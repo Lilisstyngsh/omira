@@ -1,0 +1,13 @@
+OMD Order - Structured Package
+
+Isi:
+- Source Laravel existing dipertahankan.
+- Folder development noise (.git, node_modules, IDE settings) dihapus dari paket.
+- Struktur Laravel utama dipertahankan:
+  app/
+  routes/
+  database/
+  resources/
+
+Catatan:
+Tahap berikutnya sesuai requirement: analisis existing source code sebelum perubahan implementasi.
