@@ -1299,10 +1299,6 @@
                                     <a href="{{ route('omd.master.plant') }}"
                                         class="{{ request()->routeIs('omd.master.plant') ? 'active' : '' }}">
 
-                                        <span class="nav-sub-icon">
-                                            ●
-                                        </span>
-
                                         <span>
                                             Plant
                                         </span>
@@ -1315,25 +1311,15 @@
                                     <a href="{{ route('omd.master.line') }}"
                                         class="{{ request()->routeIs('omd.master.line') ? 'active' : '' }}">
 
-                                        <span class="nav-sub-icon">
-                                            ●
-                                        </span>
-
                                         <span>
                                             Line
                                         </span>
 
                                     </a>
 
-
-
                                     {{-- MODEL & PRODUK --}}
                                     <a href="{{ route('omd.master.model-product') }}"
                                         class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
-
-                                        <span class="nav-sub-icon">
-                                            ●
-                                        </span>
 
                                         <span>
                                             Model & Produk
@@ -1341,29 +1327,17 @@
 
                                     </a>
 
-
-
                                     {{-- JENIS NG --}}
                                     <a href="{{ route('omd.master.ng-type') }}"
                                         class="{{ request()->routeIs('omd.master.ng-type') ? 'active' : '' }}">
 
-                                        <span class="nav-sub-icon">
-                                            ●
-                                        </span>
-
                                         <span>
                                             Jenis NG
                                         </span>
-
                                     </a>
-
-
                                 </div>
-
-
                             </div>
                         @endif
-
 
                         {{-- Manajemen Akun hanya Leader --}}
                         @if (auth()->user()->role === 'omd_leader')

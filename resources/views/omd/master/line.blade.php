@@ -31,70 +31,31 @@
 
 
                 @foreach ($plants as $plant)
-                    <div class="
-                plant-card
-                {{ $selectedPlant && $selectedPlant->id == $plant->id ? 'active' : '' }}
-            "
+                    <div class=" plant-card
+                {{ $selectedPlant && $selectedPlant->id == $plant->id ? 'active' : '' }}"
                         onclick="loadLine({{ $plant->id }}, this)">
 
-
-
                         <div class="plant-header">
-
-
-
                             <div class="plant-icon">
-
                                 🏭
-
                             </div>
 
-
-
                             <div>
-
-
                                 <h4>
-
                                     {{ $plant->name }}
 
                                 </h4>
 
-
-
                                 <p>
-
                                     {{ $plant->lines_count }} Line
-
                                 </p>
-
-
                             </div>
-
-
                         </div>
-
-
-
                     </div>
                 @endforeach
-
-
-
             </div>
-
-
-
         </div>
-
-
     </div>
-
-
-
-
-
-
 
     {{-- =====================================================
     LINE TABLE
@@ -269,86 +230,30 @@
 
 
     <div id="editModal" class="modal-overlay">
-
-
         <div class="modal-box">
-
-
-            <h4 class="fw-bold mb-3">
-
-                Edit Line
-
-            </h4>
-
-
-
-
-
+            <h4 class="fw-bold mb-3"> Edit Line</h4>
             <form method="POST" id="editForm">
-
-
                 @csrf
-
                 @method('PUT')
 
-
-
-
-
                 <label class="form-label">
-
                     Nama Line
-
                 </label>
-
-
-
 
                 <input type="text" name="name" id="editName" class="form-control" required>
 
-
-
-
-
-
-
-
                 <div class="modal-action">
 
-
                     <button type="button" onclick="closeModal()" class="btn btn-secondary">
-
-
                         Batal
-
-
                     </button>
-
-
-
-
-
+                
                     <button class="btn btn-primary">
-
-
                         Simpan
-
-
                     </button>
-
-
-
                 </div>
-
-
-
             </form>
-
-
-
         </div>
-
-
     </div>
 
     <style>

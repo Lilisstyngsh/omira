@@ -163,49 +163,25 @@ class MasterDataController extends Controller
         );
     }
 
-
-
-
-
     public function storeLine(Request $request)
     {
-
-
         $validated = $request->validate([
-
-
             'plant_id' => [
                 'required',
                 'exists:plants,id'
             ],
-
-
             'name' => [
                 'required',
                 'string',
                 'max:100'
             ]
-
-
         ]);
-
-
 
         Line::create([
-
-
             'plant_id' => $validated['plant_id'],
-
-
             'name' => $validated['name'],
-
-
             'is_active' => true
-
-
         ]);
-
-
 
         return redirect()
             ->route('omd.master.line', [
@@ -217,48 +193,27 @@ class MasterDataController extends Controller
             );
     }
 
-
-
-
-
     public function updateLine(
         Request $request,
         Line $line
     ) {
-
-
         $validated = $request->validate([
-
-
             'plant_id' => [
                 'required',
                 'exists:plants,id'
             ],
-
 
             'name' => [
                 'required',
                 'string',
                 'max:100'
             ]
-
-
         ]);
-
-
 
         $line->update([
-
-
             'plant_id' => $validated['plant_id'],
-
-
             'name' => $validated['name']
-
-
         ]);
-
-
 
         return redirect()
             ->route('omd.master.line', [
@@ -270,30 +225,17 @@ class MasterDataController extends Controller
             );
     }
 
-
-
-
-
     public function destroyLine(Line $line)
     {
-
-
         if ($line->masterModels()->exists()) {
-
-
             return back()
                 ->withErrors(
                     'Line tidak dapat dihapus karena masih memiliki Model'
                 );
         }
-
-
-
         $plantId = $line->plant_id;
 
-
         $line->delete();
-
 
         return redirect()
             ->route('omd.master.line', [
