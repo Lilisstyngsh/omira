@@ -146,6 +146,12 @@ class DatabaseSeeder extends Seeder
                     'code' => 'C',
                     'name' => 'NG Cover'
                 ],
+
+                [
+                    'code' => 'S',
+                    'name' => 'NG Scrap'
+                ],
+
             ]
 
             as $ng

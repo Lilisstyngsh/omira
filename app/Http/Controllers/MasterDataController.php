@@ -277,8 +277,6 @@ class MasterDataController extends Controller
 
     public function modelProduct()
     {
-
-
         $models = MasterModel::with([
             'line.plant',
             'products'
@@ -286,19 +284,22 @@ class MasterDataController extends Controller
             ->orderBy('model')
             ->get();
 
-
-
         $lines = Line::with('plant')
             ->orderBy('name')
             ->get();
 
+        $selectedLineId = request()->query('line_id');
 
+        if (!$selectedLineId) {
+            $selectedLineId = $lines->first()?->id;
+        }
 
         return view(
             'omd.master.model-product',
             compact(
                 'models',
-                'lines'
+                'lines',
+                'selectedLineId'
             )
         );
     }
@@ -310,41 +311,27 @@ class MasterDataController extends Controller
     public function storeModel(
         Request $request
     ) {
-
-
         $validated = $request->validate([
-
-
             'line_id' => [
                 'required',
                 'exists:lines,id'
             ],
-
-
             'model' => [
                 'required',
                 'string',
                 'max:100'
             ]
-
         ]);
-
-
-
 
         MasterModel::create([
-
             'line_id' => $validated['line_id'],
-
             'model' => $validated['model'],
-
             'is_active' => true
-
         ]);
 
-
-
-        return back()
+        return redirect(
+            url('/omd/master/model-product?line_id=' . $validated['line_id'])
+        )
             ->with(
                 'success',
                 'Model berhasil ditambahkan'
@@ -357,40 +344,25 @@ class MasterDataController extends Controller
 
 
 
-    public function updateModel(
-        Request $request,
-        MasterModel $model
-    ) {
-
-
+    public function updateModel(Request $request, MasterModel $model)
+    {
         $validated = $request->validate([
-
-
             'line_id' => [
                 'required',
                 'exists:lines,id'
             ],
-
-
             'model' => [
                 'required',
                 'string',
                 'max:100'
             ]
-
         ]);
-
-
 
         $model->update($validated);
 
-
-
         return back()
-            ->with(
-                'success',
-                'Model berhasil diperbarui'
-            );
+            ->with('success', 'Model berhasil diperbarui')
+            ->with('selected_line_id', $validated['line_id']);
     }
 
 
@@ -401,27 +373,16 @@ class MasterDataController extends Controller
     public function destroyModel(
         MasterModel $model
     ) {
-
-
-        if ($model->products()->exists()) {
-
-
-            return back()
-                ->withErrors(
-                    'Model masih memiliki Produk'
-                );
-        }
-
-
+        $lineId = $model->line_id;
 
         $model->delete();
 
-
-
-        return back()
+        return redirect(
+            url('/omd/master/model-product?line_id=' . $lineId)
+        )
             ->with(
                 'success',
-                'Model berhasil dihapus'
+                'Model dan produk berhasil dihapus'
             );
     }
 
