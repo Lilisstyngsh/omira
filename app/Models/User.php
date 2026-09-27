@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -26,6 +25,7 @@ class User extends Authenticatable
         'role',
         'user_group',
         'area_id',
+        'line_id',
     ];
 
     /**
@@ -38,19 +38,34 @@ class User extends Authenticatable
         'role',
         'user_group',
         'area_id',
+        'line_id',
         'remember_token',
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Relasi User -> Area.
      *
-     * @return array<string, string>
+     * Dipertahankan agar fitur lama yang masih menggunakan Area
+     * tidak langsung rusak.
      */
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
     }
 
+    /**
+     * Relasi User -> Line.
+     */
+    public function line(): BelongsTo
+    {
+        return $this->belongsTo(Line::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

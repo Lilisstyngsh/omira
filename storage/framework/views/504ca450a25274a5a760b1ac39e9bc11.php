@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Tambah Akun'); ?>
+<?php $__env->startSection('header', 'Tambah Akun'); ?>
 
-@section('title', 'Tambah Akun')
-@section('header', 'Tambah Akun')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <div class="page-head">
         <div>
@@ -14,7 +12,7 @@
             </div>
         </div>
 
-        <a href="{{ route('omd.users.index') }}" class="btn btn-secondary">
+        <a href="<?php echo e(route('omd.users.index')); ?>" class="btn btn-secondary">
             Kembali
         </a>
     </div>
@@ -22,8 +20,8 @@
 
     <div class="card">
 
-        <form method="POST" action="{{ route('omd.users.store') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('omd.users.store')); ?>">
+            <?php echo csrf_field(); ?>
 
             <div class="field">
 
@@ -35,14 +33,21 @@
                     id="name"
                     type="text"
                     name="name"
-                    value="{{ old('name') }}"
+                    value="<?php echo e(old('name')); ?>"
                     placeholder="Nama user"
                     required
                 >
 
-                @error('name')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
+                <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <small class="text-danger"><?php echo e($message); ?></small>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
             </div>
 
@@ -57,14 +62,21 @@
                     id="email"
                     type="email"
                     name="email"
-                    value="{{ old('email') }}"
+                    value="<?php echo e(old('email')); ?>"
                     placeholder="contoh@omd.com"
                     required
                 >
 
-                @error('email')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
+                <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <small class="text-danger"><?php echo e($message); ?></small>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
             </div>
 
@@ -85,22 +97,30 @@
                         Pilih Plant
                     </option>
 
-                    @foreach ($plants as $plant)
+                    <?php $__currentLoopData = $plants; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plant): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                         <option
-                            value="{{ $plant->id }}"
-                            @selected(old('plant_id') == $plant->id)
+                            value="<?php echo e($plant->id); ?>"
+                            <?php if(old('plant_id') == $plant->id): echo 'selected'; endif; ?>
                         >
-                            {{ $plant->name }}
+                            <?php echo e($plant->name); ?>
+
                         </option>
 
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                 </select>
 
-                @error('plant_id')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
+                <?php $__errorArgs = ['plant_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <small class="text-danger"><?php echo e($message); ?></small>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
             </div>
 
@@ -124,9 +144,16 @@
 
                 </select>
 
-                @error('line_id')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
+                <?php $__errorArgs = ['line_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <small class="text-danger"><?php echo e($message); ?></small>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
             </div>
 
@@ -145,9 +172,16 @@
                     required
                 >
 
-                @error('password')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
+                <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <small class="text-danger"><?php echo e($message); ?></small>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
             </div>
 
@@ -172,7 +206,7 @@
             <div style="margin-top:24px; display:flex; gap:10px;">
 
                 <a
-                    href="{{ route('omd.users.index') }}"
+                    href="<?php echo e(route('omd.users.index')); ?>"
                     class="btn btn-secondary"
                 >
                     Batal
@@ -194,7 +228,7 @@
 
     <script>
 
-        var plants = @json($plants);
+        var plants = <?php echo json_encode($plants, 15, 512) ?>;
 
         var plantSelect =
             document.getElementById('plant_id');
@@ -203,7 +237,7 @@
             document.getElementById('line_id');
 
         var oldLineId =
-            "{{ old('line_id') }}";
+            "<?php echo e(old('line_id')); ?>";
 
 
         function loadLines(plantId)
@@ -317,4 +351,5 @@
 
     </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/omd/users/create.blade.php ENDPATH**/ ?>

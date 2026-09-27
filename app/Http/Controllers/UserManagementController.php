@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Line;
+use App\Models\Plant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +17,7 @@ class UserManagementController extends Controller
     public function index()
     {
         $users = User::where('role', 'user')
-            ->whereIn('user_group', ['ppic', 'produksi'])
-            ->orderBy('user_group')
+            ->with('line.plant')
             ->orderBy('name')
             ->get();
 
@@ -28,7 +29,17 @@ class UserManagementController extends Controller
      */
     public function create()
     {
-        return view('omd.users.create');
+        $plants = Plant::where('is_active', true)
+            ->with([
+                'lines' => function ($query) {
+                    $query->where('is_active', true)
+                        ->orderBy('name');
+                }
+            ])
+            ->orderBy('name')
+            ->get();
+
+        return view('omd.users.create', compact('plants'));
     }
 
     /**
@@ -50,9 +61,16 @@ class UserManagementController extends Controller
                 'unique:users,email',
             ],
 
-            'user_group' => [
+            'plant_id' => [
                 'required',
-                Rule::in(['ppic', 'produksi']),
+                'integer',
+                'exists:plants,id',
+            ],
+
+            'line_id' => [
+                'required',
+                'integer',
+                'exists:lines,id',
             ],
 
             'password' => [
@@ -63,12 +81,25 @@ class UserManagementController extends Controller
             ],
         ]);
 
+        $line = Line::where('id', $validated['line_id'])
+            ->where('plant_id', $validated['plant_id'])
+            ->where('is_active', true)
+            ->first();
+
+        if (!$line) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'line_id' => 'Line tidak sesuai dengan Plant yang dipilih.',
+                ]);
+        }
+
         User::create([
             'name' => trim($validated['name']),
             'email' => strtolower(trim($validated['email'])),
             'password' => Hash::make($validated['password']),
             'role' => 'user',
-            'user_group' => $validated['user_group'],
+            'line_id' => $line->id,
         ]);
 
         return redirect()
@@ -83,7 +114,19 @@ class UserManagementController extends Controller
     {
         $this->validateUser($user);
 
-        return view('omd.users.edit', compact('user'));
+        $user->load('line.plant');
+
+        $plants = Plant::where('is_active', true)
+            ->with([
+                'lines' => function ($query) {
+                    $query->where('is_active', true)
+                        ->orderBy('name');
+                }
+            ])
+            ->orderBy('name')
+            ->get();
+
+        return view('omd.users.edit', compact('user', 'plants'));
     }
 
     /**
@@ -95,7 +138,7 @@ class UserManagementController extends Controller
 
         $validated = $request->validate([
             'name' => [
-                
+                'required',
                 'string',
                 'max:100',
             ],
@@ -107,9 +150,16 @@ class UserManagementController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
 
-            'user_group' => [
+            'plant_id' => [
                 'required',
-                Rule::in(['ppic', 'produksi']),
+                'integer',
+                'exists:plants,id',
+            ],
+
+            'line_id' => [
+                'required',
+                'integer',
+                'exists:lines,id',
             ],
 
             'password' => [
@@ -120,11 +170,23 @@ class UserManagementController extends Controller
             ],
         ]);
 
+        $line = Line::where('id', $validated['line_id'])
+            ->where('plant_id', $validated['plant_id'])
+            ->where('is_active', true)
+            ->first();
+
+        if (!$line) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'line_id' => 'Line tidak sesuai dengan Plant yang dipilih.',
+                ]);
+        }
+
         $user->name = trim($validated['name']);
         $user->email = strtolower(trim($validated['email']));
-        $user->user_group = $validated['user_group'];
+        $user->line_id = $line->id;
 
-        // Password hanya diubah jika diisi.
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
@@ -151,14 +213,13 @@ class UserManagementController extends Controller
     }
 
     /**
-     * Pastikan akun yang dikelola adalah akun user PPIC/Produksi.
+     * Pastikan akun yang dikelola adalah akun user.
      */
     private function validateUser(User $user): void
     {
         abort_unless(
-            $user->role === 'user' &&
-                in_array($user->user_group, ['ppic', 'produksi'], true),
-            404
+            $user->role === 'user',
+               404
         );
     }
 }

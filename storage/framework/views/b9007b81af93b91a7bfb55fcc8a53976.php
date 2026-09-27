@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Manajemen Akun'); ?>
+<?php $__env->startSection('header', 'Manajemen Akun'); ?>
 
-@section('title', 'Manajemen Akun')
-@section('header', 'Manajemen Akun')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <div class="page-head">
         <div>
@@ -13,7 +11,7 @@
             </div>
         </div>
 
-        <a href="{{ route('omd.users.create') }}" class="btn btn-primary">
+        <a href="<?php echo e(route('omd.users.create')); ?>" class="btn btn-primary">
             + Tambah Akun
         </a>
     </div>
@@ -37,31 +35,35 @@
 
                 <tbody>
 
-                    @forelse($users as $index => $user)
+                    <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
                         <tr>
 
                             <td>
-                                {{ $index + 1 }}
+                                <?php echo e($index + 1); ?>
+
                             </td>
 
                             <td>
-                                <b>{{ $user->name }}</b>
+                                <b><?php echo e($user->name); ?></b>
                             </td>
 
                             <td>
-                                {{ $user->email }}
+                                <?php echo e($user->email); ?>
+
                             </td>
 
                             <td>
                                 <span class="badge">
-                                    {{ $user->line?->plant?->name ?? '-' }}
+                                    <?php echo e($user->line?->plant?->name ?? '-'); ?>
+
                                 </span>
                             </td>
 
                             <td>
                                 <span class="badge">
-                                    {{ $user->line?->name ?? '-' }}
+                                    <?php echo e($user->line?->name ?? '-'); ?>
+
                                 </span>
                             </td>
 
@@ -69,17 +71,17 @@
 
                                 <div style="display:flex; gap:8px;">
 
-                                    <a href="{{ route('omd.users.edit', $user) }}"
+                                    <a href="<?php echo e(route('omd.users.edit', $user)); ?>"
                                         class="btn btn-secondary">
                                         Edit
                                     </a>
 
                                     <form method="POST"
-                                        action="{{ route('omd.users.destroy', $user) }}"
+                                        action="<?php echo e(route('omd.users.destroy', $user)); ?>"
                                         onsubmit="return confirm('Hapus akun ini?')">
 
-                                        @csrf
-                                        @method('DELETE')
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
 
                                         <button type="submit" class="btn btn-danger">
                                             Hapus
@@ -93,7 +95,7 @@
 
                         </tr>
 
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <tr>
                             <td colspan="6" class="empty">
@@ -101,7 +103,7 @@
                             </td>
                         </tr>
 
-                    @endforelse
+                    <?php endif; ?>
 
                 </tbody>
 
@@ -111,4 +113,5 @@
 
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/omd/users/index.blade.php ENDPATH**/ ?>
