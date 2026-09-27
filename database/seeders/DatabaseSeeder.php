@@ -8,6 +8,8 @@ use App\Models\Line;
 use App\Models\NgType;
 use App\Models\Target;
 use App\Models\User;
+use App\Models\MasterModel;
+use App\Models\Product;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -128,6 +130,281 @@ class DatabaseSeeder extends Seeder
             );
 
             $lines[$data['name']] = $line;
+        }
+
+                /*
+        |--------------------------------------------------------------------------
+        | MASTER MODEL & PRODUCT
+        |--------------------------------------------------------------------------
+        */
+
+        $modelProducts = [
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT BODY - PPIC BODY
+            |--------------------------------------------------------------------------
+            */
+            'PPIC Body' => [
+                '660' => [
+                    'Handle',
+                    'Frame FR R',
+                    'Frame FR L',
+                    'Frame RR R',
+                    'Frame RR L',
+                    'Cap',
+                    'Garnish',
+                    'Pad',
+                ],
+                '560' => [
+                    'Handle',
+                    'Frame FR R',
+                    'Frame FR L',
+                    'Frame RR R',
+                    'Frame RR L',
+                    'Garnish',
+                ],
+                '4L45W / 5P45' => [
+                    'Handle',
+                    'Frame R',
+                    'Frame L',
+                    'Cap',
+                    'Pad',
+                ],
+                'TBINA' => [
+                    'Slide R',
+                    'Slide L',
+                    'Reclining R',
+                    'Reclining L',
+                    'Tilt R',
+                    'Tilt L',
+                    'Handle',
+                    'Pad Frame',
+                ],
+                'TTI' => [
+                    'Slide R',
+                    'Slide L',
+                    'Reclining R',
+                    'Reclining L',
+                    'Tilt R',
+                    'Tilt L',
+                ],
+                'HINO' => [
+                    'Handle',
+                ],
+                'ADM KAP' => [
+                    'Backdoor',
+                ],
+                '230' => [],
+                '800A' => [],
+                'SUZUKI' => [
+                    'Handle YHA',
+                    'Handle YTB',
+                ],
+                'DOWA' => [],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT BODY - AS BODY
+            |--------------------------------------------------------------------------
+            */
+            'AS Body' => [
+                'SUZUKI' => [
+                    'Case YHA/YTB',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT BODY - PT
+            |--------------------------------------------------------------------------
+            */
+            'PT' => [
+                '660 / 230' => [
+                    'Handle',
+                    'Cap',
+                ],
+                '560' => [
+                    'Handle',
+                ],
+                '4L45W / 5P45' => [
+                    'Handle',
+                    'Cap',
+                ],
+                'SUZUKI' => [
+                    'Handle YHA/YTB',
+                    'Cap YHA/YTB',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT BODY - INJ
+            |--------------------------------------------------------------------------
+            */
+            'INJ' => [
+                'ALL MODEL' => [
+                    'Handle No 2 / Frame (Box TP 332)',
+                    'Garnish (Box TP 362)',
+                ],
+                'HINO' => [
+                    'Case Hino',
+                    'Handle Hino',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT UNIT - PPIC UNIT
+            |--------------------------------------------------------------------------
+            */
+            'PPIC Unit' => [
+                'D98E (NR)' => [
+                    'TCC',
+                    'CSH',
+                ],
+                '-' => [
+                    'WP',
+                ],
+                '?' => [
+                    'OP',
+                ],
+                '889F' => [
+                    'TCC',
+                    'OPN',
+                ],
+                'D72F/D73F' => [
+                    'TCC',
+                    'OPN',
+                ],
+                'D13E' => [
+                    'TCC',
+                ],
+                '922F' => [
+                    'OPN',
+                ],
+                'D18E' => [
+                    'TCC',
+                ],
+                'D41E' => [
+                    'TCC',
+                    'OPN',
+                ],
+                'D05E' => [
+                    'TCC',
+                    'OPN',
+                    'CSH',
+                ],
+                '4A91' => [
+                    'TCC',
+                ],
+                '5P45' => [
+                    'TCC',
+                ],
+                'TNGA' => [
+                    'TCC No 1',
+                    'TCC No 2',
+                ],
+                'ALL MODEL' => [
+                    'Komponen OPN',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT UNIT - AS UNIT
+            |--------------------------------------------------------------------------
+            */
+            'AS Unit' => [
+                'Pump' => [
+                    'WPNR',
+                    'WP D05E',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT UNIT - MA
+            |--------------------------------------------------------------------------
+            */
+            'MA' => [
+                'ALL MODEL' => [
+                    'TCC',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT UNIT - DC
+            |--------------------------------------------------------------------------
+            */
+            'DC' => [
+                'All Model Kecuali TNGA' => [
+                    'TCC',
+                    'OPN',
+                ],
+                'TNGA' => [
+                    'TCC No 1',
+                    'TCC No 2',
+                ],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT ELECTRIC - PPIC ELECTRIC
+            |--------------------------------------------------------------------------
+            */
+            'PPIC Electric' => [
+                '4WD IMV' => [],
+                'PBD 582D/737D/840D' => [],
+                'PBD 5P45' => [],
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANT ELECTRIC - AS ELECTRIC
+            |--------------------------------------------------------------------------
+            */
+            'AS Electric' => [
+                'EWP EF160' => [],
+                'EWP GA35' => [],
+                'OP T431' => [],
+                'EWP EF160 Toyota' => [],
+                '4WD 5F00/5K45' => [],
+                'PBD Y17' => [],
+            ],
+        ];
+
+        foreach ($modelProducts as $lineName => $models) {
+            if (!isset($lines[$lineName])) {
+                continue;
+            }
+
+            $line = $lines[$lineName];
+
+            foreach ($models as $modelName => $products) {
+                $masterModel = MasterModel::firstOrCreate(
+                    [
+                        'line_id' => $line->id,
+                        'model' => $modelName
+                    ],
+                    [
+                        'is_active' => true
+                    ]
+                );
+
+                foreach ($products as $productName) {
+                    Product::firstOrCreate(
+                        [
+                            'master_model_id' => $masterModel->id,
+                            'name' => $productName
+                        ],
+                        [
+                            'is_active' => true
+                        ]
+                    );
+                }
+            }
         }
 
         foreach (

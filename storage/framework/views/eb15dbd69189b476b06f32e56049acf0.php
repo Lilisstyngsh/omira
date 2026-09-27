@@ -928,11 +928,6 @@ Data Master Model & Produk
 
                                 </strong>
 
-                                <span>
-                                    <?php echo e($model->line->name ?? '-'); ?>
-
-                                </span>
-
                             </div>
 
                         </td>
@@ -1493,6 +1488,18 @@ Data Master Model & Produk
 
             tbody.appendChild(row);
         }
+
+        let no = 1;
+
+        document.querySelectorAll('.model-row').forEach(row => {
+            if (row.style.display !== 'none') {
+                const numberCell = row.querySelector('.number-cell');
+
+                if (numberCell) {
+                    numberCell.textContent = no++;
+                }
+            }
+        });
     }
 
 
