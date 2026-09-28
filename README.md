@@ -1,50 +1,57 @@
 # OMD Order
 
-Sistem Laravel untuk digitalisasi proses order dan repair OMD Workshop.
+OMD Order adalah aplikasi berbasis web yang dikembangkan untuk membantu digitalisasi proses **Order dan Repair Box NG** pada OMD Workshop.
 
-## Setup
+Aplikasi ini digunakan untuk membantu proses pengajuan order repair, verifikasi order, pencatatan hasil repair, konfirmasi penyelesaian, serta pemantauan riwayat order secara terstruktur.
 
-```bash
-composer install
-copy .env.example .env
-php artisan key:generate
-```
+## Fitur Utama
 
-Atur koneksi MySQL/MariaDB pada `.env`, lalu:
+### User
+- Login dan autentikasi pengguna
+- Melihat data order Repair Box
+- Membuat Order Repair Box
+- Memilih Model dan Produk sesuai Line
+- Input jenis dan quantity NG
+- Melihat detail dan progress order
+- Melihat hasil repair dari OMD
+- Melakukan konfirmasi penerimaan hasil repair
+- Melihat History Order Repair Box
+- Mengelola profil pribadi
+- Mengubah email dan password
 
-```bash
-php artisan migrate --seed
-```
+### OMD
+- Melihat daftar Order Repair Box
+- Verifikasi order
+- Memproses Repair Box
+- Input hasil repair untuk setiap detail order
+- Mencatat quantity sebelum dan sesudah repair
+- Mencatat catatan ketidaksesuaian
+- Memantau progress setiap order
+- Melihat order yang telah selesai
+- Melihat History Order Repair Box
+- Notifikasi order yang perlu diproses
+- Mengelola data master
 
-Jalankan:
+### OMD Leader
+Selain fitur OMD, OMD Leader memiliki akses untuk:
+- Manajemen akun User
+- Data Master Plant & Line
+- Data Master Model & Produk
+- Data Master Jenis NG
 
-```bash
-php artisan serve
-```
+## Alur Order Repair Box
 
-Jika PHP Laragon belum masuk PATH Windows, gunakan executable PHP Laragon, contoh:
+Proses Order Repair Box menggunakan tahapan:
 
-```bash
-"C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64\php.exe" artisan migrate --seed
-```
-
-## Akun Seeder
-
-Semua akun contoh memakai password `password`.
-
-| Email | Role | Kelompok |
-|---|---|---|
-| user@omd.local | User | PPIC |
-| produksi@omd.local | User | Produksi |
-| member@omd.local | OMD Member | - |
-| leader@omd.local | OMD | - |
-
-## Master Model & Produk
-
-OMD Leader membuka:
-
-`Data Master -> Data PPIC` atau `Data Master -> Data Produksi`.
-
-Setiap halaman memiliki form Model dan Produk. Satu Model dapat mempunyai banyak Produk.
-
-Jenis NG (P/H/C) dan Quantity bukan master data; keduanya diisi saat transaksi Order Repair.
+```text
+User Submit
+      ↓
+Verified OMD
+      ↓
+Repair OMD
+      ↓
+Serah Terima
+      ↓
+Order Selesai
+      ↓
+History
