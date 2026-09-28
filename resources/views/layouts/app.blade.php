@@ -1265,7 +1265,7 @@
                         {{-- OMD --}}
 
                         <a href="{{ route('omd.orders.index') }}"
-                            class="{{ request()->routeIs('omd.orders.*') ? 'active' : '' }}">
+                            class="{{ request()->routeIs('omd.orders.index') ? 'active' : '' }}">
 
                             <span class="nav-icon">▣</span>
 
@@ -1279,6 +1279,16 @@
 
                         </a>
 
+                        <a href="{{ route('omd.orders.history') }}"
+                            class="{{ request()->routeIs('omd.orders.history') ? 'active' : '' }}">
+
+                            <span class="nav-icon">↺</span>
+
+                            <span>
+                                History Order Repair Box
+                            </span>
+
+                        </a>
 
                         <a href="{{ route('omd.tps.index') }}"
                             class="{{ request()->routeIs('omd.tps.*') ? 'active' : '' }}">
@@ -1286,7 +1296,7 @@
                             <span class="nav-icon">⚙</span>
 
                             <span>
-                                Order TPS Tools
+                                Order TPS Tool
                             </span>
 
                         </a>

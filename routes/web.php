@@ -364,6 +364,11 @@ Route::middleware('auth')->group(function () {
             )->name('orders.index');
 
             Route::get(
+                '/orders/history',
+                [OmdOrderController::class, 'history']
+            )->name('orders.history');
+
+            Route::get(
                 '/orders/pending-count',
                 [OmdOrderController::class, 'pendingCount']
             )->name('orders.pendingCount');

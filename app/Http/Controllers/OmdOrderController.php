@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class OmdOrderController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $orders = RepairOrder::with([
             'user',
@@ -20,15 +20,16 @@ class OmdOrderController extends Controller
             'result',
             'confirmation',
         ])
+            ->whereIn('status', [
+                'submitted',
+                'verified',
+                'in_repair',
+            ])
             ->latest('created_at')
-            ->paginate(15);
+            ->paginate(10);
 
-        return view(
-            'omd.orders.index',
-            compact('orders')
-        );
+        return view('omd.orders.index', compact('orders'));
     }
-
 
     public function show(RepairOrder $order)
     {
@@ -321,5 +322,28 @@ class OmdOrderController extends Controller
         return response()->json([
             'count' => $count,
         ]);
+    }
+
+    public function history()
+    {
+        $orders = RepairOrder::with([
+            'user',
+            'line',
+            'area',
+            'product',
+            'masterModel',
+            'ngType',
+            'result',
+            'confirmation',
+            'handedOverBy',
+        ])
+            ->whereIn('status', [
+                'completed',
+                'confirmed',
+            ])
+            ->latest('created_at')
+            ->paginate(10);
+
+        return view('omd.orders.history', compact('orders'));
     }
 }

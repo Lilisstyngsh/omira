@@ -1259,7 +1259,7 @@
                         
 
                         <a href="<?php echo e(route('omd.orders.index')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.orders.*') ? 'active' : ''); ?>">
+                            class="<?php echo e(request()->routeIs('omd.orders.index') ? 'active' : ''); ?>">
 
                             <span class="nav-icon">▣</span>
 
@@ -1273,6 +1273,16 @@
 
                         </a>
 
+                        <a href="<?php echo e(route('omd.orders.history')); ?>"
+                            class="<?php echo e(request()->routeIs('omd.orders.history') ? 'active' : ''); ?>">
+
+                            <span class="nav-icon">↺</span>
+
+                            <span>
+                                History Order Repair Box
+                            </span>
+
+                        </a>
 
                         <a href="<?php echo e(route('omd.tps.index')); ?>"
                             class="<?php echo e(request()->routeIs('omd.tps.*') ? 'active' : ''); ?>">
@@ -1280,7 +1290,7 @@
                             <span class="nav-icon">⚙</span>
 
                             <span>
-                                Order TPS Tools
+                                Order TPS Tool
                             </span>
 
                         </a>
