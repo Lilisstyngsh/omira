@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Detail Order Repair Box'); ?>
+<?php $__env->startSection('header', 'Detail Order Repair Box'); ?>
 
-@section('title', 'Detail Order Repair Box')
-@section('header', 'Detail Order Repair Box')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <style>
         .repair-head {
@@ -434,7 +432,8 @@
         <div>
 
             <h2>
-                {{ $order->order_number }}
+                <?php echo e($order->order_number); ?>
+
             </h2>
 
             <p>
@@ -446,11 +445,12 @@
 
         <div class="repair-head-actions">
 
-            <span class="status-badge status-{{ $order->status }}">
-                {{ $order->status_label }}
+            <span class="status-badge status-<?php echo e($order->status); ?>">
+                <?php echo e($order->status_label); ?>
+
             </span>
 
-            <a href="{{ route('omd.orders.index') }}" class="btn btn-secondary">
+            <a href="<?php echo e(route('omd.orders.index')); ?>" class="btn btn-secondary">
                 Kembali
             </a>
 
@@ -459,28 +459,27 @@
     </div>
 
 
-    @if ($errors->any())
+    <?php if($errors->any()): ?>
 
         <div class="error-list">
 
             <ul style="margin:0;padding-left:16px;">
 
-                @foreach ($errors->all() as $error)
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <li>
-                        {{ $error }}
+                        <?php echo e($error); ?>
+
                     </li>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
             </ul>
 
         </div>
 
-    @endif
+    <?php endif; ?>
 
 
-    {{-- =====================================================
-     INFORMASI ORDER
-===================================================== --}}
+    
 
     <div class="repair-card">
 
@@ -497,7 +496,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->order_number }}
+                    <?php echo e($order->order_number); ?>
+
                 </strong>
 
             </div>
@@ -510,7 +510,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '-' }}
+                    <?php echo e($order->created_at ? $order->created_at->format('d-m-Y H:i') : '-'); ?>
+
                 </strong>
 
             </div>
@@ -523,7 +524,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->user?->name ?? '-' }}
+                    <?php echo e($order->user?->name ?? '-'); ?>
+
                 </strong>
 
             </div>
@@ -536,7 +538,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->line?->name ?? ($order->area ? $order->area->name : '-') }}
+                    <?php echo e($order->line?->name ?? ($order->area ? $order->area->name : '-')); ?>
+
                 </strong>
 
             </div>
@@ -562,7 +565,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->quantity }}
+                    <?php echo e($order->quantity); ?>
+
                 </strong>
 
             </div>
@@ -575,7 +579,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->status_label }}
+                    <?php echo e($order->status_label); ?>
+
                 </strong>
 
             </div>
@@ -588,7 +593,8 @@
                 </span>
 
                 <strong>
-                    {{ $order->omdVerifier?->name ?? '-' }}
+                    <?php echo e($order->omdVerifier?->name ?? '-'); ?>
+
                 </strong>
 
             </div>
@@ -596,18 +602,17 @@
         </div>
 
 
-        @if ($order->description)
+        <?php if($order->description): ?>
             <div class="description-box" style="margin-top:14px;">
-                {{ $order->description }}
+                <?php echo e($order->description); ?>
+
             </div>
-        @endif
+        <?php endif; ?>
 
     </div>
 
 
-    {{-- =====================================================
-     DATA DETAIL ORDER
-===================================================== --}}
+    
 
     <div class="repair-card">
 
@@ -658,19 +663,21 @@
 
                 <tbody>
 
-                    @if ($order->items->isNotEmpty())
+                    <?php if($order->items->isNotEmpty()): ?>
 
-                        @foreach ($order->items as $item)
+                        <?php $__currentLoopData = $order->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
 
                                 <td>
-                                    {{ $loop->iteration }}
+                                    <?php echo e($loop->iteration); ?>
+
                                 </td>
 
                                 <td>
 
                                     <span class="model-text">
-                                        {{ $item->masterModel?->model ?? '-' }}
+                                        <?php echo e($item->masterModel?->model ?? '-'); ?>
+
                                     </span>
 
                                 </td>
@@ -678,7 +685,8 @@
                                 <td>
 
                                     <span class="product-text">
-                                        {{ $item->product?->name ?? '-' }}
+                                        <?php echo e($item->product?->name ?? '-'); ?>
+
                                     </span>
 
                                 </td>
@@ -686,27 +694,31 @@
                                 <td>
 
                                     <span class="ng-badge">
-                                        {{ $item->ngType?->code ?? '-' }}
+                                        <?php echo e($item->ngType?->code ?? '-'); ?>
+
                                     </span>
 
                                 </td>
 
                                 <td>
-                                    {{ $item->before_qty }}
+                                    <?php echo e($item->before_qty); ?>
+
                                 </td>
 
                                 <td>
-                                    {{ $item->after_qty ?? '-' }}
+                                    <?php echo e($item->after_qty ?? '-'); ?>
+
                                 </td>
 
                                 <td>
-                                    {{ $item->mismatch_note ?? '-' }}
+                                    <?php echo e($item->mismatch_note ?? '-'); ?>
+
                                 </td>
 
                             </tr>
-                        @endforeach
-                    @else
-                        {{-- FALLBACK UNTUK DATA ORDER LAMA --}}
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php else: ?>
+                        
 
                         <tr>
 
@@ -717,7 +729,8 @@
                             <td>
 
                                 <span class="model-text">
-                                    {{ $order->masterModel?->model ?? ($order->model ?? '-') }}
+                                    <?php echo e($order->masterModel?->model ?? ($order->model ?? '-')); ?>
+
                                 </span>
 
                             </td>
@@ -725,7 +738,8 @@
                             <td>
 
                                 <span class="product-text">
-                                    {{ $order->product?->name ?? '-' }}
+                                    <?php echo e($order->product?->name ?? '-'); ?>
+
                                 </span>
 
                             </td>
@@ -733,13 +747,15 @@
                             <td>
 
                                 <span class="ng-badge">
-                                    {{ $order->ngType?->code ?? '-' }}
+                                    <?php echo e($order->ngType?->code ?? '-'); ?>
+
                                 </span>
 
                             </td>
 
                             <td>
-                                {{ $order->quantity }}
+                                <?php echo e($order->quantity); ?>
+
                             </td>
 
                             <td>
@@ -752,7 +768,7 @@
 
                         </tr>
 
-                    @endif
+                    <?php endif; ?>
 
                 </tbody>
 
@@ -763,11 +779,9 @@
     </div>
 
 
-    {{-- =====================================================
-     FORM HASIL REPAIR - DATA BARU
-===================================================== --}}
+    
 
-    @if ($order->status === 'in_repair' && $order->items->isNotEmpty())
+    <?php if($order->status === 'in_repair' && $order->items->isNotEmpty()): ?>
 
         <div class="repair-card">
 
@@ -780,9 +794,9 @@
             </p>
 
 
-            <form method="POST" action="{{ route('omd.orders.complete', $order) }}">
+            <form method="POST" action="<?php echo e(route('omd.orders.complete', $order)); ?>">
 
-                @csrf
+                <?php echo csrf_field(); ?>
 
 
                 <div class="order-table-wrap">
@@ -824,49 +838,53 @@
 
                         <tbody>
 
-                            @foreach ($order->items as $item)
+                            <?php $__currentLoopData = $order->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
 
                                     <td>
-                                        {{ $item->masterModel?->model ?? '-' }}
+                                        <?php echo e($item->masterModel?->model ?? '-'); ?>
+
                                     </td>
 
                                     <td>
-                                        {{ $item->product?->name ?? '-' }}
+                                        <?php echo e($item->product?->name ?? '-'); ?>
+
                                     </td>
 
                                     <td>
 
                                         <span class="ng-badge">
-                                            {{ $item->ngType?->code ?? '-' }}
+                                            <?php echo e($item->ngType?->code ?? '-'); ?>
+
                                         </span>
 
                                     </td>
 
                                     <td>
-                                        {{ $item->before_qty }}
+                                        <?php echo e($item->before_qty); ?>
+
                                     </td>
 
                                     <td>
 
-                                        <input type="number" name="items[{{ $item->id }}][after_qty]"
+                                        <input type="number" name="items[<?php echo e($item->id); ?>][after_qty]"
                                             class="qty-input" min="0"
-                                            value="{{ old('items.' . $item->id . '.after_qty', $item->after_qty ?? $item->before_qty) }}"
+                                            value="<?php echo e(old('items.' . $item->id . '.after_qty', $item->after_qty ?? $item->before_qty)); ?>"
                                             required>
 
                                     </td>
 
                                     <td>
 
-                                        <input type="text" name="items[{{ $item->id }}][mismatch_note]"
+                                        <input type="text" name="items[<?php echo e($item->id); ?>][mismatch_note]"
                                             class="note-input"
-                                            value="{{ old('items.' . $item->id . '.mismatch_note', $item->mismatch_note) }}"
+                                            value="<?php echo e(old('items.' . $item->id . '.mismatch_note', $item->mismatch_note)); ?>"
                                             placeholder="Catatan bila ada ketidaksesuaian">
 
                                     </td>
 
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </tbody>
 
@@ -887,14 +905,12 @@
 
         </div>
 
-    @endif
+    <?php endif; ?>
 
 
-    {{-- =====================================================
-     FORM LEGACY HASIL REPAIR
-===================================================== --}}
+    
 
-    @if ($order->status === 'in_repair' && $order->items->isEmpty())
+    <?php if($order->status === 'in_repair' && $order->items->isEmpty()): ?>
         <div class="repair-card">
 
             <h3 class="repair-card-title">
@@ -906,9 +922,9 @@
             </p>
 
 
-            <form method="POST" action="{{ route('omd.orders.complete', $order) }}">
+            <form method="POST" action="<?php echo e(route('omd.orders.complete', $order)); ?>">
 
-                @csrf
+                <?php echo csrf_field(); ?>
 
 
                 <div class="legacy-result-grid">
@@ -919,8 +935,8 @@
                             OK
                         </label>
 
-                        <input type="number" name="ok_qty" min="0" max="{{ $order->quantity }}"
-                            value="{{ old('ok_qty', $order->quantity) }}"
+                        <input type="number" name="ok_qty" min="0" max="<?php echo e($order->quantity); ?>"
+                            value="<?php echo e(old('ok_qty', $order->quantity)); ?>"
                             class="qty-input" required>
 
                     </div>
@@ -933,7 +949,7 @@
                         </label>
 
                         <input type="number" name="scrap_qty" min="0"
-                            value="{{ old('scrap_qty', 0) }}"
+                            value="<?php echo e(old('scrap_qty', 0)); ?>"
                             class="qty-input" required>
 
                     </div>
@@ -946,7 +962,7 @@
                         </label>
 
                         <input type="number" name="ng_qty" min="0"
-                            value="{{ old('ng_qty', 0) }}"
+                            value="<?php echo e(old('ng_qty', 0)); ?>"
                             class="qty-input" required>
 
                     </div>
@@ -960,7 +976,7 @@
                         Catatan
                     </label>
 
-                    <input type="text" name="notes" value="{{ old('notes') }}" class="note-input" style="width:100%;"
+                    <input type="text" name="notes" value="<?php echo e(old('notes')); ?>" class="note-input" style="width:100%;"
                         placeholder="Catatan hasil repair">
 
                 </div>
@@ -977,14 +993,12 @@
             </form>
 
         </div>
-    @endif
+    <?php endif; ?>
 
 
-    {{-- =====================================================
-     AKSI VERIFIKASI / REPAIR
-===================================================== --}}
+    
 
-    @if ($order->status === 'submitted')
+    <?php if($order->status === 'submitted'): ?>
         <div class="repair-card">
 
             <div class="action-card">
@@ -1002,9 +1016,9 @@
                 </div>
 
 
-                <form method="POST" action="{{ route('omd.orders.verify', $order) }}">
+                <form method="POST" action="<?php echo e(route('omd.orders.verify', $order)); ?>">
 
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <button type="submit" class="btn btn-primary">
                         Verifikasi Order
@@ -1015,10 +1029,10 @@
             </div>
 
         </div>
-    @endif
+    <?php endif; ?>
 
 
-    @if ($order->status === 'verified')
+    <?php if($order->status === 'verified'): ?>
         <div class="repair-card">
 
             <div class="action-card">
@@ -1036,9 +1050,9 @@
                 </div>
 
 
-                <form method="POST" action="{{ route('omd.orders.start', $order) }}">
+                <form method="POST" action="<?php echo e(route('omd.orders.start', $order)); ?>">
 
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <button type="submit" class="btn btn-warning">
                         Mulai Repair
@@ -1049,18 +1063,16 @@
             </div>
 
         </div>
-    @endif
+    <?php endif; ?>
 
 
-    {{-- =====================================================
-     SERAH TERIMA
-===================================================== --}}
+    
 
-    @if ($order->status === 'completed')
+    <?php if($order->status === 'completed'): ?>
 
         <div class="repair-card">
 
-            @if ($order->handed_over_at)
+            <?php if($order->handed_over_at): ?>
                 <div class="handover-box">
 
                     <div>
@@ -1070,16 +1082,17 @@
                         </strong>
 
                         <span>
-                            {{ $order->handed_over_at->format('d-m-Y H:i') }}
+                            <?php echo e($order->handed_over_at->format('d-m-Y H:i')); ?>
+
                             oleh
-                            {{ $order->handedOverBy?->name ?? '-' }}.
+                            <?php echo e($order->handedOverBy?->name ?? '-'); ?>.
                             Menunggu konfirmasi User.
                         </span>
 
                     </div>
 
                 </div>
-            @else
+            <?php else: ?>
                 <div class="handover-box">
 
                     <div>
@@ -1095,9 +1108,9 @@
                     </div>
 
 
-                    <form method="POST" action="{{ route('omd.orders.handover', $order) }}">
+                    <form method="POST" action="<?php echo e(route('omd.orders.handover', $order)); ?>">
 
-                        @csrf
+                        <?php echo csrf_field(); ?>
 
                         <button type="submit" class="btn btn-success">
                             Serah Terima ke User
@@ -1106,18 +1119,16 @@
                     </form>
 
                 </div>
-            @endif
+            <?php endif; ?>
 
         </div>
 
-    @endif
+    <?php endif; ?>
 
 
-    {{-- =====================================================
-     CONFIRMED
-===================================================== --}}
+    
 
-    @if ($order->status === 'confirmed')
+    <?php if($order->status === 'confirmed'): ?>
         <div class="repair-card">
 
             <div class="handover-box">
@@ -1137,12 +1148,10 @@
             </div>
 
         </div>
-    @endif
+    <?php endif; ?>
 
 
-    {{-- =====================================================
-     TIMELINE
-===================================================== --}}
+    
 
     <div class="repair-card">
 
@@ -1165,7 +1174,8 @@
 
                 <span>
                     Order dikirim oleh User.
-                    {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '' }}
+                    <?php echo e($order->created_at ? $order->created_at->format('d-m-Y H:i') : ''); ?>
+
                 </span>
 
             </div>
@@ -1173,7 +1183,7 @@
 
             <div
                 class="timeline-item
-                {{ in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
+                <?php echo e(in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <strong>
                     Verified
@@ -1181,15 +1191,17 @@
 
                 <span>
 
-                    @if ($order->verified_at)
-                        {{ $order->verified_at->format('d-m-Y H:i') }}
+                    <?php if($order->verified_at): ?>
+                        <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
+
 
                         oleh
 
-                        {{ $order->omdVerifier?->name ?? '-' }}
-                    @else
+                        <?php echo e($order->omdVerifier?->name ?? '-'); ?>
+
+                    <?php else: ?>
                         Menunggu verifikasi.
-                    @endif
+                    <?php endif; ?>
 
                 </span>
 
@@ -1198,7 +1210,7 @@
 
             <div
                 class="timeline-item
-                {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
+                <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <strong>
                     In Repair
@@ -1206,11 +1218,12 @@
 
                 <span>
 
-                    @if ($order->repair_started_at)
-                        {{ $order->repair_started_at->format('d-m-Y H:i') }}
-                    @else
+                    <?php if($order->repair_started_at): ?>
+                        <?php echo e($order->repair_started_at->format('d-m-Y H:i')); ?>
+
+                    <?php else: ?>
                         Menunggu proses repair.
-                    @endif
+                    <?php endif; ?>
 
                 </span>
 
@@ -1219,7 +1232,7 @@
 
             <div
                 class="timeline-item
-                {{ in_array($order->status, ['completed', 'confirmed']) ? 'active' : '' }}">
+                <?php echo e(in_array($order->status, ['completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <strong>
                     Completed
@@ -1227,11 +1240,12 @@
 
                 <span>
 
-                    @if ($order->repair_completed_at)
-                        {{ $order->repair_completed_at->format('d-m-Y H:i') }}
-                    @else
+                    <?php if($order->repair_completed_at): ?>
+                        <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
+
+                    <?php else: ?>
                         Menunggu hasil repair.
-                    @endif
+                    <?php endif; ?>
 
                 </span>
 
@@ -1239,7 +1253,7 @@
 
 
             <div class="timeline-item
-                {{ $order->handed_over_at ? 'active' : '' }}">
+                <?php echo e($order->handed_over_at ? 'active' : ''); ?>">
 
                 <strong>
                     Serah Terima
@@ -1247,15 +1261,17 @@
 
                 <span>
 
-                    @if ($order->handed_over_at)
-                        {{ $order->handed_over_at->format('d-m-Y H:i') }}
+                    <?php if($order->handed_over_at): ?>
+                        <?php echo e($order->handed_over_at->format('d-m-Y H:i')); ?>
+
 
                         oleh
 
-                        {{ $order->handedOverBy?->name ?? '-' }}
-                    @else
+                        <?php echo e($order->handedOverBy?->name ?? '-'); ?>
+
+                    <?php else: ?>
                         Menunggu serah terima OMD ke User.
-                    @endif
+                    <?php endif; ?>
 
                 </span>
 
@@ -1264,7 +1280,7 @@
 
             <div
                 class="timeline-item
-                {{ $order->status === 'confirmed' ? 'active' : '' }}">
+                <?php echo e($order->status === 'confirmed' ? 'active' : ''); ?>">
 
                 <strong>
                     Confirmed
@@ -1272,15 +1288,17 @@
 
                 <span>
 
-                    @if ($order->status === 'confirmed' && $order->confirmation?->confirmed_at)
-                        {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
+                    <?php if($order->status === 'confirmed' && $order->confirmation?->confirmed_at): ?>
+                        <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
+
 
                         oleh
 
-                        {{ $order->confirmation->confirmedByUser?->name ?? '-' }}
-                    @else
+                        <?php echo e($order->confirmation->confirmedByUser?->name ?? '-'); ?>
+
+                    <?php else: ?>
                         Menunggu konfirmasi User.
-                    @endif
+                    <?php endif; ?>
 
                 </span>
 
@@ -1290,4 +1308,6 @@
 
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/omd/orders/show.blade.php ENDPATH**/ ?>

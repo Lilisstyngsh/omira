@@ -12,10 +12,7 @@
             </div>
         </div>
 
-        <a
-            class="btn btn-primary"
-            href="<?php echo e(route('user.orders.create')); ?>"
-        >
+        <a class="btn btn-primary" href="<?php echo e(route('user.orders.create')); ?>">
             + Buat Order Repair
         </a>
     </div>
@@ -52,10 +49,7 @@
                 </div>
             </div>
 
-            <a
-                class="btn btn-secondary"
-                href="<?php echo e(route('user.orders.index')); ?>"
-            >
+            <a class="btn btn-secondary" href="<?php echo e(route('user.orders.index')); ?>">
                 Lihat Semua
             </a>
         </div>
@@ -66,7 +60,7 @@
                     <tr>
                         <th>No Order</th>
                         <th>Tanggal</th>
-                        <th>Area</th>
+                        <th>Line</th>
                         <th>Produk</th>
                         <th>Status</th>
                     </tr>
@@ -87,14 +81,24 @@
                             </td>
 
                             <td>
-                                <?php echo e($order->area->category); ?> -
-                                <?php echo e($order->area->name); ?>
+                                <?php echo e($order->line?->name ?? '-'); ?>
 
                             </td>
 
                             <td>
-                                <?php echo e($order->product->name); ?>
+                                <?php if($order->items->isNotEmpty()): ?>
+                                    <?php echo e($order->items->first()->product?->name ?? '-'); ?>
 
+
+                                    <?php if($order->items->count() > 1): ?>
+                                        <span class="muted">
+                                            +<?php echo e($order->items->count() - 1); ?> lainnya
+                                        </span>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <?php echo e($order->product?->name ?? '-'); ?>
+
+                                <?php endif; ?>
                             </td>
 
                             <td>
@@ -116,4 +120,5 @@
         </div>
     </div>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/user/dashboard.blade.php ENDPATH**/ ?>

@@ -447,50 +447,6 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        $ppicLine = $lines['PPIC Unit'];
-
-        User::updateOrCreate(
-
-            [
-                'email' => 'user@omd.local'
-            ],
-
-            [
-                'name' => 'Leader PPIC',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'line_id' => $ppicLine->id
-            ]
-        );
-
-        User::updateOrCreate(
-            [
-                'email' => 'produksi@omd.local'
-            ],
-
-            [
-                'name' => 'Leader Produksi',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'line_id' => null
-            ]
-        );
-
-        User::updateOrCreate(
-
-            [
-                'email' => 'member@omd.local'
-            ],
-
-            [
-                'name' => 'OMD Member',
-                'password' => Hash::make('password'),
-                'role' => 'omd_member',
-                'line_id' => null
-            ]
-
-        );
-
         User::updateOrCreate(
             [
                 'email' => 'leader@omd.local'

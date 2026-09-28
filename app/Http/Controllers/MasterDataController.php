@@ -87,21 +87,28 @@ class MasterDataController extends Controller
             );
     }
 
-    public function destroyPlant(
-        Plant $plant
-    ) {
+    public function destroyPlant(Plant $plant)
+    {
+        DB::transaction(function () use ($plant) {
 
-        if ($plant->lines()->count() > 0) {
+            $lines = $plant->lines()->get();
 
-            return back()
-                ->withErrors(
-                    'Plant masih memiliki Line'
-                );
-        }
+            foreach ($lines as $line) {
 
+                $models = $line->masterModels()->get();
 
-        $plant->delete();
+                foreach ($models as $model) {
 
+                    $model->products()->delete();
+
+                    $model->delete();
+                }
+
+                $line->delete();
+            }
+
+            $plant->delete();
+        });
 
         return back()
             ->with(

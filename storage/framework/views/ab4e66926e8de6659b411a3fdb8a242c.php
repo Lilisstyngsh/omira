@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Buat Order Repair Box'); ?>
+<?php $__env->startSection('header', 'Buat Order Repair Box'); ?>
 
-@section('title', 'Buat Order Repair Box')
-@section('header', 'Buat Order Repair Box')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <style>
         .order-card {
@@ -237,21 +235,24 @@
             <div class="info-box">
                 <span>Plant</span>
                 <strong>
-                    {{ $line->plant?->name ?? '-' }}
+                    <?php echo e($line->plant?->name ?? '-'); ?>
+
                 </strong>
             </div>
 
             <div class="info-box">
                 <span>Line</span>
                 <strong>
-                    {{ $line->name }}
+                    <?php echo e($line->name); ?>
+
                 </strong>
             </div>
 
             <div class="info-box">
                 <span>Tanggal</span>
                 <strong>
-                    {{ now()->format('d-m-Y H:i') }}
+                    <?php echo e(now()->format('d-m-Y H:i')); ?>
+
                 </strong>
             </div>
 
@@ -261,13 +262,13 @@
             Detail NG
         </div>
 
-        @php
+        <?php
             $ngMap = $ngTypes->keyBy('code');
             $ngCodes = ['P', 'H', 'C', 'S'];
-        @endphp
+        ?>
 
-        <form method="POST" action="{{ route('user.orders.store') }}" id="orderForm">
-            @csrf
+        <form method="POST" action="<?php echo e(route('user.orders.store')); ?>" id="orderForm">
+            <?php echo csrf_field(); ?>
 
             <div class="table-wrap">
 
@@ -283,17 +284,19 @@
                                 Produk
                             </th>
 
-                            @foreach ($ngCodes as $code)
+                            <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <th style="width:100px;">
-                                    {{ $code }}
+                                    <?php echo e($code); ?>
 
-                                    @if (isset($ngMap[$code]))
+
+                                    <?php if(isset($ngMap[$code])): ?>
                                         <div style="font-size:9px;font-weight:500;margin-top:2px;">
-                                            {{ $ngMap[$code]->name }}
+                                            <?php echo e($ngMap[$code]->name); ?>
+
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </th>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                             <th style="width:100px;">
                                 Total NG
@@ -303,54 +306,56 @@
 
                     <tbody>
 
-                        @php
+                        <?php
                             $rowIndex = 0;
-                        @endphp
+                        ?>
 
-                        @forelse ($models as $model)
+                        <?php $__empty_1 = true; $__currentLoopData = $models; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $model): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
-                            @foreach ($model->products as $product)
+                            <?php $__currentLoopData = $model->products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
 
                                     <td>
                                         <span class="model-name">
-                                            {{ $model->model }}
+                                            <?php echo e($model->model); ?>
+
                                         </span>
 
-                                        <input type="hidden" name="items[{{ $rowIndex }}][master_model_id]"
-                                            value="{{ $model->id }}">
+                                        <input type="hidden" name="items[<?php echo e($rowIndex); ?>][master_model_id]"
+                                            value="<?php echo e($model->id); ?>">
                                     </td>
 
                                     <td>
                                         <span class="product-name">
-                                            {{ $product->name }}
+                                            <?php echo e($product->name); ?>
+
                                         </span>
 
-                                        <input type="hidden" name="items[{{ $rowIndex }}][product_id]"
-                                            value="{{ $product->id }}">
+                                        <input type="hidden" name="items[<?php echo e($rowIndex); ?>][product_id]"
+                                            value="<?php echo e($product->id); ?>">
                                     </td>
 
-                                    @foreach ($ngCodes as $code)
-                                        @php
+                                    <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
                                             $ng = $ngMap[$code] ?? null;
-                                        @endphp
+                                        ?>
 
                                         <td style="text-align:center;">
 
-                                            @if ($ng)
+                                            <?php if($ng): ?>
                                                 <input type="number" class="qty-input"
-                                                    name="items[{{ $rowIndex }}][qty][{{ $ng->id }}]"
+                                                    name="items[<?php echo e($rowIndex); ?>][qty][<?php echo e($ng->id); ?>]"
                                                     min="0" step="1"
-                                                    value="{{ old('items.' . $rowIndex . '.qty.' . $ng->id, '') }}"
+                                                    value="<?php echo e(old('items.' . $rowIndex . '.qty.' . $ng->id, '')); ?>"
                                                     placeholder="0">
-                                            @else
+                                            <?php else: ?>
                                                 <span style="color:#cbd5e1;">
                                                     -
                                                 </span>
-                                            @endif
+                                            <?php endif; ?>
 
                                         </td>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                     <td class="row-total">
                                         0
@@ -358,12 +363,12 @@
 
                                 </tr>
 
-                                @php
+                                <?php
                                     $rowIndex++;
-                                @endphp
-                            @endforeach
+                                ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                             <tr>
                                 <td colspan="7" class="empty-state">
@@ -371,7 +376,7 @@
                                 </td>
                             </tr>
 
-                        @endforelse
+                        <?php endif; ?>
 
                     </tbody>
 
@@ -390,7 +395,7 @@
                     Keterangan
                 </label>
 
-                <textarea name="description" placeholder="Tambahkan keterangan jika diperlukan...">{{ old('description') }}</textarea>
+                <textarea name="description" placeholder="Tambahkan keterangan jika diperlukan..."><?php echo e(old('description')); ?></textarea>
 
             </div>
 
@@ -495,4 +500,6 @@
         calculateTotals();
     </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/user/orders/create.blade.php ENDPATH**/ ?>

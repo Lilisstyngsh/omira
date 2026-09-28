@@ -137,6 +137,7 @@ Route::middleware('auth')->group(function () {
         ->prefix('omd')
         ->name('omd.')
         ->group(function () {
+
             Route::middleware('role:omd_leader')
                 ->prefix('users')
                 ->name('users.')
@@ -157,26 +158,28 @@ Route::middleware('auth')->group(function () {
                     Route::put('/{user}', [UserManagementController::class, 'update'])
                         ->name('update');
 
+                    Route::post('/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
+                        ->name('reset-password');
+
                     Route::delete('/{user}', [UserManagementController::class, 'destroy'])
                         ->name('destroy');
                 });
 
 
             /*
-|--------------------------------------------------------------------------
-| Data Master
-|--------------------------------------------------------------------------
-|
-| Struktur Baru:
-|
-| Plant
-|   └── Line
-|        └── Model
-|             └── Product
-|                  └── NG Type
-|
-*/
-
+            |--------------------------------------------------------------------------
+            | Data Master
+            |--------------------------------------------------------------------------
+            |
+            | Struktur Baru:
+            |
+            | Plant
+            |   └── Line
+            |        └── Model
+            |             └── Product
+            |                  └── NG Type
+            |
+            */
 
             Route::middleware('role:omd_leader')
                 ->prefix('master')
@@ -210,12 +213,12 @@ Route::middleware('auth')->group(function () {
                     )->name('plant.destroy');
 
 
-
                     /*
-        |--------------------------------------------------------------------------
-        | Line
-        |--------------------------------------------------------------------------
-        */
+                    |--------------------------------------------------------------------------
+                    | Line
+                    |--------------------------------------------------------------------------
+                    */
+
                     Route::get(
                         '/line/by-plant/{plant}',
                         [MasterDataController::class, 'getLineByPlant']
@@ -227,12 +230,10 @@ Route::middleware('auth')->group(function () {
                     )->name('line');
 
 
-
                     Route::post(
                         '/line',
                         [MasterDataController::class, 'storeLine']
                     )->name('line.store');
-
 
 
                     Route::put(
@@ -241,26 +242,22 @@ Route::middleware('auth')->group(function () {
                     )->name('line.update');
 
 
-
                     Route::delete(
                         '/line/{line}',
                         [MasterDataController::class, 'destroyLine']
                     )->name('line.destroy');
 
 
-
                     /*
-        |--------------------------------------------------------------------------
-        | Model & Product
-        |--------------------------------------------------------------------------
-        */
-
+                    |--------------------------------------------------------------------------
+                    | Model & Product
+                    |--------------------------------------------------------------------------
+                    */
 
                     Route::get(
                         '/model-product',
                         [MasterDataController::class, 'modelProduct']
                     )->name('model-product');
-
 
 
                     Route::post(
@@ -269,12 +266,10 @@ Route::middleware('auth')->group(function () {
                     )->name('model.store');
 
 
-
                     Route::put(
                         '/model/{model}',
                         [MasterDataController::class, 'updateModel']
                     )->name('model.update');
-
 
 
                     Route::delete(
@@ -283,13 +278,10 @@ Route::middleware('auth')->group(function () {
                     )->name('model.destroy');
 
 
-
-
                     Route::post(
                         '/product',
                         [MasterDataController::class, 'storeProduct']
                     )->name('product.store');
-
 
 
                     Route::put(
@@ -298,27 +290,22 @@ Route::middleware('auth')->group(function () {
                     )->name('product.update');
 
 
-
                     Route::delete(
                         '/product/{product}',
                         [MasterDataController::class, 'destroyProduct']
                     )->name('product.destroy');
 
 
-
-
                     /*
-        |--------------------------------------------------------------------------
-        | Jenis NG
-        |--------------------------------------------------------------------------
-        */
-
+                    |--------------------------------------------------------------------------
+                    | Jenis NG
+                    |--------------------------------------------------------------------------
+                    */
 
                     Route::get(
                         '/ng-type',
                         [MasterDataController::class, 'ngType']
                     )->name('ng-type');
-
 
 
                     Route::post(
@@ -327,12 +314,10 @@ Route::middleware('auth')->group(function () {
                     )->name('ng-type.store');
 
 
-
                     Route::put(
                         '/ng-type/{ngType}',
                         [MasterDataController::class, 'updateNgType']
                     )->name('ng-type.update');
-
 
 
                     Route::delete(
@@ -340,6 +325,7 @@ Route::middleware('auth')->group(function () {
                         [MasterDataController::class, 'destroyNgType']
                     )->name('ng-type.destroy');
                 });
+
 
             /*
             |--------------------------------------------------------------------------
@@ -372,20 +358,40 @@ Route::middleware('auth')->group(function () {
             |--------------------------------------------------------------------------
             */
 
-            Route::get('/orders', [OmdOrderController::class, 'index'])
-                ->name('orders.index');
+            Route::get(
+                '/orders',
+                [OmdOrderController::class, 'index']
+            )->name('orders.index');
 
-            Route::get('/orders/{order}', [OmdOrderController::class, 'show'])
-                ->name('orders.show');
+            Route::get(
+                '/orders/pending-count',
+                [OmdOrderController::class, 'pendingCount']
+            )->name('orders.pendingCount');
 
-            Route::post('/orders/{order}/verify', [OmdOrderController::class, 'verify'])
-                ->name('orders.verify');
+            Route::get(
+                '/orders/{order}',
+                [OmdOrderController::class, 'show']
+            )->name('orders.show');
 
-            Route::post('/orders/{order}/start-repair', [OmdOrderController::class, 'startRepair'])
-                ->name('orders.start');
+            Route::post(
+                '/orders/{order}/verify',
+                [OmdOrderController::class, 'verify']
+            )->name('orders.verify');
 
-            Route::post('/orders/{order}/complete', [OmdOrderController::class, 'complete'])
-                ->name('orders.complete');
+            Route::post(
+                '/orders/{order}/start-repair',
+                [OmdOrderController::class, 'startRepair']
+            )->name('orders.start');
+
+            Route::post(
+                '/orders/{order}/complete',
+                [OmdOrderController::class, 'complete']
+            )->name('orders.complete');
+
+            Route::post(
+                '/orders/{order}/handover',
+                [OmdOrderController::class, 'handover']
+            )->name('orders.handover');
 
 
             /*

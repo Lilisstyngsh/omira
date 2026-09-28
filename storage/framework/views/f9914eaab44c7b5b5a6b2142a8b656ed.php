@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('header'); ?>
 Jenis NG
 <?php $__env->stopSection(); ?>

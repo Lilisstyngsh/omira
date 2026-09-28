@@ -7,6 +7,8 @@
 
     <title><?php echo $__env->yieldContent('title', 'OMD Order'); ?></title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <style>
         :root {
             --primary: #7c3aed;
@@ -1128,6 +1130,45 @@
             width: 12px;
             text-align: center;
         }
+
+        .nav-notification {
+            margin-left: auto;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .10);
+        }
+
+        .nav-notification.hidden {
+            display: none;
+        }
+
+        @keyframes notificationPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, .45);
+            }
+
+            70% {
+                box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .nav-notification.pulse {
+            animation: notificationPulse 1.8s infinite;
+        }
     </style>
 </head>
 
@@ -1226,6 +1267,10 @@
                                 Order Repair Box
                             </span>
 
+                            <span id="omdOrderNotification" class="nav-notification hidden">
+                                0
+                            </span>
+
                         </a>
 
 
@@ -1286,25 +1331,12 @@
                                 
                                 <div class="nav-dropdown-menu">
 
-
-                                    
-                                    <a href="<?php echo e(route('omd.master.plant')); ?>"
-                                        class="<?php echo e(request()->routeIs('omd.master.plant') ? 'active' : ''); ?>">
-
-                                        <span>
-                                            Plant
-                                        </span>
-
-                                    </a>
-
-
-
                                     
                                     <a href="<?php echo e(route('omd.master.line')); ?>"
                                         class="<?php echo e(request()->routeIs('omd.master.line') ? 'active' : ''); ?>">
 
                                         <span>
-                                            Line
+                                            Plant & Line
                                         </span>
 
                                     </a>
@@ -1314,7 +1346,7 @@
                                         class="<?php echo e(request()->routeIs('omd.master.model-product') ? 'active' : ''); ?>">
 
                                         <span>
-                                            Model & Produk
+                                            Model Box
                                         </span>
 
                                     </a>
@@ -1466,6 +1498,65 @@
 
         </div>
 
+    <?php endif; ?>
+
+    <?php if(auth()->check() && in_array(auth()->user()->role, ['omd_member', 'omd_leader'])): ?>
+        <script>
+            function updateOmdOrderNotification() {
+
+                fetch("<?php echo e(route('omd.orders.pendingCount')); ?>", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Gagal mengambil notifikasi order.');
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        const badge =
+                            document.getElementById('omdOrderNotification');
+
+                        if (!badge) {
+                            return;
+                        }
+
+                        const count = parseInt(data.count) || 0;
+
+                        if (count > 0) {
+
+                            badge.textContent =
+                                count > 99 ? '99+' : count;
+
+                            badge.classList.remove('hidden');
+                            badge.classList.add('pulse');
+
+                        } else {
+
+                            badge.textContent = '0';
+
+                            badge.classList.add('hidden');
+                            badge.classList.remove('pulse');
+                        }
+
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
+
+            updateOmdOrderNotification();
+
+            setInterval(
+                updateOmdOrderNotification,
+                5000
+            );
+        </script>
     <?php endif; ?>
 
 </body>

@@ -11,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
 {
+    private const DEFAULT_PASSWORD = 'Aiia@2026';
+
     /**
      * Menampilkan daftar akun user.
      */
@@ -74,7 +76,7 @@ class UserManagementController extends Controller
             ],
 
             'password' => [
-                'required',
+                'nullable',
                 'string',
                 'min:8',
                 'confirmed',
@@ -94,17 +96,24 @@ class UserManagementController extends Controller
                 ]);
         }
 
+        $password = !empty($validated['password'])
+            ? $validated['password']
+            : self::DEFAULT_PASSWORD;
+
         User::create([
             'name' => trim($validated['name']),
             'email' => strtolower(trim($validated['email'])),
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make($password),
             'role' => 'user',
             'line_id' => $line->id,
         ]);
 
         return redirect()
             ->route('omd.users.index')
-            ->with('success', 'Akun user berhasil ditambahkan.');
+            ->with(
+                'account_success',
+                'Akun user berhasil ditambahkan.'
+            );
     }
 
     /**
@@ -126,7 +135,10 @@ class UserManagementController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('omd.users.edit', compact('user', 'plants'));
+        return view(
+            'omd.users.edit',
+            compact('user', 'plants')
+        );
     }
 
     /**
@@ -188,14 +200,40 @@ class UserManagementController extends Controller
         $user->line_id = $line->id;
 
         if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
+            $user->password = Hash::make(
+                $validated['password']
+            );
         }
 
         $user->save();
 
         return redirect()
             ->route('omd.users.index')
-            ->with('success', 'Akun user berhasil diperbarui.');
+            ->with(
+                'account_success',
+                'Akun user berhasil diperbarui.'
+            );
+    }
+
+    /**
+     * Reset password ke password default sistem.
+     */
+    public function resetPassword(User $user)
+    {
+        $this->validateUser($user);
+
+        $user->password = Hash::make(
+            self::DEFAULT_PASSWORD
+        );
+
+        $user->save();
+
+        return redirect()
+            ->route('omd.users.index')
+            ->with(
+                'account_success',
+                'Password akun berhasil direset ke password default sistem.'
+            );
     }
 
     /**
@@ -209,7 +247,10 @@ class UserManagementController extends Controller
 
         return redirect()
             ->route('omd.users.index')
-            ->with('success', 'Akun user berhasil dihapus.');
+            ->with(
+                'account_success',
+                'Akun user berhasil dihapus.'
+            );
     }
 
     /**
@@ -219,7 +260,7 @@ class UserManagementController extends Controller
     {
         abort_unless(
             $user->role === 'user',
-               404
+            404
         );
     }
 }

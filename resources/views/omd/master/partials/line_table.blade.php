@@ -1,6 +1,5 @@
 <table class="table">
 
-
     <thead>
 
         <tr>
@@ -22,19 +21,14 @@
     </thead>
 
 
-
     <tbody>
-
 
         @forelse($lines as $line)
             <tr>
 
-
                 <td>
                     {{ $loop->iteration }}
                 </td>
-
-
 
                 <td>
 
@@ -46,62 +40,48 @@
 
                 <td>
 
+                    <div class="action-group">
 
-                    <button class="btn btn-warning btn-sm"
-                        onclick="editLine(
-{{ $line->id }},
-'{{ $line->name }}'
-)">
-
-                        Edit
-
-                    </button>
-
-
-
-                    <form method="POST" action="{{ route('omd.master.line.destroy', $line->id) }}" style="display:inline">
-
-
-                        @csrf
-
-                        @method('DELETE')
-
-
-                        <button class="btn btn-danger btn-sm">
-
-                            Hapus
-
+                        <button type="button" class="btn btn-warning btn-sm"
+                            onclick="editLine(
+                                {{ $line->id }},
+                                '{{ addslashes($line->name) }}',
+                                {{ $selectedPlant?->id ?? 'null' }}
+                            )">
+                            Edit
                         </button>
 
 
-                    </form>
+                        <form method="POST" action="{{ route('omd.master.line.destroy', $line->id) }}"
+                            class="delete-line-form" style="display:inline">
 
+                            @csrf
 
+                            @method('DELETE')
+
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Hapus
+                            </button>
+
+                        </form>
+
+                    </div>
 
                 </td>
 
-
             </tr>
-
-
 
         @empty
 
-
             <tr>
 
-                <td colspan="4" class="text-center">
-
+                <td colspan="3" class="text-center">
                     Belum ada Line
-
                 </td>
 
             </tr>
         @endforelse
 
-
-
     </tbody>
-
 
 </table>

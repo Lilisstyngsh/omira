@@ -1,96 +1,216 @@
-<?php $__env->startSection('title', 'Order Saya'); ?>
-
-<?php $__env->startSection('header', 'Order Saya'); ?>
+<?php $__env->startSection('header', 'Order Repair Box'); ?>
 
 <?php $__env->startSection('content'); ?>
-    <div class="page-head">
-        <div>
-            <h2>Order Repair Box</h2>
-            <div class="muted">
-                Daftar order yang dibuat oleh akun Anda.
-            </div>
+
+    <style>
+        .page-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+        }
+
+        .page-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-head h2 {
+            margin: 0;
+            font-size: 17px;
+            color: #111827;
+        }
+
+        .btn-create {
+            text-decoration: none;
+            background: #4f46e5;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th {
+            background: #f9fafb;
+            text-align: left;
+            padding: 12px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .orders-table td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 12px;
+            color: #374151;
+        }
+
+        .order-number {
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .status-submitted {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .status-verified {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-in_repair {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
+
+        .status-completed {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .status-confirmed {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-detail {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        @media (max-width: 900px) {
+            .table-wrap {
+                overflow-x: auto;
+            }
+
+            .orders-table {
+                min-width: 900px;
+            }
+        }
+    </style>
+
+    <div class="page-card">
+
+        <div class="page-head">
+            <h2>Daftar Order Repair Box</h2>
+
+            <a href="<?php echo e(route('user.orders.create')); ?>" class="btn-create">
+                + Buat Order
+            </a>
         </div>
 
-        <a class="btn btn-primary" href="<?php echo e(route('user.orders.create')); ?>">
-            + Buat Order
-        </a>
-    </div>
+        <div class="table-wrap">
 
-    <div class="table-wrap">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>No Order</th>
-                    <th>Tanggal</th>
-                    <th>Area</th>
-                    <th>Model</th>
-                    <th>Produk</th>
-                    <th>Qty</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
+            <table class="orders-table">
 
-            <tbody>
-                <?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <thead>
                     <tr>
-                        <td>
-                            <b><?php echo e($order->order_number); ?></b>
-                        </td>
-
-                        <td>
-                            <?php echo e($order->order_date->format('d/m/Y')); ?>
-
-                        </td>
-
-                        <td>
-                            <?php echo e($order->area->category); ?> - <?php echo e($order->area->name); ?>
-
-                        </td>
-
-                        <td>
-                            <?php echo e($order->masterModel?->model ?? $order->model ?? '-'); ?>
-
-                        </td>
-
-                        <td>
-                            <?php echo e($order->product->name); ?>
-
-                        </td>
-
-                        <td>
-                            <?php echo e($order->quantity); ?>
-
-                        </td>
-
-                        <td>
-                            <span class="badge badge-<?php echo e($order->status); ?>">
-                                <?php echo e($order->status_label); ?>
-
-                            </span>
-                        </td>
-
-                        <td>
-                            <a
-                                class="btn btn-secondary"
-                                href="<?php echo e(route('user.orders.show', $order)); ?>"
-                            >
-                                Detail
-                            </a>
-                        </td>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>No Order</th>
+                        <th>Jenis Order</th>
+                        <th>Line</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <tr>
-                        <td colspan="8" class="empty">
-                            Belum ada order.
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+
+                    <?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr>
+                            <td>
+                                <?php echo e($orders->firstItem() + $index); ?>
+
+                            </td>
+
+                            <td>
+                                <?php echo e($order->created_at->format('d-m-Y H:i')); ?>
+
+                            </td>
+
+                            <td class="order-number">
+                                <?php echo e($order->order_number); ?>
+
+                            </td>
+
+                            <td>
+                                Repair Box
+                            </td>
+
+                            <td>
+                                <?php echo e($order->line?->name ?? '-'); ?>
+
+                            </td>
+
+                            <td>
+                                <?php echo e($order->quantity); ?>
+
+                            </td>
+
+                            <td>
+                                <span class="status status-<?php echo e($order->status); ?>">
+                                    <?php echo e($order->status_label); ?>
+
+                                </span>
+                            </td>
+
+                            <td>
+                                <a href="<?php echo e(route('user.orders.show', $order)); ?>" class="btn-detail" title="Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:40px;color:#9ca3af;">
+                                Belum ada order Repair Box.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div style="margin-top:20px;">
+            <?php echo e($orders->links()); ?>
+
+        </div>
+
     </div>
-
-    <?php echo e($orders->links()); ?>
 
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/user/orders/index.blade.php ENDPATH**/ ?>

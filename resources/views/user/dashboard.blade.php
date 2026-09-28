@@ -14,10 +14,7 @@
             </div>
         </div>
 
-        <a
-            class="btn btn-primary"
-            href="{{ route('user.orders.create') }}"
-        >
+        <a class="btn btn-primary" href="{{ route('user.orders.create') }}">
             + Buat Order Repair
         </a>
     </div>
@@ -54,10 +51,7 @@
                 </div>
             </div>
 
-            <a
-                class="btn btn-secondary"
-                href="{{ route('user.orders.index') }}"
-            >
+            <a class="btn btn-secondary" href="{{ route('user.orders.index') }}">
                 Lihat Semua
             </a>
         </div>
@@ -68,7 +62,7 @@
                     <tr>
                         <th>No Order</th>
                         <th>Tanggal</th>
-                        <th>Area</th>
+                        <th>Line</th>
                         <th>Produk</th>
                         <th>Status</th>
                     </tr>
@@ -88,12 +82,21 @@
                             </td>
 
                             <td>
-                                {{ $order->area->category }} -
-                                {{ $order->area->name }}
+                                {{ $order->line?->name ?? '-' }}
                             </td>
 
                             <td>
-                                {{ $order->product->name }}
+                                @if ($order->items->isNotEmpty())
+                                    {{ $order->items->first()->product?->name ?? '-' }}
+
+                                    @if ($order->items->count() > 1)
+                                        <span class="muted">
+                                            +{{ $order->items->count() - 1 }} lainnya
+                                        </span>
+                                    @endif
+                                @else
+                                    {{ $order->product?->name ?? '-' }}
+                                @endif
                             </td>
 
                             <td>
