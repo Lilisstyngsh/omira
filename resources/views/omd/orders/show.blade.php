@@ -129,10 +129,14 @@
     }
 
     .order-table-wrap {
+        width: 100%;
         max-height: 430px;
-        overflow: auto;
-        border-radius: 12px;
+        overflow-y: auto;
+        overflow-x: auto;
         border: 1px solid #edf1f5;
+        border-radius: 12px;
+        position: relative;
+        background: #fff;
     }
 
     .repair-table {
@@ -142,13 +146,14 @@
         border-spacing: 0;
     }
 
-    .repair-table th {
-        position: sticky;
-        top: 0;
-        z-index: 10;
+    .repair-table thead th {
+        position: sticky !important;
+        position: -webkit-sticky !important;
+        top: 0 !important;
+        z-index: 2 !important;
         padding: 12px 13px;
         text-align: left;
-        background: #fafbfc;
+        background: #fafbfc !important;
         border-bottom: 1px solid #e9eef4;
         color: #64748b;
         font-size: 10px;
@@ -156,21 +161,19 @@
         text-transform: uppercase;
         letter-spacing: .03em;
         white-space: nowrap;
+        box-shadow: 0 1px 0 #e9eef4;
     }
 
-    .repair-table td {
+    .repair-table tbody td {
         padding: 12px 13px;
         border-bottom: 1px solid #eef2f6;
         font-size: 12px;
         color: #334155;
         vertical-align: middle;
+        background: #fff;
     }
 
-    .repair-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .repair-table tbody tr:hover {
+    .repair-table tbody tr:hover td {
         background: #fcfcff;
     }
 
@@ -326,9 +329,9 @@
     }
 
     .timeline {
-        min-width: 760px;
+        min-width: 620px;
         display: grid;
-        grid-template-columns: repeat(5, minmax(130px, 1fr));
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
         position: relative;
     }
 
@@ -773,7 +776,7 @@
         </div>
 
 
-        <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
 
             <button type="submit" class="btn btn-primary">
                 Simpan Hasil Repair
@@ -897,7 +900,7 @@
         </div>
 
 
-        <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
 
             <button type="submit" class="btn btn-primary">
                 Simpan Hasil Repair
@@ -1040,12 +1043,11 @@
         Riwayat tahapan Order Repair Box.
     </p>
 
-
     <div class="timeline-wrap">
 
         <div class="timeline">
 
-            {{-- SUBMITTED --}}
+            {{-- USER SUBMIT --}}
             <div class="timeline-item active">
 
                 <div class="timeline-icon">
@@ -1053,7 +1055,7 @@
                 </div>
 
                 <strong>
-                    Submitted
+                    User Submit
                 </strong>
 
                 <span>
@@ -1063,62 +1065,28 @@
             </div>
 
 
-            {{-- VERIFIED --}}
+            {{-- VERIFIED OMD --}}
             <div
                 class="timeline-item
-            {{ in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
-
-                <div class="timeline-icon">
-                    {{ in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? '✓' : '✕' }}
-                </div>
-
-                <strong>
-                    Verified
-                </strong>
-
-                <span>
-
-                    @if ($order->verified_at)
-
-                    {{ $order->verified_at->format('d-m-Y H:i') }}
-
-                    <br>
-
-                    {{ $order->omdVerifier?->name ?? '-' }}
-
-                    @else
-
-                    Belum dilakukan
-
-                    @endif
-
-                </span>
-
-            </div>
-
-
-            {{-- IN REPAIR --}}
-            <div
-                class="timeline-item
-            {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
+                {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
 
                 <div class="timeline-icon">
                     {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕' }}
                 </div>
 
                 <strong>
-                    In Repair
+                    Verified OMD
                 </strong>
 
                 <span>
 
-                    @if ($order->repair_started_at)
+                    @if ($order->verified_at)
 
-                    {{ $order->repair_started_at->format('d-m-Y H:i') }}
+                        {{ $order->verified_at->format('d-m-Y H:i') }}
 
                     @else
 
-                    Belum dilakukan
+                        Belum dilakukan
 
                     @endif
 
@@ -1127,28 +1095,46 @@
             </div>
 
 
-            {{-- COMPLETED --}}
+            {{-- REPAIR OMD --}}
             <div
                 class="timeline-item
-            {{ in_array($order->status, ['completed', 'confirmed']) ? 'active' : '' }}">
+                {{ in_array($order->status, ['completed', 'confirmed']) ? 'active' : '' }}">
 
                 <div class="timeline-icon">
-                    {{ in_array($order->status, ['completed', 'confirmed']) ? '✓' : '✕' }}
+
+                    @if (in_array($order->status, ['completed', 'confirmed']))
+
+                        ✓
+
+                    @elseif ($order->status === 'in_repair')
+
+                        △
+
+                    @else
+
+                        ✕
+
+                    @endif
+
                 </div>
 
                 <strong>
-                    Completed
+                    Repair OMD
                 </strong>
 
                 <span>
 
                     @if ($order->repair_completed_at)
 
-                    {{ $order->repair_completed_at->format('d-m-Y H:i') }}
+                        {{ $order->repair_completed_at->format('d-m-Y H:i') }}
+
+                    @elseif ($order->repair_started_at)
+
+                        Sedang diproses
 
                     @else
 
-                    Belum dilakukan
+                        Belum dilakukan
 
                     @endif
 
@@ -1157,32 +1143,50 @@
             </div>
 
 
-            {{-- CONFIRMED --}}
+            {{-- SERAH TERIMA --}}
             <div
                 class="timeline-item
-            {{ $order->status === 'confirmed' ? 'active' : '' }}">
+                {{ $order->status === 'confirmed' ? 'active' : '' }}">
 
                 <div class="timeline-icon">
-                    {{ $order->status === 'confirmed' ? '✓' : '✕' }}
+
+                    @if ($order->status === 'confirmed')
+
+                        ✓
+
+                    @elseif ($order->status === 'completed')
+
+                        △
+
+                    @else
+
+                        ✕
+
+                    @endif
+
                 </div>
 
                 <strong>
-                    Confirmed
+                    Serah Terima
                 </strong>
 
                 <span>
 
                     @if ($order->status === 'confirmed' && $order->confirmation?->confirmed_at)
 
-                    {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
+                        {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
 
-                    <br>
+                        <br>
 
-                    {{ $order->confirmation->confirmedByUser?->name ?? '-' }}
+                        {{ $order->confirmation->confirmedByUser?->name ?? '-' }}
+
+                    @elseif ($order->status === 'completed')
+
+                        Menunggu konfirmasi User
 
                     @else
 
-                    Belum dilakukan
+                        Belum dilakukan
 
                     @endif
 

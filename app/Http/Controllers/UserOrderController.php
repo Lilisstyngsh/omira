@@ -19,9 +19,13 @@ class UserOrderController extends Controller
             'line',
             'result',
             'confirmation',
-            'handedOverBy',
         ])
             ->where('user_id', $request->user()->id)
+            ->whereIn('status', [
+                'submitted',
+                'in_repair',
+                'completed',
+            ])
             ->latest('created_at')
             ->paginate(10);
 
@@ -334,10 +338,12 @@ class UserOrderController extends Controller
             ]
         );
 
-        return back()->with(
-            'success',
-            'Order berhasil dikonfirmasi. Proses Repair Box selesai.'
-        );
+        return redirect()
+            ->route('user.orders.index')
+            ->with(
+                'success',
+                'Order berhasil dikonfirmasi. Proses Repair Box selesai.'
+            );
     }
 
     private function lineCode(string $lineName): string
@@ -361,5 +367,31 @@ class UserOrderController extends Controller
                 )
             ),
         };
+    }
+
+    public function history(Request $request)
+    {
+        $orders = RepairOrder::with([
+            'line',
+            'result',
+            'confirmation',
+        ])
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'confirmed')
+            ->latest('created_at')
+            ->paginate(10);
+
+        return view('user.orders.history', compact('orders'));
+    }
+
+    public function pendingConfirmationCount(Request $request)
+    {
+        $count = RepairOrder::where('user_id', $request->user()->id)
+            ->where('status', 'completed')
+            ->count();
+
+        return response()->json([
+            'count' => $count,
+        ]);
     }
 }

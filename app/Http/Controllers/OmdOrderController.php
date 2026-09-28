@@ -22,7 +22,6 @@ class OmdOrderController extends Controller
         ])
             ->whereIn('status', [
                 'submitted',
-                'verified',
                 'in_repair',
                 'completed',
             ])
@@ -49,7 +48,6 @@ class OmdOrderController extends Controller
             'result',
             'confirmation',
             'omdVerifier',
-            'handedOverBy',
             'items.masterModel',
             'items.product',
             'items.ngType',
@@ -60,7 +58,6 @@ class OmdOrderController extends Controller
             compact('order')
         );
     }
-
 
     public function verify(
         Request $request,
@@ -73,40 +70,29 @@ class OmdOrderController extends Controller
         );
 
         $order->update([
-            'status' => 'verified',
+            'status' => 'in_repair',
             'verified_by' => $request->user()->id,
             'verified_at' => now(),
+            'repair_started_at' => now(),
         ]);
 
-        return back()
+        return redirect()
+            ->route('omd.orders.show', $order)
             ->with(
                 'success',
-                'Order berhasil diverifikasi.'
+                'Order berhasil diverifikasi dan langsung masuk proses repair.'
             );
     }
-
 
     public function startRepair(
         RepairOrder $order
     ) {
         abort_unless(
-            $order->status === 'verified',
+            false,
             422,
-            'Order belum diverifikasi.'
+            'Proses Mulai Repair dilakukan otomatis saat verifikasi.'
         );
-
-        $order->update([
-            'status' => 'in_repair',
-            'repair_started_at' => now(),
-        ]);
-
-        return back()
-            ->with(
-                'success',
-                'Order masuk proses repair.'
-            );
     }
-
 
     public function complete(
         Request $request,
@@ -119,7 +105,6 @@ class OmdOrderController extends Controller
         );
 
         $order->load('items');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -147,9 +132,7 @@ class OmdOrderController extends Controller
                 ];
             }
 
-
             $data = $request->validate($rules);
-
 
             DB::transaction(function () use (
                 $order,
@@ -158,17 +141,14 @@ class OmdOrderController extends Controller
 
                 foreach ($order->items as $item) {
 
-                    $itemData =
-                        $data['items'][$item->id]
-                        ?? [];
+                    $itemData = $data['items'][$item->id] ?? [];
 
                     $item->update([
                         'after_qty' =>
                         $itemData['after_qty'] ?? 0,
 
                         'mismatch_note' =>
-                        $itemData['mismatch_note']
-                            ?? null,
+                        $itemData['mismatch_note'] ?? null,
                     ]);
                 }
 
@@ -178,7 +158,6 @@ class OmdOrderController extends Controller
                 ]);
             });
 
-
             return redirect()
                 ->route('omd.orders.index')
                 ->with(
@@ -186,7 +165,6 @@ class OmdOrderController extends Controller
                     'Order Repair Box Selesai dan menunggu verifikasi dari User.'
                 );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -221,12 +199,10 @@ class OmdOrderController extends Controller
             ],
         ]);
 
-
         $sum =
             $data['ok_qty'] +
             $data['scrap_qty'] +
             $data['ng_qty'];
-
 
         if ($sum > $order->quantity) {
 
@@ -238,7 +214,6 @@ class OmdOrderController extends Controller
                 ->withInput();
         }
 
-
         DB::transaction(function () use (
             $request,
             $order,
@@ -249,7 +224,6 @@ class OmdOrderController extends Controller
                 'status' => 'completed',
                 'repair_completed_at' => now(),
             ]);
-
 
             $order->result()->updateOrCreate(
                 [],
@@ -272,52 +246,11 @@ class OmdOrderController extends Controller
             );
         });
 
-
-        return back()
+        return redirect()
+            ->route('omd.orders.index')
             ->with(
                 'success',
-                'Hasil repair berhasil disimpan.'
-            );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SERAH TERIMA OMD KE USER
-    |--------------------------------------------------------------------------
-    */
-
-    public function handover(
-        Request $request,
-        RepairOrder $order
-    ) {
-        abort_unless(
-            $order->status === 'completed',
-            422,
-            'Order belum selesai repair.'
-        );
-
-
-        abort_unless(
-            !$order->handed_over_at,
-            422,
-            'Order sudah pernah diserahterimakan.'
-        );
-
-
-        $order->update([
-            'handed_over_by' =>
-            $request->user()->id,
-
-            'handed_over_at' =>
-            now(),
-        ]);
-
-
-        return back()
-            ->with(
-                'success',
-                'Barang repair berhasil diserahterimakan kepada user.'
+                'Order Repair Box Selesai dan menunggu verifikasi dari User.'
             );
     }
 

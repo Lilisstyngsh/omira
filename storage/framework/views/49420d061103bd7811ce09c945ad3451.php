@@ -1,216 +1,568 @@
+<?php $__env->startSection('title', 'Order Repair Box'); ?>
 <?php $__env->startSection('header', 'Order Repair Box'); ?>
 
 <?php $__env->startSection('content'); ?>
 
-    <style>
-        .page-card {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+<style>
+    .page-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+    }
+
+    .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-head h2 {
+        margin: 0;
+        font-size: 17px;
+        color: #111827;
+    }
+
+    .btn-create {
+        text-decoration: none;
+        background: #4f46e5;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        transition: .18s ease;
+    }
+
+    .btn-create:hover {
+        background: #4338ca;
+        color: #fff;
+    }
+
+    .orders-table-wrap {
+        overflow-x: auto;
+    }
+
+    .orders-table {
+        width: 100%;
+        min-width: 1180px;
+        border-collapse: collapse;
+    }
+
+    .orders-table th {
+        padding: 12px 14px;
+        text-align: left;
+        background: #f9fafb;
+        border-bottom: 1px solid #e9eef4;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #6b7280;
+        white-space: nowrap;
+    }
+
+    .orders-table thead tr:first-child th {
+        background: #f6f7fb;
+        text-align: center;
+    }
+
+    .orders-table thead tr:first-child th[rowspan="2"] {
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .orders-table thead tr:nth-child(2) th {
+        text-align: center;
+        font-size: 9px;
+        padding: 11px 10px;
+    }
+
+    .orders-table td {
+        padding: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 12px;
+        color: #374151;
+        vertical-align: middle;
+    }
+
+    .orders-table tbody tr {
+        cursor: pointer;
+        transition: .18s ease;
+    }
+
+    .orders-table tbody tr:hover {
+        background: #f8fafc;
+        transform: translateY(-1px);
+    }
+
+    .orders-table tbody tr:active {
+        background: #f1f5f9;
+    }
+
+    .orders-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .order-no {
+        width: 55px;
+        text-align: center;
+        color: #94a3b8;
+        font-weight: 700;
+    }
+
+    .order-number {
+        font-weight: 800;
+        color: #111827;
+        white-space: nowrap;
+    }
+
+    .order-line-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #3478c5;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .order-type-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: #f5f3ff;
+        color: #6659df;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .order-qty {
+        font-size: 13px !important;
+        font-weight: 800;
+        color: #172033 !important;
+        text-align: center;
+    }
+
+    .process-cell {
+        width: 115px;
+        text-align: center !important;
+        padding: 12px 8px !important;
+    }
+
+    .process-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .process-done {
+        background: #dcfce7;
+        color: #16a34a;
+        box-shadow: inset 0 0 0 1px #bbf7d0;
+    }
+
+    .process-progress {
+        background: #fef3c7;
+        color: #d97706;
+        box-shadow: inset 0 0 0 1px #fde68a;
+    }
+
+    .process-pending {
+        background: #fee2e2;
+        color: #dc2626;
+        box-shadow: inset 0 0 0 1px #fecaca;
+    }
+
+    .order-alert {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 18px;
+        padding: 15px 18px;
+        border: 1px solid #fde68a;
+        border-radius: 14px;
+        background: #fffbeb;
+    }
+
+    .order-alert-icon {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #fef3c7;
+        color: #d97706;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .order-alert strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #92400e;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .order-alert span {
+        color: #a16207;
+        font-size: 10px;
+    }
+
+    .order-empty {
+        padding: 55px 20px !important;
+        text-align: center !important;
+        color: #94a3b8 !important;
+    }
+
+    .order-empty-text {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    @media (max-width: 900px) {
+        .orders-table-wrap {
+            overflow-x: auto;
         }
 
         .page-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            align-items: flex-start;
+            gap: 12px;
         }
+    }
 
-        .page-head h2 {
-            margin: 0;
-            font-size: 17px;
-            color: #111827;
-        }
+    .success-alert {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 18px;
+        padding: 15px 18px;
+        border: 1px solid #bbf7d0;
+        border-radius: 14px;
+        background: #f0fdf4;
+    }
 
-        .btn-create {
-            text-decoration: none;
-            background: #4f46e5;
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 9px;
-            font-size: 12px;
-            font-weight: 700;
-        }
+    .success-alert-icon {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #dcfce7;
+        color: #16a34a;
+        font-size: 16px;
+        font-weight: 800;
+    }
 
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    .success-alert strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #166534;
+        font-size: 12px;
+        font-weight: 800;
+    }
 
-        .orders-table th {
-            background: #f9fafb;
-            text-align: left;
-            padding: 12px;
-            font-size: 11px;
-            color: #6b7280;
-        }
+    .success-alert span {
+        color: #4d7a5c;
+        font-size: 10px;
+    }
+</style>
 
-        .orders-table td {
-            padding: 13px 12px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 12px;
-            color: #374151;
-        }
+<?php
+$completedOrders = $orders->where('status', 'completed')->count();
+?>
 
-        .order-number {
-            font-weight: 700;
-            color: #111827;
-        }
+<?php if($completedOrders > 0): ?>
+<div class="order-alert">
+    <div class="order-alert-icon">
+        !
+    </div>
 
-        .status {
-            display: inline-flex;
-            padding: 5px 9px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-        }
+    <div>
+        <strong>
+            Order Repair Box Selesai
+        </strong>
 
-        .status-submitted {
-            background: #eff6ff;
-            color: #2563eb;
-        }
+        <span>
+            <?php echo e($completedOrders); ?> order sudah selesai diperbaiki dan menunggu konfirmasi User.
+        </span>
+    </div>
+</div>
+<?php endif; ?>
 
-        .status-verified {
-            background: #fef3c7;
-            color: #92400e;
-        }
+<?php if(session('success')): ?>
+<div class="success-alert">
+    <div class="success-alert-icon">
+        ✓
+    </div>
 
-        .status-in_repair {
-            background: #f3e8ff;
-            color: #7e22ce;
-        }
+    <div>
+        <strong>
+            Berhasil
+        </strong>
 
-        .status-completed {
-            background: #ecfdf5;
-            color: #047857;
-        }
+        <span>
+            <?php echo e(session('success')); ?>
 
-        .status-confirmed {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
+        </span>
+    </div>
+</div>
+<?php endif; ?>
 
-        .btn-detail {
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: #f3f4f6;
-            color: #374151;
-        }
+<div class="page-card">
 
-        @media (max-width: 900px) {
-            .table-wrap {
-                overflow-x: auto;
-            }
+    <div class="page-head">
+        <h2>Daftar Order Repair Box</h2>
 
-            .orders-table {
-                min-width: 900px;
-            }
-        }
-    </style>
+        <a href="<?php echo e(route('user.orders.create')); ?>" class="btn-create">
+            + Buat Order
+        </a>
+    </div>
 
-    <div class="page-card">
+    <div class="orders-table-wrap">
 
-        <div class="page-head">
-            <h2>Daftar Order Repair Box</h2>
+        <table class="orders-table">
 
-            <a href="<?php echo e(route('user.orders.create')); ?>" class="btn-create">
-                + Buat Order
-            </a>
-        </div>
+            <thead>
 
-        <div class="table-wrap">
+                <tr>
 
-            <table class="orders-table">
+                    <th rowspan="2" style="width:55px;">
+                        No
+                    </th>
 
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Tanggal</th>
-                        <th>No Order</th>
-                        <th>Jenis Order</th>
-                        <th>Line</th>
-                        <th>Qty</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
+                    <th rowspan="2">
+                        Tanggal
+                    </th>
 
-                <tbody>
+                    <th rowspan="2">
+                        No Order
+                    </th>
 
-                    <?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr>
-                            <td>
-                                <?php echo e($orders->firstItem() + $index); ?>
+                    <th rowspan="2">
+                        Jenis Order
+                    </th>
 
-                            </td>
+                    <th rowspan="2">
+                        Line
+                    </th>
 
-                            <td>
-                                <?php echo e($order->created_at->format('d-m-Y H:i')); ?>
+                    <th rowspan="2">
+                        Qty
+                    </th>
 
-                            </td>
+                    <th colspan="4" style="text-align:center;">
+                        Status
+                    </th>
 
-                            <td class="order-number">
-                                <?php echo e($order->order_number); ?>
+                </tr>
 
-                            </td>
+                <tr>
 
-                            <td>
-                                Repair Box
-                            </td>
+                    <th class="process-cell">
+                        User Submit
+                    </th>
 
-                            <td>
-                                <?php echo e($order->line?->name ?? '-'); ?>
+                    <th class="process-cell">
+                        Verified OMD
+                    </th>
 
-                            </td>
+                    <th class="process-cell">
+                        Repair OMD
+                    </th>
 
-                            <td>
-                                <?php echo e($order->quantity); ?>
+                    <th class="process-cell">
+                        Serah Terima
+                    </th>
 
-                            </td>
+                </tr>
 
-                            <td>
-                                <span class="status status-<?php echo e($order->status); ?>">
-                                    <?php echo e($order->status_label); ?>
+            </thead>
 
-                                </span>
-                            </td>
+            <tbody>
 
-                            <td>
-                                <a href="<?php echo e(route('user.orders.show', $order)); ?>" class="btn-detail" title="Detail">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
+                <?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr
+                    onclick="window.location='<?php echo e(route('user.orders.show', $order)); ?>'"
+                    title="Klik untuk melihat detail order">
 
-                        <tr>
-                            <td colspan="8" style="text-align:center;padding:40px;color:#9ca3af;">
-                                Belum ada order Repair Box.
-                            </td>
-                        </tr>
-                    <?php endif; ?>
+                    <td class="order-no">
+                        <?php echo e($orders->firstItem() + $index); ?>
 
-                </tbody>
+                    </td>
 
-            </table>
+                    <td>
+                        <?php echo e($order->created_at ? $order->created_at->format('d-m-Y H:i') : '-'); ?>
 
-        </div>
+                    </td>
 
-        <div style="margin-top:20px;">
-            <?php echo e($orders->links()); ?>
+                    <td class="order-number">
+                        <?php echo e($order->order_number); ?>
 
-        </div>
+                    </td>
+
+                    <td>
+                        <span class="order-type-badge">
+                            Repair Box
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="order-line-badge">
+                            <?php echo e($order->line?->name ?? '-'); ?>
+
+                        </span>
+                    </td>
+
+                    <td class="order-qty">
+                        <?php echo e($order->quantity); ?>
+
+                    </td>
+
+                    
+                    <td class="process-cell">
+
+                        <span
+                            class="process-icon process-done"
+                            title="User sudah submit order">
+                            ✓
+                        </span>
+
+                    </td>
+
+                    
+                    <td class="process-cell">
+
+                        <?php if(in_array($order->status, ['in_repair', 'completed', 'confirmed'])): ?>
+
+                        <span
+                            class="process-icon process-done"
+                            title="Order sudah diverifikasi OMD">
+                            ✓
+                        </span>
+
+                        <?php else: ?>
+
+                        <span
+                            class="process-icon process-pending"
+                            title="Belum diverifikasi OMD">
+                            ✕
+                        </span>
+
+                        <?php endif; ?>
+
+                    </td>
+
+                    
+                    <td class="process-cell">
+
+                        <?php if(in_array($order->status, ['completed', 'confirmed'])): ?>
+
+                        <span
+                            class="process-icon process-done"
+                            title="Repair OMD sudah selesai">
+                            ✓
+                        </span>
+
+                        <?php elseif($order->status === 'in_repair'): ?>
+
+                        <span
+                            class="process-icon process-progress"
+                            title="Repair OMD sedang diproses">
+                            △
+                        </span>
+
+                        <?php else: ?>
+
+                        <span
+                            class="process-icon process-pending"
+                            title="Repair OMD belum dimulai">
+                            ✕
+                        </span>
+
+                        <?php endif; ?>
+
+                    </td>
+
+                    
+                    <td class="process-cell">
+
+                        <?php if($order->status === 'confirmed'): ?>
+
+                        <span
+                            class="process-icon process-done"
+                            title="Serah terima sudah selesai">
+                            ✓
+                        </span>
+
+                        <?php elseif($order->status === 'completed'): ?>
+
+                        <span
+                            class="process-icon process-progress"
+                            title="Menunggu serah terima / konfirmasi User">
+                            △
+                        </span>
+
+                        <?php else: ?>
+
+                        <span
+                            class="process-icon process-pending"
+                            title="Belum masuk tahap serah terima">
+                            ✕
+                        </span>
+
+                        <?php endif; ?>
+
+                    </td>
+
+                </tr>
+
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+
+                <tr>
+
+                    <td colspan="10" class="order-empty">
+                        <div class="order-empty-text">
+                            Belum ada Order Repair Box
+                        </div>
+                    </td>
+
+                </tr>
+
+                <?php endif; ?>
+
+            </tbody>
+
+        </table>
 
     </div>
 
-<?php $__env->stopSection(); ?>
+    <div style="margin-top:20px;">
+        <?php echo e($orders->links()); ?>
 
+    </div>
+
+</div>
+
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/user/orders/index.blade.php ENDPATH**/ ?>

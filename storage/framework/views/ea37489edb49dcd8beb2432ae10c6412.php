@@ -340,17 +340,17 @@
     }
 
     .timeline {
-        min-width: 760px;
+        min-width: 620px;
         display: grid;
-        grid-template-columns: repeat(5, minmax(130px, 1fr));
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
         position: relative;
     }
 
     .timeline::before {
         content: '';
         position: absolute;
-        left: 10%;
-        right: 10%;
+        left: 12.5%;
+        right: 12.5%;
         top: 18px;
         height: 2px;
         background: #e5e7eb;
@@ -609,7 +609,6 @@
 
     </div>
 
-
     <div style="margin-top:18px;">
 
         <div style="margin-bottom:7px;font-size:11px;font-weight:800;color:#334155;">
@@ -627,6 +626,7 @@
 
 
 
+
 <?php if($order->items->isNotEmpty()): ?>
 
 <?php if($order->items->whereNotNull('after_qty')->isNotEmpty()): ?>
@@ -636,6 +636,10 @@
     <h3 class="repair-card-title">
         Hasil Repair
     </h3>
+
+    <p class="repair-card-desc">
+        Hasil repair yang telah diinput oleh OMD.
+    </p>
 
     <div class="order-table-wrap">
 
@@ -895,7 +899,7 @@
                 </div>
 
                 <strong>
-                    Submitted
+                    User Submit
                 </strong>
 
                 <span>
@@ -909,15 +913,15 @@
             
             <div
                 class="timeline-item
-                <?php echo e(in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
+                <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <div class="timeline-icon">
-                    <?php echo e(in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? '✓' : '✕'); ?>
+                    <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕'); ?>
 
                 </div>
 
                 <strong>
-                    Verified
+                    Verified OMD
                 </strong>
 
                 <span>
@@ -947,47 +951,28 @@
             
             <div
                 class="timeline-item
-                <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
-
-                <div class="timeline-icon">
-                    <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕'); ?>
-
-                </div>
-
-                <strong>
-                    In Repair
-                </strong>
-
-                <span>
-
-                    <?php if($order->repair_started_at): ?>
-
-                    <?php echo e($order->repair_started_at->format('d-m-Y H:i')); ?>
-
-
-                    <?php else: ?>
-
-                    Belum dilakukan
-
-                    <?php endif; ?>
-
-                </span>
-
-            </div>
-
-
-            
-            <div
-                class="timeline-item
                 <?php echo e(in_array($order->status, ['completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <div class="timeline-icon">
-                    <?php echo e(in_array($order->status, ['completed', 'confirmed']) ? '✓' : '✕'); ?>
+
+                    <?php if(in_array($order->status, ['completed', 'confirmed'])): ?>
+
+                    ✓
+
+                    <?php elseif($order->status === 'in_repair'): ?>
+
+                    △
+
+                    <?php else: ?>
+
+                    ✕
+
+                    <?php endif; ?>
 
                 </div>
 
                 <strong>
-                    Completed
+                    Repair OMD
                 </strong>
 
                 <span>
@@ -996,6 +981,10 @@
 
                     <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
 
+
+                    <?php elseif($order->repair_started_at): ?>
+
+                    Sedang diproses
 
                     <?php else: ?>
 
@@ -1014,12 +1003,25 @@
                 <?php echo e($order->status === 'confirmed' ? 'active' : ''); ?>">
 
                 <div class="timeline-icon">
-                    <?php echo e($order->status === 'confirmed' ? '✓' : '✕'); ?>
+
+                    <?php if($order->status === 'confirmed'): ?>
+
+                    ✓
+
+                    <?php elseif($order->status === 'completed'): ?>
+
+                    △
+
+                    <?php else: ?>
+
+                    ✕
+
+                    <?php endif; ?>
 
                 </div>
 
                 <strong>
-                    Confirmed
+                    Serah Terima
                 </strong>
 
                 <span>
@@ -1028,6 +1030,10 @@
 
                     <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
 
+
+                    <?php elseif($order->status === 'completed'): ?>
+
+                    Menunggu konfirmasi User
 
                     <?php else: ?>
 

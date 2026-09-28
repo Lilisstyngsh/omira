@@ -127,10 +127,14 @@
     }
 
     .order-table-wrap {
+        width: 100%;
         max-height: 430px;
-        overflow: auto;
-        border-radius: 12px;
+        overflow-y: auto;
+        overflow-x: auto;
         border: 1px solid #edf1f5;
+        border-radius: 12px;
+        position: relative;
+        background: #fff;
     }
 
     .repair-table {
@@ -140,13 +144,14 @@
         border-spacing: 0;
     }
 
-    .repair-table th {
-        position: sticky;
-        top: 0;
-        z-index: 10;
+    .repair-table thead th {
+        position: sticky !important;
+        position: -webkit-sticky !important;
+        top: 0 !important;
+        z-index: 2 !important;
         padding: 12px 13px;
         text-align: left;
-        background: #fafbfc;
+        background: #fafbfc !important;
         border-bottom: 1px solid #e9eef4;
         color: #64748b;
         font-size: 10px;
@@ -154,21 +159,19 @@
         text-transform: uppercase;
         letter-spacing: .03em;
         white-space: nowrap;
+        box-shadow: 0 1px 0 #e9eef4;
     }
 
-    .repair-table td {
+    .repair-table tbody td {
         padding: 12px 13px;
         border-bottom: 1px solid #eef2f6;
         font-size: 12px;
         color: #334155;
         vertical-align: middle;
+        background: #fff;
     }
 
-    .repair-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .repair-table tbody tr:hover {
+    .repair-table tbody tr:hover td {
         background: #fcfcff;
     }
 
@@ -324,9 +327,9 @@
     }
 
     .timeline {
-        min-width: 760px;
+        min-width: 620px;
         display: grid;
-        grid-template-columns: repeat(5, minmax(130px, 1fr));
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
         position: relative;
     }
 
@@ -782,7 +785,7 @@
         </div>
 
 
-        <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
 
             <button type="submit" class="btn btn-primary">
                 Simpan Hasil Repair
@@ -904,7 +907,7 @@
         </div>
 
 
-        <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
 
             <button type="submit" class="btn btn-primary">
                 Simpan Hasil Repair
@@ -1039,7 +1042,6 @@
         Riwayat tahapan Order Repair Box.
     </p>
 
-
     <div class="timeline-wrap">
 
         <div class="timeline">
@@ -1052,7 +1054,7 @@
                 </div>
 
                 <strong>
-                    Submitted
+                    User Submit
                 </strong>
 
                 <span>
@@ -1066,44 +1068,7 @@
             
             <div
                 class="timeline-item
-            <?php echo e(in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
-
-                <div class="timeline-icon">
-                    <?php echo e(in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? '✓' : '✕'); ?>
-
-                </div>
-
-                <strong>
-                    Verified
-                </strong>
-
-                <span>
-
-                    <?php if($order->verified_at): ?>
-
-                    <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
-
-
-                    <br>
-
-                    <?php echo e($order->omdVerifier?->name ?? '-'); ?>
-
-
-                    <?php else: ?>
-
-                    Belum dilakukan
-
-                    <?php endif; ?>
-
-                </span>
-
-            </div>
-
-
-            
-            <div
-                class="timeline-item
-            <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
+                <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <div class="timeline-icon">
                     <?php echo e(in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕'); ?>
@@ -1111,19 +1076,19 @@
                 </div>
 
                 <strong>
-                    In Repair
+                    Verified OMD
                 </strong>
 
                 <span>
 
-                    <?php if($order->repair_started_at): ?>
+                    <?php if($order->verified_at): ?>
 
-                    <?php echo e($order->repair_started_at->format('d-m-Y H:i')); ?>
+                        <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
 
 
                     <?php else: ?>
 
-                    Belum dilakukan
+                        Belum dilakukan
 
                     <?php endif; ?>
 
@@ -1135,27 +1100,44 @@
             
             <div
                 class="timeline-item
-            <?php echo e(in_array($order->status, ['completed', 'confirmed']) ? 'active' : ''); ?>">
+                <?php echo e(in_array($order->status, ['completed', 'confirmed']) ? 'active' : ''); ?>">
 
                 <div class="timeline-icon">
-                    <?php echo e(in_array($order->status, ['completed', 'confirmed']) ? '✓' : '✕'); ?>
+
+                    <?php if(in_array($order->status, ['completed', 'confirmed'])): ?>
+
+                        ✓
+
+                    <?php elseif($order->status === 'in_repair'): ?>
+
+                        △
+
+                    <?php else: ?>
+
+                        ✕
+
+                    <?php endif; ?>
 
                 </div>
 
                 <strong>
-                    Completed
+                    Repair OMD
                 </strong>
 
                 <span>
 
                     <?php if($order->repair_completed_at): ?>
 
-                    <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
+                        <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
 
+
+                    <?php elseif($order->repair_started_at): ?>
+
+                        Sedang diproses
 
                     <?php else: ?>
 
-                    Belum dilakukan
+                        Belum dilakukan
 
                     <?php endif; ?>
 
@@ -1167,32 +1149,49 @@
             
             <div
                 class="timeline-item
-            <?php echo e($order->status === 'confirmed' ? 'active' : ''); ?>">
+                <?php echo e($order->status === 'confirmed' ? 'active' : ''); ?>">
 
                 <div class="timeline-icon">
-                    <?php echo e($order->status === 'confirmed' ? '✓' : '✕'); ?>
+
+                    <?php if($order->status === 'confirmed'): ?>
+
+                        ✓
+
+                    <?php elseif($order->status === 'completed'): ?>
+
+                        △
+
+                    <?php else: ?>
+
+                        ✕
+
+                    <?php endif; ?>
 
                 </div>
 
                 <strong>
-                    Confirmed
+                    Serah Terima
                 </strong>
 
                 <span>
 
                     <?php if($order->status === 'confirmed' && $order->confirmation?->confirmed_at): ?>
 
-                    <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
+                        <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
 
 
-                    <br>
+                        <br>
 
-                    <?php echo e($order->confirmation->confirmedByUser?->name ?? '-'); ?>
+                        <?php echo e($order->confirmation->confirmedByUser?->name ?? '-'); ?>
 
+
+                    <?php elseif($order->status === 'completed'): ?>
+
+                        Menunggu konfirmasi User
 
                     <?php else: ?>
 
-                    Belum dilakukan
+                        Belum dilakukan
 
                     <?php endif; ?>
 

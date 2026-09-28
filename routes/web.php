@@ -113,6 +113,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/orders', [UserOrderController::class, 'index'])
                 ->name('orders.index');
 
+            Route::get('/orders/history', [UserOrderController::class, 'history'])
+                ->name('orders.history');
+
+            Route::get('/orders/pending-confirmation-count', [UserOrderController::class, 'pendingConfirmationCount'])
+                ->name('orders.pendingConfirmationCount');
+
             Route::get('/orders/create', [UserOrderController::class, 'create'])
                 ->name('orders.create');
 

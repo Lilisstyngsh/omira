@@ -342,17 +342,17 @@
     }
 
     .timeline {
-        min-width: 760px;
+        min-width: 620px;
         display: grid;
-        grid-template-columns: repeat(5, minmax(130px, 1fr));
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
         position: relative;
     }
 
     .timeline::before {
         content: '';
         position: absolute;
-        left: 10%;
-        right: 10%;
+        left: 12.5%;
+        right: 12.5%;
         top: 18px;
         height: 2px;
         background: #e5e7eb;
@@ -603,7 +603,6 @@
 
     </div>
 
-
     <div style="margin-top:18px;">
 
         <div style="margin-bottom:7px;font-size:11px;font-weight:800;color:#334155;">
@@ -618,6 +617,7 @@
 
 </div>
 
+
 {{-- =====================================================
  HASIL REPAIR
 ===================================================== --}}
@@ -631,6 +631,10 @@
     <h3 class="repair-card-title">
         Hasil Repair
     </h3>
+
+    <p class="repair-card-desc">
+        Hasil repair yang telah diinput oleh OMD.
+    </p>
 
     <div class="order-table-wrap">
 
@@ -874,7 +878,7 @@
 
         <div class="timeline">
 
-            {{-- SUBMITTED --}}
+            {{-- USER SUBMIT --}}
             <div class="timeline-item active">
 
                 <div class="timeline-icon">
@@ -882,7 +886,7 @@
                 </div>
 
                 <strong>
-                    Submitted
+                    User Submit
                 </strong>
 
                 <span>
@@ -892,17 +896,17 @@
             </div>
 
 
-            {{-- VERIFIED --}}
+            {{-- VERIFIED OMD --}}
             <div
                 class="timeline-item
-                {{ in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
+                {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
 
                 <div class="timeline-icon">
-                    {{ in_array($order->status, ['verified', 'in_repair', 'completed', 'confirmed']) ? '✓' : '✕' }}
+                    {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕' }}
                 </div>
 
                 <strong>
-                    Verified
+                    Verified OMD
                 </strong>
 
                 <span>
@@ -927,47 +931,31 @@
             </div>
 
 
-            {{-- IN REPAIR --}}
-            <div
-                class="timeline-item
-                {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
-
-                <div class="timeline-icon">
-                    {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕' }}
-                </div>
-
-                <strong>
-                    In Repair
-                </strong>
-
-                <span>
-
-                    @if ($order->repair_started_at)
-
-                    {{ $order->repair_started_at->format('d-m-Y H:i') }}
-
-                    @else
-
-                    Belum dilakukan
-
-                    @endif
-
-                </span>
-
-            </div>
-
-
-            {{-- COMPLETED --}}
+            {{-- REPAIR OMD --}}
             <div
                 class="timeline-item
                 {{ in_array($order->status, ['completed', 'confirmed']) ? 'active' : '' }}">
 
                 <div class="timeline-icon">
-                    {{ in_array($order->status, ['completed', 'confirmed']) ? '✓' : '✕' }}
+
+                    @if (in_array($order->status, ['completed', 'confirmed']))
+
+                    ✓
+
+                    @elseif ($order->status === 'in_repair')
+
+                    △
+
+                    @else
+
+                    ✕
+
+                    @endif
+
                 </div>
 
                 <strong>
-                    Completed
+                    Repair OMD
                 </strong>
 
                 <span>
@@ -976,6 +964,10 @@
 
                     {{ $order->repair_completed_at->format('d-m-Y H:i') }}
 
+                    @elseif ($order->repair_started_at)
+
+                    Sedang diproses
+
                     @else
 
                     Belum dilakukan
@@ -987,17 +979,31 @@
             </div>
 
 
-            {{-- CONFIRMED --}}
+            {{-- SERAH TERIMA --}}
             <div
                 class="timeline-item
                 {{ $order->status === 'confirmed' ? 'active' : '' }}">
 
                 <div class="timeline-icon">
-                    {{ $order->status === 'confirmed' ? '✓' : '✕' }}
+
+                    @if ($order->status === 'confirmed')
+
+                    ✓
+
+                    @elseif ($order->status === 'completed')
+
+                    △
+
+                    @else
+
+                    ✕
+
+                    @endif
+
                 </div>
 
                 <strong>
-                    Confirmed
+                    Serah Terima
                 </strong>
 
                 <span>
@@ -1005,6 +1011,10 @@
                     @if ($order->status === 'confirmed' && $order->confirmation?->confirmed_at)
 
                     {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
+
+                    @elseif ($order->status === 'completed')
+
+                    Menunggu konfirmasi User
 
                     @else
 
