@@ -319,13 +319,7 @@ class UserOrderController extends Controller
         abort_unless(
             $order->status === 'completed',
             422,
-            'Order belum siap dikonfirmasi.'
-        );
-
-        abort_unless(
-            $order->handed_over_at,
-            422,
-            'Order belum diserahterimakan oleh OMD.'
+            'Order belum selesai diproses.'
         );
 
         $order->update([
@@ -342,7 +336,7 @@ class UserOrderController extends Controller
 
         return back()->with(
             'success',
-            'Order berhasil dikonfirmasi. Terima kasih.'
+            'Order berhasil dikonfirmasi. Proses Repair Box selesai.'
         );
     }
 

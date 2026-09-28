@@ -24,11 +24,17 @@ class OmdOrderController extends Controller
                 'submitted',
                 'verified',
                 'in_repair',
+                'completed',
             ])
             ->latest('created_at')
             ->paginate(10);
 
-        return view('omd.orders.index', compact('orders'));
+        $completedCount = RepairOrder::where('status', 'completed')->count();
+
+        return view('omd.orders.index', compact(
+            'orders',
+            'completedCount'
+        ));
     }
 
     public function show(RepairOrder $order)
@@ -166,7 +172,6 @@ class OmdOrderController extends Controller
                     ]);
                 }
 
-
                 $order->update([
                     'status' => 'completed',
                     'repair_completed_at' => now(),
@@ -174,10 +179,11 @@ class OmdOrderController extends Controller
             });
 
 
-            return back()
+            return redirect()
+                ->route('omd.orders.index')
                 ->with(
                     'success',
-                    'Hasil repair berhasil disimpan.'
+                    'Order Repair Box Selesai dan menunggu verifikasi dari User.'
                 );
         }
 
@@ -335,12 +341,8 @@ class OmdOrderController extends Controller
             'ngType',
             'result',
             'confirmation',
-            'handedOverBy',
         ])
-            ->whereIn('status', [
-                'completed',
-                'confirmed',
-            ])
+            ->where('status', 'confirmed')
             ->latest('created_at')
             ->paginate(10);
 
