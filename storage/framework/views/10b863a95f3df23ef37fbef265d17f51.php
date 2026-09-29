@@ -1215,448 +1215,452 @@
 
     <?php if(View::hasSection('guest')): ?>
 
-    <main class="guest-page">
-        <?php echo $__env->yieldContent('guest'); ?>
-    </main>
+        <main class="guest-page">
+            <?php echo $__env->yieldContent('guest'); ?>
+        </main>
     <?php else: ?>
-    
-
-    <div class="app">
-
         
 
-        <aside class="sidebar">
+        <div class="app">
 
             
-            <div class="brand">
 
-                <div class="brand-logo">
-                    O
-                </div>
+            <aside class="sidebar">
 
-                <div class="brand-text">
+                
+                <div class="brand">
 
-                    <div class="brand-title">
-                        OMIRA
+                    <div class="brand-logo">
+                        O
                     </div>
 
-                    <div class="brand-subtitle">
-                        OMD Integrated Repair Application
+                    <div class="brand-text">
+
+                        <div class="brand-title">
+                            OMIRA
+                        </div>
+
+                        <div class="brand-subtitle">
+                            OMD Integrated Repair Application
+                        </div>
+
                     </div>
 
                 </div>
 
-            </div>
-
-
-            
-            <div class="nav-section">
-                Main Menu
-            </div>
-
-            <nav class="nav">
 
                 
-                <a href="<?php echo e(route('dashboard')); ?>" class="<?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
+                <div class="nav-section">
+                    Main Menu
+                </div>
 
-                    <span class="nav-icon">⌂</span>
+                <nav class="nav">
 
-                    <span>
-                        Dashboard
-                    </span>
+                    
+                    <a href="<?php echo e(route('dashboard')); ?>" class="<?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
 
-                </a>
+                        <span class="nav-icon">⌂</span>
 
+                        <span>
+                            Dashboard
+                        </span>
 
-                
-                <?php if(auth()->user()->role === 'user'): ?>
-                <a href="<?php echo e(route('user.orders.index')); ?>"
-                    class="<?php echo e(request()->routeIs('user.orders.index') ? 'active' : ''); ?>">
-                    <span class="nav-icon">▣</span>
-                    <span>Order Repair Box</span>
-                    <span id="userOrderNotification" class="nav-notification hidden">0</span>
-                </a>
-
-                <a href="<?php echo e(route('user.orders.history')); ?>"
-                    class="<?php echo e(request()->routeIs('user.orders.history') ? 'active' : ''); ?>">
-                    <span class="nav-icon">↺</span>
-                    <span>History Order Repair Box</span>
-                </a>
-
-
-                <a href="<?php echo e(route('user.tps.index')); ?>"
-                    class="<?php echo e(request()->routeIs('user.tps.*') ? 'active' : ''); ?>">
-
-                    <span class="nav-icon">⚙</span>
-
-                    <span>
-                        Order TPS Tools
-                    </span>
-
-                </a>
-
-                <?php else: ?>
-                
-
-                <a href="<?php echo e(route('omd.orders.index')); ?>"
-                    class="<?php echo e(request()->routeIs('omd.orders.index') ? 'active' : ''); ?>">
-
-                    <span class="nav-icon">▣</span>
-
-                    <span>
-                        Order Repair Box
-                    </span>
-
-                    <span id="omdOrderNotification" class="nav-notification hidden">
-                        0
-                    </span>
-
-                </a>
-
-                <a href="<?php echo e(route('omd.orders.history')); ?>"
-                    class="<?php echo e(request()->routeIs('omd.orders.history') ? 'active' : ''); ?>">
-
-                    <span class="nav-icon">↺</span>
-
-                    <span>
-                        History Order Repair Box
-                    </span>
-
-                </a>
-
-                <a href="<?php echo e(route('omd.tps.index')); ?>"
-                    class="<?php echo e(request()->routeIs('omd.tps.*') ? 'active' : ''); ?>">
-
-                    <span class="nav-icon">⚙</span>
-
-                    <span>
-                        Order TPS Tool
-                    </span>
-
-                </a>
-                <?php endif; ?>
-
-            </nav>
-
-
-            
-
-            <?php if(auth()->user()->role !== 'user'): ?>
-
-            <div class="nav-section">
-                Management
-            </div>
-
-            <nav class="nav">
-
-                
-                <?php if(auth()->user()->role === 'omd_leader'): ?>
-                <div class="nav-dropdown <?php echo e(request()->routeIs('omd.master.*') ? 'open' : ''); ?>">
+                    </a>
 
 
                     
-                    <div class="nav-dropdown-toggle <?php echo e(request()->routeIs('omd.master.*') ? 'active' : ''); ?>"
-                        onclick="this.parentElement.classList.toggle('open')">
+                    <?php if(auth()->user()->role === 'user'): ?>
+                        <a href="<?php echo e(route('user.orders.index')); ?>"
+                            class="<?php echo e(request()->routeIs('user.orders.index') ? 'active' : ''); ?>">
+                            <span class="nav-icon">▣</span>
+                            <span>Order Repair Box</span>
+                            <span id="userOrderNotification" class="nav-notification hidden">0</span>
+                        </a>
+
+                        <a href="<?php echo e(route('user.orders.history')); ?>"
+                            class="<?php echo e(request()->routeIs('user.orders.history') ? 'active' : ''); ?>">
+                            <span class="nav-icon">↺</span>
+                            <span>History Order Repair Box</span>
+                        </a>
 
 
-                        <span class="nav-icon">
-                            ▤
-                        </span>
+                        <a href="<?php echo e(route('user.tps.index')); ?>"
+                            class="<?php echo e(request()->routeIs('user.tps.*') ? 'active' : ''); ?>">
 
-
-                        <span class="nav-dropdown-title">
-                            Data Master
-                        </span>
-
-
-                        <span class="nav-arrow">
-                            ▾
-                        </span>
-
-
-                    </div>
-
-
-
-                    
-                    <div class="nav-dropdown-menu">
-
-                        
-                        <a href="<?php echo e(route('omd.master.line')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.master.line') ? 'active' : ''); ?>">
+                            <span class="nav-icon">⚙</span>
 
                             <span>
-                                Plant & Line
+                                Order TPS Tools
+                            </span>
+
+                        </a>
+                    <?php else: ?>
+                        
+
+                        <a href="<?php echo e(route('omd.orders.index')); ?>"
+                            class="<?php echo e(request()->routeIs('omd.orders.index') ? 'active' : ''); ?>">
+
+                            <span class="nav-icon">▣</span>
+
+                            <span>
+                                Order Repair Box
+                            </span>
+
+                            <span id="omdOrderNotification" class="nav-notification hidden">
+                                0
                             </span>
 
                         </a>
 
-                        
-                        <a href="<?php echo e(route('omd.master.model-product')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.master.model-product') ? 'active' : ''); ?>">
+                        <a href="<?php echo e(route('omd.orders.history')); ?>"
+                            class="<?php echo e(request()->routeIs('omd.orders.history') ? 'active' : ''); ?>">
+
+                            <span class="nav-icon">↺</span>
 
                             <span>
-                                Model Box
+                                History Order Repair Box
                             </span>
 
                         </a>
 
-                        
-                        <a href="<?php echo e(route('omd.master.ng-type')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.master.ng-type') ? 'active' : ''); ?>">
+                        <a href="<?php echo e(route('omd.tps.index')); ?>"
+                            class="<?php echo e(request()->routeIs('omd.tps.*') ? 'active' : ''); ?>">
+
+                            <span class="nav-icon">⚙</span>
 
                             <span>
-                                Jenis NG
+                                Order TPS Tool
                             </span>
+
                         </a>
-                    </div>
-                </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+
+                </nav>
+
 
                 
-                <?php if(auth()->user()->role === 'omd_leader'): ?>
-                <a href="<?php echo e(route('omd.users.index')); ?>"
-                    class="<?php echo e(request()->routeIs('omd.users.*') ? 'active' : ''); ?>">
 
-                    <span class="nav-icon">
-                        👥
-                    </span>
+                <?php if(auth()->user()->role !== 'user'): ?>
 
-                    <span>
-                        Manajemen Akun
-                    </span>
+                    <div class="nav-section">
+                        Management
+                    </div>
 
-                </a>
+                    <nav class="nav">
+
+                        
+                        <?php if(auth()->user()->role === 'omd_leader'): ?>
+                            <div class="nav-dropdown <?php echo e(request()->routeIs('omd.master.*') ? 'open' : ''); ?>">
+
+
+                                
+                                <div class="nav-dropdown-toggle <?php echo e(request()->routeIs('omd.master.*') ? 'active' : ''); ?>"
+                                    onclick="this.parentElement.classList.toggle('open')">
+
+
+                                    <span class="nav-icon">
+                                        ▤
+                                    </span>
+
+
+                                    <span class="nav-dropdown-title">
+                                        Data Master
+                                    </span>
+
+
+                                    <span class="nav-arrow">
+                                        ▾
+                                    </span>
+
+
+                                </div>
+
+
+
+                                
+                                <div class="nav-dropdown-menu">
+
+                                    
+                                    <a href="<?php echo e(route('omd.master.line')); ?>"
+                                        class="<?php echo e(request()->routeIs('omd.master.line') ? 'active' : ''); ?>">
+
+                                        <span>
+                                            Plant & Line
+                                        </span>
+
+                                    </a>
+
+                                    
+                                    <a href="<?php echo e(route('omd.master.model-product')); ?>"
+                                        class="<?php echo e(request()->routeIs('omd.master.model-product') ? 'active' : ''); ?>">
+
+                                        <span>
+                                            Model Box
+                                        </span>
+
+                                    </a>
+
+                                    
+                                    <a href="<?php echo e(route('omd.master.ng-type')); ?>"
+                                        class="<?php echo e(request()->routeIs('omd.master.ng-type') ? 'active' : ''); ?>">
+
+                                        <span>
+                                            Jenis NG
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        
+                        <?php if(auth()->user()->role === 'omd_leader'): ?>
+                            <a href="<?php echo e(route('omd.users.index')); ?>"
+                                class="<?php echo e(request()->routeIs('omd.users.*') ? 'active' : ''); ?>">
+
+                                <span class="nav-icon">
+                                    👥
+                                </span>
+
+                                <span>
+                                    Manajemen Akun
+                                </span>
+
+                            </a>
+                        <?php endif; ?>
+
+                    </nav>
+
                 <?php endif; ?>
 
-            </nav>
 
-            <?php endif; ?>
+                
 
+                <div class="sidebar-bottom">
 
-            
+                    <div class="sidebar-user">
 
-            <div class="sidebar-bottom">
+                        <div class="sidebar-user-info">
 
-                <div class="sidebar-user">
+                            <div class="sidebar-avatar">
+                                <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
 
-                    <div class="sidebar-user-info">
+                            </div>
 
-                        <div class="sidebar-avatar">
-                            <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
+                            <div style="min-width:0;">
+
+                                <div class="sidebar-user-name">
+                                    <?php echo e(auth()->user()->name); ?>
+
+                                </div>
+
+                                <div class="sidebar-user-role">
+                                    <?php if(auth()->user()->role === 'user'): ?>
+                                        <?php echo e(auth()->user()->line?->name ?? '-'); ?>
+
+                                    <?php else: ?>
+                                        OMD
+                                    <?php endif; ?>
+                                </div>
+
+                            </div>
 
                         </div>
 
-                        <div style="min-width:0;">
 
-                            <div class="sidebar-user-name">
+                        
+                        <form method="POST" action="<?php echo e(route('logout')); ?>">
+                            <?php echo csrf_field(); ?>
+
+                            <button type="submit" class="logout-btn">
+
+                                <span>
+                                    Logout
+                                </span>
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+
+            
+
+            <main class="main">
+
+                
+                <header class="topbar">
+
+                    <div class="topbar-title">
+                        <?php echo $__env->yieldContent('header', 'Dashboard'); ?>
+                    </div>
+
+
+                    <div class="topbar-right">
+
+                        <div class="profile">
+
+                            <div class="profile-avatar">
+                                <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
+
+                            </div>
+
+                            <div class="profile-name">
                                 <?php echo e(auth()->user()->name); ?>
 
                             </div>
 
-                            <div class="sidebar-user-role">
-                                <?php echo e(strtoupper(str_replace('_', ' ', auth()->user()->role))); ?>
-
-                            </div>
-
                         </div>
 
                     </div>
+
+                </header>
+
+
+                
+                <section class="content">
+
+                    
+                    <?php if(session('success')): ?>
+                        <div class="alert alert-success">
+                            <?php echo e(session('success')); ?>
+
+                        </div>
+                    <?php endif; ?>
 
 
                     
-                    <form method="POST" action="<?php echo e(route('logout')); ?>">
-                        <?php echo csrf_field(); ?>
-
-                        <button type="submit" class="logout-btn">
-
-                            <span>
-                                Logout
-                            </span>
-
-                        </button>
-
-                    </form>
-
-                </div>
-
-            </div>
-
-        </aside>
-
-
-        
-
-        <main class="main">
-
-            
-            <header class="topbar">
-
-                <div class="topbar-title">
-                    <?php echo $__env->yieldContent('header', 'Dashboard'); ?>
-                </div>
-
-
-                <div class="topbar-right">
-
-                    <div class="profile">
-
-                        <div class="profile-avatar">
-                            <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
+                    <?php if($errors->any()): ?>
+                        <div class="alert alert-danger">
+                            <?php echo e($errors->first()); ?>
 
                         </div>
-
-                        <div class="profile-name">
-                            <?php echo e(auth()->user()->name); ?>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </header>
+                    <?php endif; ?>
 
 
-            
-            <section class="content">
+                    
+                    <?php echo $__env->yieldContent('content'); ?>
 
-                
-                <?php if(session('success')): ?>
-                <div class="alert alert-success">
-                    <?php echo e(session('success')); ?>
+                </section>
 
-                </div>
-                <?php endif; ?>
+            </main>
 
-
-                
-                <?php if($errors->any()): ?>
-                <div class="alert alert-danger">
-                    <?php echo e($errors->first()); ?>
-
-                </div>
-                <?php endif; ?>
-
-
-                
-                <?php echo $__env->yieldContent('content'); ?>
-
-            </section>
-
-        </main>
-
-    </div>
+        </div>
 
     <?php endif; ?>
 
     <?php if(auth()->check() && in_array(auth()->user()->role, ['omd_member', 'omd_leader'])): ?>
-    <script>
-        function updateOmdOrderNotification() {
+        <script>
+            function updateOmdOrderNotification() {
 
-            fetch("<?php echo e(route('omd.orders.pendingCount')); ?>", {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal mengambil notifikasi order.');
-                    }
+                fetch("<?php echo e(route('omd.orders.pendingCount')); ?>", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Gagal mengambil notifikasi order.');
+                        }
 
-                    return response.json();
-                })
-                .then(data => {
+                        return response.json();
+                    })
+                    .then(data => {
 
-                    const badge =
-                        document.getElementById('omdOrderNotification');
+                        const badge =
+                            document.getElementById('omdOrderNotification');
 
-                    if (!badge) {
-                        return;
-                    }
+                        if (!badge) {
+                            return;
+                        }
 
-                    const count = parseInt(data.count) || 0;
+                        const count = parseInt(data.count) || 0;
 
-                    if (count > 0) {
+                        if (count > 0) {
 
-                        badge.textContent =
-                            count > 99 ? '99+' : count;
+                            badge.textContent =
+                                count > 99 ? '99+' : count;
 
-                        badge.classList.remove('hidden');
-                        badge.classList.add('pulse');
+                            badge.classList.remove('hidden');
+                            badge.classList.add('pulse');
 
-                    } else {
+                        } else {
 
-                        badge.textContent = '0';
+                            badge.textContent = '0';
 
-                        badge.classList.add('hidden');
-                        badge.classList.remove('pulse');
-                    }
+                            badge.classList.add('hidden');
+                            badge.classList.remove('pulse');
+                        }
 
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
 
-        updateOmdOrderNotification();
+            updateOmdOrderNotification();
 
-        setInterval(
-            updateOmdOrderNotification,
-            5000
-        );
-    </script>
+            setInterval(
+                updateOmdOrderNotification,
+                5000
+            );
+        </script>
     <?php endif; ?>
 
     <?php if(auth()->check() && auth()->user()->role === 'user'): ?>
-    <script>
-        function updateUserOrderNotification() {
-            fetch("<?php echo e(route('user.orders.pendingConfirmationCount')); ?>", {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal mengambil notifikasi order user.');
-                    }
+        <script>
+            function updateUserOrderNotification() {
+                fetch("<?php echo e(route('user.orders.pendingConfirmationCount')); ?>", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Gagal mengambil notifikasi order user.');
+                        }
 
-                    return response.json();
-                })
-                .then(data => {
-                    const badge = document.getElementById('userOrderNotification');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const badge = document.getElementById('userOrderNotification');
 
-                    if (!badge) {
-                        return;
-                    }
+                        if (!badge) {
+                            return;
+                        }
 
-                    const count = parseInt(data.count) || 0;
+                        const count = parseInt(data.count) || 0;
 
-                    if (count > 0) {
-                        badge.textContent = count > 99 ? '99+' : count;
-                        badge.classList.remove('hidden');
-                        badge.classList.add('pulse');
-                    } else {
-                        badge.textContent = '0';
-                        badge.classList.add('hidden');
-                        badge.classList.remove('pulse');
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.classList.remove('hidden');
+                            badge.classList.add('pulse');
+                        } else {
+                            badge.textContent = '0';
+                            badge.classList.add('hidden');
+                            badge.classList.remove('pulse');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
 
-        updateUserOrderNotification();
+            updateUserOrderNotification();
 
-        setInterval(updateUserOrderNotification, 5000);
-    </script>
+            setInterval(updateUserOrderNotification, 5000);
+        </script>
     <?php endif; ?>
 
 </body>
 
 </body>
 
-</html><?php /**PATH C:\laragon\www\omira\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\laragon\www\omira\resources\views/layouts/app.blade.php ENDPATH**/ ?>

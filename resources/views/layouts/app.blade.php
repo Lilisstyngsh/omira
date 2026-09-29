@@ -1217,447 +1217,450 @@
 
     @if (View::hasSection('guest'))
 
-    <main class="guest-page">
-        @yield('guest')
-    </main>
+        <main class="guest-page">
+            @yield('guest')
+        </main>
     @else
-    {{-- =========================================================
+        {{-- =========================================================
              APPLICATION
         ========================================================== --}}
 
-    <div class="app">
+        <div class="app">
 
-        {{-- =====================================================
+            {{-- =====================================================
                  SIDEBAR
             ====================================================== --}}
 
-        <aside class="sidebar">
+            <aside class="sidebar">
 
-            {{-- BRAND --}}
-            <div class="brand">
+                {{-- BRAND --}}
+                <div class="brand">
 
-                <div class="brand-logo">
-                    O
-                </div>
-
-                <div class="brand-text">
-
-                    <div class="brand-title">
-                        OMIRA
+                    <div class="brand-logo">
+                        O
                     </div>
 
-                    <div class="brand-subtitle">
-                        OMD Integrated Repair Application
+                    <div class="brand-text">
+
+                        <div class="brand-title">
+                            OMIRA
+                        </div>
+
+                        <div class="brand-subtitle">
+                            OMD Integrated Repair Application
+                        </div>
+
                     </div>
 
                 </div>
 
-            </div>
+
+                {{-- MAIN MENU --}}
+                <div class="nav-section">
+                    Main Menu
+                </div>
+
+                <nav class="nav">
+
+                    {{-- Dashboard --}}
+                    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+
+                        <span class="nav-icon">⌂</span>
+
+                        <span>
+                            Dashboard
+                        </span>
+
+                    </a>
 
 
-            {{-- MAIN MENU --}}
-            <div class="nav-section">
-                Main Menu
-            </div>
+                    {{-- USER --}}
+                    @if (auth()->user()->role === 'user')
+                        <a href="{{ route('user.orders.index') }}"
+                            class="{{ request()->routeIs('user.orders.index') ? 'active' : '' }}">
+                            <span class="nav-icon">▣</span>
+                            <span>Order Repair Box</span>
+                            <span id="userOrderNotification" class="nav-notification hidden">0</span>
+                        </a>
 
-            <nav class="nav">
-
-                {{-- Dashboard --}}
-                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-
-                    <span class="nav-icon">⌂</span>
-
-                    <span>
-                        Dashboard
-                    </span>
-
-                </a>
+                        <a href="{{ route('user.orders.history') }}"
+                            class="{{ request()->routeIs('user.orders.history') ? 'active' : '' }}">
+                            <span class="nav-icon">↺</span>
+                            <span>History Order Repair Box</span>
+                        </a>
 
 
-                {{-- USER --}}
-                @if (auth()->user()->role === 'user')
-                <a href="{{ route('user.orders.index') }}"
-                    class="{{ request()->routeIs('user.orders.index') ? 'active' : '' }}">
-                    <span class="nav-icon">▣</span>
-                    <span>Order Repair Box</span>
-                    <span id="userOrderNotification" class="nav-notification hidden">0</span>
-                </a>
+                        <a href="{{ route('user.tps.index') }}"
+                            class="{{ request()->routeIs('user.tps.*') ? 'active' : '' }}">
 
-                <a href="{{ route('user.orders.history') }}"
-                    class="{{ request()->routeIs('user.orders.history') ? 'active' : '' }}">
-                    <span class="nav-icon">↺</span>
-                    <span>History Order Repair Box</span>
-                </a>
+                            <span class="nav-icon">⚙</span>
 
+                            <span>
+                                Order TPS Tools
+                            </span>
 
-                <a href="{{ route('user.tps.index') }}"
-                    class="{{ request()->routeIs('user.tps.*') ? 'active' : '' }}">
+                        </a>
+                    @else
+                        {{-- OMD --}}
 
-                    <span class="nav-icon">⚙</span>
+                        <a href="{{ route('omd.orders.index') }}"
+                            class="{{ request()->routeIs('omd.orders.index') ? 'active' : '' }}">
 
-                    <span>
-                        Order TPS Tools
-                    </span>
+                            <span class="nav-icon">▣</span>
 
-                </a>
+                            <span>
+                                Order Repair Box
+                            </span>
 
-                @else
-                {{-- OMD --}}
+                            <span id="omdOrderNotification" class="nav-notification hidden">
+                                0
+                            </span>
 
-                <a href="{{ route('omd.orders.index') }}"
-                    class="{{ request()->routeIs('omd.orders.index') ? 'active' : '' }}">
+                        </a>
 
-                    <span class="nav-icon">▣</span>
+                        <a href="{{ route('omd.orders.history') }}"
+                            class="{{ request()->routeIs('omd.orders.history') ? 'active' : '' }}">
 
-                    <span>
-                        Order Repair Box
-                    </span>
+                            <span class="nav-icon">↺</span>
 
-                    <span id="omdOrderNotification" class="nav-notification hidden">
-                        0
-                    </span>
+                            <span>
+                                History Order Repair Box
+                            </span>
 
-                </a>
+                        </a>
 
-                <a href="{{ route('omd.orders.history') }}"
-                    class="{{ request()->routeIs('omd.orders.history') ? 'active' : '' }}">
+                        <a href="{{ route('omd.tps.index') }}"
+                            class="{{ request()->routeIs('omd.tps.*') ? 'active' : '' }}">
 
-                    <span class="nav-icon">↺</span>
+                            <span class="nav-icon">⚙</span>
 
-                    <span>
-                        History Order Repair Box
-                    </span>
+                            <span>
+                                Order TPS Tool
+                            </span>
 
-                </a>
+                        </a>
+                    @endif
 
-                <a href="{{ route('omd.tps.index') }}"
-                    class="{{ request()->routeIs('omd.tps.*') ? 'active' : '' }}">
-
-                    <span class="nav-icon">⚙</span>
-
-                    <span>
-                        Order TPS Tool
-                    </span>
-
-                </a>
-                @endif
-
-            </nav>
+                </nav>
 
 
-            {{-- =================================================
+                {{-- =================================================
                      MANAGEMENT
                 ================================================== --}}
 
-            @if (auth()->user()->role !== 'user')
+                @if (auth()->user()->role !== 'user')
 
-            <div class="nav-section">
-                Management
-            </div>
-
-            <nav class="nav">
-
-                {{-- Data Master hanya Leader --}}
-                @if (auth()->user()->role === 'omd_leader')
-                <div class="nav-dropdown {{ request()->routeIs('omd.master.*') ? 'open' : '' }}">
-
-
-                    {{-- Parent Data Master --}}
-                    <div class="nav-dropdown-toggle {{ request()->routeIs('omd.master.*') ? 'active' : '' }}"
-                        onclick="this.parentElement.classList.toggle('open')">
-
-
-                        <span class="nav-icon">
-                            ▤
-                        </span>
-
-
-                        <span class="nav-dropdown-title">
-                            Data Master
-                        </span>
-
-
-                        <span class="nav-arrow">
-                            ▾
-                        </span>
-
-
+                    <div class="nav-section">
+                        Management
                     </div>
 
+                    <nav class="nav">
+
+                        {{-- Data Master hanya Leader --}}
+                        @if (auth()->user()->role === 'omd_leader')
+                            <div class="nav-dropdown {{ request()->routeIs('omd.master.*') ? 'open' : '' }}">
 
 
-                    {{-- Dropdown Data Master Baru --}}
-                    <div class="nav-dropdown-menu">
+                                {{-- Parent Data Master --}}
+                                <div class="nav-dropdown-toggle {{ request()->routeIs('omd.master.*') ? 'active' : '' }}"
+                                    onclick="this.parentElement.classList.toggle('open')">
 
-                        {{-- LINE --}}
-                        <a href="{{ route('omd.master.line') }}"
-                            class="{{ request()->routeIs('omd.master.line') ? 'active' : '' }}">
 
-                            <span>
-                                Plant & Line
-                            </span>
+                                    <span class="nav-icon">
+                                        ▤
+                                    </span>
 
-                        </a>
 
-                        {{-- MODEL & PRODUK --}}
-                        <a href="{{ route('omd.master.model-product') }}"
-                            class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
+                                    <span class="nav-dropdown-title">
+                                        Data Master
+                                    </span>
 
-                            <span>
-                                Model Box
-                            </span>
 
-                        </a>
+                                    <span class="nav-arrow">
+                                        ▾
+                                    </span>
 
-                        {{-- JENIS NG --}}
-                        <a href="{{ route('omd.master.ng-type') }}"
-                            class="{{ request()->routeIs('omd.master.ng-type') ? 'active' : '' }}">
 
-                            <span>
-                                Jenis NG
-                            </span>
-                        </a>
-                    </div>
-                </div>
+                                </div>
+
+
+
+                                {{-- Dropdown Data Master Baru --}}
+                                <div class="nav-dropdown-menu">
+
+                                    {{-- LINE --}}
+                                    <a href="{{ route('omd.master.line') }}"
+                                        class="{{ request()->routeIs('omd.master.line') ? 'active' : '' }}">
+
+                                        <span>
+                                            Plant & Line
+                                        </span>
+
+                                    </a>
+
+                                    {{-- MODEL & PRODUK --}}
+                                    <a href="{{ route('omd.master.model-product') }}"
+                                        class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
+
+                                        <span>
+                                            Model Box
+                                        </span>
+
+                                    </a>
+
+                                    {{-- JENIS NG --}}
+                                    <a href="{{ route('omd.master.ng-type') }}"
+                                        class="{{ request()->routeIs('omd.master.ng-type') ? 'active' : '' }}">
+
+                                        <span>
+                                            Jenis NG
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Manajemen Akun hanya Leader --}}
+                        @if (auth()->user()->role === 'omd_leader')
+                            <a href="{{ route('omd.users.index') }}"
+                                class="{{ request()->routeIs('omd.users.*') ? 'active' : '' }}">
+
+                                <span class="nav-icon">
+                                    👥
+                                </span>
+
+                                <span>
+                                    Manajemen Akun
+                                </span>
+
+                            </a>
+                        @endif
+
+                    </nav>
+
                 @endif
 
-                {{-- Manajemen Akun hanya Leader --}}
-                @if (auth()->user()->role === 'omd_leader')
-                <a href="{{ route('omd.users.index') }}"
-                    class="{{ request()->routeIs('omd.users.*') ? 'active' : '' }}">
 
-                    <span class="nav-icon">
-                        👥
-                    </span>
-
-                    <span>
-                        Manajemen Akun
-                    </span>
-
-                </a>
-                @endif
-
-            </nav>
-
-            @endif
-
-
-            {{-- =================================================
+                {{-- =================================================
                      SIDEBAR BOTTOM
                 ================================================== --}}
 
-            <div class="sidebar-bottom">
+                <div class="sidebar-bottom">
 
-                <div class="sidebar-user">
+                    <div class="sidebar-user">
 
-                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-info">
 
-                        <div class="sidebar-avatar">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
-
-                        <div style="min-width:0;">
-
-                            <div class="sidebar-user-name">
-                                {{ auth()->user()->name }}
+                            <div class="sidebar-avatar">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
 
-                            <div class="sidebar-user-role">
-                                {{ strtoupper(str_replace('_', ' ', auth()->user()->role)) }}
+                            <div style="min-width:0;">
+
+                                <div class="sidebar-user-name">
+                                    {{ auth()->user()->name }}
+                                </div>
+
+                                <div class="sidebar-user-role">
+                                    @if (auth()->user()->role === 'user')
+                                        {{ auth()->user()->line?->name ?? '-' }}
+                                    @else
+                                        OMD
+                                    @endif
+                                </div>
+
                             </div>
 
                         </div>
+
+
+                        {{-- LOGOUT --}}
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <button type="submit" class="logout-btn">
+
+                                <span>
+                                    Logout
+                                </span>
+
+                            </button>
+
+                        </form>
 
                     </div>
 
-
-                    {{-- LOGOUT --}}
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-
-                        <button type="submit" class="logout-btn">
-
-                            <span>
-                                Logout
-                            </span>
-
-                        </button>
-
-                    </form>
-
                 </div>
 
-            </div>
-
-        </aside>
+            </aside>
 
 
-        {{-- =====================================================
+            {{-- =====================================================
                  MAIN
             ====================================================== --}}
 
-        <main class="main">
+            <main class="main">
 
-            {{-- TOPBAR --}}
-            <header class="topbar">
+                {{-- TOPBAR --}}
+                <header class="topbar">
 
-                <div class="topbar-title">
-                    @yield('header', 'Dashboard')
-                </div>
+                    <div class="topbar-title">
+                        @yield('header', 'Dashboard')
+                    </div>
 
 
-                <div class="topbar-right">
+                    <div class="topbar-right">
 
-                    <div class="profile">
+                        <div class="profile">
 
-                        <div class="profile-avatar">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
+                            <div class="profile-avatar">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
 
-                        <div class="profile-name">
-                            {{ auth()->user()->name }}
+                            <div class="profile-name">
+                                {{ auth()->user()->name }}
+                            </div>
+
                         </div>
 
                     </div>
 
-                </div>
-
-            </header>
+                </header>
 
 
-            {{-- CONTENT --}}
-            <section class="content">
+                {{-- CONTENT --}}
+                <section class="content">
 
-                {{-- SUCCESS --}}
-                @if (session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-                @endif
-
-
-                {{-- ERROR --}}
-                @if ($errors->any())
-                <div class="alert alert-danger">
-                    {{ $errors->first() }}
-                </div>
-                @endif
+                    {{-- SUCCESS --}}
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
 
-                {{-- PAGE CONTENT --}}
-                @yield('content')
+                    {{-- ERROR --}}
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
 
-            </section>
 
-        </main>
+                    {{-- PAGE CONTENT --}}
+                    @yield('content')
 
-    </div>
+                </section>
+
+            </main>
+
+        </div>
 
     @endif
 
     @if (auth()->check() && in_array(auth()->user()->role, ['omd_member', 'omd_leader']))
-    <script>
-        function updateOmdOrderNotification() {
+        <script>
+            function updateOmdOrderNotification() {
 
-            fetch("{{ route('omd.orders.pendingCount') }}", {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal mengambil notifikasi order.');
-                    }
+                fetch("{{ route('omd.orders.pendingCount') }}", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Gagal mengambil notifikasi order.');
+                        }
 
-                    return response.json();
-                })
-                .then(data => {
+                        return response.json();
+                    })
+                    .then(data => {
 
-                    const badge =
-                        document.getElementById('omdOrderNotification');
+                        const badge =
+                            document.getElementById('omdOrderNotification');
 
-                    if (!badge) {
-                        return;
-                    }
+                        if (!badge) {
+                            return;
+                        }
 
-                    const count = parseInt(data.count) || 0;
+                        const count = parseInt(data.count) || 0;
 
-                    if (count > 0) {
+                        if (count > 0) {
 
-                        badge.textContent =
-                            count > 99 ? '99+' : count;
+                            badge.textContent =
+                                count > 99 ? '99+' : count;
 
-                        badge.classList.remove('hidden');
-                        badge.classList.add('pulse');
+                            badge.classList.remove('hidden');
+                            badge.classList.add('pulse');
 
-                    } else {
+                        } else {
 
-                        badge.textContent = '0';
+                            badge.textContent = '0';
 
-                        badge.classList.add('hidden');
-                        badge.classList.remove('pulse');
-                    }
+                            badge.classList.add('hidden');
+                            badge.classList.remove('pulse');
+                        }
 
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
 
-        updateOmdOrderNotification();
+            updateOmdOrderNotification();
 
-        setInterval(
-            updateOmdOrderNotification,
-            5000
-        );
-    </script>
+            setInterval(
+                updateOmdOrderNotification,
+                5000
+            );
+        </script>
     @endif
 
     @if (auth()->check() && auth()->user()->role === 'user')
-    <script>
-        function updateUserOrderNotification() {
-            fetch("{{ route('user.orders.pendingConfirmationCount') }}", {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal mengambil notifikasi order user.');
-                    }
+        <script>
+            function updateUserOrderNotification() {
+                fetch("{{ route('user.orders.pendingConfirmationCount') }}", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Gagal mengambil notifikasi order user.');
+                        }
 
-                    return response.json();
-                })
-                .then(data => {
-                    const badge = document.getElementById('userOrderNotification');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const badge = document.getElementById('userOrderNotification');
 
-                    if (!badge) {
-                        return;
-                    }
+                        if (!badge) {
+                            return;
+                        }
 
-                    const count = parseInt(data.count) || 0;
+                        const count = parseInt(data.count) || 0;
 
-                    if (count > 0) {
-                        badge.textContent = count > 99 ? '99+' : count;
-                        badge.classList.remove('hidden');
-                        badge.classList.add('pulse');
-                    } else {
-                        badge.textContent = '0';
-                        badge.classList.add('hidden');
-                        badge.classList.remove('pulse');
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.classList.remove('hidden');
+                            badge.classList.add('pulse');
+                        } else {
+                            badge.textContent = '0';
+                            badge.classList.add('hidden');
+                            badge.classList.remove('pulse');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
 
-        updateUserOrderNotification();
+            updateUserOrderNotification();
 
-        setInterval(updateUserOrderNotification, 5000);
-    </script>
+            setInterval(updateUserOrderNotification, 5000);
+        </script>
     @endif
 
 </body>
