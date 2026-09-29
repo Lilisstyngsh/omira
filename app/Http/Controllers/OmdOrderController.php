@@ -28,19 +28,27 @@ class OmdOrderController extends Controller
             ->latest('created_at')
             ->paginate(10);
 
-        $completedCount = RepairOrder::where('status', 'completed')->count();
 
-        return view('omd.orders.index', compact(
-            'orders',
-            'completedCount'
-        ));
+        $completedCount = RepairOrder::query()
+            ->where('status', 'completed')
+            ->count();
+
+
+        return view(
+            'omd.orders.index',
+            compact(
+                'orders',
+                'completedCount'
+            )
+        );
     }
+
 
     public function show(RepairOrder $order)
     {
         $order->load([
             'user',
-            'line',
+            'line.plant',
             'area',
             'product',
             'masterModel',
@@ -53,11 +61,13 @@ class OmdOrderController extends Controller
             'items.ngType',
         ]);
 
+
         return view(
             'omd.orders.show',
             compact('order')
         );
     }
+
 
     public function verify(
         Request $request,
@@ -69,30 +79,45 @@ class OmdOrderController extends Controller
             'Order tidak berada pada status Submitted.'
         );
 
+
         $order->update([
             'status' => 'in_repair',
+
             'verified_by' => $request->user()->id,
+
             'verified_at' => now(),
+
             'repair_started_at' => now(),
         ]);
 
+
         return redirect()
-            ->route('omd.orders.show', $order)
+            ->route(
+                'omd.orders.show',
+                $order
+            )
             ->with(
                 'success',
                 'Order berhasil diverifikasi dan langsung masuk proses repair.'
             );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tetap dipertahankan untuk kompatibilitas route lama
+    |--------------------------------------------------------------------------
+    */
+
     public function startRepair(
         RepairOrder $order
     ) {
-        abort_unless(
-            false,
+        abort(
             422,
             'Proses Mulai Repair dilakukan otomatis saat verifikasi.'
         );
     }
+
 
     public function complete(
         Request $request,
@@ -104,26 +129,35 @@ class OmdOrderController extends Controller
             'Order belum berada pada proses repair.'
         );
 
+
         $order->load('items');
+
 
         /*
         |--------------------------------------------------------------------------
         | FORMAT BARU
-        | 1 Token -> banyak Model/Product/NG
+        | 1 Produk memiliki item P/H/C/S
         |--------------------------------------------------------------------------
         */
 
         if ($order->items->isNotEmpty()) {
 
-            $rules = [];
+            $rules = [
+                'items' => [
+                    'required',
+                    'array',
+                ],
+            ];
+
 
             foreach ($order->items as $item) {
 
                 $rules['items.' . $item->id . '.after_qty'] = [
-                    'required',
+                    'nullable',
                     'integer',
                     'min:0',
                 ];
+
 
                 $rules['items.' . $item->id . '.mismatch_note'] = [
                     'nullable',
@@ -132,7 +166,9 @@ class OmdOrderController extends Controller
                 ];
             }
 
+
             $data = $request->validate($rules);
+
 
             DB::transaction(function () use (
                 $order,
@@ -141,30 +177,70 @@ class OmdOrderController extends Controller
 
                 foreach ($order->items as $item) {
 
-                    $itemData = $data['items'][$item->id] ?? [];
+                    $itemData =
+                        $data['items'][$item->id] ?? [];
 
-                    $item->update([
-                        'after_qty' =>
-                        $itemData['after_qty'] ?? 0,
 
-                        'mismatch_note' =>
-                        $itemData['mismatch_note'] ?? null,
-                    ]);
+                    /*
+                     * Karena input OMD boleh kosong saat pertama dibuka,
+                     * nilai kosong dinormalisasi menjadi 0 saat disimpan.
+                     */
+                    $afterQty =
+                        $itemData['after_qty'] ?? null;
+
+
+                    if (
+                        $afterQty === null ||
+                        $afterQty === ''
+                    ) {
+                        $afterQty = 0;
+                    }
+
+
+                    $updateData = [
+                        'after_qty' => (int) $afterQty,
+                    ];
+
+
+                    /*
+                     * mismatch_note hanya diperbarui jika memang
+                     * dikirim oleh form.
+                     */
+                    if (
+                        array_key_exists(
+                            'mismatch_note',
+                            $itemData
+                        )
+                    ) {
+                        $updateData['mismatch_note'] =
+                            $itemData['mismatch_note'] !== ''
+                            ? $itemData['mismatch_note']
+                            : null;
+                    }
+
+
+                    $item->update($updateData);
                 }
+
 
                 $order->update([
                     'status' => 'completed',
+
                     'repair_completed_at' => now(),
                 ]);
             });
 
+
             return redirect()
-                ->route('omd.orders.index')
+                ->route(
+                    'omd.orders.index'
+                )
                 ->with(
                     'success',
-                    'Order Repair Box Selesai dan menunggu verifikasi dari User.'
+                    'Order Repair Box selesai dan menunggu konfirmasi dari User.'
                 );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -199,10 +275,12 @@ class OmdOrderController extends Controller
             ],
         ]);
 
+
         $sum =
             $data['ok_qty'] +
             $data['scrap_qty'] +
             $data['ng_qty'];
+
 
         if ($sum > $order->quantity) {
 
@@ -214,6 +292,7 @@ class OmdOrderController extends Controller
                 ->withInput();
         }
 
+
         DB::transaction(function () use (
             $request,
             $order,
@@ -222,8 +301,10 @@ class OmdOrderController extends Controller
 
             $order->update([
                 'status' => 'completed',
+
                 'repair_completed_at' => now(),
             ]);
+
 
             $order->result()->updateOrCreate(
                 [],
@@ -246,22 +327,28 @@ class OmdOrderController extends Controller
             );
         });
 
+
         return redirect()
             ->route('omd.orders.index')
             ->with(
                 'success',
-                'Order Repair Box Selesai dan menunggu verifikasi dari User.'
+                'Order Repair Box selesai dan menunggu konfirmasi dari User.'
             );
     }
 
+
     public function pendingCount()
     {
-        $count = RepairOrder::where('status', 'submitted')->count();
+        $count = RepairOrder::query()
+            ->where('status', 'submitted')
+            ->count();
+
 
         return response()->json([
             'count' => $count,
         ]);
     }
+
 
     public function history()
     {
@@ -274,11 +361,50 @@ class OmdOrderController extends Controller
             'ngType',
             'result',
             'confirmation',
+            'items.masterModel',
+            'items.product',
+            'items.ngType',
         ])
             ->where('status', 'confirmed')
             ->latest('created_at')
             ->paginate(10);
 
-        return view('omd.orders.history', compact('orders'));
+
+        return view(
+            'omd.orders.history',
+            compact('orders')
+        );
+    }
+
+
+    public function historyShow(
+        RepairOrder $order
+    ) {
+        abort_unless(
+            $order->status === 'confirmed',
+            404
+        );
+
+
+        $order->load([
+            'user',
+            'line.plant',
+            'area',
+            'product',
+            'masterModel',
+            'ngType',
+            'result',
+            'confirmation',
+            'omdVerifier',
+            'items.masterModel',
+            'items.product',
+            'items.ngType',
+        ]);
+
+
+        return view(
+            'omd.orders.history-show',
+            compact('order')
+        );
     }
 }

@@ -369,6 +369,9 @@ Route::middleware('auth')->group(function () {
                 [OmdOrderController::class, 'index']
             )->name('orders.index');
 
+            Route::get('/orders/history/{order}', [OmdOrderController::class, 'historyShow'])
+                ->name('orders.history.show');
+
             Route::get(
                 '/orders/history',
                 [OmdOrderController::class, 'history']

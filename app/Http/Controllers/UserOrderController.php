@@ -8,7 +8,6 @@ use App\Models\NgType;
 use App\Models\RepairOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class UserOrderController extends Controller
@@ -32,6 +31,7 @@ class UserOrderController extends Controller
         return view('user.orders.index', compact('orders'));
     }
 
+
     public function create(Request $request)
     {
         $user = $request->user();
@@ -47,7 +47,11 @@ class UserOrderController extends Controller
             'Akun user belum memiliki Line.'
         );
 
-        $line = Line::with('plant')->findOrFail($user->line_id);
+        $line = Line::query()
+            ->whereKey($user->line_id)
+            ->where('is_active', true)
+            ->with('plant')
+            ->firstOrFail();
 
         $models = MasterModel::query()
             ->where('line_id', $user->line_id)
@@ -63,9 +67,25 @@ class UserOrderController extends Controller
             ->orderBy('model')
             ->get();
 
-        $ngTypes = NgType::where('is_active', true)
-            ->orderBy('code')
-            ->get();
+        $ngCodes = [
+            'P',
+            'H',
+            'C',
+            'S',
+        ];
+
+        $ngTypes = NgType::query()
+            ->where('is_active', true)
+            ->whereIn('code', $ngCodes)
+            ->get()
+            ->sortBy(function ($ngType) use ($ngCodes) {
+                return array_search(
+                    strtoupper($ngType->code),
+                    $ngCodes,
+                    true
+                );
+            })
+            ->values();
 
         return view('user.orders.create', [
             'line' => $line,
@@ -73,6 +93,7 @@ class UserOrderController extends Controller
             'ngTypes' => $ngTypes,
         ]);
     }
+
 
     public function store(Request $request)
     {
@@ -93,49 +114,88 @@ class UserOrderController extends Controller
             'description' => [
                 'nullable',
                 'string',
-                'max:1000'
+                'max:1000',
             ],
 
             'items' => [
                 'required',
                 'array',
-                'min:1'
+                'min:1',
             ],
 
             'items.*.master_model_id' => [
                 'required',
                 'integer',
-                'exists:master_models,id'
+                'exists:master_models,id',
             ],
 
             'items.*.product_id' => [
                 'required',
                 'integer',
-                'exists:products,id'
+                'exists:products,id',
             ],
 
             'items.*.qty' => [
                 'nullable',
-                'array'
+                'array',
             ],
 
             'items.*.qty.*' => [
                 'nullable',
                 'integer',
-                'min:0'
+                'min:0',
             ],
         ]);
 
-        $line = Line::findOrFail($user->line_id);
+
+        $line = Line::query()
+            ->whereKey($user->line_id)
+            ->where('is_active', true)
+            ->firstOrFail();
+
 
         /*
-    |--------------------------------------------------------------------------
-    | Validasi item dan hitung total
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Jenis NG yang digunakan sistem
+        |--------------------------------------------------------------------------
+        */
 
-        $preparedItems = [];
-        $totalQuantity = 0;
+        $ngCodes = [
+            'P',
+            'H',
+            'C',
+            'S',
+        ];
+
+
+        $ngTypes = NgType::query()
+            ->where('is_active', true)
+            ->whereIn('code', $ngCodes)
+            ->get()
+            ->keyBy(function ($ngType) {
+                return strtoupper($ngType->code);
+            });
+
+
+        if ($ngTypes->count() !== count($ngCodes)) {
+            abort(
+                422,
+                'Master Jenis NG P, H, C, dan S belum lengkap.'
+            );
+        }
+
+
+        $ngTypesById = $ngTypes->keyBy('id');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validasi dan kumpulkan data Produk
+        |--------------------------------------------------------------------------
+        */
+
+        $selectedProducts = [];
+
 
         foreach ($data['items'] as $item) {
 
@@ -152,6 +212,7 @@ class UserOrderController extends Controller
                 );
             }
 
+
             $product = $model->products()
                 ->whereKey($item['product_id'])
                 ->where('is_active', true)
@@ -164,18 +225,32 @@ class UserOrderController extends Controller
                 );
             }
 
+
+            $productKey = $model->id . ':' . $product->id;
+
+
+            if (!isset($selectedProducts[$productKey])) {
+
+                $selectedProducts[$productKey] = [
+                    'master_model_id' => $model->id,
+                    'product_id' => $product->id,
+                    'qty' => [
+                        'P' => 0,
+                        'H' => 0,
+                        'C' => 0,
+                        'S' => 0,
+                    ],
+                ];
+            }
+
+
             foreach (($item['qty'] ?? []) as $ngTypeId => $quantity) {
 
                 $quantity = (int) ($quantity ?? 0);
 
-                if ($quantity <= 0) {
-                    continue;
-                }
 
-                $ngType = NgType::query()
-                    ->whereKey($ngTypeId)
-                    ->where('is_active', true)
-                    ->first();
+                $ngType = $ngTypesById->get($ngTypeId);
+
 
                 if (!$ngType) {
                     abort(
@@ -184,30 +259,103 @@ class UserOrderController extends Controller
                     );
                 }
 
-                $preparedItems[] = [
-                    'master_model_id' => $model->id,
-                    'product_id' => $product->id,
-                    'ng_type_id' => $ngType->id,
-                    'before_qty' => $quantity,
-                ];
 
-                $totalQuantity += $quantity;
+                $ngCode = strtoupper($ngType->code);
+
+
+                if (!in_array($ngCode, $ngCodes, true)) {
+                    abort(
+                        422,
+                        'Jenis NG tidak diperbolehkan.'
+                    );
+                }
+
+
+                $selectedProducts[$productKey]['qty'][$ngCode] += $quantity;
             }
         }
 
-        if (empty($preparedItems)) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Buat 4 Repair Order Item untuk setiap Produk yang dipilih
+        |--------------------------------------------------------------------------
+        |
+        | Contoh:
+        |
+        | Produk A
+        | P = 2
+        | H = 0
+        | C = 3
+        | S = 0
+        |
+        | Database:
+        | Produk A | P | 2
+        | Produk A | H | 0
+        | Produk A | C | 3
+        | Produk A | S | 0
+        |
+        */
+
+        $preparedItems = [];
+        $totalQuantity = 0;
+
+
+        foreach ($selectedProducts as $selectedProduct) {
+
+            $productTotal =
+                $selectedProduct['qty']['P'] +
+                $selectedProduct['qty']['H'] +
+                $selectedProduct['qty']['C'] +
+                $selectedProduct['qty']['S'];
+
+
+            /*
+             * Produk yang seluruh Qty NG-nya kosong
+             * tidak ikut dibuat ke dalam order.
+             */
+            if ($productTotal <= 0) {
+                continue;
+            }
+
+
+            foreach ($ngCodes as $ngCode) {
+
+                $ngType = $ngTypes->get($ngCode);
+
+
+                $beforeQty =
+                    (int) $selectedProduct['qty'][$ngCode];
+
+
+                $preparedItems[] = [
+                    'master_model_id' => $selectedProduct['master_model_id'],
+                    'product_id' => $selectedProduct['product_id'],
+                    'ng_type_id' => $ngType->id,
+                    'before_qty' => $beforeQty,
+                ];
+
+
+                $totalQuantity += $beforeQty;
+            }
+        }
+
+
+        if (empty($preparedItems) || $totalQuantity <= 0) {
+
             return back()
                 ->withErrors([
-                    'items' => 'Masukkan minimal satu Quantity NG.'
+                    'items' => 'Masukkan minimal satu Quantity NG.',
                 ])
                 ->withInput();
         }
 
+
         /*
-    |--------------------------------------------------------------------------
-    | Buat Token Order
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Buat Token Order
+        |--------------------------------------------------------------------------
+        */
 
         DB::transaction(function () use (
             $data,
@@ -220,15 +368,19 @@ class UserOrderController extends Controller
 
             $year = now()->year;
 
+
             $lastSequence = RepairOrder::query()
                 ->where('line_id', $line->id)
                 ->where('order_year', $year)
                 ->lockForUpdate()
                 ->max('sequence');
 
+
             $sequence = ($lastSequence ?? 0) + 1;
 
+
             $lineCode = $this->lineCode($line->name);
+
 
             $orderNumber = sprintf(
                 'RB-%s-%d-%03d',
@@ -237,7 +389,9 @@ class UserOrderController extends Controller
                 $sequence
             );
 
+
             $firstItem = $preparedItems[0];
+
 
             $order = RepairOrder::create([
                 'order_number' => $orderNumber,
@@ -251,11 +405,13 @@ class UserOrderController extends Controller
                 'sequence' => $sequence,
 
                 /*
-             * Field lama tetap diisi untuk kompatibilitas
-             * dengan struktur RepairOrder existing.
-             */
+                 * Field lama tetap diisi untuk kompatibilitas
+                 * dengan struktur RepairOrder existing.
+                 */
                 'master_model_id' => $firstItem['master_model_id'],
+
                 'product_id' => $firstItem['product_id'],
+
                 'ng_type_id' => $firstItem['ng_type_id'],
 
                 'order_date' => now()->toDateString(),
@@ -267,31 +423,40 @@ class UserOrderController extends Controller
                 'status' => 'submitted',
             ]);
 
+
             foreach ($preparedItems as $item) {
 
                 $order->items()->create([
                     'master_model_id' => $item['master_model_id'],
+
                     'product_id' => $item['product_id'],
+
                     'ng_type_id' => $item['ng_type_id'],
+
                     'before_qty' => $item['before_qty'],
                 ]);
             }
         });
 
+
         return redirect()
-            ->route('user.orders.index', $order)
+            ->route('user.orders.index')
             ->with(
                 'success',
                 'Order Repair Box berhasil dikirim ke OMD.'
             );
     }
 
-    public function show(Request $request, RepairOrder $order)
-    {
+
+    public function show(
+        Request $request,
+        RepairOrder $order
+    ) {
         abort_unless(
             $order->user_id === $request->user()->id,
             403
         );
+
 
         $order->load([
             'user',
@@ -305,11 +470,13 @@ class UserOrderController extends Controller
             'handedOverBy',
         ]);
 
+
         return view(
             'user.orders.show',
             compact('order')
         );
     }
+
 
     public function confirm(
         Request $request,
@@ -320,23 +487,28 @@ class UserOrderController extends Controller
             403
         );
 
+
         abort_unless(
             $order->status === 'completed',
             422,
             'Order belum selesai diproses.'
         );
 
+
         $order->update([
             'status' => 'confirmed',
         ]);
+
 
         $order->confirmation()->updateOrCreate(
             [],
             [
                 'confirmed_by_user_id' => $request->user()->id,
+
                 'confirmed_at' => now(),
             ]
         );
+
 
         return redirect()
             ->route('user.orders.index')
@@ -346,28 +518,6 @@ class UserOrderController extends Controller
             );
     }
 
-    private function lineCode(string $lineName): string
-    {
-        return match (strtolower(trim($lineName))) {
-            'inj' => 'IJ',
-            'painting', 'pt' => 'PT',
-            'as unit' => 'AU',
-            'machining', 'ma' => 'MA',
-            'die casting', 'dc' => 'DC',
-            'ppic unit' => 'PU',
-            'as electric' => 'AE',
-            'ppic electric', 'ppic electris' => 'PE',
-            'as body' => 'AB',
-            'ppic body' => 'PB',
-            default => strtoupper(
-                Str::substr(
-                    preg_replace('/[^A-Za-z]/', '', $lineName),
-                    0,
-                    2
-                )
-            ),
-        };
-    }
 
     public function history(Request $request)
     {
@@ -381,17 +531,67 @@ class UserOrderController extends Controller
             ->latest('created_at')
             ->paginate(10);
 
-        return view('user.orders.history', compact('orders'));
+
+        return view(
+            'user.orders.history',
+            compact('orders')
+        );
     }
+
 
     public function pendingConfirmationCount(Request $request)
     {
-        $count = RepairOrder::where('user_id', $request->user()->id)
+        $count = RepairOrder::query()
+            ->where('user_id', $request->user()->id)
             ->where('status', 'completed')
             ->count();
+
 
         return response()->json([
             'count' => $count,
         ]);
+    }
+
+
+    private function lineCode(string $lineName): string
+    {
+        return match (strtolower(trim($lineName))) {
+
+            'inj' => 'IJ',
+
+            'painting',
+            'pt' => 'PT',
+
+            'as unit' => 'AU',
+
+            'machining',
+            'ma' => 'MA',
+
+            'die casting',
+            'dc' => 'DC',
+
+            'ppic unit' => 'PU',
+
+            'as electric' => 'AE',
+
+            'ppic electric',
+            'ppic electris' => 'PE',
+
+            'as body' => 'AB',
+
+            'ppic body' => 'PB',
+
+            default => strtoupper(
+                Str::substr(
+                    preg_replace(
+                        '/[^A-Za-z]/',
+                        '',
+                        $lineName
+                    ),
+                    0,
+                    2
+                )
+            ),
+        };
     }
 }

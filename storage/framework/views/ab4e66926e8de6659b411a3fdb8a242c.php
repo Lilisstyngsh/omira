@@ -95,6 +95,10 @@
             border-bottom: none;
         }
 
+        .order-table tbody tr:hover td {
+            background: #fcfcff;
+        }
+
         .model-name {
             font-weight: 700;
             color: #111827;
@@ -114,6 +118,7 @@
             font-size: 13px;
             font-weight: 600;
             outline: none;
+            box-sizing: border-box;
         }
 
         .qty-input:focus {
@@ -125,15 +130,6 @@
             font-weight: 700;
             text-align: center;
             color: #111827;
-        }
-
-        .model-group td {
-            background: #fafafa;
-            color: #4f46e5;
-            font-size: 11px;
-            font-weight: 700;
-            padding-top: 10px;
-            padding-bottom: 10px;
         }
 
         .grand-total {
@@ -170,6 +166,7 @@
             font-size: 13px;
             resize: vertical;
             outline: none;
+            box-sizing: border-box;
         }
 
         .field textarea:focus {
@@ -193,6 +190,11 @@
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
+            transition: .18s ease;
+        }
+
+        .btn-reset:hover {
+            background: #f8fafc;
         }
 
         .btn-submit {
@@ -204,6 +206,7 @@
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
+            transition: .18s ease;
         }
 
         .btn-submit:hover {
@@ -217,66 +220,145 @@
             font-size: 13px;
         }
 
+        .ng-name {
+            display: block;
+            font-size: 9px;
+            font-weight: 500;
+            margin-top: 2px;
+            color: #94a3b8;
+        }
+
+        .error-box {
+            margin-bottom: 18px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #b42318;
+            font-size: 11px;
+        }
+
         @media (max-width: 800px) {
+
             .info-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .bottom-actions {
+                flex-direction: column-reverse;
+            }
+
+            .btn-reset,
+            .btn-submit {
+                width: 100%;
             }
         }
     </style>
 
+
     <div class="order-card">
+
+        <?php if($errors->any()): ?>
+
+            <div class="error-box">
+
+                <ul style="margin:0;padding-left:16px;">
+
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li>
+                            <?php echo e($error); ?>
+
+                        </li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                </ul>
+
+            </div>
+
+        <?php endif; ?>
+
 
         <div class="section-title">
             Informasi Order
         </div>
 
+
         <div class="info-grid">
 
             <div class="info-box">
-                <span>Plant</span>
+
+                <span>
+                    Plant
+                </span>
+
                 <strong>
                     <?php echo e($line->plant?->name ?? '-'); ?>
 
                 </strong>
+
             </div>
 
+
             <div class="info-box">
-                <span>Line</span>
+
+                <span>
+                    Line
+                </span>
+
                 <strong>
                     <?php echo e($line->name); ?>
 
                 </strong>
+
             </div>
 
+
             <div class="info-box">
-                <span>Tanggal</span>
+
+                <span>
+                    Tanggal
+                </span>
+
                 <strong>
                     <?php echo e(now()->format('d-m-Y H:i')); ?>
 
                 </strong>
+
             </div>
 
         </div>
+
 
         <div class="section-title">
             Detail NG
         </div>
 
+
         <?php
-            $ngMap = $ngTypes->keyBy('code');
+
+            $ngMap = $ngTypes->keyBy(function ($ngType) {
+                return strtoupper($ngType->code);
+            });
+
             $ngCodes = ['P', 'H', 'C', 'S'];
+
         ?>
 
+
         <form method="POST" action="<?php echo e(route('user.orders.store')); ?>" id="orderForm">
+
             <?php echo csrf_field(); ?>
+
 
             <div class="table-wrap">
 
                 <table class="order-table">
 
                     <thead>
+
                         <tr>
-                            <th class="left" style="width:100px;">
+
+                            <th class="left" style="width:150px;">
                                 Model
                             </th>
 
@@ -284,25 +366,32 @@
                                 Produk
                             </th>
 
+
                             <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <th style="width:100px;">
+
                                     <?php echo e($code); ?>
 
 
                                     <?php if(isset($ngMap[$code])): ?>
-                                        <div style="font-size:9px;font-weight:500;margin-top:2px;">
+                                        <span class="ng-name">
                                             <?php echo e($ngMap[$code]->name); ?>
 
-                                        </div>
+                                        </span>
                                     <?php endif; ?>
+
                                 </th>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
 
                             <th style="width:100px;">
                                 Total NG
                             </th>
+
                         </tr>
+
                     </thead>
+
 
                     <tbody>
 
@@ -310,12 +399,14 @@
                             $rowIndex = 0;
                         ?>
 
+
                         <?php $__empty_1 = true; $__currentLoopData = $models; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $model): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
                             <?php $__currentLoopData = $model->products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
 
                                     <td>
+
                                         <span class="model-name">
                                             <?php echo e($model->model); ?>
 
@@ -323,9 +414,12 @@
 
                                         <input type="hidden" name="items[<?php echo e($rowIndex); ?>][master_model_id]"
                                             value="<?php echo e($model->id); ?>">
+
                                     </td>
 
+
                                     <td>
+
                                         <span class="product-name">
                                             <?php echo e($product->name); ?>
 
@@ -333,12 +427,15 @@
 
                                         <input type="hidden" name="items[<?php echo e($rowIndex); ?>][product_id]"
                                             value="<?php echo e($product->id); ?>">
+
                                     </td>
+
 
                                     <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php
                                             $ng = $ngMap[$code] ?? null;
                                         ?>
+
 
                                         <td style="text-align:center;">
 
@@ -357,23 +454,28 @@
                                         </td>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
+
                                     <td class="row-total">
                                         0
                                     </td>
 
                                 </tr>
 
+
                                 <?php
                                     $rowIndex++;
                                 ?>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
+
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                             <tr>
+
                                 <td colspan="7" class="empty-state">
                                     Belum ada Model & Produk untuk Line Anda.
                                 </td>
+
                             </tr>
 
                         <?php endif; ?>
@@ -384,10 +486,17 @@
 
             </div>
 
+
             <div class="grand-total">
+
                 Total NG:
-                <span id="grandTotal">0</span>
+
+                <span id="grandTotal">
+                    0
+                </span>
+
             </div>
+
 
             <div class="field">
 
@@ -399,11 +508,13 @@
 
             </div>
 
+
             <div class="bottom-actions">
 
                 <button type="button" class="btn-reset" onclick="resetOrderForm()">
                     Reset
                 </button>
+
 
                 <button type="submit" class="btn-submit">
                     Kirim Order Repair Box
@@ -415,87 +526,149 @@
 
     </div>
 
+
     <script>
         function calculateTotals() {
+
             let grandTotal = 0;
 
-            document.querySelectorAll('.order-table tbody tr').forEach(row => {
 
-                let rowTotal = 0;
+            document
+                .querySelectorAll('.order-table tbody tr')
+                .forEach(row => {
 
-                row.querySelectorAll('.qty-input').forEach(input => {
-                    rowTotal += parseInt(input.value) || 0;
+                    let rowTotal = 0;
+
+
+                    row
+                        .querySelectorAll('.qty-input')
+                        .forEach(input => {
+
+                            rowTotal +=
+                                parseInt(input.value) || 0;
+
+                        });
+
+
+                    const totalCell =
+                        row.querySelector('.row-total');
+
+
+                    if (totalCell) {
+                        totalCell.textContent =
+                            rowTotal;
+                    }
+
+
+                    grandTotal += rowTotal;
+
                 });
 
-                const totalCell = row.querySelector('.row-total');
 
-                if (totalCell) {
-                    totalCell.textContent = rowTotal;
-                }
-
-                grandTotal += rowTotal;
-            });
-
-            document.getElementById('grandTotal').textContent = grandTotal;
+            document.getElementById(
+                'grandTotal'
+            ).textContent = grandTotal;
         }
 
-        document.querySelectorAll('.qty-input').forEach(input => {
 
-            input.addEventListener('input', calculateTotals);
+        document
+            .querySelectorAll('.qty-input')
+            .forEach(input => {
 
-            input.addEventListener('keydown', function(event) {
+                input.addEventListener(
+                    'input',
+                    calculateTotals
+                );
 
-                if (event.key === 'Enter') {
 
-                    event.preventDefault();
+                input.addEventListener(
+                    'keydown',
+                    function(event) {
 
-                    const inputs = Array.from(
-                        document.querySelectorAll('.qty-input')
-                    );
+                        if (event.key === 'Enter') {
 
-                    const currentIndex = inputs.indexOf(this);
+                            event.preventDefault();
 
-                    if (inputs[currentIndex + 1]) {
-                        inputs[currentIndex + 1].focus();
-                        inputs[currentIndex + 1].select();
+
+                            const inputs =
+                                Array.from(
+                                    document.querySelectorAll(
+                                        '.qty-input'
+                                    )
+                                );
+
+
+                            const currentIndex =
+                                inputs.indexOf(this);
+
+
+                            if (
+                                inputs[currentIndex + 1]
+                            ) {
+
+                                inputs[currentIndex + 1]
+                                    .focus();
+
+                                inputs[currentIndex + 1]
+                                    .select();
+                            }
+
+                        }
+
                     }
-                }
+                );
 
             });
 
-        });
 
         function resetOrderForm() {
 
-            document.querySelectorAll('.qty-input').forEach(input => {
-                input.value = '';
-            });
+            document
+                .querySelectorAll('.qty-input')
+                .forEach(input => {
+
+                    input.value = '';
+
+                });
+
 
             calculateTotals();
         }
 
-        document.getElementById('orderForm').addEventListener(
-            'submit',
-            function(event) {
 
-                let grandTotal = 0;
+        document
+            .getElementById('orderForm')
+            .addEventListener(
+                'submit',
+                function(event) {
 
-                document.querySelectorAll('.qty-input').forEach(input => {
-                    grandTotal += parseInt(input.value) || 0;
-                });
+                    let grandTotal = 0;
 
-                if (grandTotal <= 0) {
 
-                    event.preventDefault();
+                    document
+                        .querySelectorAll('.qty-input')
+                        .forEach(input => {
 
-                    alert(
-                        'Masukkan minimal satu Quantity NG sebelum mengirim order.'
-                    );
+                            grandTotal +=
+                                parseInt(input.value) || 0;
+
+                        });
+
+
+                    if (grandTotal <= 0) {
+
+                        event.preventDefault();
+
+
+                        alert(
+                            'Masukkan minimal satu Quantity NG sebelum mengirim order.'
+                        );
+
+                    }
 
                 }
+            );
 
-            }
-        );
 
         calculateTotals();
     </script>

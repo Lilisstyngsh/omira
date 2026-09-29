@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('header', 'History Order Repair Box'); ?>
 
 <?php $__env->startSection('content'); ?>

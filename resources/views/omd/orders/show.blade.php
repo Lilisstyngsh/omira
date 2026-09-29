@@ -5,1199 +5,1304 @@
 
 @section('content')
 
-<style>
-    .repair-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 22px;
-    }
-
-    .repair-head h2 {
-        margin: 0 0 7px;
-        font-size: 22px;
-        font-weight: 800;
-        color: #172033;
-    }
-
-    .repair-head p {
-        margin: 0;
-        color: #64748b;
-        font-size: 12px;
-    }
-
-    .repair-head-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .repair-card {
-        background: #fff;
-        border: 1px solid #e8edf4;
-        border-radius: 18px;
-        box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
-        padding: 22px;
-    }
-
-    .repair-card+.repair-card {
-        margin-top: 18px;
-    }
-
-    .repair-card-title {
-        margin: 0 0 4px;
-        font-size: 16px;
-        font-weight: 800;
-        color: #172033;
-    }
-
-    .repair-card-desc {
-        margin: 0 0 18px;
-        font-size: 11px;
-        color: #64748b;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 82px;
-        min-height: 28px;
-        padding: 0 10px;
-        border-radius: 999px;
-        font-size: 10px;
-        font-weight: 800;
-    }
-
-    .status-submitted {
-        background: #f1efff;
-        color: #6557dc;
-    }
-
-    .status-verified {
-        background: #eff6ff;
-        color: #3478c5;
-    }
-
-    .status-in_repair {
-        background: #fff7e8;
-        color: #b77906;
-    }
-
-    .status-completed {
-        background: #ecfdf3;
-        color: #15803d;
-    }
-
-    .status-confirmed {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-draft {
-        background: #f1f5f9;
-        color: #64748b;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    .info-item {
-        padding: 13px;
-        border-radius: 11px;
-        background: #f8fafc;
-        border: 1px solid #edf1f5;
-    }
-
-    .info-item span {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 9px;
-        font-weight: 700;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-    }
-
-    .info-item strong {
-        font-size: 12px;
-        color: #334155;
-    }
-
-    .order-table-wrap {
-        width: 100%;
-        max-height: 430px;
-        overflow-y: auto;
-        overflow-x: auto;
-        border: 1px solid #edf1f5;
-        border-radius: 12px;
-        position: relative;
-        background: #fff;
-    }
-
-    .repair-table {
-        width: 100%;
-        min-width: 850px;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .repair-table thead th {
-        position: sticky !important;
-        position: -webkit-sticky !important;
-        top: 0 !important;
-        z-index: 2 !important;
-        padding: 12px 13px;
-        text-align: left;
-        background: #fafbfc !important;
-        border-bottom: 1px solid #e9eef4;
-        color: #64748b;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .03em;
-        white-space: nowrap;
-        box-shadow: 0 1px 0 #e9eef4;
-    }
-
-    .repair-table tbody td {
-        padding: 12px 13px;
-        border-bottom: 1px solid #eef2f6;
-        font-size: 12px;
-        color: #334155;
-        vertical-align: middle;
-        background: #fff;
-    }
-
-    .repair-table tbody tr:hover td {
-        background: #fcfcff;
-    }
-
-    .model-text {
-        font-weight: 800;
-        color: #172033;
-    }
-
-    .product-text {
-        font-weight: 650;
-        color: #475569;
-    }
-
-    .ng-badge {
-        display: inline-flex;
-        align-items: center;
-        min-width: 34px;
-        height: 25px;
-        justify-content: center;
-        padding: 0 8px;
-        border-radius: 7px;
-        background: #f5f3ff;
-        color: #6557dc;
-        font-size: 10px;
-        font-weight: 800;
-    }
-
-    .qty-input {
-        width: 95px;
-        height: 36px;
-        padding: 0 10px;
-        border: 1px solid #dce3ec;
-        border-radius: 9px;
-        outline: none;
-        font-size: 12px;
-        box-sizing: border-box;
-    }
-
-    .qty-input:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, .10);
-    }
-
-    .note-input {
-        width: 100%;
-        min-width: 180px;
-        height: 36px;
-        padding: 0 10px;
-        border: 1px solid #dce3ec;
-        border-radius: 9px;
-        outline: none;
-        font-size: 11px;
-        box-sizing: border-box;
-    }
-
-    .note-input:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, .10);
-    }
-
-    .legacy-result-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-    }
-
-    .action-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        padding: 16px;
-        border-radius: 12px;
-        background: #fafbfc;
-        border: 1px solid #edf1f5;
-    }
-
-    .action-card-info strong {
-        display: block;
-        margin-bottom: 4px;
-        font-size: 12px;
-        color: #334155;
-    }
-
-    .action-card-info span {
-        font-size: 10px;
-        color: #94a3b8;
-    }
-
-    .action-button-wrap {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
-
-    .btn {
-        height: 36px;
-        padding: 0 14px;
-        border: none;
-        border-radius: 9px;
-        font-size: 11px;
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: .18s ease;
-    }
-
-    .btn-primary {
-        background: #7c3aed;
-        color: #fff;
-        box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
-    }
-
-    .btn-primary:hover {
-        background: #6d28d9;
-        color: #fff;
-    }
-
-    .btn-warning {
-        background: #fff7e8;
-        color: #b77906;
-    }
-
-    .btn-warning:hover {
-        background: #ffedc2;
-    }
-
-    .btn-success {
-        background: #ecfdf3;
-        color: #15803d;
-    }
-
-    .btn-success:hover {
-        background: #dcfce7;
-    }
-
-    .btn-secondary {
-        background: #f1f5f9;
-        color: #475569;
-    }
-
-    .btn-secondary:hover {
-        background: #e2e8f0;
-    }
-
-    .timeline-wrap {
-        overflow-x: auto;
-        padding: 8px 2px 5px;
-    }
-
-    .timeline {
-        min-width: 620px;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(140px, 1fr));
-        position: relative;
-    }
-
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 10%;
-        right: 10%;
-        top: 18px;
-        height: 2px;
-        background: #e5e7eb;
-    }
-
-    .timeline-item {
-        position: relative;
-        text-align: center;
-        padding: 0 8px;
-        z-index: 1;
-    }
-
-    .timeline-icon {
-        width: 28px;
-        height: 28px;
-        margin: 0 auto 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-size: 15px;
-        font-weight: 800;
-        background: #fee2e2;
-        color: #dc2626;
-        border: 3px solid #fff;
-        box-shadow: 0 0 0 2px #fecaca;
-    }
-
-    .timeline-item.active .timeline-icon {
-        background: #dcfce7;
-        color: #16a34a;
-        box-shadow: 0 0 0 2px #bbf7d0;
-    }
-
-    .timeline-item strong {
-        display: block;
-        margin-bottom: 5px;
-        color: #334155;
-        font-size: 11px;
-        font-weight: 800;
-    }
-
-    .timeline-item span {
-        display: block;
-        font-size: 9px;
-        line-height: 1.5;
-        color: #dc2626;
-    }
-
-    .timeline-item.active span {
-        color: #64748b;
-    }
-
-    .description-box {
-        padding: 13px;
-        border-radius: 11px;
-        background: #fafbfc;
-        border: 1px solid #edf1f5;
-        color: #64748b;
-        font-size: 11px;
-        line-height: 1.6;
-    }
-
-    .error-list {
-        margin: 0 0 18px;
-        padding: 12px 15px;
-        border-radius: 10px;
-        background: #fff1f2;
-        border: 1px solid #ffd8dd;
-        color: #b42318;
-        font-size: 11px;
-    }
-
-    .completed-box {
-        padding: 15px;
-        border: 1px solid #d9eee2;
-        border-radius: 12px;
-        background: #f2fbf5;
-    }
-
-    .completed-box strong {
-        display: block;
-        margin-bottom: 4px;
-        color: #166534;
-        font-size: 12px;
-    }
-
-    .completed-box span {
-        font-size: 10px;
-        color: #4d7a5c;
-    }
-
-    @media (max-width: 1000px) {
-        .info-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 700px) {
+    <style>
         .repair-head {
-            flex-direction: column;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px;
         }
 
-        .info-grid,
-        .legacy-result-grid {
-            grid-template-columns: 1fr;
+        .repair-head h2 {
+            margin: 0 0 7px;
+            font-size: 22px;
+            font-weight: 800;
+            color: #172033;
         }
+
+        .repair-head p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .repair-head-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .repair-card {
+            background: #fff;
+            border: 1px solid #e8edf4;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
+            padding: 22px;
+        }
+
+        .repair-card+.repair-card {
+            margin-top: 18px;
+        }
+
+        .repair-card-title {
+            margin: 0 0 4px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #172033;
+        }
+
+        .repair-card-desc {
+            margin: 0 0 18px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 82px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .status-submitted {
+            background: #f1efff;
+            color: #6557dc;
+        }
+
+        .status-in_repair {
+            background: #fff7e8;
+            color: #b77906;
+        }
+
+        .status-completed {
+            background: #ecfdf3;
+            color: #15803d;
+        }
+
+        .status-confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-draft {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            padding: 13px;
+            border-radius: 11px;
+            background: #f8fafc;
+            border: 1px solid #edf1f5;
+        }
+
+        .info-item span {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .info-item strong {
+            font-size: 12px;
+            color: #334155;
+        }
+
+        .description-box {
+            padding: 13px;
+            border-radius: 11px;
+            background: #fafbfc;
+            border: 1px solid #edf1f5;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        /* =================================================
+           REPAIR TABLE WRAPPER (scroll area)
+        ================================================== */
+
+        .repair-table-scroll {
+            width: 100%;
+            max-height: 480px;
+            overflow: auto;
+            border: 1px solid #000;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        /* Scrollbar tipis & rapi (Chrome, Edge, Safari) */
+        .repair-table-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .repair-table-scroll::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        .repair-table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .repair-table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* =================================================
+           TABLE
+        ================================================== */
+
+        .repair-table {
+            width: 100%;
+            min-width: 1100px;
+
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+
+            background: #fff;
+        }
+
+        /* =================================================
+           KOLOM
+        ================================================== */
+
+        .repair-table th:nth-child(1),
+        .repair-table td:nth-child(1) {
+            width: 55px;
+        }
+
+        .repair-table th:nth-child(2),
+        .repair-table td:nth-child(2) {
+            width: 150px;
+        }
+
+        .repair-table th:nth-child(3),
+        .repair-table td:nth-child(3) {
+            width: 170px;
+        }
+
+        /* Kolom NG sebelum dan sesudah */
+        .repair-table th:nth-child(n+4),
+        .repair-table td:nth-child(n+4) {
+            width: 68px;
+        }
+
+        /* Keterangan */
+        .repair-table .keterangan-head {
+            width: 180px !important;
+            min-width: 180px !important;
+        }
+
+        .repair-table .keterangan-cell {
+            width: 180px !important;
+            min-width: 180px !important;
+
+            text-align: left;
+            vertical-align: middle !important;
+        }
+
+        /* =================================================
+           HEADER (sticky saat tabel di-scroll)
+        ================================================== */
+
+        .repair-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .repair-table th {
+            padding: 10px 8px;
+
+            background: #f8fafc;
+
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
+
+            color: #475569;
+
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+
+            text-align: center;
+            vertical-align: middle;
+
+            white-space: nowrap;
+        }
+
+        .repair-table thead tr:nth-child(2) th {
+            background: #f1f5f9;
+        }
+
+        .repair-table thead tr:nth-child(3) th {
+            background: #f8fafc;
+        }
+
+        /* garis pemisah tegas antara header (3 baris) dan body saat sticky */
+        .repair-table thead tr:last-child th {
+            box-shadow: 0 2px 0 #000;
+        }
+
+        /* =================================================
+           BODY
+        ================================================== */
+
+        .repair-table td {
+            padding: 11px 8px;
+
+            background: #fff;
+
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
+
+            font-size: 12px;
+            color: #334155;
+
+            vertical-align: middle;
+        }
+
+        .repair-table tbody tr:hover td {
+            background: #fafbfc;
+        }
+
+        /* garis lebih tegas setiap ganti Model (rowspan) */
+        .repair-table td.no-cell,
+        .repair-table td.model-cell {
+            border-right: 1px solid #000;
+        }
+
+        /* =================================================
+           NO & MODEL
+        ================================================== */
+
+        .repair-table .model-cell,
+        .repair-table .no-cell {
+            font-weight: 800;
+            color: #172033;
+
+            vertical-align: middle !important;
+        }
+
+        .repair-table .model-cell {
+            text-align: left;
+        }
+
+        .repair-table .no-cell {
+            text-align: center;
+        }
+
+        .model-text {
+            font-weight: 800;
+            color: #172033;
+        }
+
+        .product-text {
+            font-weight: 650;
+            color: #475569;
+        }
+
+        /* =================================================
+           NILAI NG SEBELUM
+        ================================================== */
+
+        .ng-value {
+            min-height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ng-value.before {
+            font-size: 12px;
+            font-weight: 800;
+            color: #334155;
+        }
+
+        .empty-ng {
+            color: #cbd5e1;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =================================================
+           CELL NG
+        ================================================== */
+
+        .ng-cell {
+            padding: 6px !important;
+
+            text-align: center;
+            vertical-align: middle !important;
+        }
+
+        /* =================================================
+           INPUT SESUDAH
+        ================================================== */
+
+        .repair-table .ng-input {
+            display: block;
+
+            width: 44px;
+            max-width: 100%;
+
+            height: 34px;
+
+            box-sizing: border-box;
+
+            border: 1px solid #64748b;
+            border-radius: 8px;
+
+            outline: none;
+
+            text-align: center;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            color: #334155;
+            background: #fff;
+
+            padding: 0 4px;
+
+            margin: 0 auto;
+
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .repair-table .ng-input:focus {
+            border-color: #7c3aed;
+
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, .12);
+        }
+
+        .repair-table .ng-input::placeholder {
+            color: #cbd5e1;
+        }
+
+        /* =================================================
+           INPUT KETERANGAN
+        ================================================== */
+
+        .repair-table .keterangan-input {
+            width: 100%;
+            min-height: 40px;
+
+            box-sizing: border-box;
+
+            padding: 8px 10px;
+
+            border: 1px solid #64748b;
+            border-radius: 8px;
+
+            background: #fff;
+
+            color: #334155;
+
+            font-size: 11px;
+            line-height: 1.5;
+
+            resize: vertical;
+
+            outline: none;
+
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .repair-table .keterangan-input:focus {
+            border-color: #7c3aed;
+
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, .12);
+        }
+
+        /* =================================================
+           ACTION CARD
+        ================================================== */
 
         .action-card {
-            align-items: flex-start;
-            flex-direction: column;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #fafbfc;
+            border: 1px solid #edf1f5;
         }
 
-        .action-button-wrap {
-            width: 100%;
+        .action-card-info strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #334155;
         }
 
-        .action-button-wrap .btn {
-            width: 100%;
+        .action-card-info span {
+            font-size: 10px;
+            color: #94a3b8;
+            line-height: 1.5;
         }
-    }
-</style>
+
+        /* =================================================
+           BUTTON
+        ================================================== */
+
+        .btn {
+            height: 36px;
+            padding: 0 14px;
+
+            border: none;
+            border-radius: 9px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            cursor: pointer;
+            text-decoration: none;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            transition: .18s ease;
+        }
+
+        .btn-primary {
+            background: #7c3aed;
+            color: #fff;
+
+            box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
+        }
+
+        .btn-primary:hover {
+            background: #6d28d9;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* =================================================
+           COMPLETED BOX
+        ================================================== */
+
+        .completed-box {
+            padding: 15px;
+
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+
+            background: #f0fdf4;
+        }
+
+        .completed-box strong {
+            display: block;
+            margin-bottom: 4px;
+
+            color: #166534;
+
+            font-size: 12px;
+        }
+
+        .completed-box span {
+            font-size: 10px;
+            color: #4d7a5c;
+            line-height: 1.5;
+        }
+
+        /* =================================================
+           LEGACY RESULT
+        ================================================== */
+
+        .legacy-result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        /* =================================================
+           TIMELINE
+        ================================================== */
+
+        .timeline-wrap {
+            overflow-x: auto;
+            padding: 8px 2px 5px;
+        }
+
+        .timeline {
+            min-width: 620px;
+
+            display: grid;
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+
+            position: absolute;
+
+            left: 12.5%;
+            right: 12.5%;
+
+            top: 18px;
+
+            height: 2px;
+
+            background: #e5e7eb;
+        }
+
+        .timeline-item {
+            position: relative;
+
+            text-align: center;
+
+            padding: 0 8px;
+
+            z-index: 1;
+        }
+
+        .timeline-icon {
+            width: 28px;
+            height: 28px;
+
+            margin: 0 auto 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            font-size: 15px;
+            font-weight: 800;
+
+            background: #fee2e2;
+            color: #dc2626;
+
+            border: 3px solid #fff;
+
+            box-shadow:
+                0 0 0 2px #fecaca;
+        }
+
+        .timeline-item.active .timeline-icon {
+            background: #dcfce7;
+            color: #16a34a;
+
+            box-shadow:
+                0 0 0 2px #bbf7d0;
+        }
+
+        .timeline-item strong {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: #334155;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .timeline-item span {
+            display: block;
+
+            font-size: 9px;
+            line-height: 1.5;
+
+            color: #dc2626;
+        }
+
+        .timeline-item.active span {
+            color: #64748b;
+        }
+
+        /* =================================================
+           ERROR
+        ================================================== */
+
+        .error-list {
+            margin: 0 0 18px;
+            padding: 12px 15px;
+
+            border-radius: 10px;
+
+            background: #fff1f2;
+            border: 1px solid #ffd8dd;
+
+            color: #b42318;
+
+            font-size: 11px;
+        }
+
+        /* =================================================
+           RESPONSIVE
+        ================================================== */
+
+        @media (max-width: 1000px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .repair-head {
+                flex-direction: column;
+            }
+
+            .info-grid,
+            .legacy-result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
 
 
-<div class="repair-head">
+    <div class="repair-head">
 
-    <div>
+        <div>
 
-        <h2>
-            {{ $order->order_number }}
-        </h2>
-
-        <p>
-            Order Repair Box
-        </p>
-
-    </div>
-
-
-    <div class="repair-head-actions">
-
-        <span class="status-badge status-{{ $order->status }}">
-            {{ $order->status_label }}
-        </span>
-
-        <a href="{{ route('omd.orders.index') }}" class="btn btn-secondary">
-            Kembali
-        </a>
-
-    </div>
-
-</div>
-
-
-@if ($errors->any())
-
-<div class="error-list">
-
-    <ul style="margin:0;padding-left:16px;">
-
-        @foreach ($errors->all() as $error)
-
-        <li>
-            {{ $error }}
-        </li>
-
-        @endforeach
-
-    </ul>
-
-</div>
-
-@endif
-
-
-{{-- =====================================================
-     INFORMASI ORDER
-    ===================================================== --}}
-
-<div class="repair-card">
-
-    <h3 class="repair-card-title">
-        Informasi Order
-    </h3>
-
-    <div class="info-grid">
-
-        <div class="info-item">
-
-            <span>
-                No Order
-            </span>
-
-            <strong>
+            <h2>
                 {{ $order->order_number }}
-            </strong>
+            </h2>
+
+            <p>
+                Order Repair Box
+            </p>
 
         </div>
 
 
-        <div class="info-item">
+        <div class="repair-head-actions">
 
-            <span>
-                Tanggal
-            </span>
-
-            <strong>
-                {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '-' }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Nama
-            </span>
-
-            <strong>
-                {{ $order->user?->name ?? '-' }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Line
-            </span>
-
-            <strong>
-                {{ $order->line?->name ?? ($order->area ? $order->area->name : '-') }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Jenis Order
-            </span>
-
-            <strong>
-                Repair Box
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Total Qty
-            </span>
-
-            <strong>
-                {{ $order->quantity }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Status
-            </span>
-
-            <strong>
+            <span class="status-badge status-{{ $order->status }}">
                 {{ $order->status_label }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Verifikator OMD
             </span>
 
-            <strong>
-                {{ $order->omdVerifier?->name ?? '-' }}
-            </strong>
+
+            <a href="{{ route('omd.orders.index') }}" class="btn btn-secondary">
+                Kembali
+            </a>
 
         </div>
 
     </div>
 
 
-    @if ($order->description)
+    @if ($errors->any())
 
-    <div class="description-box" style="margin-top:14px;">
-        {{ $order->description }}
-    </div>
+        <div class="error-list">
+
+            <ul style="margin:0;padding-left:16px;">
+
+                @foreach ($errors->all() as $error)
+                    <li>
+                        {{ $error }}
+                    </li>
+                @endforeach
+
+            </ul>
+
+        </div>
 
     @endif
 
-</div>
 
-{{-- =====================================================
-     FORM HASIL REPAIR - DATA BARU
-    ===================================================== --}}
+    {{-- =====================================================
+     INFORMASI ORDER
+===================================================== --}}
 
-@if ($order->status === 'in_repair' && $order->items->isNotEmpty())
+    <div class="repair-card">
 
-<div class="repair-card">
+        <h3 class="repair-card-title">
+            Informasi Order
+        </h3>
 
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:18px;">
 
-        <div>
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    No Order
+                </span>
+
+                <strong>
+                    {{ $order->order_number }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Tanggal
+                </span>
+
+                <strong>
+                    {{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Nama
+                </span>
+
+                <strong>
+                    {{ $order->user?->name ?? '-' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Plant
+                </span>
+
+                <strong>
+                    {{ $order->line?->plant?->name ?? '-' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Line
+                </span>
+
+                <strong>
+                    {{ $order->line?->name ?? '-' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Jenis Order
+                </span>
+
+                <strong>
+                    Repair Box
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Total Qty
+                </span>
+
+                <strong>
+                    {{ $order->quantity }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Status
+                </span>
+
+                <strong>
+                    {{ $order->status_label }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div style="margin-top:18px;">
+
+            <div style="margin-bottom:7px;font-size:11px;font-weight:800;color:#334155;">
+                Keterangan
+            </div>
+
+            <div class="description-box">
+                {{ $order->description ?: '-' }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- =====================================================
+     DETAIL / HASIL REPAIR
+===================================================== --}}
+
+    @if ($order->items->isNotEmpty())
+
+        @php
+            $modelGroups = $order->items->groupBy('master_model_id');
+            $ngCodes = ['P', 'H', 'C', 'S'];
+        @endphp
+
+
+        <div class="repair-card">
 
             <h3 class="repair-card-title">
-                Diisi Oleh OMD Setelah Repair
+
+                @if ($order->status === 'in_repair')
+                    Diisi Oleh OMD Setelah Repair
+                @else
+                    Hasil Repair
+                @endif
+
             </h3>
 
-            <p class="repair-card-desc" style="margin-bottom:0;">
-                Masukkan hasil repair untuk setiap detail order.
+
+            <p class="repair-card-desc">
+
+                @if ($order->status === 'in_repair')
+                    Masukkan hasil repair untuk setiap Produk dan Jenis NG.
+                @else
+                    Hasil repair yang telah disimpan oleh OMD.
+                @endif
+
             </p>
 
+
+            @if ($order->status === 'in_repair')
+                <form method="POST" action="{{ route('omd.orders.complete', $order) }}">
+
+                    @csrf
+            @endif
+
+
+            <div class="repair-table-scroll">
+
+                <table class="repair-table">
+
+                    <colgroup>
+                        <col style="width:55px;">
+                        <col style="width:150px;">
+                        <col style="width:170px;">
+
+                        <col style="width:68px;">
+                        <col style="width:68px;">
+                        <col style="width:68px;">
+                        <col style="width:68px;">
+
+                        <col style="width:68px;">
+                        <col style="width:68px;">
+                        <col style="width:68px;">
+                        <col style="width:68px;">
+
+                        <col style="width:180px;">
+                    </colgroup>
+
+
+                    {{-- =================================================
+             HEADER
+        ================================================== --}}
+
+                    <thead>
+
+                        <tr>
+
+                            <th rowspan="3">
+                                No
+                            </th>
+
+                            <th rowspan="3" style="text-align:left;">
+                                Model
+                            </th>
+
+                            <th rowspan="3" style="text-align:left;">
+                                Produk
+                            </th>
+
+                            <th colspan="8">
+                                Jenis &amp; Qty NG
+                            </th>
+
+                            <th rowspan="3" class="keterangan-head">
+                                Keterangan
+                            </th>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <th colspan="4">
+                                Sebelum
+                            </th>
+
+                            <th colspan="4">
+                                Sesudah
+                            </th>
+
+                        </tr>
+
+
+                        <tr>
+
+                            @foreach ($ngCodes as $code)
+                                <th>{{ $code }}</th>
+                            @endforeach
+
+                            @foreach ($ngCodes as $code)
+                                <th>{{ $code }}</th>
+                            @endforeach
+
+                        </tr>
+
+                    </thead>
+
+
+                    {{-- =================================================
+             BODY
+        ================================================== --}}
+
+                    <tbody>
+
+                        @foreach ($modelGroups as $modelItems)
+                            @php
+                                $productGroups = $modelItems->groupBy('product_id');
+                                $modelRowspan = $productGroups->count();
+                            @endphp
+
+
+                            @foreach ($productGroups as $productItems)
+                                @php
+                                    $ngItems = $productItems->keyBy(function ($item) {
+                                        return strtoupper($item->ngType?->code ?? '');
+                                    });
+
+                                    $productId = $productItems->first()->product_id;
+                                @endphp
+
+
+                                <tr>
+
+                                    {{-- NO + MODEL hanya sekali per MODEL --}}
+                                    @if ($loop->first)
+                                        <td rowspan="{{ $modelRowspan }}" class="no-cell">
+                                            {{ $loop->parent->iteration }}
+                                        </td>
+
+                                        <td rowspan="{{ $modelRowspan }}" class="model-cell">
+                                            <span class="model-text">
+                                                {{ $modelItems->first()->masterModel?->model ?? '-' }}
+                                            </span>
+                                        </td>
+                                    @endif
+
+
+                                    {{-- =========================
+                             PRODUK
+                        ========================== --}}
+
+                                    <td>
+                                        <span class="product-text">
+                                            {{ $productItems->first()->product?->name ?? '-' }}
+                                        </span>
+                                    </td>
+
+
+                                    {{-- =========================
+                             SEBELUM
+                        ========================== --}}
+
+                                    @foreach ($ngCodes as $code)
+                                        @php
+                                            $ngItem = $ngItems->get($code);
+                                        @endphp
+
+                                        <td class="ng-cell">
+
+                                            @if ($ngItem)
+                                                <div class="ng-value before">
+                                                    {{ $ngItem->before_qty }}
+                                                </div>
+                                            @else
+                                                <div class="ng-value empty-ng">
+                                                    
+                                                </div>
+                                            @endif
+
+                                        </td>
+                                    @endforeach
+
+
+                                    {{-- =========================
+                             SESUDAH
+                        ========================== --}}
+
+                                    @foreach ($ngCodes as $code)
+                                        @php
+                                            $ngItem = $ngItems->get($code);
+                                        @endphp
+
+                                        <td class="ng-cell">
+
+                                            @if ($ngItem)
+                                                @if ($order->status === 'in_repair')
+                                                    <input type="number" name="items[{{ $ngItem->id }}][after_qty]"
+                                                        class="ng-input" min="0"
+                                                        value="{{ old('items.' . $ngItem->id . '.after_qty', '') }}"
+                                                        placeholder="">
+                                                @else
+                                                    <div class="ng-value before">
+                                                        {{ $ngItem->after_qty ?? '-' }}
+                                                    </div>
+                                                @endif
+                                            @else
+                                                <div class="ng-value empty-ng">
+                                                    -
+                                                </div>
+                                            @endif
+
+                                        </td>
+                                    @endforeach
+
+
+                                    {{-- =========================
+                             KETERANGAN PER PRODUK
+                        ========================== --}}
+
+                                    <td class="keterangan-cell">
+
+                                        @if ($order->status === 'in_repair')
+                                            <textarea name="product_notes[{{ $productId }}]" class="keterangan-input" placeholder="Keterangan...">{{ old('product_notes.' . $productId, '') }}</textarea>
+                                        @else
+                                            <div class="keterangan-text">
+                                                -
+                                            </div>
+                                        @endif
+
+                                    </td>
+
+                                </tr>
+                            @endforeach
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            @if ($order->status === 'in_repair')
+                <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+
+                    <button type="submit" class="btn btn-primary">
+                        Simpan Hasil Repair
+                    </button>
+
+                </div>
+
+
+                </form>
+            @endif
+
         </div>
 
-        <div>
-            <span class="status-badge status-in_repair">
-                In Repair
-            </span>
-        </div>
-
-    </div>
+    @endif
 
 
-    <form method="POST" action="{{ route('omd.orders.complete', $order) }}">
+    {{-- =====================================================
+     LEGACY RESULT
+===================================================== --}}
 
-        @csrf
-
-
-        <div class="order-table-wrap">
-
-            <table class="repair-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Model
-                        </th>
-
-                        <th>
-                            Produk
-                        </th>
-
-                        <th>
-                            Jenis NG
-                        </th>
-
-                        <th>
-                            Qty Sebelum
-                        </th>
-
-                        <th>
-                            Qty Sesudah
-                        </th>
-
-                        <th>
-                            Catatan Ketidaksesuaian
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    @foreach ($order->items as $item)
-
-                    <tr>
-
-                        <td>
-                            {{ $item->masterModel?->model ?? '-' }}
-                        </td>
-
-                        <td>
-                            {{ $item->product?->name ?? '-' }}
-                        </td>
-
-                        <td>
-
-                            <span class="ng-badge">
-                                {{ $item->ngType?->code ?? '-' }}
-                            </span>
-
-                        </td>
-
-                        <td>
-                            {{ $item->before_qty }}
-                        </td>
-
-                        <td>
-
-                            <input
-                                type="number"
-                                name="items[{{ $item->id }}][after_qty]"
-                                class="qty-input"
-                                min="0"
-                                value="{{ old('items.' . $item->id . '.after_qty') }}"
-                                required>
-
-                        </td>
-
-                        <td>
-
-                            <input
-                                type="text"
-                                name="items[{{ $item->id }}][mismatch_note]"
-                                class="note-input"
-                                value="{{ old('items.' . $item->id . '.mismatch_note') }}"
-                                placeholder="Catatan bila ada ketidaksesuaian">
-
-                        </td>
-
-                    </tr>
-
-                    @endforeach
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-
-            <button type="submit" class="btn btn-primary">
-                Simpan Hasil Repair
-            </button>
-
-        </div>
-
-    </form>
-
-</div>
-
-@endif
-
-
-{{-- =====================================================
-     FORM LEGACY HASIL REPAIR
-    ===================================================== --}}
-
-@if ($order->status === 'in_repair' && $order->items->isEmpty())
-
-<div class="repair-card">
-
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:18px;">
-
-        <div>
+    @if ($order->items->isEmpty() && $order->result)
+        <div class="repair-card">
 
             <h3 class="repair-card-title">
-                Input Hasil Repair
+                Hasil Repair
             </h3>
 
-            <p class="repair-card-desc" style="margin-bottom:0;">
-                Form kompatibilitas untuk order lama.
+            <p class="repair-card-desc">
+                Data hasil repair dari format order lama.
             </p>
 
-        </div>
 
-        <div>
-            <span class="status-badge status-in_repair">
-                In Repair
-            </span>
-        </div>
+            <div class="legacy-result-grid">
 
-    </div>
+                <div class="info-item">
 
+                    <span>
+                        OK
+                    </span>
 
-    <form method="POST" action="{{ route('omd.orders.complete', $order) }}">
+                    <strong>
+                        {{ $order->result->ok_qty }}
+                    </strong>
 
-        @csrf
-
-
-        <div class="legacy-result-grid">
-
-            <div>
-
-                <label style="display:block;margin-bottom:7px;font-size:11px;font-weight:700;">
-                    OK
-                </label>
-
-                <input
-                    type="number"
-                    name="ok_qty"
-                    min="0"
-                    max="{{ $order->quantity }}"
-                    value="{{ old('ok_qty') }}"
-                    class="qty-input"
-                    required>
-
-            </div>
+                </div>
 
 
-            <div>
+                <div class="info-item">
 
-                <label style="display:block;margin-bottom:7px;font-size:11px;font-weight:700;">
-                    SCRAP
-                </label>
+                    <span>
+                        Scrap
+                    </span>
 
-                <input
-                    type="number"
-                    name="scrap_qty"
-                    min="0"
-                    value="{{ old('scrap_qty') }}"
-                    class="qty-input"
-                    required>
+                    <strong>
+                        {{ $order->result->scrap_qty }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>
+                        NG
+                    </span>
+
+                    <strong>
+                        {{ $order->result->ng_qty }}
+                    </strong>
+
+                </div>
 
             </div>
 
 
-            <div>
+            <div class="description-box" style="margin-top:14px;">
+                {{ $order->result->notes ?: 'Tidak ada catatan.' }}
+            </div>
 
-                <label style="display:block;margin-bottom:7px;font-size:11px;font-weight:700;">
-                    NG
-                </label>
+        </div>
+    @endif
 
-                <input
-                    type="number"
-                    name="ng_qty"
-                    min="0"
-                    value="{{ old('ng_qty') }}"
-                    class="qty-input"
-                    required>
+
+    {{-- =====================================================
+     VERIFIKASI ORDER
+===================================================== --}}
+
+    @if ($order->status === 'submitted')
+        <div class="repair-card">
+
+            <div class="action-card">
+
+                <div class="action-card-info">
+
+                    <strong>
+                        Verifikasi Order
+                    </strong>
+
+                    <span>
+                        Pastikan data order sudah sesuai.
+                        Setelah diverifikasi, order langsung masuk proses repair.
+                    </span>
+
+                </div>
+
+
+                <form method="POST" action="{{ route('omd.orders.verify', $order) }}">
+
+                    @csrf
+
+                    <button type="submit" class="btn btn-primary">
+                        Verifikasi Order
+                    </button>
+
+                </form>
 
             </div>
 
         </div>
+    @endif
 
 
-        <div style="margin-top:16px;">
+    {{-- =====================================================
+     COMPLETED
+===================================================== --}}
 
-            <label style="display:block;margin-bottom:7px;font-size:11px;font-weight:700;">
-                Catatan
-            </label>
+    @if ($order->status === 'completed')
+        <div class="repair-card">
 
-            <input
-                type="text"
-                name="notes"
-                value="{{ old('notes') }}"
-                class="note-input"
-                style="width:100%;"
-                placeholder="Catatan hasil repair">
+            <div class="completed-box">
 
-        </div>
+                <strong>
+                    Repair Selesai
+                </strong>
 
+                <span>
+                    Hasil repair sudah disimpan dan order menunggu konfirmasi dari User.
+                </span>
 
-        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-
-            <button type="submit" class="btn btn-primary">
-                Simpan Hasil Repair
-            </button>
+            </div>
 
         </div>
-
-    </form>
-
-</div>
-
-@endif
+    @endif
 
 
-{{-- =====================================================
-     AKSI VERIFIKASI
-    ===================================================== --}}
-
-@if ($order->status === 'submitted')
-
-<div class="repair-card">
-
-    <div class="action-card">
-
-        <div class="action-card-info">
-
-            <strong>
-                Verifikasi Order
-            </strong>
-
-            <span>
-                Pastikan data order sudah sesuai sebelum diproses.
-            </span>
-
-        </div>
-
-
-        <div class="action-button-wrap">
-
-            <form method="POST" action="{{ route('omd.orders.verify', $order) }}">
-
-                @csrf
-
-                <button type="submit" class="btn btn-primary">
-                    Verifikasi Order
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-</div>
-
-@endif
-
-
-{{-- =====================================================
-     AKSI MULAI REPAIR
-    ===================================================== --}}
-
-@if ($order->status === 'verified')
-
-<div class="repair-card">
-
-    <div class="action-card">
-
-        <div class="action-card-info">
-
-            <strong>
-                Mulai Repair
-            </strong>
-
-            <span>
-                Order sudah diverifikasi dan siap dikerjakan.
-            </span>
-
-        </div>
-
-
-        <div class="action-button-wrap">
-
-            <form method="POST" action="{{ route('omd.orders.start', $order) }}">
-
-                @csrf
-
-                <button type="submit" class="btn btn-primary">
-                    Mulai Repair
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-</div>
-
-@endif
-
-
-
-{{-- =====================================================
+    {{-- =====================================================
      CONFIRMED
-    ===================================================== --}}
+===================================================== --}}
 
-@if ($order->status === 'confirmed')
+    @if ($order->status === 'confirmed')
+        <div class="repair-card">
 
-<div class="repair-card">
-
-    <div class="completed-box">
-
-        <strong>
-            Order Sudah Dikonfirmasi
-        </strong>
-
-        <span>
-            User sudah mengonfirmasi penerimaan hasil repair.
-        </span>
-
-    </div>
-
-</div>
-
-@endif
-
-
-{{-- =====================================================
-     TIMELINE
-    ===================================================== --}}
-
-<div class="repair-card">
-
-    <h3 class="repair-card-title">
-        Progress Order
-    </h3>
-
-    <p class="repair-card-desc">
-        Riwayat tahapan Order Repair Box.
-    </p>
-
-    <div class="timeline-wrap">
-
-        <div class="timeline">
-
-            {{-- USER SUBMIT --}}
-            <div class="timeline-item active">
-
-                <div class="timeline-icon">
-                    ✓
-                </div>
+            <div class="completed-box">
 
                 <strong>
-                    User Submit
+                    Order Sudah Dikonfirmasi
                 </strong>
 
                 <span>
-                    {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '-' }}
-                </span>
-
-            </div>
-
-
-            {{-- VERIFIED OMD --}}
-            <div
-                class="timeline-item
-                {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? 'active' : '' }}">
-
-                <div class="timeline-icon">
-                    {{ in_array($order->status, ['in_repair', 'completed', 'confirmed']) ? '✓' : '✕' }}
-                </div>
-
-                <strong>
-                    Verified OMD
-                </strong>
-
-                <span>
-
-                    @if ($order->verified_at)
-
-                        {{ $order->verified_at->format('d-m-Y H:i') }}
-
-                    @else
-
-                        Belum dilakukan
-
-                    @endif
-
-                </span>
-
-            </div>
-
-
-            {{-- REPAIR OMD --}}
-            <div
-                class="timeline-item
-                {{ in_array($order->status, ['completed', 'confirmed']) ? 'active' : '' }}">
-
-                <div class="timeline-icon">
-
-                    @if (in_array($order->status, ['completed', 'confirmed']))
-
-                        ✓
-
-                    @elseif ($order->status === 'in_repair')
-
-                        △
-
-                    @else
-
-                        ✕
-
-                    @endif
-
-                </div>
-
-                <strong>
-                    Repair OMD
-                </strong>
-
-                <span>
-
-                    @if ($order->repair_completed_at)
-
-                        {{ $order->repair_completed_at->format('d-m-Y H:i') }}
-
-                    @elseif ($order->repair_started_at)
-
-                        Sedang diproses
-
-                    @else
-
-                        Belum dilakukan
-
-                    @endif
-
-                </span>
-
-            </div>
-
-
-            {{-- SERAH TERIMA --}}
-            <div
-                class="timeline-item
-                {{ $order->status === 'confirmed' ? 'active' : '' }}">
-
-                <div class="timeline-icon">
-
-                    @if ($order->status === 'confirmed')
-
-                        ✓
-
-                    @elseif ($order->status === 'completed')
-
-                        △
-
-                    @else
-
-                        ✕
-
-                    @endif
-
-                </div>
-
-                <strong>
-                    Serah Terima
-                </strong>
-
-                <span>
-
-                    @if ($order->status === 'confirmed' && $order->confirmation?->confirmed_at)
-
-                        {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
-
-                        <br>
-
-                        {{ $order->confirmation->confirmedByUser?->name ?? '-' }}
-
-                    @elseif ($order->status === 'completed')
-
-                        Menunggu konfirmasi User
-
-                    @else
-
-                        Belum dilakukan
-
-                    @endif
-
+                    User sudah mengonfirmasi penerimaan hasil repair.
                 </span>
 
             </div>
 
         </div>
-
-    </div>
-
-</div>
+    @endif
 
 @endsection
