@@ -132,7 +132,7 @@ class DatabaseSeeder extends Seeder
             $lines[$data['name']] = $line;
         }
 
-                /*
+        /*
         |--------------------------------------------------------------------------
         | MASTER MODEL & PRODUCT
         |--------------------------------------------------------------------------
@@ -194,8 +194,12 @@ class DatabaseSeeder extends Seeder
                 'ADM KAP' => [
                     'Backdoor',
                 ],
-                '230' => [],
-                '800A' => [],
+                '230' => [
+                    '230'
+                ],
+                '800A' => [
+                    '800A'
+                ],
                 'SUZUKI' => [
                     'Handle YHA',
                     'Handle YTB',
@@ -263,10 +267,10 @@ class DatabaseSeeder extends Seeder
                     'TCC',
                     'CSH',
                 ],
-                '-' => [
+                'ISZ/K3' => [
                     'WP',
                 ],
-                '?' => [
+                '1SZ/3SZ' => [
                     'OP',
                 ],
                 '889F' => [
@@ -316,7 +320,7 @@ class DatabaseSeeder extends Seeder
             |--------------------------------------------------------------------------
             */
             'AS Unit' => [
-                'Pump' => [
+                'Water Pump' => [
                     'WPNR',
                     'WP D05E',
                 ],
@@ -355,9 +359,15 @@ class DatabaseSeeder extends Seeder
             |--------------------------------------------------------------------------
             */
             'PPIC Electric' => [
-                '4WD IMV' => [],
-                'PBD 582D/737D/840D' => [],
-                'PBD 5P45' => [],
+                '4WD IMV' => [
+                    '4WD IMV'
+                ],
+                'PBD 582D/737D/840D' => [
+                    'PBD 582D/737D/840D'
+                ],
+                'PBD 5P45' => [
+                    'PBD 5P45'
+                ],
             ],
 
             /*
@@ -366,12 +376,24 @@ class DatabaseSeeder extends Seeder
             |--------------------------------------------------------------------------
             */
             'AS Electric' => [
-                'EWP EF160' => [],
-                'EWP GA35' => [],
-                'OP T431' => [],
-                'EWP EF160 Toyota' => [],
-                '4WD 5F00/5K45' => [],
-                'PBD Y17' => [],
+                'EWP EF160' => [
+                    'EWP EF160'
+                ],
+                'EWP GA35' => [
+                    'EWP GA35'
+                ],
+                'OP T431' => [
+                    'OP T431'
+                ],
+                'EWP EF160 Toyota' => [
+                    'EWP EF160 Toyota'
+                ],
+                '4WD 5F00/5K45' => [
+                    '4WD 5F00/5K45'
+                ],
+                'PBD Y17' => [
+                    'PBD Y17'
+                ],
             ],
         ];
 
@@ -449,16 +471,112 @@ class DatabaseSeeder extends Seeder
 
         User::updateOrCreate(
             [
-                'email' => 'leader@omd.local'
+                'email' => 'dwi.h@aiia.co.id'
             ],
 
             [
-                'name' => 'OMD',
+                'name' => 'Dwi Haryanto',
                 'password' => Hash::make('password'),
                 'role' => 'omd_leader',
                 'line_id' => null
             ]
         );
+
+        $userAccounts = [
+            [
+                'name' => 'RAMANDA',
+                'email' => 'ramanda_fe@aiia.co.id',
+                'plant' => 'BODY',
+                'line' => 'PPIC BODY',
+            ],
+
+            [
+                'name' => 'UBAYDILLAH',
+                'email' => 'ubaydillah@aiia.co.id',
+                'plant' => 'BODY',
+                'line' => 'AS BODY',
+            ],
+
+            [
+                'name' => 'MARCELLINO',
+                'email' => 'marcellino.reyhan@aiia.co.id',
+                'plant' => 'BODY',
+                'line' => 'PT',
+            ],
+
+            [
+                'name' => 'MARCELINO',
+                'email' => 'marcellino.reyhan@aiia.co.id',
+                'plant' => 'BODY',
+                'line' => 'INJ',
+            ],
+
+            [
+                'name' => 'TAUFIK',
+                'email' => 'taufik.widodo@aiia.co.id',
+                'plant' => 'UNIT',
+                'line' => 'PPIC UNIT',
+            ],
+
+            [
+                'name' => 'TEDDY',
+                'email' => 'teddy@aiia.co.id',
+                'plant' => 'UNIT',
+                'line' => 'AS UNIT',
+            ],
+
+            [
+                'name' => 'ANHAR',
+                'email' => 'anhar.kurniaji@aiia.co.id',
+                'plant' => 'UNIT',
+                'line' => 'MA',
+            ],
+
+            [
+                'name' => 'ADE F',
+                'email' => 'ade.firmansyah@aiia.co.id',
+                'plant' => 'UNIT',
+                'line' => 'DC',
+            ],
+
+            [
+                'name' => 'SAIFUL',
+                'email' => 'saiful.safari@aiia.co.id',
+                'plant' => 'ELECTRIC',
+                'line' => 'PPIC ELECTRIC',
+            ],
+
+            [
+                'name' => 'WIDIYAN',
+                'email' => 'widiyan@aiia.co.id',
+                'plant' => 'ELECTRIC',
+                'line' => 'AS ELECTRIC',
+            ],
+        ];
+
+        foreach ($userAccounts as $account) {
+
+            $plant = Plant::where('name', $account['plant'])
+                ->where('is_active', true)
+                ->firstOrFail();
+
+            $line = Line::where('name', $account['line'])
+                ->where('plant_id', $plant->id)
+                ->where('is_active', true)
+                ->firstOrFail();
+
+            User::updateOrCreate(
+                [
+                    'email' => strtolower(trim($account['email'])),
+                ],
+                [
+                    'name' => trim($account['name']),
+                    'password' => Hash::make('Aiia@2026'),
+                    'role' => 'user',
+                    'line_id' => $line->id,
+                ]
+            );
+        }
 
         /*
         |--------------------------------------------------------------------------

@@ -326,10 +326,6 @@
                 Selamat datang, {{ auth()->user()->name }}
             </h2>
 
-            <div class="muted">
-                Pantau proses Order Repair Box yang Anda buat.
-            </div>
-
         </div>
 
         <a class="btn btn-primary" href="{{ route('user.orders.create') }}">

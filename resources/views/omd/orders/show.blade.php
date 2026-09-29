@@ -134,8 +134,8 @@
         }
 
         /* =================================================
-           REPAIR TABLE WRAPPER (scroll area)
-        ================================================== */
+                           REPAIR TABLE WRAPPER (scroll area)
+                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -166,8 +166,8 @@
         }
 
         /* =================================================
-           TABLE
-        ================================================== */
+                           TABLE
+                        ================================================== */
 
         .repair-table {
             width: 100%;
@@ -181,8 +181,8 @@
         }
 
         /* =================================================
-           KOLOM
-        ================================================== */
+                           KOLOM
+                        ================================================== */
 
         .repair-table th:nth-child(1),
         .repair-table td:nth-child(1) {
@@ -220,8 +220,8 @@
         }
 
         /* =================================================
-           HEADER (sticky saat tabel di-scroll)
-        ================================================== */
+                           HEADER (sticky saat tabel di-scroll)
+                        ================================================== */
 
         .repair-table thead {
             position: sticky;
@@ -264,8 +264,8 @@
         }
 
         /* =================================================
-           BODY
-        ================================================== */
+                           BODY
+                        ================================================== */
 
         .repair-table td {
             padding: 11px 8px;
@@ -292,8 +292,8 @@
         }
 
         /* =================================================
-           NO & MODEL
-        ================================================== */
+                           NO & MODEL
+                        ================================================== */
 
         .repair-table .model-cell,
         .repair-table .no-cell {
@@ -322,8 +322,8 @@
         }
 
         /* =================================================
-           NILAI NG SEBELUM
-        ================================================== */
+                           NILAI NG SEBELUM
+                        ================================================== */
 
         .ng-value {
             min-height: 34px;
@@ -347,8 +347,8 @@
         }
 
         /* =================================================
-           CELL NG
-        ================================================== */
+                           CELL NG
+                        ================================================== */
 
         .ng-cell {
             padding: 6px !important;
@@ -358,8 +358,8 @@
         }
 
         /* =================================================
-           INPUT SESUDAH
-        ================================================== */
+                           INPUT SESUDAH
+                        ================================================== */
 
         .repair-table .ng-input {
             display: block;
@@ -402,8 +402,8 @@
         }
 
         /* =================================================
-           INPUT KETERANGAN
-        ================================================== */
+                           INPUT KETERANGAN
+                        ================================================== */
 
         .repair-table .keterangan-input {
             width: 100%;
@@ -437,8 +437,8 @@
         }
 
         /* =================================================
-           ACTION CARD
-        ================================================== */
+                           ACTION CARD
+                        ================================================== */
 
         .action-card {
             display: flex;
@@ -465,8 +465,8 @@
         }
 
         /* =================================================
-           BUTTON
-        ================================================== */
+                           BUTTON
+                        ================================================== */
 
         .btn {
             height: 36px;
@@ -510,8 +510,8 @@
         }
 
         /* =================================================
-           COMPLETED BOX
-        ================================================== */
+                           COMPLETED BOX
+                        ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -538,8 +538,8 @@
         }
 
         /* =================================================
-           LEGACY RESULT
-        ================================================== */
+                           LEGACY RESULT
+                        ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -548,8 +548,8 @@
         }
 
         /* =================================================
-           TIMELINE
-        ================================================== */
+                           TIMELINE
+                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -647,8 +647,8 @@
         }
 
         /* =================================================
-           ERROR
-        ================================================== */
+                           ERROR
+                        ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -665,8 +665,8 @@
         }
 
         /* =================================================
-           RESPONSIVE
-        ================================================== */
+                           RESPONSIVE
+                        ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -700,20 +700,11 @@
             <h2>
                 {{ $order->order_number }}
             </h2>
-
-            <p>
-                Order Repair Box
-            </p>
-
+            
         </div>
 
 
         <div class="repair-head-actions">
-
-            <span class="status-badge status-{{ $order->status }}">
-                {{ $order->status_label }}
-            </span>
-
 
             <a href="{{ route('omd.orders.index') }}" class="btn btn-secondary">
                 Kembali
@@ -842,19 +833,6 @@
 
                 <strong>
                     {{ $order->quantity }}
-                </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-                <span>
-                    Status
-                </span>
-
-                <strong>
-                    {{ $order->status_label }}
                 </strong>
 
             </div>
@@ -1051,10 +1029,11 @@
                                         </span>
                                     </td>
 
-
                                     {{-- =========================
-                             SEBELUM
-                        ========================== --}}
+     SEBELUM
+     - Tampilkan Qty Sebelum.
+     - Jika tidak ada item NG, kosong.
+========================= --}}
 
                                     @foreach ($ngCodes as $code)
                                         @php
@@ -1065,12 +1044,10 @@
 
                                             @if ($ngItem)
                                                 <div class="ng-value before">
-                                                    {{ $ngItem->before_qty }}
+                                                    {{ $ngItem->before_qty > 0 ? $ngItem->before_qty : '' }}
                                                 </div>
                                             @else
-                                                <div class="ng-value empty-ng">
-                                                    
-                                                </div>
+                                                <div class="ng-value empty-ng"></div>
                                             @endif
 
                                         </td>
@@ -1078,31 +1055,35 @@
 
 
                                     {{-- =========================
-                             SESUDAH
-                        ========================== --}}
+     SESUDAH
+     - Input hanya muncul jika pada kolom Sebelum
+       terdapat Qty NG (> 0).
+     - Jika Sebelum kosong / 0, Sesudah juga kosong.
+     - Selain status in_repair, tampilkan hasil repair
+       hanya jika sebelumnya memang ada order repair.
+========================= --}}
 
                                     @foreach ($ngCodes as $code)
                                         @php
                                             $ngItem = $ngItems->get($code);
+                                            $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
                                         @endphp
 
                                         <td class="ng-cell">
 
-                                            @if ($ngItem)
-                                                @if ($order->status === 'in_repair')
+                                            @if ($order->status === 'in_repair')
+                                                @if ($hasBeforeQty)
                                                     <input type="number" name="items[{{ $ngItem->id }}][after_qty]"
                                                         class="ng-input" min="0"
                                                         value="{{ old('items.' . $ngItem->id . '.after_qty', '') }}"
                                                         placeholder="">
-                                                @else
-                                                    <div class="ng-value before">
-                                                        {{ $ngItem->after_qty ?? '-' }}
-                                                    </div>
                                                 @endif
                                             @else
-                                                <div class="ng-value empty-ng">
-                                                    -
-                                                </div>
+                                                @if ($hasBeforeQty)
+                                                    <div class="ng-value before">
+                                                        {{ ($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : '' }}
+                                                    </div>
+                                                @endif
                                             @endif
 
                                         </td>

@@ -132,8 +132,8 @@
         }
 
         /* =================================================
-           REPAIR TABLE WRAPPER (scroll area)
-        ================================================== */
+                           REPAIR TABLE WRAPPER (scroll area)
+                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -164,8 +164,8 @@
         }
 
         /* =================================================
-           TABLE
-        ================================================== */
+                           TABLE
+                        ================================================== */
 
         .repair-table {
             width: 100%;
@@ -179,8 +179,8 @@
         }
 
         /* =================================================
-           KOLOM
-        ================================================== */
+                           KOLOM
+                        ================================================== */
 
         .repair-table th:nth-child(1),
         .repair-table td:nth-child(1) {
@@ -218,8 +218,8 @@
         }
 
         /* =================================================
-           HEADER (sticky saat tabel di-scroll)
-        ================================================== */
+                           HEADER (sticky saat tabel di-scroll)
+                        ================================================== */
 
         .repair-table thead {
             position: sticky;
@@ -262,8 +262,8 @@
         }
 
         /* =================================================
-           BODY
-        ================================================== */
+                           BODY
+                        ================================================== */
 
         .repair-table td {
             padding: 11px 8px;
@@ -290,8 +290,8 @@
         }
 
         /* =================================================
-           NO & MODEL
-        ================================================== */
+                           NO & MODEL
+                        ================================================== */
 
         .repair-table .model-cell,
         .repair-table .no-cell {
@@ -320,8 +320,8 @@
         }
 
         /* =================================================
-           NILAI NG SEBELUM
-        ================================================== */
+                           NILAI NG SEBELUM
+                        ================================================== */
 
         .ng-value {
             min-height: 34px;
@@ -345,8 +345,8 @@
         }
 
         /* =================================================
-           CELL NG
-        ================================================== */
+                           CELL NG
+                        ================================================== */
 
         .ng-cell {
             padding: 6px !important;
@@ -356,8 +356,8 @@
         }
 
         /* =================================================
-           INPUT SESUDAH
-        ================================================== */
+                           INPUT SESUDAH
+                        ================================================== */
 
         .repair-table .ng-input {
             display: block;
@@ -400,8 +400,8 @@
         }
 
         /* =================================================
-           INPUT KETERANGAN
-        ================================================== */
+                           INPUT KETERANGAN
+                        ================================================== */
 
         .repair-table .keterangan-input {
             width: 100%;
@@ -435,8 +435,8 @@
         }
 
         /* =================================================
-           ACTION CARD
-        ================================================== */
+                           ACTION CARD
+                        ================================================== */
 
         .action-card {
             display: flex;
@@ -463,8 +463,8 @@
         }
 
         /* =================================================
-           BUTTON
-        ================================================== */
+                           BUTTON
+                        ================================================== */
 
         .btn {
             height: 36px;
@@ -508,8 +508,8 @@
         }
 
         /* =================================================
-           COMPLETED BOX
-        ================================================== */
+                           COMPLETED BOX
+                        ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -536,8 +536,8 @@
         }
 
         /* =================================================
-           LEGACY RESULT
-        ================================================== */
+                           LEGACY RESULT
+                        ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -546,8 +546,8 @@
         }
 
         /* =================================================
-           TIMELINE
-        ================================================== */
+                           TIMELINE
+                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -645,8 +645,8 @@
         }
 
         /* =================================================
-           ERROR
-        ================================================== */
+                           ERROR
+                        ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -663,8 +663,8 @@
         }
 
         /* =================================================
-           RESPONSIVE
-        ================================================== */
+                           RESPONSIVE
+                        ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -699,21 +699,11 @@
                 <?php echo e($order->order_number); ?>
 
             </h2>
-
-            <p>
-                Order Repair Box
-            </p>
-
+            
         </div>
 
 
         <div class="repair-head-actions">
-
-            <span class="status-badge status-<?php echo e($order->status); ?>">
-                <?php echo e($order->status_label); ?>
-
-            </span>
-
 
             <a href="<?php echo e(route('omd.orders.index')); ?>" class="btn btn-secondary">
                 Kembali
@@ -846,20 +836,6 @@
 
                 <strong>
                     <?php echo e($order->quantity); ?>
-
-                </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-                <span>
-                    Status
-                </span>
-
-                <strong>
-                    <?php echo e($order->status_label); ?>
 
                 </strong>
 
@@ -1053,7 +1029,6 @@
                                         </span>
                                     </td>
 
-
                                     
 
                                     <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -1065,13 +1040,11 @@
 
                                             <?php if($ngItem): ?>
                                                 <div class="ng-value before">
-                                                    <?php echo e($ngItem->before_qty); ?>
+                                                    <?php echo e($ngItem->before_qty > 0 ? $ngItem->before_qty : ''); ?>
 
                                                 </div>
                                             <?php else: ?>
-                                                <div class="ng-value empty-ng">
-                                                    
-                                                </div>
+                                                <div class="ng-value empty-ng"></div>
                                             <?php endif; ?>
 
                                         </td>
@@ -1083,26 +1056,25 @@
                                     <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php
                                             $ngItem = $ngItems->get($code);
+                                            $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
                                         ?>
 
                                         <td class="ng-cell">
 
-                                            <?php if($ngItem): ?>
-                                                <?php if($order->status === 'in_repair'): ?>
+                                            <?php if($order->status === 'in_repair'): ?>
+                                                <?php if($hasBeforeQty): ?>
                                                     <input type="number" name="items[<?php echo e($ngItem->id); ?>][after_qty]"
                                                         class="ng-input" min="0"
                                                         value="<?php echo e(old('items.' . $ngItem->id . '.after_qty', '')); ?>"
                                                         placeholder="">
-                                                <?php else: ?>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <?php if($hasBeforeQty): ?>
                                                     <div class="ng-value before">
-                                                        <?php echo e($ngItem->after_qty ?? '-'); ?>
+                                                        <?php echo e(($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : ''); ?>
 
                                                     </div>
                                                 <?php endif; ?>
-                                            <?php else: ?>
-                                                <div class="ng-value empty-ng">
-                                                    -
-                                                </div>
                                             <?php endif; ?>
 
                                         </td>
@@ -1300,4 +1272,5 @@
     <?php endif; ?>
 
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/omd/orders/show.blade.php ENDPATH**/ ?>

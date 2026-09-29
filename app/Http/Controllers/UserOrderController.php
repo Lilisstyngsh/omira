@@ -521,20 +521,74 @@ class UserOrderController extends Controller
 
     public function history(Request $request)
     {
-        $orders = RepairOrder::with([
+        $request->validate([
+            'start_date' => [
+                'nullable',
+                'date',
+            ],
+
+            'end_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:start_date',
+            ],
+
+            'per_page' => [
+                'nullable',
+                'integer',
+                'in:10,25,50,100',
+            ],
+        ]);
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $perPage = (int) $request->input('per_page', 10);
+
+        $query = RepairOrder::with([
             'line',
             'result',
             'confirmation',
         ])
             ->where('user_id', $request->user()->id)
-            ->where('status', 'confirmed')
-            ->latest('created_at')
-            ->paginate(10);
+            ->where('status', 'confirmed');
 
+        /*
+    |--------------------------------------------------------------------------
+    | FILTER TANGGAL
+    |--------------------------------------------------------------------------
+    | Tanggal yang digunakan sama dengan tanggal yang ditampilkan
+    | pada tabel, yaitu created_at.
+    */
+
+        if ($startDate) {
+            $query->whereDate(
+                'created_at',
+                '>=',
+                $startDate
+            );
+        }
+
+        if ($endDate) {
+            $query->whereDate(
+                'created_at',
+                '<=',
+                $endDate
+            );
+        }
+
+        $orders = $query
+            ->latest('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view(
             'user.orders.history',
-            compact('orders')
+            compact(
+                'orders',
+                'startDate',
+                'endDate'
+            )
         );
     }
 
