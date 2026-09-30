@@ -145,8 +145,8 @@
         }
 
         /* =========================================================
-                                                                               DETAIL REPAIR BOX
-                                                                            ========================================================== */
+                                                                                                                       DETAIL REPAIR BOX
+                                                                                                                    ========================================================== */
 
         .repair-detail {
             min-width: 280px;
@@ -238,8 +238,8 @@
         }
 
         /* =========================================================
-                                                       HISTORY FILTER
-                                                    ========================================================= */
+                                                                                               HISTORY FILTER
+                                                                                            ========================================================= */
 
         .history-filter-box {
             margin-top: 18px;
@@ -496,10 +496,6 @@
         }
 
 
-        /* =========================================================
-                                                       RESPONSIVE FILTER
-                                                    ========================================================= */
-
         @media (max-width: 900px) {
 
             .history-filter-form {
@@ -539,9 +535,7 @@
             }
         }
 
-        /* =========================================================
-                                       PER PAGE
-                                    ========================================================= */
+        
 
         .history-per-page {
             display: flex;
@@ -605,10 +599,7 @@
             color: #94a3b8;
         }
 
-        /* =========================================================
-                               SEARCH HISTORY
-                            ========================================================= */
-
+        
         .history-toolbar {
             display: flex;
             align-items: center;
@@ -718,8 +709,8 @@
 
 
         /* =========================================================
-                               RESPONSIVE TOOLBAR
-                            ========================================================= */
+                                                                       RESPONSIVE TOOLBAR
+                                                                    ========================================================= */
 
         @media (max-width: 900px) {
 
@@ -734,8 +725,8 @@
         }
 
         /* =========================================================
-       PAGINATION
-    ========================================================= */
+                                               PAGINATION
+                                            ========================================================= */
 
         .history-pagination {
             margin-top: 20px;
@@ -825,8 +816,8 @@
 
 
         /* =========================================================
-                   RESPONSIVE
-                ========================================================= */
+                                                           RESPONSIVE
+                                                        ========================================================= */
 
         @media (max-width: 600px) {
 
@@ -840,6 +831,420 @@
                 overflow-x: auto;
                 padding-bottom: 3px;
             }
+        }
+
+        .history-date-picker {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+
+        .history-date-picker i {
+
+            position: absolute;
+
+            left: 12px;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+        }
+
+
+
+        .history-date-picker input {
+
+            height: 38px;
+
+            width: 100%;
+
+            padding-left: 35px;
+
+            border-radius: 10px;
+
+            border: 1px solid #dbe7df;
+
+            background: white;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            color: #334155;
+
+            cursor: pointer;
+
+        }
+
+
+
+        .history-date-picker input:focus {
+
+            outline: none;
+
+            border-color: #52b788;
+
+            box-shadow:
+                0 0 0 3px rgba(82, 183, 136, .15);
+
+        }
+
+
+
+
+        /* =====================
+                                   CUSTOM CALENDAR
+                                ===================== */
+
+
+        .calendar-popup {
+
+            display: none;
+
+            position: absolute;
+
+            margin-top: 8px;
+
+            width: 300px;
+
+            background: white;
+
+            border-radius: 18px;
+
+            padding: 18px;
+
+            z-index: 9999;
+
+
+            box-shadow:
+
+                0 20px 45px rgba(0, 0, 0, .15);
+
+
+            border:
+
+                1px solid #dcfce7;
+
+        }
+
+
+
+
+        .calendar-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 18px;
+
+        }
+
+
+
+        .calendar-header button {
+
+
+            width: 32px;
+
+            height: 32px;
+
+            border: none;
+
+            border-radius: 50%;
+
+
+            background: #ecfdf5;
+
+            color: #15803d;
+
+
+            cursor: pointer;
+
+            font-weight: 900;
+
+
+        }
+
+
+
+        .calendar-header strong {
+
+            font-size: 15px;
+
+            font-weight: 900;
+
+            color: #172033;
+
+        }
+
+
+
+
+
+        .calendar-week,
+        .calendar-days {
+
+
+            display: grid;
+
+            grid-template-columns: repeat(7, 1fr);
+
+            gap: 6px;
+
+
+        }
+
+
+
+        .calendar-week span {
+
+            text-align: center;
+
+            font-size: 10px;
+
+            color: #94a3b8;
+
+            font-weight: 800;
+
+        }
+
+
+
+
+        .calendar-day {
+
+
+            height: 34px;
+
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+
+            border-radius: 50%;
+
+
+            cursor: pointer;
+
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+
+            color: #334155;
+
+        }
+
+
+
+        .calendar-day:hover {
+
+
+            background: #d8f3dc;
+
+            color: #166534;
+
+
+        }
+
+
+
+        .calendar-day.active {
+
+
+            background: #52b788;
+
+            color: white;
+
+
+        }
+
+
+
+        .calendar-day.range {
+
+
+            background: #d8f3dc;
+
+            border-radius: 8px;
+
+        }
+
+
+        .calendar-empty {
+
+            height: 34px;
+
+        }
+
+        /* =========================
+                           CALENDAR IMPROVEMENT
+                        ========================= */
+
+
+        .calendar-popup {
+
+            animation:
+                calendarShow .18s ease;
+
+        }
+
+
+
+        @keyframes calendarShow {
+
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(-8px) scale(.96);
+
+            }
+
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0) scale(1);
+
+            }
+
+
+        }
+
+
+
+
+
+        .calendar-day.today {
+
+
+            border:
+
+                2px solid #52b788;
+
+
+            color: #15803d;
+
+
+        }
+
+
+
+
+
+
+        .calendar-day.selected-range {
+
+
+            background: #d8f3dc;
+
+
+            border-radius: 8px;
+
+
+        }
+
+
+
+
+
+
+        .calendar-footer {
+
+
+            display: flex;
+
+
+            justify-content: space-between;
+
+
+            margin-top: 15px;
+
+
+            padding-top: 12px;
+
+
+            border-top:
+
+                1px solid #ecfdf5;
+
+
+        }
+
+
+
+
+
+        .calendar-reset {
+
+
+            border: none;
+
+
+            background: #f0fdf4;
+
+
+            color: #15803d;
+
+
+            border-radius: 10px;
+
+
+            padding: 7px 14px;
+
+
+            font-size: 11px;
+
+
+            font-weight: 800;
+
+
+            cursor: pointer;
+
+
+        }
+
+
+
+
+
+
+
+
+        @media(max-width:768px) {
+
+
+
+            .calendar-popup {
+
+
+                width:
+
+                    calc(100vw - 40px);
+
+
+                max-width: 320px;
+
+
+            }
+
+
+
+
         }
     </style>
 
@@ -870,7 +1275,72 @@
 
                         <i class="fa-regular fa-calendar"></i>
 
-                        <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                        <div class="history-date-picker">
+
+                            <i class="fa-regular fa-calendar"></i>
+
+                            <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}"
+                                placeholder="Pilih tanggal" readonly onclick="openCalendar('start_date')">
+
+
+                        </div>
+
+
+                        <div class="calendar-popup" id="calendar-start_date">
+
+                            <div class="calendar-header">
+
+                                <button type="button" onclick="prevMonth()">
+                                    ←
+                                </button>
+
+
+                                <strong id="calendarTitle">
+                                    September 2026
+                                </strong>
+
+
+                                <button type="button" onclick="nextMonth()">
+                                    →
+                                </button>
+
+
+                            </div>
+
+
+
+                            <div class="calendar-week">
+
+
+                                <span>M</span>
+                                <span>T</span>
+                                <span>W</span>
+                                <span>T</span>
+                                <span>F</span>
+                                <span>S</span>
+                                <span>S</span>
+
+
+                            </div>
+
+
+
+                            <div class="calendar-days" id="calendarDays">
+                                <div class="calendar-footer">
+
+                                    <button type="button" class="calendar-reset" onclick="resetDate('start_date')">
+
+                                        Reset
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+
+                        </div>
 
                     </div>
 
@@ -888,8 +1358,72 @@
 
                         <i class="fa-regular fa-calendar"></i>
 
-                        <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                        <div class="history-date-picker">
 
+                            <i class="fa-regular fa-calendar"></i>
+
+                            <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}"
+                                placeholder="Pilih tanggal" readonly onclick="openCalendar('end_date')">
+
+                        </div>
+
+
+                        <div class="calendar-popup" id="calendar-end_date">
+
+
+                            <div class="calendar-header">
+
+
+                                <button type="button" onclick="prevMonth()">
+                                    ←
+                                </button>
+
+
+                                <strong id="calendarTitle2">
+
+                                </strong>
+
+
+                                <button type="button" onclick="nextMonth()">
+                                    →
+
+                                </button>
+
+
+                            </div>
+
+
+                            <div class="calendar-week">
+
+
+                                <span>M</span>
+                                <span>T</span>
+                                <span>W</span>
+                                <span>T</span>
+                                <span>F</span>
+                                <span>S</span>
+                                <span>S</span>
+
+
+                            </div>
+
+
+                            <div class="calendar-days" id="calendarDays2">
+                                <div class="calendar-footer">
+
+                                    <button type="button" class="calendar-reset" onclick="resetDate('end_date')">
+
+                                        Reset
+
+                                    </button>
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
                     </div>
 
                 </div>
@@ -1143,7 +1677,8 @@
                             Previous
                         </span>
                     @else
-                        <a href="{{ $orders->previousPageUrl() }}" class="history-pagination-btn history-pagination-prev">
+                        <a href="{{ $orders->previousPageUrl() }}"
+                            class="history-pagination-btn history-pagination-prev">
                             Previous
                         </a>
                     @endif
@@ -1208,5 +1743,395 @@
         @endif
 
     </div>
+
+    <script>
+        let calendarTarget = null;
+
+
+        let currentDate = new Date();
+
+
+
+
+
+        function openCalendar(target) {
+
+
+            calendarTarget = target;
+
+
+
+            let popup = document.getElementById(
+                'calendar-' + target
+            );
+
+
+
+            document
+                .querySelectorAll('.calendar-popup')
+                .forEach(item => {
+
+                    item.style.display = 'none';
+
+                });
+
+
+
+            popup.style.display = 'block';
+
+
+
+            renderCalendar();
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        function renderCalendar() {
+
+
+            let year = currentDate.getFullYear();
+
+            let month = currentDate.getMonth();
+
+
+
+            let firstDay = new Date(
+                year,
+                month,
+                1
+            ).getDay();
+
+
+
+            let days = new Date(
+                year,
+                month + 1,
+                0
+            ).getDate();
+
+
+
+
+            /*
+                Ubah Minggu menjadi kolom terakhir
+            */
+
+            firstDay = firstDay === 0 ?
+                6 :
+                firstDay - 1;
+
+
+
+
+
+            let title =
+                currentDate.toLocaleDateString(
+                    'id-ID', {
+                        month: 'long',
+                        year: 'numeric'
+                    }
+                );
+
+
+
+            document
+                .querySelectorAll('#calendarTitle,#calendarTitle2')
+                .forEach(el => {
+
+                    el.innerHTML =
+                        title;
+
+                });
+
+
+
+
+
+            let container;
+
+
+
+            if (calendarTarget === 'start_date') {
+
+                container =
+                    document.getElementById(
+                        'calendarDays'
+                    );
+
+            } else {
+
+                container =
+                    document.getElementById(
+                        'calendarDays2'
+                    );
+
+            }
+
+
+
+
+
+            container.innerHTML = '';
+
+
+
+
+
+
+
+            for (
+                let i = 0; i < firstDay; i++
+            ) {
+
+                let empty =
+                    document.createElement('div');
+
+
+                empty.className =
+                    'calendar-empty';
+
+
+                container.appendChild(empty);
+
+            }
+
+
+
+
+
+
+
+            for (
+                let day = 1; day <= days; day++
+            ) {
+
+
+
+                let button =
+                    document.createElement('div');
+
+
+
+                button.className =
+                    'calendar-day';
+
+
+
+                button.innerHTML =
+                    day;
+
+
+
+
+
+                let value =
+                    `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+
+
+                let selected =
+                    document
+                    .getElementById(calendarTarget)
+                    .value;
+
+
+
+
+
+                if (selected === value) {
+
+                    button.classList.add(
+                        'active'
+                    );
+
+                }
+
+
+
+
+                let start =
+                    document.getElementById('start_date').value;
+
+
+
+                let end =
+                    document.getElementById('end_date').value;
+
+
+
+
+                if (start && end) {
+
+
+                    if (value > start && value < end) {
+
+                        button.classList.add(
+                            'selected-range'
+                        );
+
+                    }
+
+
+                }
+
+
+
+
+
+                button.onclick = function() {
+
+
+                    document
+                        .getElementById(calendarTarget)
+                        .value = value;
+
+
+
+                    closeCalendar();
+
+
+
+                };
+
+
+
+                container.appendChild(button);
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        function prevMonth() {
+
+
+            currentDate.setMonth(
+                currentDate.getMonth() - 1
+            );
+
+
+
+            renderCalendar();
+
+
+        }
+
+
+
+
+
+
+
+
+
+        function nextMonth() {
+
+
+            currentDate.setMonth(
+                currentDate.getMonth() + 1
+            );
+
+
+            renderCalendar();
+
+
+        }
+
+
+
+
+
+
+
+
+
+        function closeCalendar() {
+
+
+            document
+                .querySelectorAll('.calendar-popup')
+                .forEach(item => {
+
+
+                    item.style.display = 'none';
+
+
+                });
+
+
+        }
+
+
+
+
+
+
+
+
+
+        document.addEventListener(
+            'click',
+            function(e) {
+
+
+                let calendar =
+                    e.target.closest(
+                        '.calendar-popup'
+                    );
+
+
+
+                let input =
+                    e.target.closest(
+                        '.history-date-picker'
+                    );
+
+
+
+                if (!calendar && !input) {
+
+                    closeCalendar();
+
+                }
+
+
+            }
+        );
+
+        function resetDate(target) {
+
+
+            document
+                .getElementById(target)
+                .value = '';
+
+
+
+            closeCalendar();
+
+
+        }
+    </script>
+
+
 
 @endsection

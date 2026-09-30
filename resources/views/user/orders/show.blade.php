@@ -96,8 +96,8 @@
         }
 
         /* =================================================
-                       INFO
-                    ================================================== */
+                                                           INFO
+                                                        ================================================== */
 
         .info-grid {
             display: grid;
@@ -138,8 +138,8 @@
         }
 
         /* =================================================
-                       REPAIR TABLE
-                    ================================================== */
+                                                           REPAIR TABLE
+                                                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -251,8 +251,8 @@
         }
 
         /* =================================================
-                       KETERANGAN
-                    ================================================== */
+                                                           KETERANGAN
+                                                        ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -299,8 +299,8 @@
         }
 
         /* =================================================
-                       ACTION CARD
-                    ================================================== */
+                                                           ACTION CARD
+                                                        ================================================== */
 
         .action-card {
             display: flex;
@@ -327,8 +327,8 @@
         }
 
         /* =================================================
-                       CONFIRMED
-                    ================================================== */
+                                                           CONFIRMED
+                                                        ================================================== */
 
         .confirmed-box {
             padding: 16px;
@@ -352,8 +352,8 @@
         }
 
         /* =================================================
-                       BUTTON
-                    ================================================== */
+                                                           BUTTON
+                                                        ================================================== */
 
         .btn {
             height: 36px;
@@ -391,8 +391,8 @@
         }
 
         /* =================================================
-                       LEGACY
-                    ================================================== */
+                                                           LEGACY
+                                                        ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -401,8 +401,8 @@
         }
 
         /* =================================================
-                       ERROR
-                    ================================================== */
+                                                           ERROR
+                                                        ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -415,8 +415,8 @@
         }
 
         /* =================================================
-                       RESPONSIVE
-                    ================================================== */
+                                                           RESPONSIVE
+                                                        ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -440,8 +440,71 @@
                 flex-direction: column;
             }
         }
-    </style>
 
+        /* =================================================
+                                       TIMELINE
+                                    ================================================== */
+
+        .timeline-wrap {
+            overflow-x: auto;
+            padding: 8px 2px 5px;
+        }
+
+        .timeline {
+            min-width: 620px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 12.5%;
+            right: 12.5%;
+            top: 18px;
+            height: 2px;
+            background: #bbf7d0;
+        }
+
+        .timeline-item {
+            position: relative;
+            text-align: center;
+            padding: 0 8px;
+            z-index: 1;
+        }
+
+        .timeline-icon {
+            width: 28px;
+            height: 28px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 800;
+            background: #dcfce7;
+            color: #16a34a;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px #bbf7d0;
+        }
+
+        .timeline-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .timeline-item span {
+            display: block;
+            font-size: 9px;
+            line-height: 1.5;
+            color: #64748b;
+        }
+    </style>
 
     {{-- =====================================================
          HEADER
@@ -499,6 +562,158 @@
 
     @endif
 
+    {{-- =====================================================
+     PROGRESS ORDER
+===================================================== --}}
+
+    <div class="repair-card">
+
+        <h3 class="repair-card-title">
+            Progress Order
+        </h3>
+
+        <p class="repair-card-desc">
+            Riwayat tahapan Order Repair Box.
+        </p>
+
+
+        <div class="timeline-wrap">
+
+            <div class="timeline">
+
+
+                {{-- USER SUBMIT --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        User Submit
+                    </strong>
+
+                    <span>
+
+                        @if ($order->created_at)
+
+                            {{ $order->created_at->format('d-m-Y H:i') }}
+
+                            @if ($order->user?->name)
+                                <br>
+                                {{ $order->user->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                {{-- VERIFIED OMD --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Verified OMD
+                    </strong>
+
+                    <span>
+
+                        @if ($order->verified_at)
+
+                            {{ $order->verified_at->format('d-m-Y H:i') }}
+
+                            @if ($order->omdVerifier?->name)
+                                <br>
+                                {{ $order->omdVerifier->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                {{-- REPAIR OMD --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Repair OMD
+                    </strong>
+
+                    <span>
+
+                        @if ($order->repair_completed_at)
+
+                            {{ $order->repair_completed_at->format('d-m-Y H:i') }}
+
+                            @if ($order->result?->processedBy?->name)
+                                <br>
+                                {{ $order->result->processedBy->name }}
+                            @endif
+                        @elseif ($order->repair_started_at)
+                            {{ $order->repair_started_at->format('d-m-Y H:i') }}
+
+                            @if ($order->result?->processedBy?->name)
+                                <br>
+                                {{ $order->result->processedBy->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                {{-- SERAH TERIMA --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Serah Terima
+                    </strong>
+
+                    <span>
+
+                        @if ($order->confirmation?->confirmed_at)
+
+                            {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
+
+                            @if ($order->user?->name)
+                                <br>
+                                {{ $order->user->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
 
     {{-- =====================================================
          INFORMASI ORDER
@@ -902,7 +1117,6 @@
     ===================================================== --}}
 
     @if ($order->status === 'completed')
-
         <div class="repair-card">
 
             <div class="action-card">
@@ -936,45 +1150,6 @@
 
         </div>
     @elseif ($order->status === 'confirmed')
-        <div class="repair-card">
-
-            <div class="confirmed-box">
-
-                <strong>
-                    Order Telah Dikonfirmasi
-                </strong>
-
-                <span>
-                    Order Repair Box telah dikonfirmasi dan
-                    proses telah selesai.
-                </span>
-
-
-                @if ($order->confirmation?->confirmed_at)
-                    <div
-                        style="
-                            margin-top:8px;
-                            font-size:10px;
-                            color:#4d7a5c;
-                        ">
-
-                        Dikonfirmasi pada
-
-                        <strong
-                            style="
-                                display:inline;
-                                font-size:10px;
-                            ">
-                            {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
-                        </strong>
-
-                    </div>
-                @endif
-
-            </div>
-
-        </div>
-
     @endif
 
 @endsection

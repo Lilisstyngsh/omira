@@ -115,8 +115,8 @@
 
 
         /* =================================================
-                   REPAIR TABLE
-                ================================================== */
+                           REPAIR TABLE
+                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -229,8 +229,8 @@
 
 
         /* =================================================
-                   KETERANGAN
-                ================================================== */
+                           KETERANGAN
+                        ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -262,8 +262,8 @@
 
 
         /* =================================================
-                   COMPLETED
-                ================================================== */
+                           COMPLETED
+                        ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -288,8 +288,8 @@
 
 
         /* =================================================
-                   TIMELINE
-                ================================================== */
+                           TIMELINE
+                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -353,8 +353,8 @@
 
 
         /* =================================================
-                   BUTTON
-                ================================================== */
+                           BUTTON
+                        ================================================== */
 
         .btn {
             height: 36px;
@@ -382,8 +382,8 @@
 
 
         /* =================================================
-                   RESPONSIVE
-                ================================================== */
+                           RESPONSIVE
+                        ================================================== */
 
         @media (max-width: 1000px) {
 
@@ -419,18 +419,10 @@
                 {{ $order->order_number }}
             </h2>
 
-            <p>
-                Detail History Order Repair Box
-            </p>
-
         </div>
 
 
         <div class="repair-head-actions">
-
-            <span class="status-badge status-confirmed">
-                Selesai
-            </span>
 
             <a href="{{ route('omd.orders.history') }}" class="btn btn-secondary">
                 Kembali
@@ -440,6 +432,152 @@
 
     </div>
 
+    {{-- =====================================================
+     PROGRESS ORDER
+    ===================================================== --}}
+    <div class="repair-card">
+
+        <h3 class="repair-card-title">
+            Progress Order
+        </h3>
+
+        <p class="repair-card-desc">
+            Riwayat tahapan Order Repair Box.
+        </p>
+
+
+        <div class="timeline-wrap">
+
+            <div class="timeline">
+
+
+                {{-- USER SUBMIT --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        User Submit
+                    </strong>
+
+                    <span>
+
+                        {{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}
+
+                        @if ($order->user?->name)
+                            <br>
+                            {{ $order->user->name }}
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                {{-- VERIFIED OMD --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Verified OMD
+                    </strong>
+
+                    <span>
+
+                        @if ($order->verified_at)
+
+                            {{ $order->verified_at->format('d-m-Y H:i') }}
+
+                            @if ($order->omdVerifier?->name)
+                                <br>
+                                {{ $order->omdVerifier->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                {{-- REPAIR OMD --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Repair OMD
+                    </strong>
+
+                    <span>
+
+                        @if ($order->repair_completed_at)
+
+                            {{ $order->repair_completed_at->format('d-m-Y H:i') }}
+
+                            @if ($order->result?->processedBy?->name)
+                                <br>
+                                {{ $order->result->processedBy->name }}
+                            @endif
+                        @elseif ($order->repair_started_at)
+                            {{ $order->repair_started_at->format('d-m-Y H:i') }}
+
+                            @if ($order->result?->processedBy?->name)
+                                <br>
+                                {{ $order->result->processedBy->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                {{-- SERAH TERIMA --}}
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Serah Terima
+                    </strong>
+
+                    <span>
+
+                        @if ($order->confirmation?->confirmed_at)
+
+                            {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
+
+                            @if ($order->confirmation->user?->name)
+                                <br>
+                                {{ $order->confirmation->user->name }}
+                            @endif
+                        @else
+                            -
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
 
     {{-- =====================================================
      INFORMASI ORDER
@@ -836,164 +974,5 @@
         </div>
 
     @endif
-
-
-    {{-- =====================================================
-     STATUS SELESAI
-    ===================================================== --}}
-
-    <div class="repair-card">
-
-        <div class="completed-box">
-
-            <strong>
-                Order Repair Box Selesai
-            </strong>
-
-            <span>
-                Order telah dikonfirmasi oleh User dan dipindahkan ke History Order Repair Box.
-            </span>
-
-            @if ($order->confirmation?->confirmed_at)
-                <span style="margin-top:7px;">
-
-                    Dikonfirmasi pada
-
-                    <strong style="display:inline;font-size:10px;">
-                        {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
-                    </strong>
-
-                </span>
-            @endif
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-     PROGRESS ORDER
-    ===================================================== --}}
-
-    <div class="repair-card">
-
-        <h3 class="repair-card-title">
-            Progress Order
-        </h3>
-
-        <p class="repair-card-desc">
-            Riwayat tahapan Order Repair Box.
-        </p>
-
-
-        <div class="timeline-wrap">
-
-            <div class="timeline">
-
-
-                {{-- USER SUBMIT --}}
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        User Submit
-                    </strong>
-
-                    <span>
-                        {{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}
-                    </span>
-
-                </div>
-
-
-                {{-- VERIFIED OMD --}}
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Verified OMD
-                    </strong>
-
-                    <span>
-
-                        @if ($order->verified_at)
-
-                            {{ $order->verified_at->format('d-m-Y H:i') }}
-
-                            @if ($order->omdVerifier?->name)
-                                <br>
-                                {{ $order->omdVerifier->name }}
-                            @endif
-                        @else
-                            -
-
-                        @endif
-
-                    </span>
-
-                </div>
-
-
-                {{-- REPAIR OMD --}}
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Repair OMD
-                    </strong>
-
-                    <span>
-
-                        @if ($order->repair_completed_at)
-                            {{ $order->repair_completed_at->format('d-m-Y H:i') }}
-                        @elseif ($order->repair_started_at)
-                            {{ $order->repair_started_at->format('d-m-Y H:i') }}
-                        @else
-                            -
-                        @endif
-
-                    </span>
-
-                </div>
-
-
-                {{-- SERAH TERIMA --}}
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Serah Terima
-                    </strong>
-
-                    <span>
-
-                        @if ($order->confirmation?->confirmed_at)
-                            {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
-                        @else
-                            -
-                        @endif
-
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-    </div>
 
 @endsection

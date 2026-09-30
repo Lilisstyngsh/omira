@@ -457,7 +457,6 @@ class UserOrderController extends Controller
             403
         );
 
-
         $order->load([
             'user',
             'line.plant',
@@ -465,11 +464,11 @@ class UserOrderController extends Controller
             'items.product',
             'items.ngType',
             'result',
+            'result.processedBy',
             'confirmation',
             'omdVerifier',
             'handedOverBy',
         ]);
-
 
         return view(
             'user.orders.show',

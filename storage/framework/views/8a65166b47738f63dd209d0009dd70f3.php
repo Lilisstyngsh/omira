@@ -115,8 +115,8 @@
 
 
         /* =================================================
-                   REPAIR TABLE
-                ================================================== */
+                           REPAIR TABLE
+                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -229,8 +229,8 @@
 
 
         /* =================================================
-                   KETERANGAN
-                ================================================== */
+                           KETERANGAN
+                        ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -262,8 +262,8 @@
 
 
         /* =================================================
-                   COMPLETED
-                ================================================== */
+                           COMPLETED
+                        ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -288,8 +288,8 @@
 
 
         /* =================================================
-                   TIMELINE
-                ================================================== */
+                           TIMELINE
+                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -353,8 +353,8 @@
 
 
         /* =================================================
-                   BUTTON
-                ================================================== */
+                           BUTTON
+                        ================================================== */
 
         .btn {
             height: 36px;
@@ -382,8 +382,8 @@
 
 
         /* =================================================
-                   RESPONSIVE
-                ================================================== */
+                           RESPONSIVE
+                        ================================================== */
 
         @media (max-width: 1000px) {
 
@@ -418,18 +418,10 @@
 
             </h2>
 
-            <p>
-                Detail History Order Repair Box
-            </p>
-
         </div>
 
 
         <div class="repair-head-actions">
-
-            <span class="status-badge status-confirmed">
-                Selesai
-            </span>
 
             <a href="<?php echo e(route('omd.orders.history')); ?>" class="btn btn-secondary">
                 Kembali
@@ -439,6 +431,160 @@
 
     </div>
 
+    
+    <div class="repair-card">
+
+        <h3 class="repair-card-title">
+            Progress Order
+        </h3>
+
+        <p class="repair-card-desc">
+            Riwayat tahapan Order Repair Box.
+        </p>
+
+
+        <div class="timeline-wrap">
+
+            <div class="timeline">
+
+
+                
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        User Submit
+                    </strong>
+
+                    <span>
+
+                        <?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?>
+
+
+                        <?php if($order->user?->name): ?>
+                            <br>
+                            <?php echo e($order->user->name); ?>
+
+                        <?php endif; ?>
+
+                    </span>
+
+                </div>
+
+
+                
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Verified OMD
+                    </strong>
+
+                    <span>
+
+                        <?php if($order->verified_at): ?>
+
+                            <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
+
+
+                            <?php if($order->omdVerifier?->name): ?>
+                                <br>
+                                <?php echo e($order->omdVerifier->name); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+
+                    </span>
+
+                </div>
+
+
+                
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Repair OMD
+                    </strong>
+
+                    <span>
+
+                        <?php if($order->repair_completed_at): ?>
+
+                            <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
+
+
+                            <?php if($order->result?->processedBy?->name): ?>
+                                <br>
+                                <?php echo e($order->result->processedBy->name); ?>
+
+                            <?php endif; ?>
+                        <?php elseif($order->repair_started_at): ?>
+                            <?php echo e($order->repair_started_at->format('d-m-Y H:i')); ?>
+
+
+                            <?php if($order->result?->processedBy?->name): ?>
+                                <br>
+                                <?php echo e($order->result->processedBy->name); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+
+                    </span>
+
+                </div>
+
+
+                
+                <div class="timeline-item">
+
+                    <div class="timeline-icon">
+                        ✓
+                    </div>
+
+                    <strong>
+                        Serah Terima
+                    </strong>
+
+                    <span>
+
+                        <?php if($order->confirmation?->confirmed_at): ?>
+
+                            <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
+
+
+                            <?php if($order->confirmation->user?->name): ?>
+                                <br>
+                                <?php echo e($order->confirmation->user->name); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
 
     
 
@@ -824,168 +970,6 @@
         </div>
 
     <?php endif; ?>
-
-
-    
-
-    <div class="repair-card">
-
-        <div class="completed-box">
-
-            <strong>
-                Order Repair Box Selesai
-            </strong>
-
-            <span>
-                Order telah dikonfirmasi oleh User dan dipindahkan ke History Order Repair Box.
-            </span>
-
-            <?php if($order->confirmation?->confirmed_at): ?>
-                <span style="margin-top:7px;">
-
-                    Dikonfirmasi pada
-
-                    <strong style="display:inline;font-size:10px;">
-                        <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
-
-                    </strong>
-
-                </span>
-            <?php endif; ?>
-
-        </div>
-
-    </div>
-
-
-    
-
-    <div class="repair-card">
-
-        <h3 class="repair-card-title">
-            Progress Order
-        </h3>
-
-        <p class="repair-card-desc">
-            Riwayat tahapan Order Repair Box.
-        </p>
-
-
-        <div class="timeline-wrap">
-
-            <div class="timeline">
-
-
-                
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        User Submit
-                    </strong>
-
-                    <span>
-                        <?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?>
-
-                    </span>
-
-                </div>
-
-
-                
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Verified OMD
-                    </strong>
-
-                    <span>
-
-                        <?php if($order->verified_at): ?>
-
-                            <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
-
-
-                            <?php if($order->omdVerifier?->name): ?>
-                                <br>
-                                <?php echo e($order->omdVerifier->name); ?>
-
-                            <?php endif; ?>
-                        <?php else: ?>
-                            -
-
-                        <?php endif; ?>
-
-                    </span>
-
-                </div>
-
-
-                
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Repair OMD
-                    </strong>
-
-                    <span>
-
-                        <?php if($order->repair_completed_at): ?>
-                            <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
-
-                        <?php elseif($order->repair_started_at): ?>
-                            <?php echo e($order->repair_started_at->format('d-m-Y H:i')); ?>
-
-                        <?php else: ?>
-                            -
-                        <?php endif; ?>
-
-                    </span>
-
-                </div>
-
-
-                
-                <div class="timeline-item">
-
-                    <div class="timeline-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Serah Terima
-                    </strong>
-
-                    <span>
-
-                        <?php if($order->confirmation?->confirmed_at): ?>
-                            <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
-
-                        <?php else: ?>
-                            -
-                        <?php endif; ?>
-
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-    </div>
 
 <?php $__env->stopSection(); ?>
 

@@ -55,7 +55,8 @@ class OmdOrderController extends Controller
             'masterModel',
             'ngType',
             'result',
-            'confirmation',
+            'result.processedBy',
+            'confirmation.user',
             'omdVerifier',
             'items.masterModel',
             'items.product',
@@ -606,10 +607,26 @@ class OmdOrderController extends Controller
 
 
                 /*
-                |--------------------------------------------------------------------------
-                | ORDER SELESAI
-                |--------------------------------------------------------------------------
-                */
+|--------------------------------------------------------------------------
+| SIMPAN PETUGAS REPAIR
+|--------------------------------------------------------------------------
+*/
+
+                $order->result()->updateOrCreate(
+                    [
+                        'repair_order_id' => $order->id,
+                    ],
+                    [
+                        'processed_by' => auth()->id(),
+                    ]
+                );
+
+
+                /*
+|--------------------------------------------------------------------------
+| ORDER SELESAI
+|--------------------------------------------------------------------------
+*/
 
                 $order->update([
 
