@@ -700,7 +700,7 @@
             <h2>
                 {{ $order->order_number }}
             </h2>
-            
+
         </div>
 
 
@@ -1255,7 +1255,7 @@
                 </strong>
 
                 <span>
-                    Hasil repair sudah disimpan dan order menunggu konfirmasi dari User.
+                    Hasil repair sudah disimpan dan menunggu konfirmasi dari User.
                 </span>
 
             </div>

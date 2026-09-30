@@ -113,53 +113,61 @@
             line-height: 1.6;
         }
 
-        .order-table-wrap {
+
+        /* =================================================
+                   REPAIR TABLE
+                ================================================== */
+
+        .repair-table-scroll {
             width: 100%;
-            max-height: 430px;
-            overflow: auto;
+            overflow-x: auto;
+            border: 1px solid #000;
             border-radius: 12px;
-            border: 1px solid #edf1f5;
             background: #fff;
+        }
+
+        .repair-table-header {
+            min-width: 1100px;
+            background: #fafbfc;
+        }
+
+        .repair-table-body {
+            min-width: 1100px;
+            max-height: 430px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
         }
 
         .repair-table {
             width: 100%;
-            min-width: 980px;
+            min-width: 1100px;
+            table-layout: fixed;
             border-collapse: separate;
             border-spacing: 0;
+            background: #fff;
         }
 
         .repair-table th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            padding: 10px 12px;
-            text-align: left;
+            padding: 10px 8px;
             background: #fafbfc;
-            border-bottom: 1px solid #e9eef4;
-            color: #64748b;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
+            color: #475569;
             font-size: 10px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: .03em;
+            text-align: center;
+            vertical-align: middle;
             white-space: nowrap;
         }
 
-        .repair-table thead tr:first-child th {
-            border-bottom: 0;
-        }
-
-        .repair-table .sub-head {
-            padding-top: 8px;
-            padding-bottom: 10px;
-            text-align: center;
-            background: #fafbfc;
-            border-bottom: 1px solid #e9eef4 !important;
-        }
-
         .repair-table td {
-            padding: 11px 12px;
-            border-bottom: 1px solid #eef2f6;
+            padding: 4px 8px;
+            /* REVISI: sebelumnya 11px 8px */
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
             font-size: 12px;
             color: #334155;
             vertical-align: middle;
@@ -171,19 +179,27 @@
         }
 
         .repair-table tbody tr:hover td {
-            background: #fcfcff;
+            background: #fafbfc;
+        }
+
+        .repair-table td.no-cell,
+        .repair-table td.model-cell {
+            border-right: 1px solid #000;
         }
 
         .repair-table .model-cell,
         .repair-table .no-cell {
             font-weight: 800;
             color: #172033;
-            vertical-align: middle;
-            text-align: center;
+            vertical-align: middle !important;
         }
 
         .repair-table .model-cell {
             text-align: left;
+        }
+
+        .repair-table .no-cell {
+            text-align: center;
         }
 
         .model-text {
@@ -196,46 +212,58 @@
             color: #475569;
         }
 
-        .ng-check {
-            display: inline-flex;
+        .ng-value {
+            min-height: 22px;
+            /* REVISI: sebelumnya 34px */
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
-            background: #f8fafc;
+            font-weight: 800;
+            color: #334155;
+        }
+
+        .empty-ng {
             color: #cbd5e1;
             font-size: 12px;
-            font-weight: 900;
-            border: 1px solid #edf1f5;
         }
 
-        .ng-check.active {
-            background: #f5f3ff;
-            color: #6557dc;
-            border-color: #e9e3ff;
+
+        /* =================================================
+                   KETERANGAN
+                ================================================== */
+
+        .repair-table .keterangan-head {
+            width: 180px !important;
+            min-width: 180px !important;
+            text-align: center !important;
         }
 
-        .qty-readonly {
-            text-align: center;
-            font-weight: 800;
-            color: #334155;
+        .repair-table .keterangan-cell {
+            width: 180px !important;
+            min-width: 180px !important;
+            padding: 2px !important;
+            text-align: left !important;
+            vertical-align: middle !important;
         }
 
-        .result-total {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 48px;
-            height: 28px;
-            padding: 0 9px;
-            border-radius: 8px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            color: #334155;
+        .repair-table .keterangan-text {
+            width: 100%;
+            padding: 3px 8px;
+            /* REVISI: sebelumnya 8px 10px */
+            text-align: left !important;
+            color: #475569;
             font-size: 11px;
-            font-weight: 800;
+            line-height: 1.4;
+            /* REVISI: sebelumnya 1.5 */
+            white-space: pre-wrap;
+            word-break: break-word;
+            box-sizing: border-box;
         }
+
+
+        /* =================================================
+                   COMPLETED
+                ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -257,6 +285,11 @@
             color: #4d7a5c;
             line-height: 1.5;
         }
+
+
+        /* =================================================
+                   TIMELINE
+                ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -318,6 +351,11 @@
             color: #64748b;
         }
 
+
+        /* =================================================
+                   BUTTON
+                ================================================== */
+
         .btn {
             height: 36px;
             padding: 0 14px;
@@ -342,13 +380,21 @@
             background: #e2e8f0;
         }
 
+
+        /* =================================================
+                   RESPONSIVE
+                ================================================== */
+
         @media (max-width: 1000px) {
+
             .info-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
         }
 
         @media (max-width: 700px) {
+
             .repair-head {
                 flex-direction: column;
             }
@@ -356,6 +402,7 @@
             .info-grid {
                 grid-template-columns: 1fr;
             }
+
         }
     </style>
 
@@ -401,116 +448,42 @@
             Informasi Order
         </h3>
 
+
         <div class="info-grid">
 
             <div class="info-item">
-
-                <span>
-                    No Order
-                </span>
-
-                <strong>
-                    <?php echo e($order->order_number); ?>
-
-                </strong>
-
+                <span>No Order</span>
+                <strong><?php echo e($order->order_number); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Tanggal
-                </span>
-
-                <strong>
-                    <?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?>
-
-                </strong>
-
+                <span>Tanggal</span>
+                <strong><?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Nama
-                </span>
-
-                <strong>
-                    <?php echo e($order->user?->name ?? '-'); ?>
-
-                </strong>
-
+                <span>Nama</span>
+                <strong><?php echo e($order->user?->name ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Plant
-                </span>
-
-                <strong>
-                    <?php echo e($order->line?->plant?->name ?? '-'); ?>
-
-                </strong>
-
+                <span>Plant</span>
+                <strong><?php echo e($order->line?->plant?->name ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Line
-                </span>
-
-                <strong>
-                    <?php echo e($order->line?->name ?? '-'); ?>
-
-                </strong>
-
+                <span>Line</span>
+                <strong><?php echo e($order->line?->name ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Jenis Order
-                </span>
-
-                <strong>
-                    Repair Box
-                </strong>
-
+                <span>Jenis Order</span>
+                <strong>Repair Box</strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Total Qty
-                </span>
-
-                <strong>
-                    <?php echo e($order->quantity); ?>
-
-                </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-                <span>
-                    Status
-                </span>
-
-                <strong>
-                    <?php echo e($order->status_label); ?>
-
-                </strong>
-
+                <span>Total Qty</span>
+                <strong><?php echo e($order->quantity); ?></strong>
             </div>
 
         </div>
@@ -537,7 +510,8 @@
     <?php if($order->items->isNotEmpty()): ?>
 
         <?php
-            $groupedItems = $order->items->groupBy('master_model_id');
+            $modelGroups = $order->items->groupBy('master_model_id');
+            $ngCodes = ['P', 'H', 'C', 'S'];
         ?>
 
 
@@ -552,195 +526,260 @@
             </p>
 
 
-            <div class="order-table-wrap">
-
-                <table class="repair-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th rowspan="2" style="width:55px;text-align:center;">
-                                No
-                            </th>
-
-                            <th rowspan="2" style="width:170px;">
-                                Model
-                            </th>
-
-                            <th rowspan="2" style="width:170px;">
-                                Produk
-                            </th>
-
-                            <th colspan="4" style="text-align:center;">
-                                Jenis NG
-                            </th>
-
-                            <th rowspan="2" style="width:95px;text-align:center;">
-                                Qty Sebelum
-                            </th>
-
-                            <th rowspan="2" style="width:95px;text-align:center;">
-                                Qty Sesudah
-                            </th>
-
-                            <th rowspan="2" style="min-width:220px;">
-                                Keterangan
-                            </th>
-
-                        </tr>
+            <div class="repair-table-scroll">
 
 
-                        <tr>
+                
 
-                            <th class="sub-head" style="width:48px;">
-                                P
-                            </th>
+                <div class="repair-table-header">
 
-                            <th class="sub-head" style="width:48px;">
-                                H
-                            </th>
+                    <table class="repair-table">
 
-                            <th class="sub-head" style="width:48px;">
-                                C
-                            </th>
+                        <colgroup>
 
-                            <th class="sub-head" style="width:48px;">
-                                S
-                            </th>
+                            <col style="width:55px;">
+                            <col style="width:150px;">
+                            <col style="width:170px;">
 
-                        </tr>
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
 
-                    </thead>
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
 
+                            <col style="width:180px;">
 
-                    <tbody>
-
-                        <?php $__currentLoopData = $groupedItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modelItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <?php
-                                $modelNo = $loop->iteration;
-                                $rowspan = $modelItems->count();
-                            ?>
+                        </colgroup>
 
 
-                            <?php $__currentLoopData = $modelItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <thead>
+
+                            <tr>
+
+                                <th rowspan="3">
+                                    No
+                                </th>
+
+                                <th rowspan="3" style="text-align:left;">
+                                    Model
+                                </th>
+
+                                <th rowspan="3" style="text-align:left;">
+                                    Produk
+                                </th>
+
+                                <th colspan="8">
+                                    Jenis &amp; Qty NG
+                                </th>
+
+                                <th rowspan="3" class="keterangan-head">
+                                    Keterangan
+                                </th>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <th colspan="4">
+                                    Sebelum
+                                </th>
+
+                                <th colspan="4">
+                                    Sesudah
+                                </th>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <th>
+                                        <?php echo e($code); ?>
+
+                                    </th>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+
+                                <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <th>
+                                        <?php echo e($code); ?>
+
+                                    </th>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                            </tr>
+
+                        </thead>
+
+                    </table>
+
+                </div>
+
+
+                
+
+                <div class="repair-table-body">
+
+                    <table class="repair-table">
+
+                        <colgroup>
+
+                            <col style="width:55px;">
+                            <col style="width:150px;">
+                            <col style="width:170px;">
+
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+
+                            <col style="width:180px;">
+
+                        </colgroup>
+
+
+                        <tbody>
+
+                            <?php $__currentLoopData = $modelGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modelItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php
-                                    $ngCode = strtoupper($item->ngType?->code ?? '');
+                                    $productGroups = $modelItems->groupBy('product_id');
+                                    $modelRowspan = $productGroups->count();
                                 ?>
 
 
-                                <tr>
+                                <?php $__currentLoopData = $productGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $productItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
 
-                                    <?php if($loop->first): ?>
-                                        <td rowspan="<?php echo e($rowspan); ?>" class="no-cell">
-                                            <?php echo e($modelNo); ?>
+                                        $ngItems = $productItems->keyBy(function ($item) {
+                                            return strtoupper($item->ngType?->code ?? '');
+                                        });
 
-                                        </td>
+                                        $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))
+                                            ?->mismatch_note;
+
+                                    ?>
 
 
-                                        <td rowspan="<?php echo e($rowspan); ?>" class="model-cell">
+                                    <tr>
 
-                                            <span class="model-text">
-                                                <?php echo e($item->masterModel?->model ?? '-'); ?>
+
+                                        
+
+                                        <?php if($loop->first): ?>
+                                            <td rowspan="<?php echo e($modelRowspan); ?>" class="no-cell">
+                                                <?php echo e($loop->parent->iteration); ?>
+
+                                            </td>
+
+
+                                            <td rowspan="<?php echo e($modelRowspan); ?>" class="model-cell">
+
+                                                <span class="model-text">
+                                                    <?php echo e($modelItems->first()->masterModel?->model ?? '-'); ?>
+
+                                                </span>
+
+                                            </td>
+                                        <?php endif; ?>
+
+
+                                        
+
+                                        <td>
+
+                                            <span class="product-text">
+                                                <?php echo e($productItems->first()->product?->name ?? '-'); ?>
 
                                             </span>
 
                                         </td>
-                                    <?php endif; ?>
 
 
-                                    <td>
+                                        
 
-                                        <span class="product-text">
-                                            <?php echo e($item->product?->name ?? '-'); ?>
+                                        <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
+                                                $ngItem = $ngItems->get($code);
+                                            ?>
 
-                                        </span>
+                                            <td>
 
-                                    </td>
+                                                <?php if($ngItem): ?>
+                                                    <div class="ng-value">
 
-
-                                    
-                                    <td style="text-align:center;">
-
-                                        <span class="ng-check <?php echo e($ngCode === 'P' ? 'active' : ''); ?>">
-                                            <?php echo e($ngCode === 'P' ? '✓' : ''); ?>
-
-                                        </span>
-
-                                    </td>
+                                                        <?php echo e($ngItem->before_qty > 0 ? $ngItem->before_qty : ''); ?>
 
 
-                                    
-                                    <td style="text-align:center;">
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="ng-value empty-ng">
 
-                                        <span class="ng-check <?php echo e($ngCode === 'H' ? 'active' : ''); ?>">
-                                            <?php echo e($ngCode === 'H' ? '✓' : ''); ?>
+                                                    </div>
+                                                <?php endif; ?>
 
-                                        </span>
-
-                                    </td>
-
-
-                                    
-                                    <td style="text-align:center;">
-
-                                        <span class="ng-check <?php echo e($ngCode === 'C' ? 'active' : ''); ?>">
-                                            <?php echo e($ngCode === 'C' ? '✓' : ''); ?>
-
-                                        </span>
-
-                                    </td>
+                                            </td>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
-                                    
-                                    <td style="text-align:center;">
+                                        
 
-                                        <span class="ng-check <?php echo e($ngCode === 'S' ? 'active' : ''); ?>">
-                                            <?php echo e($ngCode === 'S' ? '✓' : ''); ?>
+                                        <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
 
-                                        </span>
+                                                $ngItem = $ngItems->get($code);
 
-                                    </td>
+                                                $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
 
+                                            ?>
 
-                                    
-                                    <td class="qty-readonly">
-                                        <?php echo e($item->before_qty); ?>
+                                            <td>
 
-                                    </td>
+                                                <?php if($hasBeforeQty): ?>
+                                                    <div class="ng-value">
 
-
-                                    
-                                    <td class="qty-readonly">
-                                        <?php echo e($item->after_qty ?? '-'); ?>
-
-                                    </td>
+                                                        <?php echo e(($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : ''); ?>
 
 
-                                    
-                                    <td>
-                                        <?php echo e($item->mismatch_note ?: '-'); ?>
+                                                    </div>
+                                                <?php endif; ?>
 
-                                    </td>
+                                            </td>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                                </tr>
+
+                                        
+
+                                        <td class="keterangan-cell">
+                                            <div class="keterangan-text"><?php echo e($productNote ?: '-'); ?></div>
+                                        </td>
+
+                                    </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                    </tbody>
+                        </tbody>
 
-                </table>
+                    </table>
+
+                </div>
 
             </div>
 
         </div>
+    <?php elseif($order->result): ?>
+        
 
-    <?php endif; ?>
-
-
-    
-
-    <?php if($order->result): ?>
         <div class="repair-card">
 
             <h3 class="repair-card-title">
@@ -755,58 +794,23 @@
             <div class="info-grid">
 
                 <div class="info-item">
-
-                    <span>
-                        OK
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->ok_qty); ?>
-
-                    </strong>
-
+                    <span>OK</span>
+                    <strong><?php echo e($order->result->ok_qty); ?></strong>
                 </div>
 
-
                 <div class="info-item">
-
-                    <span>
-                        Scrap
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->scrap_qty); ?>
-
-                    </strong>
-
+                    <span>Scrap</span>
+                    <strong><?php echo e($order->result->scrap_qty); ?></strong>
                 </div>
 
-
                 <div class="info-item">
-
-                    <span>
-                        NG
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->ng_qty); ?>
-
-                    </strong>
-
+                    <span>NG</span>
+                    <strong><?php echo e($order->result->ng_qty); ?></strong>
                 </div>
 
-
                 <div class="info-item">
-
-                    <span>
-                        Diproses Oleh
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->processedBy?->name ?? '-'); ?>
-
-                    </strong>
-
+                    <span>Diproses Oleh</span>
+                    <strong><?php echo e($order->result->processedBy?->name ?? '-'); ?></strong>
                 </div>
 
             </div>
@@ -818,6 +822,7 @@
             </div>
 
         </div>
+
     <?php endif; ?>
 
 
@@ -839,6 +844,7 @@
                 <span style="margin-top:7px;">
 
                     Dikonfirmasi pada
+
                     <strong style="display:inline;font-size:10px;">
                         <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
 

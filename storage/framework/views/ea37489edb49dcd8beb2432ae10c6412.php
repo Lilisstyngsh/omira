@@ -94,8 +94,8 @@
         }
 
         /* =================================================
-                   INFO
-                ================================================== */
+                       INFO
+                    ================================================== */
 
         .info-grid {
             display: grid;
@@ -136,8 +136,8 @@
         }
 
         /* =================================================
-                   REPAIR TABLE
-                ================================================== */
+                       REPAIR TABLE
+                    ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -185,7 +185,8 @@
         }
 
         .repair-table td {
-            padding: 11px 8px;
+            padding: 4px 8px;
+            /* REVISI: sebelumnya 11px 8px */
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;
             font-size: 12px;
@@ -233,7 +234,8 @@
         }
 
         .ng-value {
-            min-height: 34px;
+            min-height: 22px;
+            /* REVISI: sebelumnya 34px */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -247,66 +249,56 @@
         }
 
         /* =================================================
-                   KETERANGAN
-                ================================================== */
+                       KETERANGAN
+                    ================================================== */
 
         .repair-table .keterangan-head {
-    width: 180px !important;
-    min-width: 180px !important;
-    text-align: center !important;
-}
+            width: 180px !important;
+            min-width: 180px !important;
+            text-align: center !important;
+        }
 
-.repair-table .keterangan-cell {
-    width: 180px !important;
-    min-width: 180px !important;
+        .repair-table .keterangan-cell {
+            width: 180px !important;
+            min-width: 180px !important;
+            padding: 2px !important;
+            text-align: left !important;
+            vertical-align: middle !important;
+        }
 
-    padding: 2px !important;
+        .repair-table .keterangan-text {
+            width: 100%;
+            padding: 3px 8px;
+            /* REVISI: sebelumnya 8px 10px */
+            text-align: left !important;
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.4;
+            /* REVISI: sebelumnya 1.5 */
+            white-space: pre-wrap;
+            word-break: break-word;
+            box-sizing: border-box;
+        }
 
-    text-align: left !important;
-    vertical-align: middle !important;
-}
-
-.repair-table .keterangan-text {
-    width: 100%;
-
-    padding: 8px 10px;
-
-    text-align: left !important;
-
-    color: #475569;
-    font-size: 11px;
-    line-height: 1.5;
-
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.repair-table .keterangan-input {
-    width: 100%;
-    min-height: 40px;
-
-    box-sizing: border-box;
-
-    padding: 8px 10px;
-
-    text-align: left !important;
-
-    border: 1px solid #64748b;
-    border-radius: 8px;
-
-    background: #fff;
-    color: #334155;
-
-    font-size: 11px;
-    line-height: 1.5;
-
-    resize: vertical;
-    outline: none;
-}
+        .repair-table .keterangan-input {
+            width: 100%;
+            min-height: 40px;
+            box-sizing: border-box;
+            padding: 8px 10px;
+            text-align: left !important;
+            border: 1px solid #64748b;
+            border-radius: 8px;
+            background: #fff;
+            color: #334155;
+            font-size: 11px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+        }
 
         /* =================================================
-                   ACTION CARD
-                ================================================== */
+                       ACTION CARD
+                    ================================================== */
 
         .action-card {
             display: flex;
@@ -333,8 +325,8 @@
         }
 
         /* =================================================
-                   CONFIRMED
-                ================================================== */
+                       CONFIRMED
+                    ================================================== */
 
         .confirmed-box {
             padding: 16px;
@@ -358,8 +350,8 @@
         }
 
         /* =================================================
-                   BUTTON
-                ================================================== */
+                       BUTTON
+                    ================================================== */
 
         .btn {
             height: 36px;
@@ -397,8 +389,8 @@
         }
 
         /* =================================================
-                   LEGACY
-                ================================================== */
+                       LEGACY
+                    ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -407,8 +399,8 @@
         }
 
         /* =================================================
-                   ERROR
-                ================================================== */
+                       ERROR
+                    ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -421,8 +413,8 @@
         }
 
         /* =================================================
-                   RESPONSIVE
-                ================================================== */
+                       RESPONSIVE
+                    ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -517,99 +509,38 @@
         <div class="info-grid">
 
             <div class="info-item">
-
-                <span>
-                    No Order
-                </span>
-
-                <strong>
-                    <?php echo e($order->order_number); ?>
-
-                </strong>
-
+                <span>No Order</span>
+                <strong><?php echo e($order->order_number); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Tanggal
-                </span>
-
-                <strong>
-                    <?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?>
-
-                </strong>
-
+                <span>Tanggal</span>
+                <strong><?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Nama
-                </span>
-
-                <strong>
-                    <?php echo e($order->user?->name ?? '-'); ?>
-
-                </strong>
-
+                <span>Nama</span>
+                <strong><?php echo e($order->user?->name ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Plant
-                </span>
-
-                <strong>
-                    <?php echo e($order->line?->plant?->name ?? '-'); ?>
-
-                </strong>
-
+                <span>Plant</span>
+                <strong><?php echo e($order->line?->plant?->name ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Line
-                </span>
-
-                <strong>
-                    <?php echo e($order->line?->name ?? '-'); ?>
-
-                </strong>
-
+                <span>Line</span>
+                <strong><?php echo e($order->line?->name ?? '-'); ?></strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Jenis Order
-                </span>
-
-                <strong>
-                    Repair Box
-                </strong>
-
+                <span>Jenis Order</span>
+                <strong>Repair Box</strong>
             </div>
 
-
             <div class="info-item">
-
-                <span>
-                    Total Qty
-                </span>
-
-                <strong>
-                    <?php echo e($order->quantity); ?>
-
-                </strong>
-
+                <span>Total Qty</span>
+                <strong><?php echo e($order->quantity); ?></strong>
             </div>
 
         </div>
@@ -857,7 +788,7 @@
                                                     </div>
                                                 <?php else: ?>
                                                     <div class="ng-value empty-ng">
-                                                        
+
                                                     </div>
                                                 <?php endif; ?>
 
@@ -892,14 +823,7 @@
                                         
 
                                         <td class="keterangan-cell">
-
-                                            <div class="keterangan-text">
-
-                                                <?php echo e($productNote ?: '-'); ?>
-
-
-                                            </div>
-
+                                            <div class="keterangan-text"><?php echo e($productNote ?: '-'); ?></div>
                                         </td>
 
                                     </tr>
@@ -932,44 +856,18 @@
             <div class="legacy-result-grid">
 
                 <div class="info-item">
-
-                    <span>
-                        OK
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->ok_qty); ?>
-
-                    </strong>
-
+                    <span>OK</span>
+                    <strong><?php echo e($order->result->ok_qty); ?></strong>
                 </div>
 
-
                 <div class="info-item">
-
-                    <span>
-                        SCRAP
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->scrap_qty); ?>
-
-                    </strong>
-
+                    <span>SCRAP</span>
+                    <strong><?php echo e($order->result->scrap_qty); ?></strong>
                 </div>
 
-
                 <div class="info-item">
-
-                    <span>
-                        NG
-                    </span>
-
-                    <strong>
-                        <?php echo e($order->result->ng_qty); ?>
-
-                    </strong>
-
+                    <span>NG</span>
+                    <strong><?php echo e($order->result->ng_qty); ?></strong>
                 </div>
 
             </div>

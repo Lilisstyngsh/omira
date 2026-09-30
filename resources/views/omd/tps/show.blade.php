@@ -59,7 +59,7 @@
 
                 <h3>Aksi</h3>
 
-                @if ($order->status === 'submitted' && auth()->user()->role === 'omd_leader')
+                @if ($order->status === 'submitted' && auth()->user()->role === 'omd')
 
                     <form method="POST" action="{{ route('omd.tps.leader-check', $order) }}">
                         @csrf
@@ -79,7 +79,7 @@
                         </button>
                     </form>
 
-                @elseif ($order->status === 'verified' && auth()->user()->role === 'omd_leader')
+                @elseif ($order->status === 'verified' && auth()->user()->role === 'omd')
 
                     <form method="POST" action="{{ route('omd.tps.schedule', $order) }}">
 

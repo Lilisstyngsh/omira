@@ -1206,6 +1206,257 @@
         .nav-notification.pulse {
             animation: notificationPulse 1.8s infinite;
         }
+
+        /* =========================================================
+   PROFILE DROPDOWN
+========================================================= */
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-dropdown .profile {
+            cursor: pointer;
+            border: none;
+        }
+
+
+        /* =========================================================
+   POPUP
+========================================================= */
+
+        .profile-menu {
+            position: absolute;
+
+            top: calc(100% + 10px);
+            right: 0;
+
+            width: 255px;
+
+            padding: 8px;
+
+            background: #ffffff;
+
+            border: 1px solid #e8e5f0;
+            border-radius: 16px;
+
+            box-shadow:
+                0 15px 40px rgba(31, 20, 70, .14);
+
+            display: none;
+
+            z-index: 1000;
+        }
+
+        .profile-menu.open {
+            display: block;
+        }
+
+
+        /* =========================================================
+   PROFILE HEADER
+========================================================= */
+
+        .profile-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            padding: 8px 8px 12px;
+        }
+
+        .profile-menu-avatar {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            background:
+                linear-gradient(135deg,
+                    #8b5cf6,
+                    #6d28d9);
+
+            color: #fff;
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .profile-menu-user {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .profile-menu-name {
+            margin-bottom: 3px;
+
+            color: #182033;
+
+            font-size: 12px;
+            font-weight: 750;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-menu-email {
+            color: #667085;
+
+            font-size: 10px;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        /* =========================================================
+   EDIT PROFILE
+========================================================= */
+
+        .profile-menu-header .profile-menu-edit {
+            width: 30px;
+            height: 30px;
+
+            padding: 0;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 8px;
+
+            background: transparent;
+
+            color: #3159b7;
+
+            font-size: 15px;
+
+            cursor: pointer;
+        }
+
+        .profile-menu-header .profile-menu-edit:hover {
+            background: #f3f6ff;
+            color: #23479e;
+        }
+
+
+        /* =========================================================
+   DIVIDER
+========================================================= */
+
+        .profile-menu-divider {
+            height: 1px;
+
+            margin: 4px 3px 8px;
+
+            background: #e8e7ed;
+        }
+
+
+        /* =========================================================
+   MENU ITEM
+========================================================= */
+
+        .profile-menu>a:not(.profile-menu-edit),
+        .profile-menu>form button {
+            width: 100%;
+
+            min-height: 42px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 0 11px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: transparent;
+
+            color: #475569;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            text-align: left;
+            text-decoration: none;
+
+            box-sizing: border-box;
+
+            cursor: pointer;
+
+            transition: .18s ease;
+        }
+
+        .profile-menu>a:not(.profile-menu-edit):hover {
+            background: #f6f6f8;
+            color: #182033;
+        }
+
+
+        /* =========================================================
+   ACCOUNT SETTINGS
+========================================================= */
+
+        .profile-menu .profile-menu-settings {
+            background: #f6f6f8;
+            color: #182033;
+        }
+
+        .profile-menu .profile-menu-settings:hover {
+            background: #f1f1f3;
+        }
+
+
+        /* =========================================================
+   MENU ICON
+========================================================= */
+
+        .profile-menu-icon {
+            width: 20px;
+            height: 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            color: #3f3f46;
+
+            font-size: 15px;
+        }
+
+
+        /* =========================================================
+   LOGOUT
+========================================================= */
+
+        .profile-menu form {
+            margin: 0;
+        }
+
+        .profile-menu>form button {
+            color: #4b5563;
+        }
+
+        .profile-menu>form button:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
     </style>
 </head>
 
@@ -1349,7 +1600,7 @@
                     <nav class="nav">
 
                         
-                        <?php if(auth()->user()->role === 'omd_leader'): ?>
+                        <?php if(auth()->user()->role === 'omd'): ?>
                             <div class="nav-dropdown <?php echo e(request()->routeIs('omd.master.*') ? 'open' : ''); ?>">
 
 
@@ -1413,7 +1664,7 @@
                         <?php endif; ?>
 
                         
-                        <?php if(auth()->user()->role === 'omd_leader'): ?>
+                        <?php if(auth()->user()->role === 'omd'): ?>
                             <a href="<?php echo e(route('omd.users.index')); ?>"
                                 class="<?php echo e(request()->routeIs('omd.users.*') ? 'active' : ''); ?>">
 
@@ -1454,32 +1705,19 @@
                                 </div>
 
                                 <div class="sidebar-user-role">
+
                                     <?php if(auth()->user()->role === 'user'): ?>
                                         <?php echo e(auth()->user()->line?->name ?? '-'); ?>
 
                                     <?php else: ?>
                                         OMD
                                     <?php endif; ?>
+
                                 </div>
 
                             </div>
 
                         </div>
-
-
-                        
-                        <form method="POST" action="<?php echo e(route('logout')); ?>">
-                            <?php echo csrf_field(); ?>
-
-                            <button type="submit" class="logout-btn">
-
-                                <span>
-                                    Logout
-                                </span>
-
-                            </button>
-
-                        </form>
 
                     </div>
 
@@ -1502,15 +1740,96 @@
 
                     <div class="topbar-right">
 
-                        <div class="profile">
+                        <div class="profile-dropdown">
 
-                            <div class="profile-avatar">
-                                <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
+                            <button type="button" class="profile" id="profileToggle">
 
-                            </div>
+                                <div class="profile-avatar">
+                                    <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
 
-                            <div class="profile-name">
-                                <?php echo e(auth()->user()->name); ?>
+                                </div>
+
+                                <div class="profile-name">
+                                    <?php echo e(explode(' ', trim(auth()->user()->name))[0]); ?>
+
+                                </div>
+
+                            </button>
+
+
+                            <div class="profile-menu" id="profileMenu">
+
+                                
+                                <div class="profile-menu-header">
+
+                                    <div class="profile-menu-avatar">
+                                        <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
+
+                                    </div>
+
+
+                                    <div class="profile-menu-user">
+
+                                        <div class="profile-menu-name">
+                                            <?php echo e(auth()->user()->name); ?>
+
+                                        </div>
+
+                                        <div class="profile-menu-email">
+                                            <?php echo e(auth()->user()->email); ?>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    
+                                    <a href="<?php echo e(route('profile.index')); ?>" class="profile-menu-edit"
+                                        title="Edit Profil">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+
+                                </div>
+
+
+                                <div class="profile-menu-divider"></div>
+
+
+                                
+                                <a href="<?php echo e(route('profile.index')); ?>" class="profile-menu-settings">
+
+                                    <span class="profile-menu-icon">
+                                        <i class="fa-solid fa-gear"></i>
+                                    </span>
+
+                                    <span>
+                                        Settings
+                                    </span>
+
+                                </a>
+
+
+                                <div class="profile-menu-divider"></div>
+
+
+                                
+                                <form method="POST" action="<?php echo e(route('logout')); ?>">
+
+                                    <?php echo csrf_field(); ?>
+
+                                    <button type="submit">
+
+                                        <span class="profile-menu-icon">
+                                            <i class="fa-solid fa-right-from-bracket"></i>
+                                        </span>
+
+                                        <span>
+                                            Log out
+                                        </span>
+
+                                    </button>
+
+                                </form>
 
                             </div>
 
@@ -1553,7 +1872,7 @@
 
     <?php endif; ?>
 
-    <?php if(auth()->check() && in_array(auth()->user()->role, ['omd_member', 'omd_leader'])): ?>
+    <?php if(auth()->check() && in_array(auth()->user()->role, ['omd'])): ?>
         <script>
             function updateOmdOrderNotification() {
 
@@ -1612,40 +1931,130 @@
         </script>
     <?php endif; ?>
 
-    <?php if(auth()->check() && auth()->user()->role === 'user'): ?>
+    <?php if(auth()->check() && auth()->user()->role === 'omd'): ?>
         <script>
-            function updateUserOrderNotification() {
-                fetch("<?php echo e(route('user.orders.pendingConfirmationCount')); ?>", {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
+            function updateOmdOrderNotification() {
+
+                fetch(
+                        "<?php echo e(route('omd.orders.pendingCount')); ?>", {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
                         }
-                    })
+                    )
                     .then(response => {
+
                         if (!response.ok) {
-                            throw new Error('Gagal mengambil notifikasi order user.');
+                            throw new Error(
+                                'Gagal mengambil notifikasi order.'
+                            );
                         }
 
                         return response.json();
                     })
                     .then(data => {
-                        const badge = document.getElementById('userOrderNotification');
+
+                        const badge =
+                            document.getElementById(
+                                'omdOrderNotification'
+                            );
 
                         if (!badge) {
                             return;
                         }
 
-                        const count = parseInt(data.count) || 0;
+                        const count =
+                            parseInt(data.count) || 0;
 
                         if (count > 0) {
-                            badge.textContent = count > 99 ? '99+' : count;
+
+                            badge.textContent =
+                                count > 99 ? '99+' : count;
+
                             badge.classList.remove('hidden');
+
                             badge.classList.add('pulse');
+
                         } else {
+
                             badge.textContent = '0';
+
                             badge.classList.add('hidden');
+
                             badge.classList.remove('pulse');
                         }
+
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
+
+            updateOmdOrderNotification();
+
+            setInterval(
+                updateOmdOrderNotification,
+                5000
+            );
+        </script>
+    <?php endif; ?>
+
+
+    <?php if(auth()->check() && auth()->user()->role === 'user'): ?>
+        <script>
+            function updateUserOrderNotification() {
+
+                fetch(
+                        "<?php echo e(route('user.orders.pendingConfirmationCount')); ?>", {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }
+                    )
+                    .then(response => {
+
+                        if (!response.ok) {
+                            throw new Error(
+                                'Gagal mengambil notifikasi order user.'
+                            );
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        const badge =
+                            document.getElementById(
+                                'userOrderNotification'
+                            );
+
+                        if (!badge) {
+                            return;
+                        }
+
+                        const count =
+                            parseInt(data.count) || 0;
+
+                        if (count > 0) {
+
+                            badge.textContent =
+                                count > 99 ? '99+' : count;
+
+                            badge.classList.remove('hidden');
+
+                            badge.classList.add('pulse');
+
+                        } else {
+
+                            badge.textContent = '0';
+
+                            badge.classList.add('hidden');
+
+                            badge.classList.remove('pulse');
+                        }
+
                     })
                     .catch(error => {
                         console.error(error);
@@ -1654,11 +2063,77 @@
 
             updateUserOrderNotification();
 
-            setInterval(updateUserOrderNotification, 5000);
+            setInterval(
+                updateUserOrderNotification,
+                5000
+            );
         </script>
     <?php endif; ?>
 
-</body>
+
+    
+
+    <?php if(auth()->check()): ?>
+        <script>
+            document.addEventListener(
+                'DOMContentLoaded',
+                function() {
+
+                    const profileToggle =
+                        document.getElementById(
+                            'profileToggle'
+                        );
+
+                    const profileMenu =
+                        document.getElementById(
+                            'profileMenu'
+                        );
+
+                    if (
+                        !profileToggle ||
+                        !profileMenu
+                    ) {
+                        return;
+                    }
+
+                    profileToggle.addEventListener(
+                        'click',
+                        function(event) {
+
+                            event.stopPropagation();
+
+                            profileMenu.classList.toggle(
+                                'open'
+                            );
+
+                        }
+                    );
+
+                    profileMenu.addEventListener(
+                        'click',
+                        function(event) {
+
+                            event.stopPropagation();
+
+                        }
+                    );
+
+                    document.addEventListener(
+                        'click',
+                        function() {
+
+                            profileMenu.classList.remove(
+                                'open'
+                            );
+
+                        }
+                    );
+
+                }
+            );
+        </script>
+    <?php endif; ?>
+
 
 </body>
 

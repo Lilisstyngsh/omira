@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OmdOrderController;
@@ -54,6 +55,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', fn() => redirect()->route('dashboard'));
 
+    /*
+    |--------------------------------------------------------------------------
+    | Profile
+    |--------------------------------------------------------------------------
+*/
+
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     /*
     |--------------------------------------------------------------------------
@@ -67,7 +77,7 @@ Route::middleware('auth')->group(function () {
             ? app(UserDashboardController::class)->index(request())
             : app(DashboardController::class)->index(request());
     })
-        ->middleware('role:omd_leader,omd_member,user')
+        ->middleware('role:omd,user')
         ->name('dashboard');
 
 
@@ -139,36 +149,56 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:omd_member,omd_leader')
+    Route::middleware('role:omd')
         ->prefix('omd')
         ->name('omd.')
         ->group(function () {
 
-            Route::middleware('role:omd_leader')
-                ->prefix('users')
+
+            /*
+            |--------------------------------------------------------------------------
+            | Manajemen Akun
+            |--------------------------------------------------------------------------
+            */
+
+            Route::prefix('users')
                 ->name('users.')
                 ->group(function () {
 
-                    Route::get('/', [UserManagementController::class, 'index'])
-                        ->name('index');
+                    Route::get(
+                        '/',
+                        [UserManagementController::class, 'index']
+                    )->name('index');
 
-                    Route::get('/create', [UserManagementController::class, 'create'])
-                        ->name('create');
+                    Route::get(
+                        '/create',
+                        [UserManagementController::class, 'create']
+                    )->name('create');
 
-                    Route::post('/', [UserManagementController::class, 'store'])
-                        ->name('store');
+                    Route::post(
+                        '/',
+                        [UserManagementController::class, 'store']
+                    )->name('store');
 
-                    Route::get('/{user}/edit', [UserManagementController::class, 'edit'])
-                        ->name('edit');
+                    Route::get(
+                        '/{user}/edit',
+                        [UserManagementController::class, 'edit']
+                    )->name('edit');
 
-                    Route::put('/{user}', [UserManagementController::class, 'update'])
-                        ->name('update');
+                    Route::put(
+                        '/{user}',
+                        [UserManagementController::class, 'update']
+                    )->name('update');
 
-                    Route::post('/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
-                        ->name('reset-password');
+                    Route::post(
+                        '/{user}/reset-password',
+                        [UserManagementController::class, 'resetPassword']
+                    )->name('reset-password');
 
-                    Route::delete('/{user}', [UserManagementController::class, 'destroy'])
-                        ->name('destroy');
+                    Route::delete(
+                        '/{user}',
+                        [UserManagementController::class, 'destroy']
+                    )->name('destroy');
                 });
 
 
@@ -176,42 +206,32 @@ Route::middleware('auth')->group(function () {
             |--------------------------------------------------------------------------
             | Data Master
             |--------------------------------------------------------------------------
-            |
-            | Struktur Baru:
-            |
-            | Plant
-            |   └── Line
-            |        └── Model
-            |             └── Product
-            |                  └── NG Type
-            |
             */
 
-            Route::middleware('role:omd_leader')
-                ->prefix('master')
+            Route::prefix('master')
                 ->name('master.')
                 ->group(function () {
 
-
-                    // PLANT
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PLANT
+                    |--------------------------------------------------------------------------
+                    */
 
                     Route::get(
                         '/plant',
                         [MasterDataController::class, 'plant']
                     )->name('plant');
 
-
                     Route::post(
                         '/plant',
                         [MasterDataController::class, 'storePlant']
                     )->name('plant.store');
 
-
                     Route::put(
                         '/plant/{plant}',
                         [MasterDataController::class, 'updatePlant']
                     )->name('plant.update');
-
 
                     Route::delete(
                         '/plant/{plant}',
@@ -221,7 +241,7 @@ Route::middleware('auth')->group(function () {
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Line
+                    | LINE
                     |--------------------------------------------------------------------------
                     */
 
@@ -235,18 +255,15 @@ Route::middleware('auth')->group(function () {
                         [MasterDataController::class, 'line']
                     )->name('line');
 
-
                     Route::post(
                         '/line',
                         [MasterDataController::class, 'storeLine']
                     )->name('line.store');
 
-
                     Route::put(
                         '/line/{line}',
                         [MasterDataController::class, 'updateLine']
                     )->name('line.update');
-
 
                     Route::delete(
                         '/line/{line}',
@@ -256,7 +273,7 @@ Route::middleware('auth')->group(function () {
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Model & Product
+                    | MODEL & PRODUCT
                     |--------------------------------------------------------------------------
                     */
 
@@ -265,36 +282,30 @@ Route::middleware('auth')->group(function () {
                         [MasterDataController::class, 'modelProduct']
                     )->name('model-product');
 
-
                     Route::post(
                         '/model',
                         [MasterDataController::class, 'storeModel']
                     )->name('model.store');
-
 
                     Route::put(
                         '/model/{model}',
                         [MasterDataController::class, 'updateModel']
                     )->name('model.update');
 
-
                     Route::delete(
                         '/model/{model}',
                         [MasterDataController::class, 'destroyModel']
                     )->name('model.destroy');
-
 
                     Route::post(
                         '/product',
                         [MasterDataController::class, 'storeProduct']
                     )->name('product.store');
 
-
                     Route::put(
                         '/product/{product}',
                         [MasterDataController::class, 'updateProduct']
                     )->name('product.update');
-
 
                     Route::delete(
                         '/product/{product}',
@@ -304,7 +315,7 @@ Route::middleware('auth')->group(function () {
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Jenis NG
+                    | JENIS NG
                     |--------------------------------------------------------------------------
                     */
 
@@ -313,18 +324,15 @@ Route::middleware('auth')->group(function () {
                         [MasterDataController::class, 'ngType']
                     )->name('ng-type');
 
-
                     Route::post(
                         '/ng-type',
                         [MasterDataController::class, 'storeNgType']
                     )->name('ng-type.store');
 
-
                     Route::put(
                         '/ng-type/{ngType}',
                         [MasterDataController::class, 'updateNgType']
                     )->name('ng-type.update');
-
 
                     Route::delete(
                         '/ng-type/{ngType}',
@@ -339,23 +347,35 @@ Route::middleware('auth')->group(function () {
             |--------------------------------------------------------------------------
             */
 
-            Route::get('/tps', [TpsRepairController::class, 'omdIndex'])
-                ->name('tps.index');
+            Route::get(
+                '/tps',
+                [TpsRepairController::class, 'omdIndex']
+            )->name('tps.index');
 
-            Route::get('/tps/{order}', [TpsRepairController::class, 'omdShow'])
-                ->name('tps.show');
+            Route::get(
+                '/tps/{order}',
+                [TpsRepairController::class, 'omdShow']
+            )->name('tps.show');
 
-            Route::post('/tps/{order}/leader-check', [TpsRepairController::class, 'leaderCheck'])
-                ->name('tps.leader-check');
+            Route::post(
+                '/tps/{order}/leader-check',
+                [TpsRepairController::class, 'leaderCheck']
+            )->name('tps.leader-check');
 
-            Route::post('/tps/{order}/verify', [TpsRepairController::class, 'verify'])
-                ->name('tps.verify');
+            Route::post(
+                '/tps/{order}/verify',
+                [TpsRepairController::class, 'verify']
+            )->name('tps.verify');
 
-            Route::post('/tps/{order}/schedule', [TpsRepairController::class, 'schedule'])
-                ->name('tps.schedule');
+            Route::post(
+                '/tps/{order}/schedule',
+                [TpsRepairController::class, 'schedule']
+            )->name('tps.schedule');
 
-            Route::post('/tps/{order}/complete', [TpsRepairController::class, 'complete'])
-                ->name('tps.complete');
+            Route::post(
+                '/tps/{order}/complete',
+                [TpsRepairController::class, 'complete']
+            )->name('tps.complete');
 
 
             /*
@@ -369,8 +389,10 @@ Route::middleware('auth')->group(function () {
                 [OmdOrderController::class, 'index']
             )->name('orders.index');
 
-            Route::get('/orders/history/{order}', [OmdOrderController::class, 'historyShow'])
-                ->name('orders.history.show');
+            Route::get(
+                '/orders/history/{order}',
+                [OmdOrderController::class, 'historyShow']
+            )->name('orders.history.show');
 
             Route::get(
                 '/orders/history',
@@ -416,9 +438,7 @@ Route::middleware('auth')->group(function () {
 
             Route::get(
                 '/recap',
-                fn() =>
-                redirect()->route('dashboard')
-            )
-                ->name('recap');
+                fn() => redirect()->route('dashboard')
+            )->name('recap');
         });
 });

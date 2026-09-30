@@ -473,81 +473,80 @@ class DatabaseSeeder extends Seeder
             [
                 'email' => 'dwi.h@aiia.co.id'
             ],
-
             [
                 'name' => 'Dwi Haryanto',
                 'password' => Hash::make('password'),
-                'role' => 'omd_leader',
+                'role' => 'omd',
                 'line_id' => null
             ]
         );
 
         $userAccounts = [
             [
-                'name' => 'RAMANDA',
+                'name' => 'Ramanda',
                 'email' => 'ramanda_fe@aiia.co.id',
                 'plant' => 'BODY',
                 'line' => 'PPIC BODY',
             ],
 
             [
-                'name' => 'UBAYDILLAH',
+                'name' => 'Ubaydillah',
                 'email' => 'ubaydillah@aiia.co.id',
                 'plant' => 'BODY',
                 'line' => 'AS BODY',
             ],
 
             [
-                'name' => 'MARCELLINO',
+                'name' => 'Marcellino',
                 'email' => 'marcellino.reyhan@aiia.co.id',
                 'plant' => 'BODY',
                 'line' => 'PT',
             ],
 
             [
-                'name' => 'MARCELINO',
+                'name' => 'Marcellino',
                 'email' => 'marcellino.reyhan@aiia.co.id',
                 'plant' => 'BODY',
                 'line' => 'INJ',
             ],
 
             [
-                'name' => 'TAUFIK',
+                'name' => 'Taufik',
                 'email' => 'taufik.widodo@aiia.co.id',
                 'plant' => 'UNIT',
                 'line' => 'PPIC UNIT',
             ],
 
             [
-                'name' => 'TEDDY',
+                'name' => 'Teddy',
                 'email' => 'teddy@aiia.co.id',
                 'plant' => 'UNIT',
                 'line' => 'AS UNIT',
             ],
 
             [
-                'name' => 'ANHAR',
+                'name' => 'Anhar',
                 'email' => 'anhar.kurniaji@aiia.co.id',
                 'plant' => 'UNIT',
                 'line' => 'MA',
             ],
 
             [
-                'name' => 'ADE F',
+                'name' => 'Ade F',
                 'email' => 'ade.firmansyah@aiia.co.id',
                 'plant' => 'UNIT',
                 'line' => 'DC',
             ],
 
             [
-                'name' => 'SAIFUL',
+                'name' => 'Saiful',
                 'email' => 'saiful.safari@aiia.co.id',
                 'plant' => 'ELECTRIC',
                 'line' => 'PPIC ELECTRIC',
             ],
 
             [
-                'name' => 'WIDIYAN',
+                'name' => 'Widiyan',
                 'email' => 'widiyan@aiia.co.id',
                 'plant' => 'ELECTRIC',
                 'line' => 'AS ELECTRIC',

@@ -38,11 +38,9 @@
         .account-form-header {
             padding: 22px 24px;
             border-bottom: 1px solid #edf1f5;
-            background: linear-gradient(
-                135deg,
-                #f8f7ff 0%,
-                #ffffff 75%
-            );
+            background: linear-gradient(135deg,
+                    #f8f7ff 0%,
+                    #ffffff 75%);
         }
 
         .account-form-header h3 {
@@ -206,7 +204,7 @@
 
         <div>
             <h2 class="account-page-title">
-                Tambah Akun User
+                Tambah Akun
             </h2>
         </div>
 
@@ -230,10 +228,7 @@
 
         <div class="account-form-body">
 
-            <form
-                method="POST"
-                action="{{ route('omd.users.store') }}"
-            >
+            <form method="POST" action="{{ route('omd.users.store') }}">
 
                 @csrf
 
@@ -247,15 +242,8 @@
                             Nama
                         </label>
 
-                        <input
-                            id="name"
-                            type="text"
-                            name="name"
-                            value="{{ old('name') }}"
-                            placeholder="Contoh: User INJ"
-                            maxlength="100"
-                            required
-                        >
+                        <input id="name" type="text" name="name" value="{{ old('name') }}"
+                            placeholder="Contoh: User INJ" maxlength="100" required>
 
                         @error('name')
                             <span class="account-error">
@@ -273,15 +261,8 @@
                             Email
                         </label>
 
-                        <input
-                            id="email"
-                            type="email"
-                            name="email"
-                            value="{{ old('email') }}"
-                            placeholder="contoh@omd.com"
-                            maxlength="255"
-                            required
-                        >
+                        <input id="email" type="email" name="email" value="{{ old('email') }}"
+                            placeholder="contoh@omd.com" maxlength="255" required>
 
                         @error('email')
                             <span class="account-error">
@@ -292,32 +273,55 @@
                     </div>
 
 
-                    {{-- PLANT --}}
+                    {{-- ROLE --}}
                     <div class="account-field">
+
+                        <label for="role">
+                            Role
+                        </label>
+
+                        <select id="role" name="role" required>
+
+                            <option value="">
+                                Pilih Role
+                            </option>
+
+                            <option value="user" @selected(old('role') === 'user')>
+                                User
+                            </option>
+
+                            <option value="omd" @selected(old('role') === 'omd')>
+                                OMD
+                            </option>
+
+                        </select>
+
+                        @error('role')
+                            <span class="account-error">
+                                {{ $message }}
+                            </span>
+                        @enderror
+
+                    </div>
+
+
+                    {{-- PLANT --}}
+                    <div class="account-field" id="plant-wrapper">
 
                         <label for="plant_id">
                             Plant
                         </label>
 
-                        <select
-                            id="plant_id"
-                            name="plant_id"
-                            required
-                        >
+                        <select id="plant_id" name="plant_id" required>
 
                             <option value="">
                                 Pilih Plant
                             </option>
 
                             @foreach ($plants as $plant)
-
-                                <option
-                                    value="{{ $plant->id }}"
-                                    @selected(old('plant_id') == $plant->id)
-                                >
+                                <option value="{{ $plant->id }}" @selected(old('plant_id') == $plant->id)>
                                     {{ $plant->name }}
                                 </option>
-
                             @endforeach
 
                         </select>
@@ -332,18 +336,13 @@
 
 
                     {{-- LINE --}}
-                    <div class="account-field">
+                    <div class="account-field" id="line-wrapper">
 
                         <label for="line_id">
                             Line
                         </label>
 
-                        <select
-                            id="line_id"
-                            name="line_id"
-                            required
-                            disabled
-                        >
+                        <select id="line_id" name="line_id" required disabled>
 
                             <option value="">
                                 Pilih Plant terlebih dahulu
@@ -367,12 +366,8 @@
                             Password
                         </label>
 
-                        <input
-                            id="password"
-                            type="password"
-                            name="password"
-                            placeholder="Kosongkan untuk password default"
-                        >
+                        <input id="password" type="password" name="password"
+                            placeholder="Kosongkan untuk password default">
 
                         <span class="account-helper">
                             Kosongkan untuk menggunakan password default sistem:
@@ -395,12 +390,8 @@
                             Konfirmasi Password
                         </label>
 
-                        <input
-                            id="password_confirmation"
-                            type="password"
-                            name="password_confirmation"
-                            placeholder="Ulangi password jika diisi"
-                        >
+                        <input id="password_confirmation" type="password" name="password_confirmation"
+                            placeholder="Ulangi password jika diisi">
 
                         <span class="account-helper">
                             Tidak perlu diisi jika menggunakan password default.
@@ -414,17 +405,11 @@
                 {{-- ACTION --}}
                 <div class="account-actions">
 
-                    <a
-                        href="{{ route('omd.users.index') }}"
-                        class="account-btn account-btn-secondary"
-                    >
+                    <a href="{{ route('omd.users.index') }}" class="account-btn account-btn-secondary">
                         Batal
                     </a>
 
-                    <button
-                        type="submit"
-                        class="account-btn account-btn-primary"
-                    >
+                    <button type="submit" class="account-btn account-btn-primary">
                         Simpan Akun
                     </button>
 
@@ -442,8 +427,16 @@
     ========================================================== --}}
 
     <script>
-
         var plants = @json($plants);
+
+        var roleSelect =
+            document.getElementById('role');
+
+        var plantWrapper =
+            document.getElementById('plant-wrapper');
+
+        var lineWrapper =
+            document.getElementById('line-wrapper');
 
         var plantSelect =
             document.getElementById('plant_id');
@@ -455,8 +448,7 @@
             "{{ old('line_id') }}";
 
 
-        function loadLines(plantId)
-        {
+        function loadLines(plantId) {
             lineSelect.innerHTML = '';
 
 
@@ -475,9 +467,7 @@
 
 
             for (
-                var i = 0;
-                i < plants.length;
-                i++
+                var i = 0; i < plants.length; i++
             ) {
 
                 if (
@@ -516,9 +506,7 @@
 
 
             for (
-                var j = 0;
-                j < plant.lines.length;
-                j++
+                var j = 0; j < plant.lines.length; j++
             ) {
 
                 var line =
@@ -551,10 +539,56 @@
         }
 
 
+        function updateRoleFields() {
+            var role =
+                roleSelect.value;
+
+
+            if (role === 'omd') {
+
+                plantWrapper.style.display = 'none';
+                lineWrapper.style.display = 'none';
+
+                plantSelect.value = '';
+                lineSelect.value = '';
+
+                plantSelect.required = false;
+                lineSelect.required = false;
+
+                plantSelect.disabled = true;
+                lineSelect.disabled = true;
+
+            } else {
+
+                plantWrapper.style.display = '';
+                lineWrapper.style.display = '';
+
+                plantSelect.disabled = false;
+                plantSelect.required = true;
+
+                lineSelect.required = true;
+
+                if (plantSelect.value) {
+                    loadLines(plantSelect.value);
+                }
+
+            }
+        }
+
+
+        roleSelect.addEventListener(
+            'change',
+            function() {
+                oldLineId = '';
+
+                updateRoleFields();
+            }
+        );
+
+
         plantSelect.addEventListener(
             'change',
-            function ()
-            {
+            function() {
                 oldLineId = '';
 
                 loadLines(
@@ -564,14 +598,7 @@
         );
 
 
-        if (plantSelect.value) {
-
-            loadLines(
-                plantSelect.value
-            );
-
-        }
-
+        updateRoleFields();
     </script>
 
 @endsection

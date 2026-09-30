@@ -45,21 +45,21 @@ class TpsRepairController extends Controller
     }
     public function leaderCheck(Request $request, TpsRepairOrder $order)
     {
-        abort_unless($request->user()->role === 'omd_leader', 403);
+        abort_unless($request->user()->role === 'omd', 403);
         abort_unless($order->status === 'submitted', 422);
         $order->update(['status' => 'leader_checked', 'leader_checked_by' => $request->user()->id, 'leader_checked_at' => now()]);
         return back()->with('success', 'Problem TPS Tool sudah dicek Leader.');
     }
     public function verify(Request $request, TpsRepairOrder $order)
     {
-        abort_unless(in_array($request->user()->role, ['omd_member', 'omd_leader'], true), 403);
+        abort_unless(in_array($request->user()->role, ['omd_member', 'omd'], true), 403);
         abort_unless($order->status === 'leader_checked', 422);
         $order->update(['status' => 'verified', 'member_verified_by' => $request->user()->id, 'member_verified_at' => now()]);
         return back()->with('success', 'Problem TPS Tool berhasil diverifikasi.');
     }
     public function schedule(Request $request, TpsRepairOrder $order)
     {
-        abort_unless($request->user()->role === 'omd_leader', 403);
+        abort_unless($request->user()->role === 'omd', 403);
         $data = $request->validate(['scheduled_at' => ['required', 'date']]);
         abort_unless($order->status === 'verified', 422);
         $order->update(['status' => 'scheduled', 'scheduled_at' => $data['scheduled_at']]);
@@ -67,7 +67,7 @@ class TpsRepairController extends Controller
     }
     public function complete(Request $request, TpsRepairOrder $order)
     {
-        abort_unless(in_array($request->user()->role, ['omd_member', 'omd_leader'], true), 403);
+        abort_unless(in_array($request->user()->role, ['omd_member', 'omd'], true), 403);
         $data = $request->validate(['repair_result' => ['required', 'string', 'max:2000']]);
         abort_unless(in_array($order->status, ['scheduled', 'in_repair'], true), 422);
         $order->update(['status' => 'completed', 'repaired_by' => $request->user()->id, 'repaired_at' => now(), 'repair_result' => $data['repair_result']]);
