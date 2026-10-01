@@ -96,8 +96,8 @@
         }
 
         /* =================================================
-                                                           INFO
-                                                        ================================================== */
+                                                               INFO
+                                                            ================================================== */
 
         .info-grid {
             display: grid;
@@ -138,8 +138,8 @@
         }
 
         /* =================================================
-                                                           REPAIR TABLE
-                                                        ================================================== */
+                                                               REPAIR TABLE
+                                                            ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -235,14 +235,38 @@
             color: #475569;
         }
 
+        .repair-before-after-label {
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 2px;
+            color: #94a3b8;
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .repair-result-match-cell {
+            background: #dcfce7 !important;
+        }
+
+        .repair-result-mismatch-cell {
+            background: #fee2e2 !important;
+        }
+
+        .repair-result-match-cell .ng-value,
+        .repair-result-mismatch-cell .ng-value {
+            color: #000;
+        }
+
         .ng-value {
             min-height: 22px;
-            /* REVISI: sebelumnya 34px */
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
             font-weight: 800;
-            color: #334155;
+            color: #000;
         }
 
         .empty-ng {
@@ -251,8 +275,8 @@
         }
 
         /* =================================================
-                                                           KETERANGAN
-                                                        ================================================== */
+                                                               KETERANGAN
+                                                            ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -299,8 +323,8 @@
         }
 
         /* =================================================
-                                                           ACTION CARD
-                                                        ================================================== */
+                                                               ACTION CARD
+                                                            ================================================== */
 
         .action-card {
             display: flex;
@@ -327,8 +351,8 @@
         }
 
         /* =================================================
-                                                           CONFIRMED
-                                                        ================================================== */
+                                                               CONFIRMED
+                                                            ================================================== */
 
         .confirmed-box {
             padding: 16px;
@@ -352,8 +376,8 @@
         }
 
         /* =================================================
-                                                           BUTTON
-                                                        ================================================== */
+                                                               BUTTON
+                                                            ================================================== */
 
         .btn {
             height: 36px;
@@ -391,8 +415,8 @@
         }
 
         /* =================================================
-                                                           LEGACY
-                                                        ================================================== */
+                                                               LEGACY
+                                                            ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -401,8 +425,8 @@
         }
 
         /* =================================================
-                                                           ERROR
-                                                        ================================================== */
+                                                               ERROR
+                                                            ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -415,8 +439,8 @@
         }
 
         /* =================================================
-                                                           RESPONSIVE
-                                                        ================================================== */
+                                                               RESPONSIVE
+                                                            ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -442,8 +466,8 @@
         }
 
         /* =================================================
-                                       TIMELINE
-                                    ================================================== */
+                                           TIMELINE
+                                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -484,10 +508,28 @@
             border-radius: 50%;
             font-size: 15px;
             font-weight: 800;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px #cbd5e1;
+        }
+
+        .timeline-icon.completed {
             background: #dcfce7;
             color: #16a34a;
-            border: 3px solid #fff;
             box-shadow: 0 0 0 2px #bbf7d0;
+        }
+
+        .timeline-icon.in-progress {
+            background: #fef3c7;
+            color: #d97706;
+            box-shadow: 0 0 0 2px #fde68a;
+        }
+
+        .timeline-icon.pending {
+            background: #fee2e2;
+            color: #dc2626;
+            box-shadow: 0 0 0 2px #fecaca;
         }
 
         .timeline-item strong {
@@ -526,10 +568,6 @@
 
 
         <div class="repair-head-actions">
-
-            <span class="status-badge status-{{ $order->status }}">
-                {{ $order->status_label }}
-            </span>
 
             <a href="{{ route('user.orders.index') }}" class="btn btn-secondary">
                 Kembali
@@ -582,10 +620,30 @@
             <div class="timeline">
 
 
+                @php
+                    $verifiedDone = (bool) $order->verified_at;
+                    $repairStarted = (bool) $order->repair_started_at;
+                    $repairDone = (bool) $order->repair_completed_at;
+                    $handoverDone = (bool) $order->confirmation?->confirmed_at;
+
+                    $verifiedState = $verifiedDone
+                        ? 'completed'
+                        : 'pending';
+
+                    $repairState = $repairDone
+                        ? 'completed'
+                        : ($repairStarted ? 'in-progress' : 'pending');
+
+                    $handoverState = $handoverDone
+                        ? 'completed'
+                        : ($order->status === 'completed' ? 'in-progress' : 'pending');
+                @endphp
+
+
                 {{-- USER SUBMIT --}}
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
+                    <div class="timeline-icon completed">
                         ✓
                     </div>
 
@@ -615,8 +673,12 @@
                 {{-- VERIFIED OMD --}}
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
-                        ✓
+                    <div class="timeline-icon {{ $verifiedState }}">
+                        @if ($verifiedState === 'completed')
+                            ✓
+                        @else
+                            ×
+                        @endif
                     </div>
 
                     <strong>
@@ -645,8 +707,14 @@
                 {{-- REPAIR OMD --}}
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
-                        ✓
+                    <div class="timeline-icon {{ $repairState }}">
+                        @if ($repairState === 'completed')
+                            ✓
+                        @elseif ($repairState === 'in-progress')
+                            △
+                        @else
+                            ×
+                        @endif
                     </div>
 
                     <strong>
@@ -682,8 +750,14 @@
                 {{-- SERAH TERIMA --}}
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
-                        ✓
+                    <div class="timeline-icon {{ $handoverState }}">
+                        @if ($handoverState === 'completed')
+                            ✓
+                        @elseif ($handoverState === 'in-progress')
+                            △
+                        @else
+                            ×
+                        @endif
                     </div>
 
                     <strong>
@@ -810,6 +884,9 @@
 
             <div class="repair-table-scroll">
 
+                @php
+                    $showAfter = in_array($order->status, ['completed', 'confirmed'], true);
+                @endphp
 
                 {{-- =================================================
                      HEADER
@@ -830,10 +907,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
+                            @if ($showAfter)
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                            @endif
 
                             <col style="width:180px;">
 
@@ -844,40 +923,42 @@
 
                             <tr>
 
-                                <th rowspan="3">
+                                <th rowspan="{{ $showAfter ? 3 : 2 }}">
                                     No
                                 </th>
 
-                                <th rowspan="3" style="text-align:left;">
+                                <th rowspan="{{ $showAfter ? 3 : 2 }}" style="text-align:left;">
                                     Model
                                 </th>
 
-                                <th rowspan="3" style="text-align:left;">
+                                <th rowspan="{{ $showAfter ? 3 : 2 }}" style="text-align:left;">
                                     Produk
                                 </th>
 
-                                <th colspan="8">
+                                <th colspan="{{ $showAfter ? 8 : 4 }}">
                                     Jenis &amp; Qty NG
                                 </th>
 
-                                <th rowspan="3" class="keterangan-head">
+                                <th rowspan="{{ $showAfter ? 3 : 2 }}" class="keterangan-head">
                                     Keterangan
                                 </th>
 
                             </tr>
 
 
-                            <tr>
+                            @if ($showAfter)
+                                <tr>
 
-                                <th colspan="4">
-                                    Sebelum
-                                </th>
+                                    <th colspan="4">
+                                        Sebelum
+                                    </th>
 
-                                <th colspan="4">
-                                    Sesudah
-                                </th>
+                                    <th colspan="4">
+                                        Sesudah
+                                    </th>
 
-                            </tr>
+                                </tr>
+                            @endif
 
 
                             <tr>
@@ -889,11 +970,13 @@
                                 @endforeach
 
 
-                                @foreach ($ngCodes as $code)
-                                    <th>
-                                        {{ $code }}
-                                    </th>
-                                @endforeach
+                                @if ($showAfter)
+                                    @foreach ($ngCodes as $code)
+                                        <th>
+                                            {{ $code }}
+                                        </th>
+                                    @endforeach
+                                @endif
 
                             </tr>
 
@@ -923,10 +1006,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
+                            @if ($showAfter)
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                            @endif
 
                             <col style="width:180px;">
 
@@ -937,26 +1022,24 @@
 
                             @foreach ($modelGroups as $modelItems)
                                 @php
-
                                     $productGroups = $modelItems->groupBy('product_id');
-
                                     $modelRowspan = $productGroups->count();
-
                                 @endphp
 
 
                                 @foreach ($productGroups as $productItems)
                                     @php
-
                                         $ngItems = $productItems->keyBy(function ($item) {
                                             return strtoupper($item->ngType?->code ?? '');
                                         });
 
-                                        $productId = $productItems->first()->product_id;
+                                        $firstItem = $productItems->first();
+                                        $productId = $firstItem->product_id;
 
                                         $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))
                                             ?->mismatch_note;
 
+                                        $hasFinalResult = in_array($order->status, ['completed', 'confirmed'], true);
                                     @endphp
 
 
@@ -990,7 +1073,7 @@
                                         <td>
 
                                             <span class="product-text">
-                                                {{ $productItems->first()->product?->name ?? '-' }}
+                                                {{ $firstItem->product?->name ?? '-' }}
                                             </span>
 
                                         </td>
@@ -1012,9 +1095,7 @@
                                                         {{ $ngItem->before_qty > 0 ? $ngItem->before_qty : '' }}
                                                     </div>
                                                 @else
-                                                    <div class="ng-value empty-ng">
-
-                                                    </div>
+                                                    <div class="ng-value empty-ng"></div>
                                                 @endif
 
                                             </td>
@@ -1025,25 +1106,37 @@
                                              SESUDAH
                                         ========================== --}}
 
-                                        @foreach ($ngCodes as $code)
-                                            @php
-                                                $ngItem = $ngItems->get($code);
+                                        @if ($showAfter)
+                                            @foreach ($ngCodes as $code)
+                                                @php
+                                                    $ngItem = $ngItems->get($code);
+                                                    $beforeQty = (int) ($ngItem?->before_qty ?? 0);
+                                                    $afterQty = (int) ($ngItem?->after_qty ?? 0);
+                                                    $isNgMatch = $hasFinalResult && $beforeQty === $afterQty;
+                                                    $isNgMismatch = $hasFinalResult && $beforeQty !== $afterQty;
+                                                @endphp
 
-                                                $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
-                                            @endphp
+                                                @php
+                                                    $resultCellClass = '';
 
-                                            <td class="ng-cell">
+                                                    if ($hasFinalResult && $afterQty > 0) {
+                                                        $resultCellClass = $isNgMatch
+                                                            ? 'repair-result-match-cell'
+                                                            : ($isNgMismatch
+                                                                ? 'repair-result-mismatch-cell'
+                                                                : '');
+                                                    }
+                                                @endphp
 
-                                                @if ($hasBeforeQty)
+                                                <td class="ng-cell {{ $resultCellClass }}">
+
                                                     <div class="ng-value">
-
-                                                        {{ ($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : '' }}
-
+                                                        {{ $afterQty > 0 ? $afterQty : '' }}
                                                     </div>
-                                                @endif
 
-                                            </td>
-                                        @endforeach
+                                                </td>
+                                            @endforeach
+                                        @endif
 
 
                                         {{-- =========================
@@ -1063,6 +1156,7 @@
                     </table>
 
                 </div>
+
 
             </div>
 

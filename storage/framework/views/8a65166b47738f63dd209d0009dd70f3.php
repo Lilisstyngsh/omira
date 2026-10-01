@@ -219,7 +219,20 @@
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            color: #334155;
+            color: #000;
+        }
+
+        .repair-result-match-cell {
+            background: #dcfce7 !important;
+        }
+
+        .repair-result-mismatch-cell {
+            background: #fee2e2 !important;
+        }
+
+        .repair-result-match-cell .ng-value,
+        .repair-result-mismatch-cell .ng-value {
+            color: #000;
         }
 
         .empty-ng {
@@ -437,11 +450,6 @@
         <h3 class="repair-card-title">
             Progress Order
         </h3>
-
-        <p class="repair-card-desc">
-            Riwayat tahapan Order Repair Box.
-        </p>
-
 
         <div class="timeline-wrap">
 
@@ -667,11 +675,6 @@
                 Detail Repair Box
             </h3>
 
-            <p class="repair-card-desc">
-                Detail model, produk, jenis NG, dan hasil repair.
-            </p>
-
-
             <div class="repair-table-scroll">
 
 
@@ -814,6 +817,8 @@
                                         $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))
                                             ?->mismatch_note;
 
+                                        $hasFinalResult = in_array($order->status, ['completed', 'confirmed'], true);
+
                                     ?>
 
 
@@ -882,24 +887,29 @@
 
                                         <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <?php
-
                                                 $ngItem = $ngItems->get($code);
+                                                $beforeQty = (int) ($ngItem?->before_qty ?? 0);
+                                                $afterQty = (int) ($ngItem?->after_qty ?? 0);
 
-                                                $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
+                                                $isNgMatch = $hasFinalResult && $beforeQty === $afterQty;
+                                                $isNgMismatch = $hasFinalResult && $beforeQty !== $afterQty;
 
+                                                $resultCellClass = '';
+
+                                                if ($hasFinalResult && $afterQty > 0) {
+                                                    $resultCellClass = $isNgMatch
+                                                        ? 'repair-result-match-cell'
+                                                        : ($isNgMismatch
+                                                            ? 'repair-result-mismatch-cell'
+                                                            : '');
+                                                }
                                             ?>
 
-                                            <td>
+                                            <td class="<?php echo e($resultCellClass); ?>">
+                                                <div class="ng-value">
+                                                    <?php echo e($afterQty > 0 ? $afterQty : ''); ?>
 
-                                                <?php if($hasBeforeQty): ?>
-                                                    <div class="ng-value">
-
-                                                        <?php echo e(($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : ''); ?>
-
-
-                                                    </div>
-                                                <?php endif; ?>
-
+                                                </div>
                                             </td>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 

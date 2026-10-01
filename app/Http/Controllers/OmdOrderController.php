@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\NgType;
+use App\Models\Product;
 use App\Models\RepairOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OmdOrderController extends Controller
 {
@@ -58,11 +60,11 @@ class OmdOrderController extends Controller
             'result.processedBy',
             'confirmation.user',
             'omdVerifier',
-            'items.masterModel',
+            'items.masterModel.products',
             'items.product',
+            'items.afterProduct',
             'items.ngType',
         ]);
-
 
         return view(
             'omd.orders.show',
@@ -144,7 +146,6 @@ class OmdOrderController extends Controller
             'Order belum berada pada proses repair.'
         );
 
-
         $order->load([
             'items',
             'items.product',
@@ -152,17 +153,9 @@ class OmdOrderController extends Controller
             'items.ngType',
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | FORMAT BARU
-        |--------------------------------------------------------------------------
-        */
-
         if ($order->items->isNotEmpty()) {
 
             $rules = [
-
                 'items' => [
                     'required',
                     'array',
@@ -183,11 +176,16 @@ class OmdOrderController extends Controller
                     'min:0',
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | KETERANGAN PER PRODUK
-                |--------------------------------------------------------------------------
-                */
+                'after_products' => [
+                    'nullable',
+                    'array',
+                ],
+
+                'after_products.*' => [
+                    'nullable',
+                    'integer',
+                    'exists:products,id',
+                ],
 
                 'product_notes' => [
                     'nullable',
@@ -201,13 +199,6 @@ class OmdOrderController extends Controller
                 ],
             ];
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDASI ITEM YANG SUDAH ADA
-            |--------------------------------------------------------------------------
-            */
-
             foreach ($order->items as $item) {
 
                 $rules['items.' . $item->id . '.after_qty'] = [
@@ -216,14 +207,6 @@ class OmdOrderController extends Controller
                     'min:0',
                 ];
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | BACKWARD COMPATIBILITY
-                | Tetap menerima mismatch_note jika form lama masih mengirimnya
-                |--------------------------------------------------------------------------
-                */
-
                 $rules['items.' . $item->id . '.mismatch_note'] = [
                     'nullable',
                     'string',
@@ -231,15 +214,7 @@ class OmdOrderController extends Controller
                 ];
             }
 
-
             $data = $request->validate($rules);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SIMPAN FORMAT BARU
-            |--------------------------------------------------------------------------
-            */
 
             DB::transaction(function () use (
                 $order,
@@ -249,16 +224,8 @@ class OmdOrderController extends Controller
                 $productNotes =
                     $data['product_notes'] ?? [];
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | PRODUCT ID YANG MEMANG ADA DALAM ORDER
-                |--------------------------------------------------------------------------
-                |
-                | Digunakan agar new_items tidak dapat memasukkan
-                | product_id sembarangan.
-                |
-                */
+                $afterProducts =
+                    $data['after_products'] ?? [];
 
                 $allowedProductIds = $order->items
                     ->pluck('product_id')
@@ -269,32 +236,79 @@ class OmdOrderController extends Controller
                     ->unique()
                     ->values();
 
+                /*
+            |--------------------------------------------------------------------------
+            | Validasi Produk SESUDAH
+            |--------------------------------------------------------------------------
+            |
+            | Produk SESUDAH harus:
+            | - benar-benar ada
+            | - aktif
+            | - berada pada Model yang sama
+            | - berada pada data_scope yang sama
+            |
+            */
+
+                $resolveAfterProduct = function (
+                    $afterProductId,
+                    $masterModelId
+                ) {
+
+                    $afterProductId = (int) $afterProductId;
+
+                    $product = Product::query()
+                        ->whereKey($afterProductId)
+                        ->where('is_active', true)
+                        ->first();
+
+                    if (!$product) {
+                        throw ValidationException::withMessages([
+                            'after_products' =>
+                            'Produk sesudah tidak valid.',
+                        ]);
+                    }
+
+                    $masterModel = $product->masterModel;
+
+                    if (!$masterModel) {
+                        throw ValidationException::withMessages([
+                            'after_products' =>
+                            'Model Produk Sesudah tidak ditemukan.',
+                        ]);
+                    }
+
+                    if (
+                        (int) $product->master_model_id !==
+                        (int) $masterModelId
+                    ) {
+                        throw ValidationException::withMessages([
+                            'after_products' =>
+                            'Produk Sesudah harus berasal dari Model yang sama.',
+                        ]);
+                    }
+
+                    return $product->id;
+                };
 
                 /*
-                |--------------------------------------------------------------------------
-                | UPDATE ITEM YANG SUDAH ADA
-                |--------------------------------------------------------------------------
-                */
+            |--------------------------------------------------------------------------
+            | UPDATE ITEM YANG SUDAH ADA
+            |--------------------------------------------------------------------------
+            */
 
                 foreach ($order->items as $item) {
 
                     $itemData =
                         $data['items'][$item->id] ?? [];
 
-
                     /*
-                    |--------------------------------------------------------------------------
-                    | QTY SESUDAH
-                    |--------------------------------------------------------------------------
-                    */
+                |--------------------------------------------------------------------------
+                | QTY SESUDAH
+                |--------------------------------------------------------------------------
+                */
 
                     $afterQty =
                         $itemData['after_qty'] ?? null;
-
-
-                    /*
-                    | Input kosong disimpan sebagai 0
-                    */
 
                     if (
                         $afterQty === null ||
@@ -303,25 +317,57 @@ class OmdOrderController extends Controller
                         $afterQty = 0;
                     }
 
+                    /*
+                |--------------------------------------------------------------------------
+                | PRODUK SESUDAH
+                |--------------------------------------------------------------------------
+                |
+                | Satu Produk Sebelum menggunakan satu Produk Sesudah.
+                |
+                */
+
+                    $beforeProductId =
+                        (int) $item->product_id;
+
+                    $afterProductId =
+                        array_key_exists(
+                            $beforeProductId,
+                            $afterProducts
+                        )
+                        ? $afterProducts[$beforeProductId]
+                        : null;
+
+                    if (
+                        $afterProductId === null ||
+                        $afterProductId === ''
+                    ) {
+                        $afterProductId =
+                            $item->after_product_id
+                            ?? $item->product_id;
+                    }
+
+                    $afterProductId =
+                        $resolveAfterProduct(
+                            $afterProductId,
+                            $item->master_model_id
+                        );
 
                     $updateData = [
-                        'after_qty' => (int) $afterQty,
+                        'after_product_id' =>
+                        $afterProductId,
+
+                        'after_qty' =>
+                        (int) $afterQty,
                     ];
 
-
                     /*
-                    |--------------------------------------------------------------------------
-                    | KETERANGAN PER PRODUK
-                    |--------------------------------------------------------------------------
-                    |
-                    | Satu produk memiliki satu keterangan.
-                    | Karena mismatch_note berada di repair_order_items,
-                    | nilai yang sama disimpan pada item NG produk tersebut.
-                    |
-                    */
+                |--------------------------------------------------------------------------
+                | KETERANGAN PER PRODUK
+                |--------------------------------------------------------------------------
+                */
 
-                    $productId = $item->product_id;
-
+                    $productId =
+                        $item->product_id;
 
                     if (
                         $productId !== null &&
@@ -334,7 +380,6 @@ class OmdOrderController extends Controller
                         $note =
                             $productNotes[$productId];
 
-
                         $updateData['mismatch_note'] =
                             $note !== ''
                             ? $note
@@ -346,43 +391,20 @@ class OmdOrderController extends Controller
                         )
                     ) {
 
-                        /*
-                        | Kompatibilitas dengan form lama
-                        */
-
                         $updateData['mismatch_note'] =
                             $itemData['mismatch_note'] !== ''
                             ? $itemData['mismatch_note']
                             : null;
                     }
 
-
                     $item->update($updateData);
                 }
 
-
                 /*
-                |--------------------------------------------------------------------------
-                | ITEM NG YANG SEBELUMNYA BELUM ADA
-                |--------------------------------------------------------------------------
-                |
-                | Contoh:
-                |
-                | Sebelum:
-                | P = -
-                | H = 2
-                | C = -
-                | S = -
-                |
-                | Sesudah:
-                | P = [1]
-                | H = [2]
-                | C = [0]
-                | S = [1]
-                |
-                | P/C/S akan dibuat sebagai repair_order_items baru.
-                |
-                */
+            |--------------------------------------------------------------------------
+            | ITEM NG YANG SEBELUMNYA BELUM ADA
+            |--------------------------------------------------------------------------
+            */
 
                 if (!empty($data['new_items'])) {
 
@@ -402,20 +424,12 @@ class OmdOrderController extends Controller
                             );
                         });
 
-
                     foreach (
                         $data['new_items']
                         as $productId => $codes
                     ) {
 
                         $productId = (int) $productId;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Pastikan product memang milik order ini
-                        |--------------------------------------------------------------------------
-                        */
 
                         if (
                             !$allowedProductIds->contains(
@@ -424,13 +438,6 @@ class OmdOrderController extends Controller
                         ) {
                             continue;
                         }
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Cari item produk yang sudah ada
-                        |--------------------------------------------------------------------------
-                        */
 
                         $existingProductItem =
                             $order->items->first(
@@ -444,55 +451,59 @@ class OmdOrderController extends Controller
                                 }
                             );
 
-
                         if (!$existingProductItem) {
                             continue;
                         }
 
-
                         $masterModelId =
                             $existingProductItem->master_model_id;
 
-
                         /*
-                        |--------------------------------------------------------------------------
-                        | KETERANGAN PRODUK
-                        |--------------------------------------------------------------------------
-                        */
+                    |--------------------------------------------------------------------------
+                    | PRODUK SESUDAH
+                    |--------------------------------------------------------------------------
+                    */
+
+                        $afterProductId =
+                            array_key_exists(
+                                $productId,
+                                $afterProducts
+                            )
+                            ? $afterProducts[$productId]
+                            : null;
+
+                        if (
+                            $afterProductId === null ||
+                            $afterProductId === ''
+                        ) {
+                            $afterProductId =
+                                $productId;
+                        }
+
+                        $afterProductId =
+                            $resolveAfterProduct(
+                                $afterProductId,
+                                $masterModelId
+                            );
 
                         $productNote =
                             $productNotes[$productId]
                             ?? null;
-
 
                         foreach (
                             $codes
                             as $code => $afterQty
                         ) {
 
-                            $code = strtoupper($code);
-
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | Hanya P/H/C/S yang diperbolehkan
-                            |--------------------------------------------------------------------------
-                            */
+                            $code =
+                                strtoupper($code);
 
                             $ngType =
                                 $ngTypes->get($code);
 
-
                             if (!$ngType) {
                                 continue;
                             }
-
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | Cek apakah item sudah ada
-                            |--------------------------------------------------------------------------
-                            */
 
                             $existingItem =
                                 $order->items->first(
@@ -511,30 +522,24 @@ class OmdOrderController extends Controller
                                     }
                                 );
 
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | Jika sudah ada
-                            |--------------------------------------------------------------------------
-                            */
+                            $normalizedAfterQty =
+                                (
+                                    $afterQty === ''
+                                    ||
+                                    $afterQty === null
+                                )
+                                ? 0
+                                : (int) $afterQty;
 
                             if ($existingItem) {
 
-                                $normalizedAfterQty =
-                                    (
-                                        $afterQty === ''
-                                        ||
-                                        $afterQty === null
-                                    )
-                                    ? 0
-                                    : (int) $afterQty;
-
-
                                 $updateData = [
+                                    'after_product_id' =>
+                                    $afterProductId,
+
                                     'after_qty' =>
                                     $normalizedAfterQty,
                                 ];
-
 
                                 if (
                                     array_key_exists(
@@ -549,31 +554,12 @@ class OmdOrderController extends Controller
                                         : null;
                                 }
 
-
                                 $existingItem->update(
                                     $updateData
                                 );
 
-
                                 continue;
                             }
-
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | Jika belum ada, buat item baru
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $normalizedAfterQty =
-                                (
-                                    $afterQty === ''
-                                    ||
-                                    $afterQty === null
-                                )
-                                ? 0
-                                : (int) $afterQty;
-
 
                             $order->items()->create([
 
@@ -582,6 +568,9 @@ class OmdOrderController extends Controller
 
                                 'product_id' =>
                                 $productId,
+
+                                'after_product_id' =>
+                                $afterProductId,
 
                                 'ng_type_id' =>
                                 $ngType->id,
@@ -593,40 +582,38 @@ class OmdOrderController extends Controller
                                 $normalizedAfterQty,
 
                                 'mismatch_note' => (
-                                    $productNote !== null
-                                    &&
+                                    $productNote !== null &&
                                     $productNote !== ''
                                 )
                                     ? $productNote
                                     : null,
-
                             ]);
                         }
                     }
                 }
 
-
                 /*
-|--------------------------------------------------------------------------
-| SIMPAN PETUGAS REPAIR
-|--------------------------------------------------------------------------
-*/
+            |--------------------------------------------------------------------------
+            | SIMPAN PETUGAS REPAIR
+            |--------------------------------------------------------------------------
+            */
 
                 $order->result()->updateOrCreate(
                     [
-                        'repair_order_id' => $order->id,
+                        'repair_order_id' =>
+                        $order->id,
                     ],
                     [
-                        'processed_by' => auth()->id(),
+                        'processed_by' =>
+                        auth()->id(),
                     ]
                 );
 
-
                 /*
-|--------------------------------------------------------------------------
-| ORDER SELESAI
-|--------------------------------------------------------------------------
-*/
+            |--------------------------------------------------------------------------
+            | ORDER SELESAI
+            |--------------------------------------------------------------------------
+            */
 
                 $order->update([
 
@@ -639,7 +626,6 @@ class OmdOrderController extends Controller
                 ]);
             });
 
-
             return redirect()
                 ->route(
                     'omd.orders.index'
@@ -650,16 +636,11 @@ class OmdOrderController extends Controller
                 );
         }
 
-
         /*
-        |--------------------------------------------------------------------------
-        | FORMAT LAMA
-        |--------------------------------------------------------------------------
-        |
-        | Tetap dipertahankan untuk order existing yang belum memiliki
-        | repair_order_items.
-        |
-        */
+    |--------------------------------------------------------------------------
+    | FORMAT LAMA
+    |--------------------------------------------------------------------------
+    */
 
         $data = $request->validate([
 
@@ -689,20 +670,12 @@ class OmdOrderController extends Controller
 
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Validasi total hasil repair format lama
-        |--------------------------------------------------------------------------
-        */
-
         $sum =
             $data['ok_qty']
             +
             $data['scrap_qty']
             +
             $data['ng_qty'];
-
 
         if ($sum > $order->quantity) {
 
@@ -713,13 +686,6 @@ class OmdOrderController extends Controller
                 ])
                 ->withInput();
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan hasil repair format lama
-        |--------------------------------------------------------------------------
-        */
 
         DB::transaction(function () use (
             $request,
@@ -736,7 +702,6 @@ class OmdOrderController extends Controller
                 now(),
 
             ]);
-
 
             $order->result()->updateOrCreate(
 
@@ -765,7 +730,6 @@ class OmdOrderController extends Controller
                 ]
             );
         });
-
 
         return redirect()
             ->route(

@@ -132,8 +132,8 @@
         }
 
         /* =================================================
-                           REPAIR TABLE WRAPPER (scroll area)
-                        ================================================== */
+                                           REPAIR TABLE WRAPPER (scroll area)
+                                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -164,8 +164,8 @@
         }
 
         /* =================================================
-                           TABLE
-                        ================================================== */
+                                           TABLE
+                                        ================================================== */
 
         .repair-table {
             width: 100%;
@@ -179,8 +179,8 @@
         }
 
         /* =================================================
-                           KOLOM
-                        ================================================== */
+                                           KOLOM
+                                        ================================================== */
 
         .repair-table th:nth-child(1),
         .repair-table td:nth-child(1) {
@@ -218,8 +218,8 @@
         }
 
         /* =================================================
-                           HEADER (sticky saat tabel di-scroll)
-                        ================================================== */
+                                           HEADER (sticky saat tabel di-scroll)
+                                        ================================================== */
 
         .repair-table thead {
             position: sticky;
@@ -262,8 +262,8 @@
         }
 
         /* =================================================
-                           BODY
-                        ================================================== */
+                                           BODY
+                                        ================================================== */
 
         .repair-table td {
             padding: 11px 8px;
@@ -290,8 +290,8 @@
         }
 
         /* =================================================
-                           NO & MODEL
-                        ================================================== */
+                                           NO & MODEL
+                                        ================================================== */
 
         .repair-table .model-cell,
         .repair-table .no-cell {
@@ -320,8 +320,8 @@
         }
 
         /* =================================================
-                           NILAI NG SEBELUM
-                        ================================================== */
+                                           NILAI NG SEBELUM
+                                        ================================================== */
 
         .ng-value {
             min-height: 34px;
@@ -345,8 +345,8 @@
         }
 
         /* =================================================
-                           CELL NG
-                        ================================================== */
+                                           CELL NG
+                                        ================================================== */
 
         .ng-cell {
             padding: 6px !important;
@@ -356,8 +356,8 @@
         }
 
         /* =================================================
-                           INPUT SESUDAH
-                        ================================================== */
+                                           INPUT SESUDAH
+                                        ================================================== */
 
         .repair-table .ng-input {
             display: block;
@@ -399,9 +399,38 @@
             color: #cbd5e1;
         }
 
-        /* =================================================
-                           INPUT KETERANGAN
-                        ================================================== */
+        .repair-table .ng-input.user-focus {
+            background: #fff7d6;
+            border-color: #eab308;
+            box-shadow: 0 0 0 2px rgba(234, 179, 8, .12);
+        }
+
+        .repair-table .ng-input.user-focus:focus {
+            border-color: #ca8a04;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, .16);
+        }
+
+        .repair-match-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .repair-match-badge.match {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .repair-match-badge.mismatch {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
 
         .repair-table .keterangan-input {
             width: 100%;
@@ -435,8 +464,8 @@
         }
 
         /* =================================================
-                           ACTION CARD
-                        ================================================== */
+                                           ACTION CARD
+                                        ================================================== */
 
         .action-card {
             display: flex;
@@ -463,8 +492,8 @@
         }
 
         /* =================================================
-                           BUTTON
-                        ================================================== */
+                                           BUTTON
+                                        ================================================== */
 
         .btn {
             height: 36px;
@@ -508,8 +537,8 @@
         }
 
         /* =================================================
-                           COMPLETED BOX
-                        ================================================== */
+                                           COMPLETED BOX
+                                        ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -536,8 +565,8 @@
         }
 
         /* =================================================
-                           LEGACY RESULT
-                        ================================================== */
+                                           LEGACY RESULT
+                                        ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -546,8 +575,8 @@
         }
 
         /* =================================================
-                           TIMELINE
-                        ================================================== */
+                                           TIMELINE
+                                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -645,8 +674,8 @@
         }
 
         /* =================================================
-                           ERROR
-                        ================================================== */
+                                           ERROR
+                                        ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -663,8 +692,8 @@
         }
 
         /* =================================================
-                           RESPONSIVE
-                        ================================================== */
+                                           RESPONSIVE
+                                        ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -903,6 +932,118 @@
 
             <div class="repair-table-scroll">
 
+                <?php if($order->status === 'submitted'): ?>
+                    <table class="repair-table">
+                        <colgroup>
+                            <col style="width:55px;">
+                            <col style="width:150px;">
+                            <col style="width:170px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:180px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th rowspan="2">
+                                    No
+                                </th>
+
+                                <th rowspan="2" style="text-align:left;">
+                                    Model
+                                </th>
+
+                                <th rowspan="2" style="text-align:left;">
+                                    Produk
+                                </th>
+
+                                <th colspan="4">
+                                    Jenis &amp; Qty NG
+                                </th>
+
+                                <th rowspan="2" class="keterangan-head">
+                                    Keterangan
+                                </th>
+                            </tr>
+
+                            <tr>
+                                <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <th><?php echo e($code); ?></th>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <?php $__currentLoopData = $modelGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modelItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
+                                    $productGroups = $modelItems->groupBy('product_id');
+                                    $modelRowspan = $productGroups->count();
+                                ?>
+
+                                <?php $__currentLoopData = $productGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $productItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
+                                        $ngItems = $productItems->keyBy(function ($item) {
+                                            return strtoupper($item->ngType?->code ?? '');
+                                        });
+
+                                        $firstItem = $productItems->first();
+
+                                        $keterangan = $firstItem->mismatch_note
+                                            ?: $order->description
+                                            ?: '-';
+                                    ?>
+
+                                    <tr>
+                                        <?php if($loop->first): ?>
+                                            <td rowspan="<?php echo e($modelRowspan); ?>" class="no-cell">
+                                                <?php echo e($loop->parent->iteration); ?>
+
+                                            </td>
+
+                                            <td rowspan="<?php echo e($modelRowspan); ?>" class="model-cell">
+                                                <span class="model-text">
+                                                    <?php echo e($modelItems->first()->masterModel?->model ?? '-'); ?>
+
+                                                </span>
+                                            </td>
+                                        <?php endif; ?>
+
+                                        <td>
+                                            <span class="product-text">
+                                                <?php echo e($firstItem->product?->name ?? '-'); ?>
+
+                                            </span>
+                                        </td>
+
+                                        <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
+                                                $ngItem = $ngItems->get($code);
+                                                $qty = (int) ($ngItem?->before_qty ?? 0);
+                                            ?>
+
+                                            <td class="ng-cell">
+                                                <div class="ng-value before">
+                                                    <?php echo e($qty > 0 ? $qty : ''); ?>
+
+                                                </div>
+                                            </td>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                                        <td class="keterangan-cell">
+                                            <div class="keterangan-text">
+                                                <?php echo e($keterangan); ?>
+
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+
                 <table class="repair-table">
 
                     <colgroup>
@@ -998,7 +1139,39 @@
                                         return strtoupper($item->ngType?->code ?? '');
                                     });
 
-                                    $productId = $productItems->first()->product_id;
+                                    $firstItem = $productItems->first();
+
+                                    $productId = $firstItem->product_id;
+
+                                    $masterModel = $firstItem->masterModel;
+
+                                    $afterProductId = $firstItem->after_product_id ?? $productId;
+
+                                    $beforeQty = [];
+
+                                    $afterQty = [];
+
+                                    foreach ($ngCodes as $code) {
+                                        $beforeQty[$code] = (int) ($ngItems->get($code)?->before_qty ?? 0);
+                                        $afterQty[$code] = (int) ($ngItems->get($code)?->after_qty ?? 0);
+                                    }
+
+                                    $productMatch = (int) $afterProductId === (int) $productId;
+
+                                    $ngMatch = true;
+
+                                    foreach ($ngCodes as $code) {
+                                        if ($afterQty[$code] !== $beforeQty[$code]) {
+                                            $ngMatch = false;
+                                            break;
+                                        }
+                                    }
+
+                                    $boxMatch = $productMatch && $ngMatch;
+
+                                    $availableProducts =
+                                        $masterModel?->products?->where('is_active', true)->sortBy('name')->values() ??
+                                        collect();
                                 ?>
 
 
@@ -1056,20 +1229,27 @@
                                     <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php
                                             $ngItem = $ngItems->get($code);
-                                            $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
+                                            $hasBeforeQty = $ngItem && (int) $ngItem->before_qty > 0;
                                         ?>
 
                                         <td class="ng-cell">
 
                                             <?php if($order->status === 'in_repair'): ?>
-                                                <?php if($hasBeforeQty): ?>
+                                                <?php if($ngItem): ?>
                                                     <input type="number" name="items[<?php echo e($ngItem->id); ?>][after_qty]"
+                                                        class="ng-input <?php echo e($hasBeforeQty ? 'user-focus' : ''); ?>"
+                                                        min="0"
+                                                        value="<?php echo e(old('items.' . $ngItem->id . '.after_qty', $ngItem->after_qty ?? '')); ?>"
+                                                        placeholder="">
+                                                <?php else: ?>
+                                                    <input type="number"
+                                                        name="new_items[<?php echo e($productId); ?>][<?php echo e($code); ?>]"
                                                         class="ng-input" min="0"
-                                                        value="<?php echo e(old('items.' . $ngItem->id . '.after_qty', '')); ?>"
+                                                        value="<?php echo e(old('new_items.' . $productId . '.' . $code, '')); ?>"
                                                         placeholder="">
                                                 <?php endif; ?>
                                             <?php else: ?>
-                                                <?php if($hasBeforeQty): ?>
+                                                <?php if($ngItem): ?>
                                                     <div class="ng-value before">
                                                         <?php echo e(($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : ''); ?>
 
@@ -1102,6 +1282,7 @@
                     </tbody>
 
                 </table>
+                <?php endif; ?>
 
             </div>
 
@@ -1242,7 +1423,7 @@
                 </strong>
 
                 <span>
-                    Hasil repair sudah disimpan dan menunggu konfirmasi dari User.
+                    Hasil repair sudah disimpan danmenunggu konfirmasi dari User.
                 </span>
 
             </div>

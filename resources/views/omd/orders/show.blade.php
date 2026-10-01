@@ -134,8 +134,8 @@
         }
 
         /* =================================================
-                           REPAIR TABLE WRAPPER (scroll area)
-                        ================================================== */
+                                           REPAIR TABLE WRAPPER (scroll area)
+                                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -166,8 +166,8 @@
         }
 
         /* =================================================
-                           TABLE
-                        ================================================== */
+                                           TABLE
+                                        ================================================== */
 
         .repair-table {
             width: 100%;
@@ -181,8 +181,8 @@
         }
 
         /* =================================================
-                           KOLOM
-                        ================================================== */
+                                           KOLOM
+                                        ================================================== */
 
         .repair-table th:nth-child(1),
         .repair-table td:nth-child(1) {
@@ -220,8 +220,8 @@
         }
 
         /* =================================================
-                           HEADER (sticky saat tabel di-scroll)
-                        ================================================== */
+                                           HEADER (sticky saat tabel di-scroll)
+                                        ================================================== */
 
         .repair-table thead {
             position: sticky;
@@ -264,8 +264,8 @@
         }
 
         /* =================================================
-                           BODY
-                        ================================================== */
+                                           BODY
+                                        ================================================== */
 
         .repair-table td {
             padding: 11px 8px;
@@ -292,8 +292,8 @@
         }
 
         /* =================================================
-                           NO & MODEL
-                        ================================================== */
+                                           NO & MODEL
+                                        ================================================== */
 
         .repair-table .model-cell,
         .repair-table .no-cell {
@@ -322,8 +322,8 @@
         }
 
         /* =================================================
-                           NILAI NG SEBELUM
-                        ================================================== */
+                                           NILAI NG SEBELUM
+                                        ================================================== */
 
         .ng-value {
             min-height: 34px;
@@ -347,8 +347,8 @@
         }
 
         /* =================================================
-                           CELL NG
-                        ================================================== */
+                                           CELL NG
+                                        ================================================== */
 
         .ng-cell {
             padding: 6px !important;
@@ -358,8 +358,8 @@
         }
 
         /* =================================================
-                           INPUT SESUDAH
-                        ================================================== */
+                                           INPUT SESUDAH
+                                        ================================================== */
 
         .repair-table .ng-input {
             display: block;
@@ -401,9 +401,38 @@
             color: #cbd5e1;
         }
 
-        /* =================================================
-                           INPUT KETERANGAN
-                        ================================================== */
+        .repair-table .ng-input.user-focus {
+            background: #fff7d6;
+            border-color: #eab308;
+            box-shadow: 0 0 0 2px rgba(234, 179, 8, .12);
+        }
+
+        .repair-table .ng-input.user-focus:focus {
+            border-color: #ca8a04;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, .16);
+        }
+
+        .repair-match-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .repair-match-badge.match {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .repair-match-badge.mismatch {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
 
         .repair-table .keterangan-input {
             width: 100%;
@@ -437,8 +466,8 @@
         }
 
         /* =================================================
-                           ACTION CARD
-                        ================================================== */
+                                           ACTION CARD
+                                        ================================================== */
 
         .action-card {
             display: flex;
@@ -465,8 +494,8 @@
         }
 
         /* =================================================
-                           BUTTON
-                        ================================================== */
+                                           BUTTON
+                                        ================================================== */
 
         .btn {
             height: 36px;
@@ -510,8 +539,8 @@
         }
 
         /* =================================================
-                           COMPLETED BOX
-                        ================================================== */
+                                           COMPLETED BOX
+                                        ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -538,8 +567,8 @@
         }
 
         /* =================================================
-                           LEGACY RESULT
-                        ================================================== */
+                                           LEGACY RESULT
+                                        ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -548,8 +577,8 @@
         }
 
         /* =================================================
-                           TIMELINE
-                        ================================================== */
+                                           TIMELINE
+                                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -647,8 +676,8 @@
         }
 
         /* =================================================
-                           ERROR
-                        ================================================== */
+                                           ERROR
+                                        ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -665,8 +694,8 @@
         }
 
         /* =================================================
-                           RESPONSIVE
-                        ================================================== */
+                                           RESPONSIVE
+                                        ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -900,6 +929,113 @@
 
             <div class="repair-table-scroll">
 
+                @if ($order->status === 'submitted')
+                    <table class="repair-table">
+                        <colgroup>
+                            <col style="width:55px;">
+                            <col style="width:150px;">
+                            <col style="width:170px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:68px;">
+                            <col style="width:180px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th rowspan="2">
+                                    No
+                                </th>
+
+                                <th rowspan="2" style="text-align:left;">
+                                    Model
+                                </th>
+
+                                <th rowspan="2" style="text-align:left;">
+                                    Produk
+                                </th>
+
+                                <th colspan="4">
+                                    Jenis &amp; Qty NG
+                                </th>
+
+                                <th rowspan="2" class="keterangan-head">
+                                    Keterangan
+                                </th>
+                            </tr>
+
+                            <tr>
+                                @foreach ($ngCodes as $code)
+                                    <th>{{ $code }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach ($modelGroups as $modelItems)
+                                @php
+                                    $productGroups = $modelItems->groupBy('product_id');
+                                    $modelRowspan = $productGroups->count();
+                                @endphp
+
+                                @foreach ($productGroups as $productItems)
+                                    @php
+                                        $ngItems = $productItems->keyBy(function ($item) {
+                                            return strtoupper($item->ngType?->code ?? '');
+                                        });
+
+                                        $firstItem = $productItems->first();
+
+                                        $keterangan = $firstItem->mismatch_note
+                                            ?: $order->description
+                                            ?: '-';
+                                    @endphp
+
+                                    <tr>
+                                        @if ($loop->first)
+                                            <td rowspan="{{ $modelRowspan }}" class="no-cell">
+                                                {{ $loop->parent->iteration }}
+                                            </td>
+
+                                            <td rowspan="{{ $modelRowspan }}" class="model-cell">
+                                                <span class="model-text">
+                                                    {{ $modelItems->first()->masterModel?->model ?? '-' }}
+                                                </span>
+                                            </td>
+                                        @endif
+
+                                        <td>
+                                            <span class="product-text">
+                                                {{ $firstItem->product?->name ?? '-' }}
+                                            </span>
+                                        </td>
+
+                                        @foreach ($ngCodes as $code)
+                                            @php
+                                                $ngItem = $ngItems->get($code);
+                                                $qty = (int) ($ngItem?->before_qty ?? 0);
+                                            @endphp
+
+                                            <td class="ng-cell">
+                                                <div class="ng-value before">
+                                                    {{ $qty > 0 ? $qty : '' }}
+                                                </div>
+                                            </td>
+                                        @endforeach
+
+                                        <td class="keterangan-cell">
+                                            <div class="keterangan-text">
+                                                {{ $keterangan }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+
                 <table class="repair-table">
 
                     <colgroup>
@@ -999,7 +1135,39 @@
                                         return strtoupper($item->ngType?->code ?? '');
                                     });
 
-                                    $productId = $productItems->first()->product_id;
+                                    $firstItem = $productItems->first();
+
+                                    $productId = $firstItem->product_id;
+
+                                    $masterModel = $firstItem->masterModel;
+
+                                    $afterProductId = $firstItem->after_product_id ?? $productId;
+
+                                    $beforeQty = [];
+
+                                    $afterQty = [];
+
+                                    foreach ($ngCodes as $code) {
+                                        $beforeQty[$code] = (int) ($ngItems->get($code)?->before_qty ?? 0);
+                                        $afterQty[$code] = (int) ($ngItems->get($code)?->after_qty ?? 0);
+                                    }
+
+                                    $productMatch = (int) $afterProductId === (int) $productId;
+
+                                    $ngMatch = true;
+
+                                    foreach ($ngCodes as $code) {
+                                        if ($afterQty[$code] !== $beforeQty[$code]) {
+                                            $ngMatch = false;
+                                            break;
+                                        }
+                                    }
+
+                                    $boxMatch = $productMatch && $ngMatch;
+
+                                    $availableProducts =
+                                        $masterModel?->products?->where('is_active', true)->sortBy('name')->values() ??
+                                        collect();
                                 @endphp
 
 
@@ -1056,30 +1224,35 @@
 
                                     {{-- =========================
      SESUDAH
-     - Input hanya muncul jika pada kolom Sebelum
-       terdapat Qty NG (> 0).
-     - Jika Sebelum kosong / 0, Sesudah juga kosong.
-     - Selain status in_repair, tampilkan hasil repair
-       hanya jika sebelumnya memang ada order repair.
+     - Semua P/H/C/S tetap dapat diinput OMD.
+     - Highlight hanya diberikan pada jenis NG yang
+       memiliki Qty Sebelum > 0 dari order User.
 ========================= --}}
 
                                     @foreach ($ngCodes as $code)
                                         @php
                                             $ngItem = $ngItems->get($code);
-                                            $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
+                                            $hasBeforeQty = $ngItem && (int) $ngItem->before_qty > 0;
                                         @endphp
 
                                         <td class="ng-cell">
 
                                             @if ($order->status === 'in_repair')
-                                                @if ($hasBeforeQty)
+                                                @if ($ngItem)
                                                     <input type="number" name="items[{{ $ngItem->id }}][after_qty]"
+                                                        class="ng-input {{ $hasBeforeQty ? 'user-focus' : '' }}"
+                                                        min="0"
+                                                        value="{{ old('items.' . $ngItem->id . '.after_qty', $ngItem->after_qty ?? '') }}"
+                                                        placeholder="">
+                                                @else
+                                                    <input type="number"
+                                                        name="new_items[{{ $productId }}][{{ $code }}]"
                                                         class="ng-input" min="0"
-                                                        value="{{ old('items.' . $ngItem->id . '.after_qty', '') }}"
+                                                        value="{{ old('new_items.' . $productId . '.' . $code, '') }}"
                                                         placeholder="">
                                                 @endif
                                             @else
-                                                @if ($hasBeforeQty)
+                                                @if ($ngItem)
                                                     <div class="ng-value before">
                                                         {{ ($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : '' }}
                                                     </div>
@@ -1113,6 +1286,7 @@
                     </tbody>
 
                 </table>
+                @endif
 
             </div>
 
@@ -1255,7 +1429,7 @@
                 </strong>
 
                 <span>
-                    Hasil repair sudah disimpan dan menunggu konfirmasi dari User.
+                    Hasil repair sudah disimpan danmenunggu konfirmasi dari User.
                 </span>
 
             </div>

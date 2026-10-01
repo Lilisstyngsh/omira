@@ -7,9 +7,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Target extends Model
 {
-    protected $fillable = ['year', 'month', 'area_id', 'target_qty'];
-    public function area(): BelongsTo
+    protected $fillable = [
+        'year',
+        'month',
+        'line_id',
+        'target_qty',
+        'scrap_limit',
+    ];
+
+    protected $casts = [
+        'year' => 'integer',
+        'month' => 'integer',
+        'line_id' => 'integer',
+        'target_qty' => 'integer',
+        'scrap_limit' => 'integer',
+    ];
+
+    public function line(): BelongsTo
     {
-        return $this->belongsTo(Area::class);
+        return $this->belongsTo(Line::class);
     }
 }

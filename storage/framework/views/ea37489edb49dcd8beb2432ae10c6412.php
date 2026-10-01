@@ -94,8 +94,8 @@
         }
 
         /* =================================================
-                                                           INFO
-                                                        ================================================== */
+                                                               INFO
+                                                            ================================================== */
 
         .info-grid {
             display: grid;
@@ -136,8 +136,8 @@
         }
 
         /* =================================================
-                                                           REPAIR TABLE
-                                                        ================================================== */
+                                                               REPAIR TABLE
+                                                            ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -233,14 +233,38 @@
             color: #475569;
         }
 
+        .repair-before-after-label {
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 2px;
+            color: #94a3b8;
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .repair-result-match-cell {
+            background: #dcfce7 !important;
+        }
+
+        .repair-result-mismatch-cell {
+            background: #fee2e2 !important;
+        }
+
+        .repair-result-match-cell .ng-value,
+        .repair-result-mismatch-cell .ng-value {
+            color: #000;
+        }
+
         .ng-value {
             min-height: 22px;
-            /* REVISI: sebelumnya 34px */
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
             font-weight: 800;
-            color: #334155;
+            color: #000;
         }
 
         .empty-ng {
@@ -249,8 +273,8 @@
         }
 
         /* =================================================
-                                                           KETERANGAN
-                                                        ================================================== */
+                                                               KETERANGAN
+                                                            ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -297,8 +321,8 @@
         }
 
         /* =================================================
-                                                           ACTION CARD
-                                                        ================================================== */
+                                                               ACTION CARD
+                                                            ================================================== */
 
         .action-card {
             display: flex;
@@ -325,8 +349,8 @@
         }
 
         /* =================================================
-                                                           CONFIRMED
-                                                        ================================================== */
+                                                               CONFIRMED
+                                                            ================================================== */
 
         .confirmed-box {
             padding: 16px;
@@ -350,8 +374,8 @@
         }
 
         /* =================================================
-                                                           BUTTON
-                                                        ================================================== */
+                                                               BUTTON
+                                                            ================================================== */
 
         .btn {
             height: 36px;
@@ -389,8 +413,8 @@
         }
 
         /* =================================================
-                                                           LEGACY
-                                                        ================================================== */
+                                                               LEGACY
+                                                            ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -399,8 +423,8 @@
         }
 
         /* =================================================
-                                                           ERROR
-                                                        ================================================== */
+                                                               ERROR
+                                                            ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -413,8 +437,8 @@
         }
 
         /* =================================================
-                                                           RESPONSIVE
-                                                        ================================================== */
+                                                               RESPONSIVE
+                                                            ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -440,8 +464,8 @@
         }
 
         /* =================================================
-                                       TIMELINE
-                                    ================================================== */
+                                           TIMELINE
+                                        ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -482,10 +506,28 @@
             border-radius: 50%;
             font-size: 15px;
             font-weight: 800;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px #cbd5e1;
+        }
+
+        .timeline-icon.completed {
             background: #dcfce7;
             color: #16a34a;
-            border: 3px solid #fff;
             box-shadow: 0 0 0 2px #bbf7d0;
+        }
+
+        .timeline-icon.in-progress {
+            background: #fef3c7;
+            color: #d97706;
+            box-shadow: 0 0 0 2px #fde68a;
+        }
+
+        .timeline-icon.pending {
+            background: #fee2e2;
+            color: #dc2626;
+            box-shadow: 0 0 0 2px #fecaca;
         }
 
         .timeline-item strong {
@@ -523,11 +565,6 @@
 
 
         <div class="repair-head-actions">
-
-            <span class="status-badge status-<?php echo e($order->status); ?>">
-                <?php echo e($order->status_label); ?>
-
-            </span>
 
             <a href="<?php echo e(route('user.orders.index')); ?>" class="btn btn-secondary">
                 Kembali
@@ -577,10 +614,30 @@
             <div class="timeline">
 
 
+                <?php
+                    $verifiedDone = (bool) $order->verified_at;
+                    $repairStarted = (bool) $order->repair_started_at;
+                    $repairDone = (bool) $order->repair_completed_at;
+                    $handoverDone = (bool) $order->confirmation?->confirmed_at;
+
+                    $verifiedState = $verifiedDone
+                        ? 'completed'
+                        : 'pending';
+
+                    $repairState = $repairDone
+                        ? 'completed'
+                        : ($repairStarted ? 'in-progress' : 'pending');
+
+                    $handoverState = $handoverDone
+                        ? 'completed'
+                        : ($order->status === 'completed' ? 'in-progress' : 'pending');
+                ?>
+
+
                 
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
+                    <div class="timeline-icon completed">
                         ✓
                     </div>
 
@@ -612,8 +669,12 @@
                 
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
-                        ✓
+                    <div class="timeline-icon <?php echo e($verifiedState); ?>">
+                        <?php if($verifiedState === 'completed'): ?>
+                            ✓
+                        <?php else: ?>
+                            ×
+                        <?php endif; ?>
                     </div>
 
                     <strong>
@@ -644,8 +705,14 @@
                 
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
-                        ✓
+                    <div class="timeline-icon <?php echo e($repairState); ?>">
+                        <?php if($repairState === 'completed'): ?>
+                            ✓
+                        <?php elseif($repairState === 'in-progress'): ?>
+                            △
+                        <?php else: ?>
+                            ×
+                        <?php endif; ?>
                     </div>
 
                     <strong>
@@ -685,8 +752,14 @@
                 
                 <div class="timeline-item">
 
-                    <div class="timeline-icon">
-                        ✓
+                    <div class="timeline-icon <?php echo e($handoverState); ?>">
+                        <?php if($handoverState === 'completed'): ?>
+                            ✓
+                        <?php elseif($handoverState === 'in-progress'): ?>
+                            △
+                        <?php else: ?>
+                            ×
+                        <?php endif; ?>
                     </div>
 
                     <strong>
@@ -812,6 +885,9 @@
 
             <div class="repair-table-scroll">
 
+                <?php
+                    $showAfter = in_array($order->status, ['completed', 'confirmed'], true);
+                ?>
 
                 
 
@@ -830,10 +906,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
+                            <?php if($showAfter): ?>
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                            <?php endif; ?>
 
                             <col style="width:180px;">
 
@@ -844,40 +922,42 @@
 
                             <tr>
 
-                                <th rowspan="3">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>">
                                     No
                                 </th>
 
-                                <th rowspan="3" style="text-align:left;">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" style="text-align:left;">
                                     Model
                                 </th>
 
-                                <th rowspan="3" style="text-align:left;">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" style="text-align:left;">
                                     Produk
                                 </th>
 
-                                <th colspan="8">
+                                <th colspan="<?php echo e($showAfter ? 8 : 4); ?>">
                                     Jenis &amp; Qty NG
                                 </th>
 
-                                <th rowspan="3" class="keterangan-head">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" class="keterangan-head">
                                     Keterangan
                                 </th>
 
                             </tr>
 
 
-                            <tr>
+                            <?php if($showAfter): ?>
+                                <tr>
 
-                                <th colspan="4">
-                                    Sebelum
-                                </th>
+                                    <th colspan="4">
+                                        Sebelum
+                                    </th>
 
-                                <th colspan="4">
-                                    Sesudah
-                                </th>
+                                    <th colspan="4">
+                                        Sesudah
+                                    </th>
 
-                            </tr>
+                                </tr>
+                            <?php endif; ?>
 
 
                             <tr>
@@ -890,12 +970,14 @@
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
-                                <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <th>
-                                        <?php echo e($code); ?>
+                                <?php if($showAfter): ?>
+                                    <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <th>
+                                            <?php echo e($code); ?>
 
-                                    </th>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </th>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php endif; ?>
 
                             </tr>
 
@@ -923,10 +1005,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
+                            <?php if($showAfter): ?>
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                            <?php endif; ?>
 
                             <col style="width:180px;">
 
@@ -937,26 +1021,24 @@
 
                             <?php $__currentLoopData = $modelGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modelItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php
-
                                     $productGroups = $modelItems->groupBy('product_id');
-
                                     $modelRowspan = $productGroups->count();
-
                                 ?>
 
 
                                 <?php $__currentLoopData = $productGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $productItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <?php
-
                                         $ngItems = $productItems->keyBy(function ($item) {
                                             return strtoupper($item->ngType?->code ?? '');
                                         });
 
-                                        $productId = $productItems->first()->product_id;
+                                        $firstItem = $productItems->first();
+                                        $productId = $firstItem->product_id;
 
                                         $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))
                                             ?->mismatch_note;
 
+                                        $hasFinalResult = in_array($order->status, ['completed', 'confirmed'], true);
                                     ?>
 
 
@@ -988,7 +1070,7 @@
                                         <td>
 
                                             <span class="product-text">
-                                                <?php echo e($productItems->first()->product?->name ?? '-'); ?>
+                                                <?php echo e($firstItem->product?->name ?? '-'); ?>
 
                                             </span>
 
@@ -1010,9 +1092,7 @@
 
                                                     </div>
                                                 <?php else: ?>
-                                                    <div class="ng-value empty-ng">
-
-                                                    </div>
+                                                    <div class="ng-value empty-ng"></div>
                                                 <?php endif; ?>
 
                                             </td>
@@ -1021,26 +1101,38 @@
 
                                         
 
-                                        <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <?php
-                                                $ngItem = $ngItems->get($code);
+                                        <?php if($showAfter): ?>
+                                            <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
+                                                    $ngItem = $ngItems->get($code);
+                                                    $beforeQty = (int) ($ngItem?->before_qty ?? 0);
+                                                    $afterQty = (int) ($ngItem?->after_qty ?? 0);
+                                                    $isNgMatch = $hasFinalResult && $beforeQty === $afterQty;
+                                                    $isNgMismatch = $hasFinalResult && $beforeQty !== $afterQty;
+                                                ?>
 
-                                                $hasBeforeQty = $ngItem && $ngItem->before_qty > 0;
-                                            ?>
+                                                <?php
+                                                    $resultCellClass = '';
 
-                                            <td class="ng-cell">
+                                                    if ($hasFinalResult && $afterQty > 0) {
+                                                        $resultCellClass = $isNgMatch
+                                                            ? 'repair-result-match-cell'
+                                                            : ($isNgMismatch
+                                                                ? 'repair-result-mismatch-cell'
+                                                                : '');
+                                                    }
+                                                ?>
 
-                                                <?php if($hasBeforeQty): ?>
+                                                <td class="ng-cell <?php echo e($resultCellClass); ?>">
+
                                                     <div class="ng-value">
-
-                                                        <?php echo e(($ngItem->after_qty ?? 0) > 0 ? $ngItem->after_qty : ''); ?>
-
+                                                        <?php echo e($afterQty > 0 ? $afterQty : ''); ?>
 
                                                     </div>
-                                                <?php endif; ?>
 
-                                            </td>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                </td>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
 
 
                                         
@@ -1058,6 +1150,7 @@
                     </table>
 
                 </div>
+
 
             </div>
 

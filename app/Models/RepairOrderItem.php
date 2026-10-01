@@ -11,6 +11,7 @@ class RepairOrderItem extends Model
         'repair_order_id',
         'master_model_id',
         'product_id',
+        'after_product_id',
         'ng_type_id',
         'before_qty',
         'after_qty',
@@ -43,6 +44,14 @@ class RepairOrderItem extends Model
         return $this->belongsTo(
             Product::class,
             'product_id'
+        );
+    }
+
+    public function afterProduct(): BelongsTo
+    {
+        return $this->belongsTo(
+            Product::class,
+            'after_product_id'
         );
     }
 

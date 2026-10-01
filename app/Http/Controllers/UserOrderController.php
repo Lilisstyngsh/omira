@@ -462,6 +462,7 @@ class UserOrderController extends Controller
             'line.plant',
             'items.masterModel',
             'items.product',
+            'items.afterProduct',
             'items.ngType',
             'result',
             'result.processedBy',
@@ -475,8 +476,6 @@ class UserOrderController extends Controller
             compact('order')
         );
     }
-
-
     public function confirm(
         Request $request,
         RepairOrder $order

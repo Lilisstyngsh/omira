@@ -9,6 +9,7 @@ use App\Http\Controllers\UserOrderController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\TpsRepairController;
 use App\Http\Controllers\MasterDataController;
+use App\Http\Controllers\TargetController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -429,6 +430,16 @@ Route::middleware('auth')->group(function () {
                 [OmdOrderController::class, 'handover']
             )->name('orders.handover');
 
+            /*
+            |--------------------------------------------------------------------------
+            | Target
+            |--------------------------------------------------------------------------
+            */
+            Route::get('/targets', [TargetController::class, 'index'])
+                ->name('targets.index');
+
+            Route::post('/targets', [TargetController::class, 'store'])
+                ->name('targets.store');
 
             /*
             |--------------------------------------------------------------------------
