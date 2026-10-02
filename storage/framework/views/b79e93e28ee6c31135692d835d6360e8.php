@@ -1,11 +1,11 @@
-@extends('layouts.app')
 
-@section('title', 'Detail History Order Repair Box')
-@section('header', 'Detail History Order Repair Box')
 
-@section('content')
+<?php $__env->startSection('title', 'Detail History Order Repair Box'); ?>
+<?php $__env->startSection('header', 'Detail History Order Repair Box'); ?>
 
-    @php
+<?php $__env->startSection('content'); ?>
+
+    <?php
 
         $hasOmdResult = in_array($order->status, ['completed', 'confirmed'], true);
 
@@ -14,7 +14,7 @@
         if ($hasOmdResult) {
             $totalQtyOmd = $order->items->sum(fn($item) => (int) ($item->after_qty ?? 0));
         }
-    @endphp
+    ?>
 
     <style>
         .repair-head {
@@ -46,8 +46,8 @@
 
 
         /* =================================================
-                               CARD
-                            ================================================== */
+                       CARD
+                    ================================================== */
 
         .repair-card {
             background: #fff;
@@ -76,8 +76,8 @@
 
 
         /* =================================================
-                               STATUS
-                            ================================================== */
+                       STATUS
+                    ================================================== */
 
         .status-badge {
             display: inline-flex;
@@ -98,8 +98,8 @@
 
 
         /* =================================================
-                               INFORMASI ORDER
-                            ================================================== */
+                       INFORMASI ORDER
+                    ================================================== */
 
         .info-grid {
             display: grid;
@@ -141,8 +141,8 @@
 
 
         /* =================================================
-                               REPAIR TABLE (SAMA PERSIS DENGAN show.blade)
-                            ================================================== */
+                       REPAIR TABLE (SAMA PERSIS DENGAN show.blade)
+                    ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -278,8 +278,8 @@
 
 
         /* =================================================
-                               KETERANGAN
-                            ================================================== */
+                       KETERANGAN
+                    ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -309,8 +309,8 @@
 
 
         /* =================================================
-                               COMPLETED
-                            ================================================== */
+                       COMPLETED
+                    ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -335,8 +335,8 @@
 
 
         /* =================================================
-                               TIMELINE
-                            ================================================== */
+                       TIMELINE
+                    ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -400,8 +400,8 @@
 
 
         /* =================================================
-                               BUTTON
-                            ================================================== */
+                       BUTTON
+                    ================================================== */
 
         .btn {
             height: 36px;
@@ -426,6 +426,11 @@
         .btn-secondary:hover {
             background: #e2e8f0;
         }
+
+
+        /* =================================================
+                       RESPONSIVE
+                    ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -459,20 +464,19 @@
     </style>
 
 
-    {{-- =====================================================
-         HEADER
-    ===================================================== --}}
+    
 
     <div class="repair-head">
 
         <div>
             <h2>
-                {{ $order->order_number }}
+                <?php echo e($order->order_number); ?>
+
             </h2>
         </div>
 
         <div class="repair-head-actions">
-            <a href="{{ route('omd.orders.history') }}" class="btn btn-secondary">
+            <a href="<?php echo e(route('omd.orders.history')); ?>" class="btn btn-secondary">
                 Kembali
             </a>
         </div>
@@ -480,9 +484,7 @@
     </div>
 
 
-    {{-- =====================================================
-         PROGRESS ORDER
-    ===================================================== --}}
+    
 
     <div class="repair-card">
 
@@ -494,7 +496,7 @@
 
             <div class="timeline">
 
-                {{-- USER SUBMIT --}}
+                
                 <div class="timeline-item">
 
                     <div class="timeline-icon">
@@ -506,18 +508,20 @@
                     </strong>
 
                     <span>
-                        {{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}
+                        <?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?>
 
-                        @if ($order->user?->name)
+
+                        <?php if($order->user?->name): ?>
                             <br>
-                            {{ $order->user->name }}
-                        @endif
+                            <?php echo e($order->user->name); ?>
+
+                        <?php endif; ?>
                     </span>
 
                 </div>
 
 
-                {{-- VERIFIED OMD --}}
+                
                 <div class="timeline-item">
 
                     <div class="timeline-icon">
@@ -529,22 +533,24 @@
                     </strong>
 
                     <span>
-                        @if ($order->verified_at)
-                            {{ $order->verified_at->format('d-m-Y H:i') }}
+                        <?php if($order->verified_at): ?>
+                            <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
 
-                            @if ($order->omdVerifier?->name)
+
+                            <?php if($order->omdVerifier?->name): ?>
                                 <br>
-                                {{ $order->omdVerifier->name }}
-                            @endif
-                        @else
+                                <?php echo e($order->omdVerifier->name); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </span>
 
                 </div>
 
 
-                {{-- REPAIR OMD --}}
+                
                 <div class="timeline-item">
 
                     <div class="timeline-icon">
@@ -556,29 +562,33 @@
                     </strong>
 
                     <span>
-                        @if ($order->repair_completed_at)
-                            {{ $order->repair_completed_at->format('d-m-Y H:i') }}
+                        <?php if($order->repair_completed_at): ?>
+                            <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
 
-                            @if ($order->result?->processedBy?->name)
-                                <br>
-                                {{ $order->result->processedBy->name }}
-                            @endif
-                        @elseif ($order->repair_started_at)
-                            {{ $order->repair_started_at->format('d-m-Y H:i') }}
 
-                            @if ($order->result?->processedBy?->name)
+                            <?php if($order->result?->processedBy?->name): ?>
                                 <br>
-                                {{ $order->result->processedBy->name }}
-                            @endif
-                        @else
+                                <?php echo e($order->result->processedBy->name); ?>
+
+                            <?php endif; ?>
+                        <?php elseif($order->repair_started_at): ?>
+                            <?php echo e($order->repair_started_at->format('d-m-Y H:i')); ?>
+
+
+                            <?php if($order->result?->processedBy?->name): ?>
+                                <br>
+                                <?php echo e($order->result->processedBy->name); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </span>
 
                 </div>
 
 
-                {{-- SERAH TERIMA --}}
+                
                 <div class="timeline-item">
 
                     <div class="timeline-icon">
@@ -590,16 +600,18 @@
                     </strong>
 
                     <span>
-                        @if ($order->confirmation?->confirmed_at)
-                            {{ $order->confirmation->confirmed_at->format('d-m-Y H:i') }}
+                        <?php if($order->confirmation?->confirmed_at): ?>
+                            <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
 
-                            @if ($order->confirmation->user?->name)
+
+                            <?php if($order->confirmation->user?->name): ?>
                                 <br>
-                                {{ $order->confirmation->user->name }}
-                            @endif
-                        @else
+                                <?php echo e($order->confirmation->user->name); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </span>
 
                 </div>
@@ -611,9 +623,7 @@
     </div>
 
 
-    {{-- =====================================================
-         INFORMASI ORDER
-    ===================================================== --}}
+    
 
     <div class="repair-card">
 
@@ -626,27 +636,27 @@
 
             <div class="info-item">
                 <span>No Order</span>
-                <strong>{{ $order->order_number }}</strong>
+                <strong><?php echo e($order->order_number); ?></strong>
             </div>
 
             <div class="info-item">
                 <span>Tanggal</span>
-                <strong>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</strong>
+                <strong><?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?></strong>
             </div>
 
             <div class="info-item">
                 <span>Nama</span>
-                <strong>{{ $order->user?->name ?? '-' }}</strong>
+                <strong><?php echo e($order->user?->name ?? '-'); ?></strong>
             </div>
 
             <div class="info-item">
                 <span>Plant</span>
-                <strong>{{ $order->line?->plant?->name ?? '-' }}</strong>
+                <strong><?php echo e($order->line?->plant?->name ?? '-'); ?></strong>
             </div>
 
             <div class="info-item">
                 <span>Line</span>
-                <strong>{{ $order->line?->name ?? '-' }}</strong>
+                <strong><?php echo e($order->line?->name ?? '-'); ?></strong>
             </div>
 
             <div class="info-item">
@@ -656,10 +666,10 @@
 
             <div class="info-item">
                 <span>Total Qty</span>
-                <strong>{{ $order->quantity }}</strong>
+                <strong><?php echo e($order->quantity); ?></strong>
             </div>
 
-            @if ($hasOmdResult)
+            <?php if($hasOmdResult): ?>
                 <div class="info-item total-qty-omd">
 
                     <span>
@@ -667,11 +677,12 @@
                     </span>
 
                     <strong>
-                        {{ $totalQtyOmd }}
+                        <?php echo e($totalQtyOmd); ?>
+
                     </strong>
 
                 </div>
-            @endif
+            <?php endif; ?>
 
         </div>
 
@@ -683,7 +694,8 @@
             </div>
 
             <div class="description-box">
-                {{ $order->description ?: '-' }}
+                <?php echo e($order->description ?: '-'); ?>
+
             </div>
 
         </div>
@@ -691,13 +703,11 @@
     </div>
 
 
-    {{-- =====================================================
-         DETAIL REPAIR BOX
-    ===================================================== --}}
+    
 
-    @if ($order->items->isNotEmpty())
+    <?php if($order->items->isNotEmpty()): ?>
 
-        @php
+        <?php
 
             $modelGroups = $order->items->groupBy('master_model_id');
 
@@ -705,7 +715,7 @@
 
             $showAfter = in_array($order->status, ['completed', 'confirmed'], true);
 
-        @endphp
+        ?>
 
 
         <div class="repair-card">
@@ -718,9 +728,7 @@
             <div class="repair-table-scroll">
 
 
-                {{-- =================================================
-                     HEADER
-                ================================================== --}}
+                
 
                 <div class="repair-table-header">
 
@@ -737,12 +745,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            @if ($showAfter)
+                            <?php if($showAfter): ?>
                                 <col style="width:68px;">
                                 <col style="width:68px;">
                                 <col style="width:68px;">
                                 <col style="width:68px;">
-                            @endif
+                            <?php endif; ?>
 
                             <col style="width:180px;">
 
@@ -753,30 +761,30 @@
 
                             <tr>
 
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>">
                                     No
                                 </th>
 
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" style="text-align:left;">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" style="text-align:left;">
                                     Model
                                 </th>
 
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" style="text-align:left;">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" style="text-align:left;">
                                     Produk
                                 </th>
 
-                                <th colspan="{{ $showAfter ? 8 : 4 }}">
+                                <th colspan="<?php echo e($showAfter ? 8 : 4); ?>">
                                     Jenis &amp; Qty NG
                                 </th>
 
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" class="keterangan-head">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" class="keterangan-head">
                                     Keterangan
                                 </th>
 
                             </tr>
 
 
-                            @if ($showAfter)
+                            <?php if($showAfter): ?>
                                 <tr>
 
                                     <th colspan="4">
@@ -788,25 +796,27 @@
                                     </th>
 
                                 </tr>
-                            @endif
+                            <?php endif; ?>
 
 
                             <tr>
 
-                                @foreach ($ngCodes as $code)
+                                <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <th>
-                                        {{ $code }}
+                                        <?php echo e($code); ?>
+
                                     </th>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
-                                @if ($showAfter)
-                                    @foreach ($ngCodes as $code)
+                                <?php if($showAfter): ?>
+                                    <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <th>
-                                            {{ $code }}
+                                            <?php echo e($code); ?>
+
                                         </th>
-                                    @endforeach
-                                @endif
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php endif; ?>
 
                             </tr>
 
@@ -817,9 +827,7 @@
                 </div>
 
 
-                {{-- =================================================
-                     BODY
-                ================================================== --}}
+                
 
                 <div class="repair-table-body">
 
@@ -836,12 +844,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            @if ($showAfter)
+                            <?php if($showAfter): ?>
                                 <col style="width:68px;">
                                 <col style="width:68px;">
                                 <col style="width:68px;">
                                 <col style="width:68px;">
-                            @endif
+                            <?php endif; ?>
 
                             <col style="width:180px;">
 
@@ -850,15 +858,15 @@
 
                         <tbody>
 
-                            @foreach ($modelGroups as $modelItems)
-                                @php
+                            <?php $__currentLoopData = $modelGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modelItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $productGroups = $modelItems->groupBy('product_id');
                                     $modelRowspan = $productGroups->count();
-                                @endphp
+                                ?>
 
 
-                                @foreach ($productGroups as $productItems)
-                                    @php
+                                <?php $__currentLoopData = $productGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $productItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $ngItems = $productItems->keyBy(function ($item) {
                                             return strtoupper($item->ngType?->code ?? '');
                                         });
@@ -870,75 +878,71 @@
                                             ?->mismatch_note;
 
                                         $hasFinalResult = in_array($order->status, ['completed', 'confirmed'], true);
-                                    @endphp
+                                    ?>
 
 
                                     <tr>
 
 
-                                        {{-- =========================
-                                             NO + MODEL
-                                        ========================== --}}
+                                        
 
-                                        @if ($loop->first)
-                                            <td rowspan="{{ $modelRowspan }}" class="no-cell">
-                                                {{ $loop->parent->iteration }}
+                                        <?php if($loop->first): ?>
+                                            <td rowspan="<?php echo e($modelRowspan); ?>" class="no-cell">
+                                                <?php echo e($loop->parent->iteration); ?>
+
                                             </td>
 
 
-                                            <td rowspan="{{ $modelRowspan }}" class="model-cell">
+                                            <td rowspan="<?php echo e($modelRowspan); ?>" class="model-cell">
 
                                                 <span class="model-text">
-                                                    {{ $modelItems->first()->masterModel?->model ?? '-' }}
+                                                    <?php echo e($modelItems->first()->masterModel?->model ?? '-'); ?>
+
                                                 </span>
 
                                             </td>
-                                        @endif
+                                        <?php endif; ?>
 
 
-                                        {{-- =========================
-                                             PRODUK
-                                        ========================== --}}
+                                        
 
                                         <td>
 
                                             <span class="product-text">
-                                                {{ $firstItem->product?->name ?? '-' }}
+                                                <?php echo e($firstItem->product?->name ?? '-'); ?>
+
                                             </span>
 
                                         </td>
 
 
-                                        {{-- =========================
-                                             SEBELUM
-                                        ========================== --}}
+                                        
 
-                                        @foreach ($ngCodes as $code)
-                                            @php
+                                        <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
                                                 $ngItem = $ngItems->get($code);
-                                            @endphp
+                                            ?>
 
                                             <td class="ng-cell">
 
-                                                @if ($ngItem)
+                                                <?php if($ngItem): ?>
                                                     <div class="ng-value">
-                                                        {{ $ngItem->before_qty > 0 ? $ngItem->before_qty : '' }}
+                                                        <?php echo e($ngItem->before_qty > 0 ? $ngItem->before_qty : ''); ?>
+
                                                     </div>
-                                                @else
+                                                <?php else: ?>
                                                     <div class="ng-value empty-ng"></div>
-                                                @endif
+                                                <?php endif; ?>
 
                                             </td>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
-                                        {{-- =========================
-                                             SESUDAH
-                                        ========================== --}}
+                                        
 
-                                        @if ($showAfter)
-                                            @foreach ($ngCodes as $code)
-                                                @php
+                                        <?php if($showAfter): ?>
+                                            <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
                                                     $ngItem = $ngItems->get($code);
 
                                                     $beforeQty = (int) ($ngItem?->before_qty ?? 0);
@@ -961,30 +965,29 @@
                                                                 ? 'repair-result-match-cell'
                                                                 : 'repair-result-mismatch-cell';
                                                     }
-                                                @endphp
+                                                ?>
 
-                                                <td class="ng-cell {{ $resultCellClass }}">
+                                                <td class="ng-cell <?php echo e($resultCellClass); ?>">
 
                                                     <div class="ng-value">
-                                                        {{ $afterQty > 0 ? $afterQty : '' }}
+                                                        <?php echo e($afterQty > 0 ? $afterQty : ''); ?>
+
                                                     </div>
 
                                                 </td>
-                                            @endforeach
-                                        @endif
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
 
 
-                                        {{-- =========================
-                                             KETERANGAN PER PRODUK
-                                        ========================== --}}
+                                        
 
                                         <td class="keterangan-cell">
-                                            <div class="keterangan-text">{{ $productNote ?: '-' }}</div>
+                                            <div class="keterangan-text"><?php echo e($productNote ?: '-'); ?></div>
                                         </td>
 
                                     </tr>
-                                @endforeach
-                            @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </tbody>
 
@@ -996,10 +999,8 @@
             </div>
 
         </div>
-    @elseif ($order->result)
-        {{-- =====================================================
-             FALLBACK DATA LAMA
-        ===================================================== --}}
+    <?php elseif($order->result): ?>
+        
 
         <div class="repair-card">
 
@@ -1016,33 +1017,36 @@
 
                 <div class="info-item">
                     <span>OK</span>
-                    <strong>{{ $order->result->ok_qty }}</strong>
+                    <strong><?php echo e($order->result->ok_qty); ?></strong>
                 </div>
 
                 <div class="info-item">
                     <span>Scrap</span>
-                    <strong>{{ $order->result->scrap_qty }}</strong>
+                    <strong><?php echo e($order->result->scrap_qty); ?></strong>
                 </div>
 
                 <div class="info-item">
                     <span>NG</span>
-                    <strong>{{ $order->result->ng_qty }}</strong>
+                    <strong><?php echo e($order->result->ng_qty); ?></strong>
                 </div>
 
                 <div class="info-item">
                     <span>Diproses Oleh</span>
-                    <strong>{{ $order->result->processedBy?->name ?? '-' }}</strong>
+                    <strong><?php echo e($order->result->processedBy?->name ?? '-'); ?></strong>
                 </div>
 
             </div>
 
 
             <div class="description-box" style="margin-top:14px;">
-                {{ $order->result->notes ?: 'Tidak ada catatan.' }}
+                <?php echo e($order->result->notes ?: 'Tidak ada catatan.'); ?>
+
             </div>
 
         </div>
 
-    @endif
+    <?php endif; ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/user/orders/history-show.blade.php ENDPATH**/ ?>

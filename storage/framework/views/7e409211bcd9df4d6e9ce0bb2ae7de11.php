@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Edit Akun'); ?>
+<?php $__env->startSection('header', 'Edit Akun'); ?>
 
-@section('title', 'Tambah Akun')
-@section('header', 'Tambah Akun')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <style>
         .account-page-head {
@@ -69,10 +67,6 @@
         .account-field {
             display: flex;
             flex-direction: column;
-        }
-
-        .account-field-full {
-            grid-column: 1 / -1;
         }
 
         .account-field label {
@@ -181,10 +175,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .account-field-full {
-                grid-column: auto;
-            }
-
             .account-actions {
                 justify-content: stretch;
             }
@@ -196,24 +186,22 @@
     </style>
 
 
-    {{-- =========================================================
-        PAGE HEADER
-    ========================================================== --}}
+    
 
     <div class="account-page-head">
 
         <div>
+
             <h2 class="account-page-title">
-                Tambah Akun
+                Edit Akun
             </h2>
+
         </div>
 
     </div>
 
 
-    {{-- =========================================================
-        FORM CARD
-    ========================================================== --}}
+    
 
     <div class="account-form-card">
 
@@ -228,52 +216,69 @@
 
         <div class="account-form-body">
 
-            <form method="POST" action="{{ route('omd.users.store') }}">
+            <form method="POST" action="<?php echo e(route('omd.users.update', $user)); ?>">
 
-                @csrf
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
 
 
                 <div class="account-form-grid">
 
-                    {{-- NAMA --}}
+                    
                     <div class="account-field">
 
                         <label for="name">
                             Nama
                         </label>
 
-                        <input id="name" type="text" name="name" value="{{ old('name') }}"
+                        <input id="name" type="text" name="name" value="<?php echo e(old('name', $user->name)); ?>"
                             placeholder="Contoh: User INJ" maxlength="100" required>
 
-                        @error('name')
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <span class="account-error">
-                                {{ $message }}
+                                <?php echo e($message); ?>
+
                             </span>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                     </div>
 
 
-                    {{-- EMAIL --}}
+                    
                     <div class="account-field">
 
                         <label for="email">
                             Email
                         </label>
 
-                        <input id="email" type="email" name="email" value="{{ old('email') }}"
+                        <input id="email" type="email" name="email" value="<?php echo e(old('email', $user->email)); ?>"
                             placeholder="contoh@omd.com" maxlength="255" required>
 
-                        @error('email')
+                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <span class="account-error">
-                                {{ $message }}
+                                <?php echo e($message); ?>
+
                             </span>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                     </div>
 
 
-                    {{-- ROLE --}}
+                    
                     <div class="account-field">
 
                         <label for="role">
@@ -286,26 +291,34 @@
                                 Pilih Role
                             </option>
 
-                            <option value="user" @selected(old('role') === 'user')>
+                            <option value="user" <?php if(old('role', $user->role) === 'user'): echo 'selected'; endif; ?>>
                                 User
                             </option>
 
-                            <option value="omd" @selected(old('role') === 'omd')>
+                            <option value="omd" <?php if(old('role', $user->role) === 'omd'): echo 'selected'; endif; ?>>
                                 OMD
                             </option>
 
                         </select>
 
-                        @error('role')
+                        <?php $__errorArgs = ['role'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <span class="account-error">
-                                {{ $message }}
+                                <?php echo e($message); ?>
+
                             </span>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                     </div>
 
 
-                    {{-- PLANT --}}
+                    
                     <div class="account-field" id="plant-wrapper">
 
                         <label for="plant_id">
@@ -318,24 +331,33 @@
                                 Pilih Plant
                             </option>
 
-                            @foreach ($plants as $plant)
-                                <option value="{{ $plant->id }}" @selected(old('plant_id') == $plant->id)>
-                                    {{ $plant->name }}
+                            <?php $__currentLoopData = $plants; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plant): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($plant->id); ?>" <?php if(old('plant_id', $user->line?->plant_id) == $plant->id): echo 'selected'; endif; ?>>
+                                    <?php echo e($plant->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </select>
 
-                        @error('plant_id')
+                        <?php $__errorArgs = ['plant_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <span class="account-error">
-                                {{ $message }}
+                                <?php echo e($message); ?>
+
                             </span>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                     </div>
 
 
-                    {{-- LINE --}}
+                    
                     <div class="account-field" id="line-wrapper">
 
                         <label for="line_id">
@@ -350,51 +372,65 @@
 
                         </select>
 
-                        @error('line_id')
+                        <?php $__errorArgs = ['line_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <span class="account-error">
-                                {{ $message }}
+                                <?php echo e($message); ?>
+
                             </span>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                     </div>
 
 
-                    {{-- PASSWORD --}}
+                    
                     <div class="account-field">
 
                         <label for="password">
-                            Password
+                            Password Baru
                         </label>
 
-                        <input id="password" type="password" name="password"
-                            placeholder="Kosongkan untuk password default">
+                        <input id="password" type="password" name="password" placeholder="Masukkan password baru">
 
                         <span class="account-helper">
-                            Kosongkan untuk menggunakan password default sistem:
-                            <strong>aiia</strong>
+                            Kosongkan jika password lama ingin tetap digunakan.
                         </span>
 
-                        @error('password')
+                        <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <span class="account-error">
-                                {{ $message }}
+                                <?php echo e($message); ?>
+
                             </span>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                     </div>
 
 
-                    {{-- KONFIRMASI PASSWORD --}}
+                    
                     <div class="account-field">
 
                         <label for="password_confirmation">
-                            Konfirmasi Password
+                            Konfirmasi Password Baru
                         </label>
 
                         <input id="password_confirmation" type="password" name="password_confirmation"
-                            placeholder="Ulangi password jika diisi">
+                            placeholder="Ulangi password baru">
 
                         <span class="account-helper">
-                            Tidak perlu diisi jika menggunakan password default.
+                            Isi hanya jika membuat password baru.
                         </span>
 
                     </div>
@@ -402,15 +438,15 @@
                 </div>
 
 
-                {{-- ACTION --}}
+                
                 <div class="account-actions">
 
-                    <a href="{{ route('omd.users.index') }}" class="account-btn account-btn-secondary">
+                    <a href="<?php echo e(route('omd.users.index')); ?>" class="account-btn account-btn-secondary">
                         Batal
                     </a>
 
                     <button type="submit" class="account-btn account-btn-primary">
-                        Simpan Akun
+                        Simpan Perubahan
                     </button>
 
                 </div>
@@ -422,12 +458,10 @@
     </div>
 
 
-    {{-- =========================================================
-        PLANT → LINE SCRIPT
-    ========================================================== --}}
+    
 
     <script>
-        var plants = @json($plants);
+        var plants = <?php echo json_encode($plants, 15, 512) ?>;
 
         var roleSelect =
             document.getElementById('role');
@@ -444,8 +478,11 @@
         var lineSelect =
             document.getElementById('line_id');
 
-        var oldLineId =
-            "{{ old('line_id') }}";
+        var selectedPlantId =
+            "<?php echo e(old('plant_id', $user->line?->plant_id)); ?>";
+
+        var selectedLineId =
+            "<?php echo e(old('line_id', $user->line_id)); ?>";
 
 
         function loadLines(plantId) {
@@ -458,6 +495,7 @@
                     '<option value="">Pilih Plant terlebih dahulu</option>';
 
                 lineSelect.disabled = true;
+                lineSelect.required = false;
 
                 return;
             }
@@ -493,12 +531,14 @@
                     '<option value="">Tidak ada Line tersedia</option>';
 
                 lineSelect.disabled = true;
+                lineSelect.required = false;
 
                 return;
             }
 
 
             lineSelect.disabled = false;
+            lineSelect.required = true;
 
 
             lineSelect.innerHTML =
@@ -524,7 +564,7 @@
 
 
                 if (
-                    String(oldLineId) ===
+                    String(selectedLineId) ===
                     String(line.id)
                 ) {
 
@@ -569,9 +609,18 @@
                 lineSelect.required = true;
 
                 if (plantSelect.value) {
-                    loadLines(plantSelect.value);
-                }
 
+                    loadLines(
+                        plantSelect.value
+                    );
+
+                } else {
+
+                    lineSelect.innerHTML =
+                        '<option value="">Pilih Plant terlebih dahulu</option>';
+
+                    lineSelect.disabled = true;
+                }
             }
         }
 
@@ -579,7 +628,7 @@
         roleSelect.addEventListener(
             'change',
             function() {
-                oldLineId = '';
+                selectedLineId = '';
 
                 updateRoleFields();
             }
@@ -589,7 +638,7 @@
         plantSelect.addEventListener(
             'change',
             function() {
-                oldLineId = '';
+                selectedLineId = '';
 
                 loadLines(
                     this.value
@@ -598,7 +647,21 @@
         );
 
 
+        if (selectedPlantId) {
+
+            plantSelect.value =
+                selectedPlantId;
+
+            loadLines(
+                selectedPlantId
+            );
+
+        }
+
+
         updateRoleFields();
     </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/omd/users/edit.blade.php ENDPATH**/ ?>

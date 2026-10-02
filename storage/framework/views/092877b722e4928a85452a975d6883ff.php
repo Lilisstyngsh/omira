@@ -30,8 +30,8 @@
         }
 
         /* =================================================
-               FILTER
-            ================================================== */
+                   FILTER
+                ================================================== */
 
         .history-filter-box {
             margin-bottom: 18px;
@@ -159,8 +159,8 @@
         }
 
         /* =================================================
-               CALENDAR POPUP
-            ================================================== */
+                   CALENDAR POPUP
+                ================================================== */
 
         .calendar-popup {
             display: none;
@@ -313,8 +313,8 @@
         }
 
         /* =================================================
-               TOOLBAR
-            ================================================== */
+                   TOOLBAR
+                ================================================== */
 
         .history-toolbar {
             display: flex;
@@ -437,8 +437,8 @@
         }
 
         /* =================================================
-               TABLE
-            ================================================== */
+                   TABLE
+                ================================================== */
 
         .orders-table-wrap {
             overflow-x: auto;
@@ -537,8 +537,8 @@
         }
 
         /* =================================================
-               PAGINATION
-            ================================================== */
+                   PAGINATION
+                ================================================== */
 
         .history-pagination {
             margin-top: 20px;
@@ -609,8 +609,8 @@
         }
 
         /* =================================================
-               RESPONSIVE
-            ================================================== */
+                   RESPONSIVE
+                ================================================== */
 
         @media (max-width: 900px) {
             .history-toolbar {
@@ -825,8 +825,8 @@
                 <tbody>
 
                     <?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr onclick="window.location='<?php echo e(route('user.orders.show', $order)); ?>'"
-                            title="Klik untuk melihat detail order">
+                        <tr onclick="window.location='<?php echo e(route('user.orders.history.show', $order)); ?>'"
+                            title="Klik untuk melihat detail history order">
 
                             <td class="order-no"><?php echo e($orders->firstItem() + $index); ?></td>
 

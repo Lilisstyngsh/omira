@@ -11,15 +11,15 @@ use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
 {
-    private const DEFAULT_PASSWORD = 'Aiia@2026';
+    private const DEFAULT_PASSWORD = 'aiia';
 
     /**
-     * Menampilkan daftar seluruh akun.
+     * Menampilkan daftar akun user.
      */
     public function index()
     {
-        $users = User::with('line.plant')
-            ->orderBy('role')
+        $users = User::where('role', 'user')
+            ->with('line.plant')
             ->orderBy('name')
             ->get();
 
@@ -63,23 +63,16 @@ class UserManagementController extends Controller
                 'unique:users,email',
             ],
 
-            'role' => [
-                'required',
-                Rule::in(['user', 'omd']),
-            ],
-
             'plant_id' => [
-                'nullable',
+                'required',
                 'integer',
                 'exists:plants,id',
-                Rule::requiredIf(fn() => $request->role === 'user'),
             ],
 
             'line_id' => [
-                'nullable',
+                'required',
                 'integer',
                 'exists:lines,id',
-                Rule::requiredIf(fn() => $request->role === 'user'),
             ],
 
             'password' => [
@@ -90,24 +83,17 @@ class UserManagementController extends Controller
             ],
         ]);
 
-        $lineId = null;
+        $line = Line::where('id', $validated['line_id'])
+            ->where('plant_id', $validated['plant_id'])
+            ->where('is_active', true)
+            ->first();
 
-        // Plant & Line hanya diperlukan untuk role User
-        if ($validated['role'] === 'user') {
-            $line = Line::where('id', $validated['line_id'])
-                ->where('plant_id', $validated['plant_id'])
-                ->where('is_active', true)
-                ->first();
-
-            if (!$line) {
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'line_id' => 'Line tidak sesuai dengan Plant yang dipilih.',
-                    ]);
-            }
-
-            $lineId = $line->id;
+        if (!$line) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'line_id' => 'Line tidak sesuai dengan Plant yang dipilih.',
+                ]);
         }
 
         $password = !empty($validated['password'])
@@ -118,15 +104,15 @@ class UserManagementController extends Controller
             'name' => trim($validated['name']),
             'email' => strtolower(trim($validated['email'])),
             'password' => Hash::make($password),
-            'role' => $validated['role'],
-            'line_id' => $lineId,
+            'role' => 'user',
+            'line_id' => $line->id,
         ]);
 
         return redirect()
             ->route('omd.users.index')
             ->with(
                 'account_success',
-                'Akun berhasil ditambahkan.'
+                'Akun user berhasil ditambahkan.'
             );
     }
 
@@ -135,6 +121,8 @@ class UserManagementController extends Controller
      */
     public function edit(User $user)
     {
+        $this->validateUser($user);
+
         $user->load('line.plant');
 
         $plants = Plant::where('is_active', true)
@@ -158,6 +146,8 @@ class UserManagementController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $this->validateUser($user);
+
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -169,27 +159,19 @@ class UserManagementController extends Controller
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')
-                    ->ignore($user->id),
-            ],
-
-            'role' => [
-                'required',
-                Rule::in(['user', 'omd']),
+                Rule::unique('users', 'email')->ignore($user->id),
             ],
 
             'plant_id' => [
-                'nullable',
+                'required',
                 'integer',
                 'exists:plants,id',
-                Rule::requiredIf(fn() => $request->role === 'user'),
             ],
 
             'line_id' => [
-                'nullable',
+                'required',
                 'integer',
                 'exists:lines,id',
-                Rule::requiredIf(fn() => $request->role === 'user'),
             ],
 
             'password' => [
@@ -200,30 +182,22 @@ class UserManagementController extends Controller
             ],
         ]);
 
-        $lineId = null;
+        $line = Line::where('id', $validated['line_id'])
+            ->where('plant_id', $validated['plant_id'])
+            ->where('is_active', true)
+            ->first();
 
-        // Plant & Line hanya diperlukan untuk role User
-        if ($validated['role'] === 'user') {
-            $line = Line::where('id', $validated['line_id'])
-                ->where('plant_id', $validated['plant_id'])
-                ->where('is_active', true)
-                ->first();
-
-            if (!$line) {
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'line_id' => 'Line tidak sesuai dengan Plant yang dipilih.',
-                    ]);
-            }
-
-            $lineId = $line->id;
+        if (!$line) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'line_id' => 'Line tidak sesuai dengan Plant yang dipilih.',
+                ]);
         }
 
         $user->name = trim($validated['name']);
         $user->email = strtolower(trim($validated['email']));
-        $user->role = $validated['role'];
-        $user->line_id = $lineId;
+        $user->line_id = $line->id;
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make(
@@ -237,7 +211,7 @@ class UserManagementController extends Controller
             ->route('omd.users.index')
             ->with(
                 'account_success',
-                'Akun berhasil diperbarui.'
+                'Akun user berhasil diperbarui.'
             );
     }
 
@@ -246,6 +220,8 @@ class UserManagementController extends Controller
      */
     public function resetPassword(User $user)
     {
+        $this->validateUser($user);
+
         $user->password = Hash::make(
             self::DEFAULT_PASSWORD
         );
@@ -265,13 +241,26 @@ class UserManagementController extends Controller
      */
     public function destroy(User $user)
     {
+        $this->validateUser($user);
+
         $user->delete();
 
         return redirect()
             ->route('omd.users.index')
             ->with(
                 'account_success',
-                'Akun berhasil dihapus.'
+                'Akun user berhasil dihapus.'
             );
+    }
+
+    /**
+     * Pastikan akun yang dikelola adalah akun user.
+     */
+    private function validateUser(User $user): void
+    {
+        abort_unless(
+            $user->role === 'user',
+            404
+        );
     }
 }

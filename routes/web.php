@@ -127,6 +127,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/orders/history', [UserOrderController::class, 'history'])
                 ->name('orders.history');
 
+            Route::get('/orders/history/{order}', [UserOrderController::class, 'historyShow'])
+                ->name('orders.history.show');
+
             Route::get('/orders/pending-confirmation-count', [UserOrderController::class, 'pendingConfirmationCount'])
                 ->name('orders.pendingConfirmationCount');
 

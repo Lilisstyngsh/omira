@@ -5,6 +5,17 @@
 
 <?php $__env->startSection('content'); ?>
 
+    <?php
+
+        $hasOmdResult = in_array($order->status, ['completed', 'confirmed'], true);
+
+        $totalQtyOmd = 0;
+
+        if ($hasOmdResult) {
+            $totalQtyOmd = $order->items->sum(fn($item) => (int) ($item->after_qty ?? 0));
+        }
+    ?>
+
     <style>
         .repair-head {
             display: flex;
@@ -33,6 +44,11 @@
             flex-wrap: wrap;
         }
 
+
+        /* =================================================
+                               CARD
+                            ================================================== */
+
         .repair-card {
             background: #fff;
             border: 1px solid #e8edf4;
@@ -58,6 +74,11 @@
             color: #64748b;
         }
 
+
+        /* =================================================
+                               STATUS
+                            ================================================== */
+
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -74,6 +95,11 @@
             background: #dcfce7;
             color: #166534;
         }
+
+
+        /* =================================================
+                               INFORMASI ORDER
+                            ================================================== */
 
         .info-grid {
             display: grid;
@@ -115,8 +141,8 @@
 
 
         /* =================================================
-                           REPAIR TABLE
-                        ================================================== */
+                               REPAIR TABLE (SAMA PERSIS DENGAN show.blade)
+                            ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -165,7 +191,6 @@
 
         .repair-table td {
             padding: 4px 8px;
-            /* REVISI: sebelumnya 11px 8px */
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;
             font-size: 12px;
@@ -212,14 +237,15 @@
             color: #475569;
         }
 
-        .ng-value {
-            min-height: 22px;
-            /* REVISI: sebelumnya 34px */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .repair-before-after-label {
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 2px;
+            color: #94a3b8;
+            font-size: 8px;
             font-weight: 800;
-            color: #000;
+            text-transform: uppercase;
+            letter-spacing: .04em;
         }
 
         .repair-result-match-cell {
@@ -235,6 +261,16 @@
             color: #000;
         }
 
+        .ng-value {
+            min-height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 800;
+            color: #000;
+        }
+
         .empty-ng {
             color: #cbd5e1;
             font-size: 12px;
@@ -242,8 +278,8 @@
 
 
         /* =================================================
-                           KETERANGAN
-                        ================================================== */
+                               KETERANGAN
+                            ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -262,12 +298,10 @@
         .repair-table .keterangan-text {
             width: 100%;
             padding: 3px 8px;
-            /* REVISI: sebelumnya 8px 10px */
             text-align: left !important;
             color: #475569;
             font-size: 11px;
             line-height: 1.4;
-            /* REVISI: sebelumnya 1.5 */
             white-space: pre-wrap;
             word-break: break-word;
             box-sizing: border-box;
@@ -275,8 +309,8 @@
 
 
         /* =================================================
-                           COMPLETED
-                        ================================================== */
+                               COMPLETED
+                            ================================================== */
 
         .completed-box {
             padding: 15px;
@@ -301,8 +335,8 @@
 
 
         /* =================================================
-                           TIMELINE
-                        ================================================== */
+                               TIMELINE
+                            ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -366,8 +400,8 @@
 
 
         /* =================================================
-                           BUTTON
-                        ================================================== */
+                               BUTTON
+                            ================================================== */
 
         .btn {
             height: 36px;
@@ -393,21 +427,13 @@
             background: #e2e8f0;
         }
 
-
-        /* =================================================
-                           RESPONSIVE
-                        ================================================== */
-
         @media (max-width: 1000px) {
-
             .info-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
         }
 
         @media (max-width: 700px) {
-
             .repair-head {
                 flex-direction: column;
             }
@@ -415,7 +441,20 @@
             .info-grid {
                 grid-template-columns: 1fr;
             }
+        }
 
+        .info-item.total-qty-omd {
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+        }
+
+        .info-item.total-qty-omd span {
+            color: #15803d;
+        }
+
+        .info-item.total-qty-omd strong {
+            color: #166534;
+            font-size: 14px;
         }
     </style>
 
@@ -425,26 +464,23 @@
     <div class="repair-head">
 
         <div>
-
             <h2>
                 <?php echo e($order->order_number); ?>
 
             </h2>
-
         </div>
 
-
         <div class="repair-head-actions">
-
             <a href="<?php echo e(route('omd.orders.history')); ?>" class="btn btn-secondary">
                 Kembali
             </a>
-
         </div>
 
     </div>
 
+
     
+
     <div class="repair-card">
 
         <h3 class="repair-card-title">
@@ -454,7 +490,6 @@
         <div class="timeline-wrap">
 
             <div class="timeline">
-
 
                 
                 <div class="timeline-item">
@@ -468,7 +503,6 @@
                     </strong>
 
                     <span>
-
                         <?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?>
 
 
@@ -477,7 +511,6 @@
                             <?php echo e($order->user->name); ?>
 
                         <?php endif; ?>
-
                     </span>
 
                 </div>
@@ -495,9 +528,7 @@
                     </strong>
 
                     <span>
-
                         <?php if($order->verified_at): ?>
-
                             <?php echo e($order->verified_at->format('d-m-Y H:i')); ?>
 
 
@@ -509,7 +540,6 @@
                         <?php else: ?>
                             -
                         <?php endif; ?>
-
                     </span>
 
                 </div>
@@ -527,9 +557,7 @@
                     </strong>
 
                     <span>
-
                         <?php if($order->repair_completed_at): ?>
-
                             <?php echo e($order->repair_completed_at->format('d-m-Y H:i')); ?>
 
 
@@ -550,7 +578,6 @@
                         <?php else: ?>
                             -
                         <?php endif; ?>
-
                     </span>
 
                 </div>
@@ -568,9 +595,7 @@
                     </strong>
 
                     <span>
-
                         <?php if($order->confirmation?->confirmed_at): ?>
-
                             <?php echo e($order->confirmation->confirmed_at->format('d-m-Y H:i')); ?>
 
 
@@ -582,17 +607,16 @@
                         <?php else: ?>
                             -
                         <?php endif; ?>
-
                     </span>
 
                 </div>
-
 
             </div>
 
         </div>
 
     </div>
+
 
     
 
@@ -640,6 +664,21 @@
                 <strong><?php echo e($order->quantity); ?></strong>
             </div>
 
+            <?php if($hasOmdResult): ?>
+                <div class="info-item total-qty-omd">
+
+                    <span>
+                        Qty OMD
+                    </span>
+
+                    <strong>
+                        <?php echo e($totalQtyOmd); ?>
+
+                    </strong>
+
+                </div>
+            <?php endif; ?>
+
         </div>
 
 
@@ -664,8 +703,13 @@
     <?php if($order->items->isNotEmpty()): ?>
 
         <?php
+
             $modelGroups = $order->items->groupBy('master_model_id');
+
             $ngCodes = ['P', 'H', 'C', 'S'];
+
+            $showAfter = in_array($order->status, ['completed', 'confirmed'], true);
+
         ?>
 
 
@@ -674,6 +718,7 @@
             <h3 class="repair-card-title">
                 Detail Repair Box
             </h3>
+
 
             <div class="repair-table-scroll">
 
@@ -695,10 +740,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
+                            <?php if($showAfter): ?>
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                            <?php endif; ?>
 
                             <col style="width:180px;">
 
@@ -709,40 +756,42 @@
 
                             <tr>
 
-                                <th rowspan="3">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>">
                                     No
                                 </th>
 
-                                <th rowspan="3" style="text-align:left;">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" style="text-align:left;">
                                     Model
                                 </th>
 
-                                <th rowspan="3" style="text-align:left;">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" style="text-align:left;">
                                     Produk
                                 </th>
 
-                                <th colspan="8">
+                                <th colspan="<?php echo e($showAfter ? 8 : 4); ?>">
                                     Jenis &amp; Qty NG
                                 </th>
 
-                                <th rowspan="3" class="keterangan-head">
+                                <th rowspan="<?php echo e($showAfter ? 3 : 2); ?>" class="keterangan-head">
                                     Keterangan
                                 </th>
 
                             </tr>
 
 
-                            <tr>
+                            <?php if($showAfter): ?>
+                                <tr>
 
-                                <th colspan="4">
-                                    Sebelum
-                                </th>
+                                    <th colspan="4">
+                                        Sebelum
+                                    </th>
 
-                                <th colspan="4">
-                                    Sesudah
-                                </th>
+                                    <th colspan="4">
+                                        Sesudah
+                                    </th>
 
-                            </tr>
+                                </tr>
+                            <?php endif; ?>
 
 
                             <tr>
@@ -755,12 +804,14 @@
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
-                                <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <th>
-                                        <?php echo e($code); ?>
+                                <?php if($showAfter): ?>
+                                    <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <th>
+                                            <?php echo e($code); ?>
 
-                                    </th>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </th>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php endif; ?>
 
                             </tr>
 
@@ -788,10 +839,12 @@
                             <col style="width:68px;">
                             <col style="width:68px;">
 
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
+                            <?php if($showAfter): ?>
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                                <col style="width:68px;">
+                            <?php endif; ?>
 
                             <col style="width:180px;">
 
@@ -809,16 +862,17 @@
 
                                 <?php $__currentLoopData = $productGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $productItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <?php
-
                                         $ngItems = $productItems->keyBy(function ($item) {
                                             return strtoupper($item->ngType?->code ?? '');
                                         });
+
+                                        $firstItem = $productItems->first();
+                                        $productId = $firstItem->product_id;
 
                                         $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))
                                             ?->mismatch_note;
 
                                         $hasFinalResult = in_array($order->status, ['completed', 'confirmed'], true);
-
                                     ?>
 
 
@@ -850,7 +904,7 @@
                                         <td>
 
                                             <span class="product-text">
-                                                <?php echo e($productItems->first()->product?->name ?? '-'); ?>
+                                                <?php echo e($firstItem->product?->name ?? '-'); ?>
 
                                             </span>
 
@@ -864,19 +918,15 @@
                                                 $ngItem = $ngItems->get($code);
                                             ?>
 
-                                            <td>
+                                            <td class="ng-cell">
 
                                                 <?php if($ngItem): ?>
                                                     <div class="ng-value">
-
                                                         <?php echo e($ngItem->before_qty > 0 ? $ngItem->before_qty : ''); ?>
-
 
                                                     </div>
                                                 <?php else: ?>
-                                                    <div class="ng-value empty-ng">
-
-                                                    </div>
+                                                    <div class="ng-value empty-ng"></div>
                                                 <?php endif; ?>
 
                                             </td>
@@ -885,33 +935,43 @@
 
                                         
 
-                                        <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <?php
-                                                $ngItem = $ngItems->get($code);
-                                                $beforeQty = (int) ($ngItem?->before_qty ?? 0);
-                                                $afterQty = (int) ($ngItem?->after_qty ?? 0);
+                                        <?php if($showAfter): ?>
+                                            <?php $__currentLoopData = $ngCodes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
+                                                    $ngItem = $ngItems->get($code);
 
-                                                $isNgMatch = $hasFinalResult && $beforeQty === $afterQty;
-                                                $isNgMismatch = $hasFinalResult && $beforeQty !== $afterQty;
+                                                    $beforeQty = (int) ($ngItem?->before_qty ?? 0);
+                                                    $afterQty = (int) ($ngItem?->after_qty ?? 0);
 
-                                                $resultCellClass = '';
+                                                    /*
+                                                     * Logika highlight (User/PPIC vs OMD):
+                                                     *
+                                                     * P = 2      | P = 2      -> HIJAU (sesuai)
+                                                     * P = 2      | P = 1      -> MERAH (tidak sesuai)
+                                                     * P = 2      | P kosong   -> MERAH (tidak sesuai)
+                                                     * P kosong   | P = 2      -> MERAH (tidak sesuai)
+                                                     * P kosong   | P kosong   -> tanpa highlight
+                                                     */
+                                                    $resultCellClass = '';
 
-                                                if ($hasFinalResult && $afterQty > 0) {
-                                                    $resultCellClass = $isNgMatch
-                                                        ? 'repair-result-match-cell'
-                                                        : ($isNgMismatch
-                                                            ? 'repair-result-mismatch-cell'
-                                                            : '');
-                                                }
-                                            ?>
+                                                    if ($hasFinalResult && ($beforeQty > 0 || $afterQty > 0)) {
+                                                        $resultCellClass =
+                                                            $beforeQty === $afterQty
+                                                                ? 'repair-result-match-cell'
+                                                                : 'repair-result-mismatch-cell';
+                                                    }
+                                                ?>
 
-                                            <td class="<?php echo e($resultCellClass); ?>">
-                                                <div class="ng-value">
-                                                    <?php echo e($afterQty > 0 ? $afterQty : ''); ?>
+                                                <td class="ng-cell <?php echo e($resultCellClass); ?>">
 
-                                                </div>
-                                            </td>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    <div class="ng-value">
+                                                        <?php echo e($afterQty > 0 ? $afterQty : ''); ?>
+
+                                                    </div>
+
+                                                </td>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
 
 
                                         
@@ -929,6 +989,7 @@
                     </table>
 
                 </div>
+
 
             </div>
 
