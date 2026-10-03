@@ -504,7 +504,7 @@
                     </div>
 
                     <span class="profile-info-value">
-                        {{ $user->line?->name ?? 'OMD' }}
+                        {{ $user->role === 'omd' ? 'OMD Workshop' : ($user->line?->name ?? '-') }}
                     </span>
                 </div>
 

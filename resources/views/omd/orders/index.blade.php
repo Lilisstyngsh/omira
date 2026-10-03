@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Order Repair Box')
-@section('header', 'Order Repair Box')
+@section('title', 'Monitoring Order Repair Box')
+@section('header', 'Monitoring Order Repair Box')
 
 @section('content')
 
@@ -17,7 +17,7 @@
         .order-page-title {
             margin: 0 0 6px;
             font-size: 22px;
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
         }
 
@@ -48,7 +48,7 @@
         .order-table-header h3 {
             margin: 0 0 5px;
             font-size: 16px;
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
         }
 
@@ -68,56 +68,78 @@
             background: #f1efff;
             color: #6557dc;
             font-size: 11px;
-            font-weight: 800;
+            font-weight: 600;
             white-space: nowrap;
         }
 
         .order-table-wrap {
-            overflow-x: auto;
+            padding: 12px;
+            overflow-x: hidden;
         }
 
         .order-table {
             width: 100%;
-            min-width: 1180px;
-            border-collapse: collapse;
+            min-width: 0;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #dfe6ef;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
         }
 
         .order-table th {
-            padding: 12px 14px;
-            text-align: left;
+            padding: 10px 7px;
+            text-align: center;
             background: #fafbfc;
-            border-bottom: 1px solid #e9eef4;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
             color: #64748b;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .04em;
-            white-space: nowrap;
+            letter-spacing: .025em;
+            white-space: normal;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .order-table th:last-child,
+        .order-table td:last-child {
+            border-right: 0;
         }
 
         .order-table thead tr:first-child th {
             background: #f6f7fb;
-            border-bottom: 1px solid #e9eef4;
+            border-bottom: 1px solid #dfe6ef;
             text-align: center;
         }
 
         .order-table thead tr:first-child th[rowspan="2"] {
-            text-align: left;
+            text-align: center;
             vertical-align: middle;
         }
 
         .order-table thead tr:nth-child(2) th {
             text-align: center;
-            font-size: 9px;
-            padding: 11px 10px;
+            font-size: 8.5px;
+            padding: 9px 5px;
+        }
+
+        .order-table th:nth-child(6),
+        .order-table td:nth-child(6) {
+            border-left: 1px solid #dfe6ef;
         }
 
         .order-table td {
-            padding: 15px 14px;
-            border-bottom: 1px solid #eef2f6;
+            padding: 11px 7px;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
             color: #334155;
-            font-size: 12px;
+            font-size: 11px;
             vertical-align: middle;
+            overflow-wrap: anywhere;
         }
 
         .order-table tbody tr {
@@ -134,17 +156,40 @@
             border-bottom: none;
         }
 
+        .order-date {
+            text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .order-date strong {
+            display: block;
+            color: #334155;
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+
+        .order-date span {
+            display: block;
+            margin-top: 2px;
+            color: #94a3b8;
+            font-size: 9px;
+            font-weight: 400;
+        }
+
         .order-no {
             width: 55px;
             color: #94a3b8 !important;
-            font-weight: 700;
+            font-weight: 400;
             text-align: center;
         }
 
         .order-number {
             color: #172033;
-            font-weight: 800;
-            white-space: nowrap;
+            font-weight: 600;
+            white-space: normal;
+            line-height: 1.3;
+            word-break: break-word;
         }
 
         .order-user {
@@ -160,7 +205,7 @@
             background: #eff6ff;
             color: #3478c5;
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 600;
             white-space: nowrap;
         }
 
@@ -173,21 +218,20 @@
             background: #f5f3ff;
             color: #6659df;
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 600;
             white-space: nowrap;
         }
 
         .order-qty {
             font-size: 13px;
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
             text-align: center;
         }
 
         .process-cell {
-            width: 115px;
             text-align: center !important;
-            padding: 12px 8px !important;
+            padding: 9px 4px !important;
         }
 
         .process-icon {
@@ -249,6 +293,16 @@
         .order-empty-text {
             font-size: 11px;
             color: #94a3b8;
+        }
+
+        @media (max-width: 900px) {
+            .order-table-wrap {
+                overflow-x: auto;
+            }
+
+            .order-table {
+                min-width: 760px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -327,8 +381,12 @@
             <div>
 
                 <h3>
-                    Daftar Order Repair Box
+                    Daftar Monitoring Repair Box
                 </h3>
+
+                <p>
+                    Pantau status order dari submit User hingga serah terima.
+                </p>
 
             </div>
         </div>
@@ -337,11 +395,23 @@
 
             <table class="order-table">
 
+                <colgroup>
+                    <col style="width:5%;">
+                    <col style="width:11%;">
+                    <col style="width:17%;">
+                    <col style="width:14%;">
+                    <col style="width:7%;">
+                    <col style="width:11.5%;">
+                    <col style="width:11.5%;">
+                    <col style="width:11.5%;">
+                    <col style="width:11.5%;">
+                </colgroup>
+
                 <thead>
 
                     <tr>
 
-                        <th rowspan="2" style="width:55px;">
+                        <th rowspan="2" style="text-align:center;">
                             No
                         </th>
 
@@ -362,7 +432,7 @@
                         </th>
 
                         <th colspan="4" style="text-align:center;">
-                            Status
+                            Status Proses
                         </th>
 
                     </tr>
@@ -374,7 +444,7 @@
                         </th>
 
                         <th class="process-cell">
-                            Verified OMD
+                            Verifikasi OMD
                         </th>
 
                         <th class="process-cell">
@@ -399,8 +469,13 @@
                                 {{ ($orders->currentPage() - 1) * $orders->perPage() + $loop->iteration }}
                             </td>
 
-                            <td>
-                                {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '-' }}
+                            <td class="order-date">
+                                @if ($order->created_at)
+                                    <strong>{{ $order->created_at->format('d-m-Y') }}</strong>
+                                    <span>{{ $order->created_at->format('H:i') }}</span>
+                                @else
+                                    -
+                                @endif
                             </td>
 
                             <td class="order-number">
@@ -408,11 +483,13 @@
                             </td>
 
                             <td>
-                                {{ $order->line?->name ?? ($order->area ? $order->area->name : '-') }}
+                                <span class="order-line-badge">
+                                    {{ $order->line?->name ?? ($order->area ? $order->area->name : '-') }}
+                                </span>
                             </td>
 
-                            <td>
-                                {{ $order->quantity }}
+                            <td class="order-qty">
+                                {{ in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}
                             </td>
 
                             {{-- USER SUBMIT --}}
@@ -425,7 +502,7 @@
                             {{-- VERIFIED OMD --}}
                             <td class="process-cell">
 
-                                @if (in_array($order->status, ['in_repair', 'completed', 'confirmed']))
+                                @if (in_array($order->status, ['in_repair', 'completed', 'revision_requested', 'confirmed']))
                                     <span class="process-icon process-done" title="Order sudah diverifikasi OMD">
                                         ✓
                                     </span>
@@ -440,7 +517,7 @@
                             {{-- REPAIR OMD --}}
                             <td class="process-cell">
 
-                                @if (in_array($order->status, ['completed', 'confirmed']))
+                                @if (in_array($order->status, ['completed', 'revision_requested', 'confirmed']))
                                     <span class="process-icon process-done" title="Repair OMD sudah selesai">
                                         ✓
                                     </span>
@@ -462,6 +539,11 @@
                                 @if ($order->status === 'confirmed')
                                     <span class="process-icon process-done" title="Serah terima sudah selesai">
                                         ✓
+                                    </span>
+                                @elseif ($order->status === 'revision_requested')
+                                    <span class="process-icon process-progress"
+                                        title="User meminta koreksi hasil repair dari OMD">
+                                        △
                                     </span>
                                 @elseif ($order->status === 'completed')
                                     <span class="process-icon process-progress"

@@ -7,63 +7,88 @@
 
     <style>
         .page-card {
+            overflow: hidden;
             background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+            border: 1px solid #e8edf4;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
         }
 
         .page-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            gap: 14px;
+            padding: 18px 20px;
+            border-bottom: 1px solid #edf1f5;
+            background: linear-gradient(135deg, #f8f7ff 0%, #fff 75%);
         }
 
         .page-head h2 {
             margin: 0;
-            font-size: 17px;
-            color: #111827;
+            font-size: 16px;
+            font-weight: 500;
+            color: #172033;
         }
 
         .btn-create {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             text-decoration: none;
-            background: #4f46e5;
+            background: #2563eb;
             color: #fff;
-            padding: 10px 15px;
+            padding: 0 14px;
             border-radius: 9px;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 11px;
+            font-weight: 800;
+            box-shadow: 0 6px 15px rgba(37, 99, 235, .18);
             transition: .18s ease;
         }
 
         .btn-create:hover {
-            background: #4338ca;
+            background: #1d4ed8;
             color: #fff;
         }
 
         .orders-table-wrap {
-            overflow-x: auto;
+            padding: 12px;
+            overflow-x: hidden;
         }
 
         .orders-table {
             width: 100%;
-            min-width: 1180px;
-            border-collapse: collapse;
+            min-width: 0;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #dfe6ef;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
         }
 
         .orders-table th {
-            padding: 12px 14px;
-            text-align: left;
-            background: #f9fafb;
-            border-bottom: 1px solid #e9eef4;
-            font-size: 10px;
+            padding: 10px 7px;
+            text-align: center;
+            background: #fafbfc;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
+            font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .04em;
-            color: #6b7280;
-            white-space: nowrap;
+            letter-spacing: .025em;
+            color: #64748b;
+            white-space: normal;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .orders-table th:last-child,
+        .orders-table td:last-child {
+            border-right: 0;
         }
 
         .orders-table thead tr:first-child th {
@@ -72,22 +97,29 @@
         }
 
         .orders-table thead tr:first-child th[rowspan="2"] {
-            text-align: left;
+            text-align: center;
             vertical-align: middle;
         }
 
         .orders-table thead tr:nth-child(2) th {
             text-align: center;
-            font-size: 9px;
-            padding: 11px 10px;
+            font-size: 8.5px;
+            padding: 9px 5px;
+        }
+
+        .orders-table th:nth-child(6),
+        .orders-table td:nth-child(6) {
+            border-left: 1px solid #dfe6ef;
         }
 
         .orders-table td {
-            padding: 14px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 12px;
-            color: #374151;
+            padding: 10px 7px;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
+            font-size: 11px;
+            color: #334155;
             vertical-align: middle;
+            overflow-wrap: anywhere;
         }
 
         .orders-table tbody tr {
@@ -96,78 +128,82 @@
         }
 
         .orders-table tbody tr:hover {
-            background: #f8fafc;
+            background: #fafaff;
             transform: translateY(-1px);
-        }
-
-        .orders-table tbody tr:active {
-            background: #f1f5f9;
         }
 
         .orders-table tbody tr:last-child td {
             border-bottom: none;
         }
 
-        .order-no {
-            width: 55px;
+        .order-date {
             text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .order-date strong {
+            display: block;
+            color: #334155;
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+
+        .order-date span {
+            display: block;
+            margin-top: 2px;
             color: #94a3b8;
+            font-size: 9px;
+            font-weight: 400;
+        }
+
+        .order-no {
+            text-align: center;
+            color: #94a3b8 !important;
             font-weight: 700;
         }
 
         .order-number {
-            font-weight: 800;
-            color: #111827;
-            white-space: nowrap;
+            font-weight: 500;
+            color: #172033;
+            white-space: normal;
+            line-height: 1.3;
+            word-break: break-word;
         }
 
         .order-line-badge {
             display: inline-flex;
             align-items: center;
-            min-height: 28px;
-            padding: 0 10px;
+            min-height: 26px;
+            padding: 0 8px;
             border-radius: 8px;
             background: #eff6ff;
             color: #3478c5;
-            font-size: 10px;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        .order-type-badge {
-            display: inline-flex;
-            align-items: center;
-            min-height: 28px;
-            padding: 0 10px;
-            border-radius: 8px;
-            background: #f5f3ff;
-            color: #6659df;
-            font-size: 10px;
-            font-weight: 800;
+            font-size: 9.5px;
+            font-weight: 600;
             white-space: nowrap;
         }
 
         .order-qty {
-            font-size: 13px !important;
-            font-weight: 800;
+            font-size: 12px !important;
+            font-weight: 500;
             color: #172033 !important;
             text-align: center;
         }
 
         .process-cell {
-            width: 115px;
             text-align: center !important;
-            padding: 12px 8px !important;
+            padding: 9px 4px !important;
         }
 
         .process-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            width: 27px;
+            height: 27px;
             border-radius: 50%;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 900;
             line-height: 1;
         }
@@ -190,18 +226,28 @@
             box-shadow: inset 0 0 0 1px #fecaca;
         }
 
-        .order-alert {
+        .order-alert,
+        .success-alert {
             display: flex;
             align-items: center;
             gap: 13px;
             margin-bottom: 18px;
             padding: 15px 18px;
-            border: 1px solid #fde68a;
             border-radius: 14px;
+        }
+
+        .order-alert {
+            border: 1px solid #fde68a;
             background: #fffbeb;
         }
 
-        .order-alert-icon {
+        .success-alert {
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        .order-alert-icon,
+        .success-alert-icon {
             width: 34px;
             height: 34px;
             flex: 0 0 34px;
@@ -209,24 +255,32 @@
             align-items: center;
             justify-content: center;
             border-radius: 10px;
-            background: #fef3c7;
-            color: #d97706;
             font-size: 16px;
             font-weight: 800;
         }
 
-        .order-alert strong {
+        .order-alert-icon {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .success-alert-icon {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .order-alert strong,
+        .success-alert strong {
             display: block;
             margin-bottom: 3px;
-            color: #92400e;
             font-size: 12px;
             font-weight: 800;
         }
 
-        .order-alert span {
-            color: #a16207;
-            font-size: 10px;
-        }
+        .order-alert strong { color: #92400e; }
+        .success-alert strong { color: #166534; }
+        .order-alert span { color: #a16207; font-size: 10px; }
+        .success-alert span { color: #4d7a5c; font-size: 10px; }
 
         .order-empty {
             padding: 55px 20px !important;
@@ -244,48 +298,16 @@
                 overflow-x: auto;
             }
 
-            .page-head {
-                align-items: flex-start;
-                gap: 12px;
+            .orders-table {
+                min-width: 760px;
             }
         }
 
-        .success-alert {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            margin-bottom: 18px;
-            padding: 15px 18px;
-            border: 1px solid #bbf7d0;
-            border-radius: 14px;
-            background: #f0fdf4;
-        }
-
-        .success-alert-icon {
-            width: 34px;
-            height: 34px;
-            flex: 0 0 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: #dcfce7;
-            color: #16a34a;
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .success-alert strong {
-            display: block;
-            margin-bottom: 3px;
-            color: #166534;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .success-alert span {
-            color: #4d7a5c;
-            font-size: 10px;
+        @media (max-width: 640px) {
+            .page-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 
@@ -316,8 +338,8 @@
         <div class="page-head">
             <h2>Daftar Order Repair Box</h2>
 
-            <a href="{{ route('user.orders.create') }}" class="btn-create">
-                + Buat Order
+            <a href="{{ route('user.orders.create') }}" class="btn-create" title="Buat Order Repair Box baru">
+                + Buat Order Repair
             </a>
         </div>
 
@@ -325,11 +347,23 @@
 
             <table class="orders-table">
 
+                <colgroup>
+                    <col style="width:44px;">
+                    <col style="width:94px;">
+                    <col style="width:122px;">
+                    <col style="width:110px;">
+                    <col style="width:55px;">
+                    <col style="width:78px;">
+                    <col style="width:82px;">
+                    <col style="width:78px;">
+                    <col style="width:88px;">
+                </colgroup>
+
                 <thead>
 
                     <tr>
 
-                        <th rowspan="2" style="width:55px;">
+                        <th rowspan="2">
                             No
                         </th>
 
@@ -387,8 +421,13 @@
                                 {{ $orders->firstItem() + $index }}
                             </td>
 
-                            <td>
-                                {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '-' }}
+                            <td class="order-date">
+                                @if ($order->created_at)
+                                    <strong>{{ $order->created_at->format('d-m-Y') }}</strong>
+                                    <span>{{ $order->created_at->format('H:i') }}</span>
+                                @else
+                                    -
+                                @endif
                             </td>
 
                             <td class="order-number">
@@ -402,7 +441,7 @@
                             </td>
 
                             <td class="order-qty">
-                                {{ $order->quantity }}
+                                {{ in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}
                             </td>
 
                             {{-- USER SUBMIT --}}
@@ -417,7 +456,7 @@
                             {{-- VERIFIED OMD --}}
                             <td class="process-cell">
 
-                                @if (in_array($order->status, ['in_repair', 'completed', 'confirmed']))
+                                @if (in_array($order->status, ['in_repair', 'completed', 'revision_requested', 'confirmed']))
                                     <span class="process-icon process-done" title="Order sudah diverifikasi OMD">
                                         ✓
                                     </span>
@@ -432,7 +471,7 @@
                             {{-- REPAIR OMD --}}
                             <td class="process-cell">
 
-                                @if (in_array($order->status, ['completed', 'confirmed']))
+                                @if (in_array($order->status, ['completed', 'revision_requested', 'confirmed']))
                                     <span class="process-icon process-done" title="Repair OMD sudah selesai">
                                         ✓
                                     </span>
@@ -455,6 +494,11 @@
                                     <span class="process-icon process-done" title="Serah terima sudah selesai">
                                         ✓
                                     </span>
+                                @elseif ($order->status === 'revision_requested')
+                                    <span class="process-icon process-progress"
+                                        title="User meminta koreksi hasil repair dari OMD">
+                                        △
+                                    </span>
                                 @elseif ($order->status === 'completed')
                                     <span class="process-icon process-progress"
                                         title="Menunggu serah terima / konfirmasi User">
@@ -474,7 +518,7 @@
 
                         <tr>
 
-                            <td colspan="10" class="order-empty">
+                            <td colspan="9" class="order-empty">
                                 <div class="order-empty-text">
                                     Belum ada Order Repair Box
                                 </div>

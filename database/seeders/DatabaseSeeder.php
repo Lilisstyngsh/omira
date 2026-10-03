@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
+    public const DEFAULT_OMD_PASSWORD = 'password';
+    public const DEFAULT_USER_PASSWORD = 'aiia';
 
     public function run(): void
     {
@@ -475,7 +477,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Dwi Haryanto',
-                'password' => Hash::make('password'),
+                'password' => Hash::make(self::DEFAULT_OMD_PASSWORD),
                 'role' => 'omd',
                 'line_id' => null
             ]
@@ -570,7 +572,7 @@ class DatabaseSeeder extends Seeder
                 ],
                 [
                     'name' => trim($account['name']),
-                    'password' => Hash::make('aiia'),
+                    'password' => Hash::make(self::DEFAULT_USER_PASSWORD),
                     'role' => 'user',
                     'line_id' => $line->id,
                 ]

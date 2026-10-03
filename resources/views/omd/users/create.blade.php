@@ -170,6 +170,92 @@
             transform: translateY(-1px);
         }
 
+
+        .account-field.is-invalid input,
+        .account-field.is-invalid select {
+            border-color: #e76b78;
+            box-shadow: 0 0 0 3px rgba(231, 107, 120, .10);
+        }
+
+        .validation-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, .38);
+            backdrop-filter: blur(3px);
+        }
+
+        .validation-modal.open {
+            display: flex;
+        }
+
+        .validation-card {
+            width: min(420px, 100%);
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid #eef2f7;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .20);
+            padding: 22px;
+        }
+
+        .validation-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff7ed;
+            color: #c96d17;
+            font-weight: 900;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .validation-title {
+            margin: 0 0 6px;
+            color: #172033;
+            font-size: 17px;
+            font-weight: 850;
+        }
+
+        .validation-text {
+            margin: 0 0 12px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .validation-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #b42318;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .validation-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+
+        .validation-close {
+            height: 38px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 10px;
+            background: #6d5dfc;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
         @media (max-width: 768px) {
 
             .account-page-head {
@@ -228,7 +314,7 @@
 
         <div class="account-form-body">
 
-            <form method="POST" action="{{ route('omd.users.store') }}">
+            <form method="POST" action="{{ route('omd.users.store') }}" id="accountCreateForm" novalidate>
 
                 @csrf
 
@@ -367,11 +453,10 @@
                         </label>
 
                         <input id="password" type="password" name="password"
-                            placeholder="Kosongkan untuk password default">
+                            placeholder="Kosongkan untuk password default" minlength="4">
 
                         <span class="account-helper">
-                            Kosongkan untuk menggunakan password default sistem:
-                            <strong>aiia</strong>
+                            Opsional. Jika dikosongkan, sistem memakai password default sesuai role yang sudah diset pada DatabaseSeeder.
                         </span>
 
                         @error('password')
@@ -391,10 +476,10 @@
                         </label>
 
                         <input id="password_confirmation" type="password" name="password_confirmation"
-                            placeholder="Ulangi password jika diisi">
+                            placeholder="Ulangi password jika diisi" minlength="4">
 
                         <span class="account-helper">
-                            Tidak perlu diisi jika menggunakan password default.
+                            Wajib sama hanya jika password custom diisi.
                         </span>
 
                     </div>
@@ -421,6 +506,18 @@
 
     </div>
 
+
+    <div class="validation-modal" id="validationModal" role="dialog" aria-modal="true" aria-labelledby="validationTitle">
+        <div class="validation-card">
+            <div class="validation-icon">!</div>
+            <h3 class="validation-title" id="validationTitle">Data belum lengkap</h3>
+            <p class="validation-text">Silakan lengkapi atau perbaiki field berikut sebelum menyimpan akun.</p>
+            <ul class="validation-list" id="validationList"></ul>
+            <div class="validation-actions">
+                <button type="button" class="validation-close" id="validationClose">Mengerti</button>
+            </div>
+        </div>
+    </div>
 
     {{-- =========================================================
         PLANT → LINE SCRIPT
@@ -544,13 +641,23 @@
                 roleSelect.value;
 
 
-            if (role === 'omd') {
+            if (role === 'user') {
+
+                plantWrapper.style.display = '';
+                lineWrapper.style.display = '';
+
+                plantSelect.disabled = false;
+                plantSelect.required = true;
+                lineSelect.required = true;
+
+                if (plantSelect.value) {
+                    loadLines(plantSelect.value);
+                }
+
+            } else {
 
                 plantWrapper.style.display = 'none';
                 lineWrapper.style.display = 'none';
-
-                plantSelect.value = '';
-                lineSelect.value = '';
 
                 plantSelect.required = false;
                 lineSelect.required = false;
@@ -558,20 +665,10 @@
                 plantSelect.disabled = true;
                 lineSelect.disabled = true;
 
-            } else {
-
-                plantWrapper.style.display = '';
-                lineWrapper.style.display = '';
-
-                plantSelect.disabled = false;
-                plantSelect.required = true;
-
-                lineSelect.required = true;
-
-                if (plantSelect.value) {
-                    loadLines(plantSelect.value);
+                if (role === 'omd') {
+                    plantSelect.value = '';
+                    lineSelect.value = '';
                 }
-
             }
         }
 
@@ -599,6 +696,101 @@
 
 
         updateRoleFields();
+
+        var accountForm = document.getElementById('accountCreateForm');
+        var validationModal = document.getElementById('validationModal');
+        var validationList = document.getElementById('validationList');
+        var validationClose = document.getElementById('validationClose');
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.account-field.is-invalid').forEach(function(field) {
+                field.classList.remove('is-invalid');
+            });
+        }
+
+        function markInvalid(element) {
+            if (!element) return;
+            var field = element.closest('.account-field');
+            if (field) field.classList.add('is-invalid');
+        }
+
+        function showValidation(errors, firstField) {
+            validationList.innerHTML = '';
+            errors.forEach(function(message) {
+                var li = document.createElement('li');
+                li.textContent = message;
+                validationList.appendChild(li);
+            });
+            validationModal.classList.add('open');
+            validationModal.dataset.focusTarget = firstField ? firstField.id : '';
+        }
+
+        validationClose.addEventListener('click', function() {
+            validationModal.classList.remove('open');
+            var id = validationModal.dataset.focusTarget;
+            if (id) {
+                var target = document.getElementById(id);
+                if (target && !target.disabled) target.focus();
+            }
+        });
+
+        validationModal.addEventListener('click', function(event) {
+            if (event.target === validationModal) validationClose.click();
+        });
+
+        accountForm.addEventListener('submit', function(event) {
+            clearFieldErrors();
+
+            var errors = [];
+            var firstField = null;
+            var checks = [
+                [document.getElementById('name'), 'Nama wajib diisi.'],
+                [document.getElementById('email'), 'Email wajib diisi.'],
+                [roleSelect, 'Role wajib dipilih.']
+            ];
+
+            if (roleSelect.value === 'user') {
+                checks.push([plantSelect, 'Plant wajib dipilih untuk role User.']);
+                checks.push([lineSelect, 'Line wajib dipilih untuk role User.']);
+            }
+
+            checks.forEach(function(item) {
+                var field = item[0];
+                if (!field || String(field.value || '').trim() !== '') return;
+                errors.push(item[1]);
+                markInvalid(field);
+                if (!firstField) firstField = field;
+            });
+
+            var email = document.getElementById('email');
+            if (email.value && !email.checkValidity()) {
+                errors.push('Format email belum valid.');
+                markInvalid(email);
+                if (!firstField) firstField = email;
+            }
+
+            var password = document.getElementById('password');
+            var passwordConfirmation = document.getElementById('password_confirmation');
+
+            if (password.value) {
+                if (password.value.length < 4) {
+                    errors.push('Password custom minimal 4 karakter.');
+                    markInvalid(password);
+                    if (!firstField) firstField = password;
+                }
+
+                if (passwordConfirmation.value !== password.value) {
+                    errors.push('Konfirmasi password harus sama dengan password custom.');
+                    markInvalid(passwordConfirmation);
+                    if (!firstField) firstField = passwordConfirmation;
+                }
+            }
+
+            if (errors.length) {
+                event.preventDefault();
+                showValidation(errors, firstField);
+            }
+        });
     </script>
 
 @endsection

@@ -444,19 +444,20 @@
 
         .orders-table-wrap {
             overflow-x: auto;
-            border: 1px solid #e9eef4;
+            border: 1px solid #dfe6ef;
             border-radius: 12px;
         }
 
         .orders-table {
             width: 100%;
             min-width: 900px;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .orders-table th {
             background: #f9fafb;
-            text-align: left;
+            text-align: center;
             padding: 12px 14px;
             font-size: 10px;
             font-weight: 800;
@@ -464,15 +465,22 @@
             letter-spacing: .04em;
             color: #6b7280;
             white-space: nowrap;
-            border-bottom: 1px solid #e9eef4;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
         }
 
         .orders-table td {
             padding: 13px 14px;
-            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
             font-size: 12px;
             color: #374151;
             vertical-align: middle;
+        }
+
+        .orders-table th:last-child,
+        .orders-table td:last-child {
+            border-right: 0;
         }
 
         .orders-table tbody tr {
@@ -491,12 +499,12 @@
         .order-no {
             width: 55px;
             color: #94a3b8 !important;
-            font-weight: 700;
+            font-weight: 400;
             text-align: center;
         }
 
         .order-number {
-            font-weight: 800;
+            font-weight: 500;
             color: #111827;
             white-space: nowrap;
         }
@@ -545,9 +553,43 @@
         .history-pagination {
             margin-top: 20px;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
+            gap: 14px;
             width: 100%;
+        }
+
+
+        .history-line-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .history-line-filter label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .history-line-filter select {
+            min-width: 170px;
+            height: 34px;
+            padding: 0 30px 0 10px;
+            border: 1px solid #dbe2ea;
+            border-radius: 8px;
+            background: #fff;
+            color: #334155;
+            font-size: 10px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .history-line-filter select:focus {
+            border-color: #7c6cf2;
+            box-shadow: 0 0 0 3px rgba(124, 108, 242, .10);
         }
 
         .history-pagination-list {
@@ -615,6 +657,21 @@
                 ================================================== */
 
         @media (max-width: 900px) {
+            .history-pagination {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .history-line-filter {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .history-line-filter select {
+                min-width: 0;
+                flex: 1;
+            }
+
             .history-toolbar {
                 align-items: stretch;
                 flex-direction: column;
@@ -690,7 +747,7 @@
         $currentPage = $orders->currentPage();
         $lastPage = $orders->lastPage();
 
-        $hasFilter = request('search') || request('start_date') || request('end_date');
+        $hasFilter = request('search') || request('start_date') || request('end_date') || request('line_id');
     @endphp
 
 
@@ -752,7 +809,7 @@
                         </button>
 
                         @if (request('start_date') || request('end_date'))
-                            <a href="{{ route('user.orders.history', array_filter(['search' => request('search'), 'per_page' => request('per_page')])) }}"
+                            <a href="{{ route('user.orders.history', array_filter(['search' => request('search'), 'per_page' => request('per_page'), 'line_id' => request('line_id')])) }}"
                                 class="history-filter-btn history-filter-btn-reset">
                                 <i class="fa-solid fa-rotate-left"></i>
                                 Reset
@@ -765,6 +822,8 @@
 
             </div>
 
+
+            <input type="hidden" name="line_id" value="{{ request('line_id') }}">
 
             {{-- =====================================================
                  TOOLBAR
@@ -847,7 +906,7 @@
 
                             <td>{{ $order->line?->name ?? '-' }}</td>
 
-                            <td>{{ $order->quantity }}</td>
+                            <td>{{ in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}</td>
 
                             <td>
                                 <span class="status status-confirmed">Selesai</span>
@@ -875,11 +934,11 @@
              PAGINATION
         ===================================================== --}}
 
-        @if ($lastPage > 1)
+        <div class="history-pagination">
 
-            <div class="history-pagination">
+            <div class="history-pagination-list">
 
-                <div class="history-pagination-list">
+                @if ($lastPage > 1)
 
                     @if ($orders->onFirstPage())
                         <span class="history-pagination-btn history-pagination-prev disabled">Previous</span>
@@ -920,11 +979,26 @@
                         <span class="history-pagination-btn history-pagination-next disabled">Next</span>
                     @endif
 
-                </div>
-
+                @endif
             </div>
 
-        @endif
+            <form method="GET" action="{{ route('user.orders.history') }}" class="history-line-filter">
+                <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                <input type="hidden" name="search" value="{{ request('search') }}">
+                <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
+                <label for="history_line_id">Filter Line</label>
+                <select id="history_line_id" name="line_id" onchange="this.form.submit()">
+                    <option value="">Semua Line</option>
+                    @foreach ($lines as $line)
+                        <option value="{{ $line->id }}" @selected((string) request('line_id') === (string) $line->id)>
+                            {{ $line->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+
+        </div>
 
     </div>
 

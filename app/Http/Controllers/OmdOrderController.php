@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Line;
 use App\Models\NgType;
 use App\Models\Product;
 use App\Models\RepairOrder;
@@ -23,10 +24,13 @@ class OmdOrderController extends Controller
             'result',
             'confirmation',
         ])
+            ->withSum('items as before_qty_sum', 'before_qty')
+            ->withSum('items as after_qty_sum', 'after_qty')
             ->whereIn('status', [
                 'submitted',
                 'in_repair',
                 'completed',
+                'revision_requested',
             ])
             ->latest('created_at')
             ->paginate(10);
@@ -141,10 +145,12 @@ class OmdOrderController extends Controller
         RepairOrder $order
     ) {
         abort_unless(
-            $order->status === 'in_repair',
+            in_array($order->status, ['in_repair', 'revision_requested'], true),
             422,
-            'Order belum berada pada proses repair.'
+            'Hasil repair hanya dapat diinput saat proses repair atau setelah User meminta koreksi.'
         );
+
+        $isCorrection = $order->status === 'revision_requested';
 
         $order->load([
             'items',
@@ -598,12 +604,25 @@ class OmdOrderController extends Controller
             |--------------------------------------------------------------------------
             */
 
+                $orderQty = (int) $order->items()->sum('before_qty');
+                $okQty = (int) $order->items()->sum('after_qty');
+                $scrapQty = max($orderQty - $okQty, 0);
+
                 $order->result()->updateOrCreate(
                     [
                         'repair_order_id' =>
                         $order->id,
                     ],
                     [
+                        'ok_qty' =>
+                        $okQty,
+
+                        'scrap_qty' =>
+                        $scrapQty,
+
+                        'ng_qty' =>
+                        0,
+
                         'processed_by' =>
                         auth()->id(),
                     ]
@@ -621,18 +640,21 @@ class OmdOrderController extends Controller
                     'completed',
 
                     'repair_completed_at' =>
-                    now(),
+                    $order->repair_completed_at ?? now(),
 
                 ]);
             });
 
             return redirect()
                 ->route(
-                    'omd.orders.index'
+                    'omd.orders.show',
+                    $order
                 )
                 ->with(
                     'success',
-                    'Order Repair Box selesai dan menunggu konfirmasi dari User.'
+                    $isCorrection
+                        ? 'Perubahan hasil repair berhasil disimpan. User akan melihat data terbaru.'
+                        : 'Hasil repair berhasil disimpan dan menunggu konfirmasi dari User.'
                 );
         }
 
@@ -699,7 +721,7 @@ class OmdOrderController extends Controller
                 'completed',
 
                 'repair_completed_at' =>
-                now(),
+                $order->repair_completed_at ?? now(),
 
             ]);
 
@@ -792,6 +814,11 @@ class OmdOrderController extends Controller
                 'string',
                 'max:100',
             ],
+            'line_id' => [
+                'nullable',
+                'integer',
+                'exists:lines,id',
+            ],
         ]);
 
 
@@ -803,6 +830,7 @@ class OmdOrderController extends Controller
             $request->input('end_date');
 
         $search = trim($request->input('search', ''));
+        $lineId = $request->filled('line_id') ? (int) $request->input('line_id') : null;
 
 
         /*
@@ -851,6 +879,8 @@ class OmdOrderController extends Controller
             'confirmation',
             'omdVerifier',
         ])
+            ->withSum('items as before_qty_sum', 'before_qty')
+            ->withSum('items as after_qty_sum', 'after_qty')
             ->where(
                 'status',
                 'confirmed'
@@ -887,6 +917,11 @@ class OmdOrderController extends Controller
                         );
                     });
             });
+        }
+
+
+        if ($lineId) {
+            $query->where('line_id', $lineId);
         }
 
 
@@ -932,13 +967,19 @@ class OmdOrderController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        $lines = Line::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
         return view(
             'omd.orders.history',
             compact(
                 'orders',
                 'startDate',
-                'endDate'
+                'endDate',
+                'lines',
+                'lineId'
             )
         );
     }

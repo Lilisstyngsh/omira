@@ -59,4 +59,13 @@ class MasterModel extends Model
             'master_model_id'
         );
     }
+
+
+    public function scrapLimits(): HasMany
+    {
+        return $this->hasMany(
+            ModelScrapLimit::class,
+            'master_model_id'
+        );
+    }
 }

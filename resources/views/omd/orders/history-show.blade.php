@@ -147,7 +147,7 @@
         .repair-table-scroll {
             width: 100%;
             overflow-x: auto;
-            border: 1px solid #000;
+            border: 1px solid #cbd5e1;
             border-radius: 12px;
             background: #fff;
         }
@@ -177,8 +177,8 @@
         .repair-table th {
             padding: 10px 8px;
             background: #fafbfc;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;
+            border-bottom: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
             color: #475569;
             font-size: 10px;
             font-weight: 800;
@@ -191,8 +191,8 @@
 
         .repair-table td {
             padding: 4px 8px;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;
+            border-bottom: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
             font-size: 12px;
             color: #334155;
             vertical-align: middle;
@@ -200,7 +200,7 @@
         }
 
         .repair-table tbody tr:last-child td {
-            border-bottom: none;
+            border-bottom: 1px solid #cbd5e1;
         }
 
         .repair-table tbody tr:hover td {
@@ -209,12 +209,12 @@
 
         .repair-table td.no-cell,
         .repair-table td.model-cell {
-            border-right: 1px solid #000;
+            border-right: 1px solid #cbd5e1;
         }
 
         .repair-table .model-cell,
         .repair-table .no-cell {
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
             vertical-align: middle !important;
         }
@@ -228,12 +228,12 @@
         }
 
         .model-text {
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
         }
 
         .product-text {
-            font-weight: 650;
+            font-weight: 400;
             color: #475569;
         }
 
@@ -267,7 +267,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-weight: 800;
+            font-weight: 500;
             color: #000;
         }
 

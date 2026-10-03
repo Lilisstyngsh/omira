@@ -115,10 +115,28 @@
 
             color: white;
 
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, .22) transparent;
+
             box-shadow:
                 8px 0 35px rgba(37, 18, 77, .12);
 
             z-index: 100;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .18);
+            border-radius: 999px;
         }
 
         /* =========================================================
@@ -1669,6 +1687,28 @@
                                     </a>
                                 </div>
                             </div>
+
+                            <a href="{{ route('omd.scrap-limits.index') }}"
+                                class="{{ request()->routeIs('omd.scrap-limits.*') ? 'active' : '' }}">
+
+                                <span class="nav-icon">⚠</span>
+
+                                <span>
+                                    Scrap Limit Model
+                                </span>
+
+                            </a>
+
+                            <a href="{{ route('omd.targets.index') }}"
+                                class="{{ request()->routeIs('omd.targets.*') ? 'active' : '' }}">
+
+                                <span class="nav-icon">◎</span>
+
+                                <span>
+                                    Target FY
+                                </span>
+
+                            </a>
                         @endif
 
                         {{-- Manajemen Akun hanya Leader --}}

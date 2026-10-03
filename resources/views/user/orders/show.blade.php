@@ -6,7 +6,7 @@
 @section('content')
 
     @php
-        $hasOmdResult = in_array($order->status, ['completed', 'confirmed'], true);
+        $hasOmdResult = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
 
         $totalQtyOmd = 0;
 
@@ -154,18 +154,18 @@
         .repair-table-scroll {
             width: 100%;
             overflow-x: auto;
-            border: 1px solid #000;
+            border: 1px solid #cbd5e1;
             border-radius: 12px;
             background: #fff;
         }
 
         .repair-table-header {
-            min-width: 1100px;
+            min-width: 760px;
             background: #fafbfc;
         }
 
         .repair-table-body {
-            min-width: 1100px;
+            min-width: 760px;
             max-height: 430px;
             overflow-y: auto;
             overflow-x: hidden;
@@ -174,7 +174,7 @@
 
         .repair-table {
             width: 100%;
-            min-width: 1100px;
+            min-width: 760px;
             table-layout: fixed;
             border-collapse: separate;
             border-spacing: 0;
@@ -182,10 +182,10 @@
         }
 
         .repair-table th {
-            padding: 10px 8px;
+            padding: 9px 5px;
             background: #fafbfc;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;
+            border-bottom: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
             color: #475569;
             font-size: 10px;
             font-weight: 800;
@@ -197,10 +197,10 @@
         }
 
         .repair-table td {
-            padding: 4px 8px;
+            padding: 5px 5px;
             /* REVISI: sebelumnya 11px 8px */
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;
+            border-bottom: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
             font-size: 12px;
             color: #334155;
             vertical-align: middle;
@@ -208,7 +208,7 @@
         }
 
         .repair-table tbody tr:last-child td {
-            border-bottom: none;
+            border-bottom: 1px solid #cbd5e1;
         }
 
         .repair-table tbody tr:hover td {
@@ -217,12 +217,12 @@
 
         .repair-table td.no-cell,
         .repair-table td.model-cell {
-            border-right: 1px solid #000;
+            border-right: 1px solid #cbd5e1;
         }
 
         .repair-table .model-cell,
         .repair-table .no-cell {
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
             vertical-align: middle !important;
         }
@@ -236,12 +236,12 @@
         }
 
         .model-text {
-            font-weight: 800;
+            font-weight: 500;
             color: #172033;
         }
 
         .product-text {
-            font-weight: 650;
+            font-weight: 400;
             color: #475569;
         }
 
@@ -275,7 +275,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-weight: 800;
+            font-weight: 500;
             color: #000;
         }
 
@@ -289,14 +289,14 @@
                                                                         ================================================== */
 
         .repair-table .keterangan-head {
-            width: 180px !important;
-            min-width: 180px !important;
+            width: 135px !important;
+            min-width: 135px !important;
             text-align: center !important;
         }
 
         .repair-table .keterangan-cell {
-            width: 180px !important;
-            min-width: 180px !important;
+            width: 135px !important;
+            min-width: 135px !important;
             padding: 2px !important;
             text-align: left !important;
             vertical-align: middle !important;
@@ -330,6 +330,60 @@
             line-height: 1.5;
             resize: vertical;
             outline: none;
+        }
+
+        .repair-table .total-row td {
+            background: #f8fafc;
+            font-weight: 800;
+            border-top: 1px solid #cbd5e1;
+        }
+
+        .repair-table .grand-total-row td {
+            background: #eef2ff;
+            color: #312e81;
+            font-weight: 900;
+            border-top: 2px solid #818cf8;
+        }
+
+        .repair-table .total-label {
+            text-align: right;
+            white-space: nowrap;
+            font-size: 10px;
+            letter-spacing: .02em;
+        }
+
+        .repair-table .total-value {
+            text-align: center;
+            font-weight: 900;
+        }
+
+
+        .repair-table-unified {
+            min-width: 620px;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .repair-table-unified th,
+        .repair-table-unified td {
+            border-color: #dbe2ea;
+        }
+
+        .repair-table-unified th:last-child,
+        .repair-table-unified td:last-child {
+            border-right: 0;
+        }
+
+        .repair-table-unified tfoot td {
+            border-bottom: 0;
+        }
+
+        .repair-table .grand-total-value {
+            text-align: center;
+            font-weight: 900;
+            font-size: 12px;
+            letter-spacing: .02em;
         }
 
         /* =================================================
@@ -422,6 +476,17 @@
 
         .btn-secondary:hover {
             background: #e2e8f0;
+        }
+
+        .btn-confirm {
+            background: #16a34a;
+            color: #fff;
+            box-shadow: 0 6px 15px rgba(22, 163, 74, .18);
+        }
+
+        .btn-confirm:hover {
+            background: #15803d;
+            color: #fff;
         }
 
         /* =================================================
@@ -593,7 +658,7 @@
 
         <div class="repair-head-actions">
 
-            <a href="{{ route('user.orders.index') }}" class="btn btn-secondary">
+            <a href="{{ route('user.orders.index') }}" class="btn btn-secondary" title="Kembali ke daftar Order Repair Box">
                 Kembali
             </a>
 
@@ -656,7 +721,7 @@
 
                     $handoverState = $handoverDone
                         ? 'completed'
-                        : ($order->status === 'completed'
+                        : (in_array($order->status, ['completed', 'revision_requested'], true)
                             ? 'in-progress'
                             : 'pending');
                 @endphp
@@ -896,312 +961,198 @@
     ===================================================== --}}
 
     @if ($order->items->isNotEmpty())
-
         @php
-
             $modelGroups = $order->items->groupBy('master_model_id');
-
             $ngCodes = ['P', 'H', 'C', 'S'];
+            $showAfter = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
+            $showProductNote = $showAfter;
 
+            $beforeTotals = collect($ngCodes)->mapWithKeys(fn($code) => [
+                $code => (int) $order->items->filter(
+                    fn($item) => strtoupper($item->ngType?->code ?? '') === $code
+                )->sum('before_qty'),
+            ]);
+
+            $afterTotals = collect($ngCodes)->mapWithKeys(fn($code) => [
+                $code => (int) $order->items->filter(
+                    fn($item) => strtoupper($item->ngType?->code ?? '') === $code
+                )->sum('after_qty'),
+            ]);
+
+            $beforeGrandTotal = (int) $beforeTotals->sum();
+            $afterGrandTotal = (int) $afterTotals->sum();
         @endphp
 
-
         <div class="repair-card">
-
             <h3 class="repair-card-title">
-                Hasil Repair
+                @if ($order->status === 'submitted')
+                    Detail Order Repair Box
+                @elseif ($order->status === 'in_repair')
+                    Order Sedang Diproses OMD
+                @elseif ($order->status === 'completed')
+                    Hasil Repair OMD — Periksa Sebelum Konfirmasi
+                @elseif ($order->status === 'revision_requested')
+                    Menunggu Koreksi Hasil Repair OMD
+                @else
+                    Hasil Repair &amp; Serah Terima
+                @endif
             </h3>
 
-
             <p class="repair-card-desc">
-                Hasil repair yang telah disimpan oleh OMD.
+                @if ($order->status === 'completed')
+                    Cocokkan qty hasil pada sistem dengan barang fisik yang diterima sebelum melakukan konfirmasi serah terima.
+                @elseif ($order->status === 'revision_requested')
+                    Ketidaksesuaian sudah dilaporkan ke OMD. Tunggu OMD memperbarui hasil repair, lalu lakukan pengecekan ulang.
+                @elseif ($order->status === 'confirmed')
+                    Data hasil repair sudah dikonfirmasi dan proses serah terima selesai.
+                @else
+                    Rincian qty NG yang dikirim ke OMD Workshop.
+                @endif
             </p>
 
-
             <div class="repair-table-scroll">
+                <table class="repair-table repair-table-unified">
+                    <colgroup>
+                        <col style="width:38px;">
+                        <col style="width:88px;">
+                        <col style="width:120px;">
+                        @foreach ($ngCodes as $code)
+                            <col style="width:44px;">
+                        @endforeach
+                        @if ($showAfter)
+                            @foreach ($ngCodes as $code)
+                                <col style="width:44px;">
+                            @endforeach
+                        @endif
+                        @if ($showProductNote)
+                            <col style="width:128px;">
+                        @endif
+                    </colgroup>
 
-                @php
-                    $showAfter = in_array($order->status, ['completed', 'confirmed'], true);
-                @endphp
-
-                {{-- =================================================
-                     HEADER
-                ================================================== --}}
-
-                <div class="repair-table-header">
-
-                    <table class="repair-table">
-
-                        <colgroup>
-
-                            <col style="width:55px;">
-                            <col style="width:150px;">
-                            <col style="width:170px;">
-
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-
-                            @if ($showAfter)
-                                <col style="width:68px;">
-                                <col style="width:68px;">
-                                <col style="width:68px;">
-                                <col style="width:68px;">
+                    <thead>
+                        <tr>
+                            <th rowspan="{{ $showAfter ? 3 : 2 }}">No</th>
+                            <th rowspan="{{ $showAfter ? 3 : 2 }}">Model</th>
+                            <th rowspan="{{ $showAfter ? 3 : 2 }}">Produk</th>
+                            <th colspan="{{ $showAfter ? 8 : 4 }}">Jenis &amp; Qty NG</th>
+                            @if ($showProductNote)
+                                <th rowspan="3" class="keterangan-head">Keterangan OMD</th>
                             @endif
+                        </tr>
 
-                            <col style="width:180px;">
-
-                        </colgroup>
-
-
-                        <thead>
-
+                        @if ($showAfter)
                             <tr>
-
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}">
-                                    No
-                                </th>
-
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" style="text-align:left;">
-                                    Model
-                                </th>
-
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" style="text-align:left;">
-                                    Produk
-                                </th>
-
-                                <th colspan="{{ $showAfter ? 8 : 4 }}">
-                                    Jenis &amp; Qty NG
-                                </th>
-
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" class="keterangan-head">
-                                    Keterangan
-                                </th>
-
+                                <th colspan="4">Sebelum</th>
+                                <th colspan="4">Sesudah</th>
                             </tr>
+                        @endif
 
-
+                        <tr>
+                            @foreach ($ngCodes as $code)
+                                <th>{{ $code }}</th>
+                            @endforeach
                             @if ($showAfter)
-                                <tr>
-
-                                    <th colspan="4">
-                                        Sebelum
-                                    </th>
-
-                                    <th colspan="4">
-                                        Sesudah
-                                    </th>
-
-                                </tr>
-                            @endif
-
-
-                            <tr>
-
                                 @foreach ($ngCodes as $code)
-                                    <th>
-                                        {{ $code }}
-                                    </th>
+                                    <th>{{ $code }}</th>
                                 @endforeach
-
-
-                                @if ($showAfter)
-                                    @foreach ($ngCodes as $code)
-                                        <th>
-                                            {{ $code }}
-                                        </th>
-                                    @endforeach
-                                @endif
-
-                            </tr>
-
-                        </thead>
-
-                    </table>
-
-                </div>
-
-
-                {{-- =================================================
-                     BODY
-                ================================================== --}}
-
-                <div class="repair-table-body">
-
-                    <table class="repair-table">
-
-                        <colgroup>
-
-                            <col style="width:55px;">
-                            <col style="width:150px;">
-                            <col style="width:170px;">
-
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-                            <col style="width:68px;">
-
-                            @if ($showAfter)
-                                <col style="width:68px;">
-                                <col style="width:68px;">
-                                <col style="width:68px;">
-                                <col style="width:68px;">
                             @endif
+                        </tr>
+                    </thead>
 
-                            <col style="width:180px;">
+                    <tbody>
+                        @foreach ($modelGroups as $modelItems)
+                            @php
+                                $productGroups = $modelItems->groupBy('product_id');
+                                $modelRowspan = $productGroups->count();
+                            @endphp
 
-                        </colgroup>
-
-
-                        <tbody>
-
-                            @foreach ($modelGroups as $modelItems)
+                            @foreach ($productGroups as $productItems)
                                 @php
-                                    $productGroups = $modelItems->groupBy('product_id');
-                                    $modelRowspan = $productGroups->count();
+                                    $ngItems = $productItems->keyBy(fn($item) => strtoupper($item->ngType?->code ?? ''));
+                                    $firstItem = $productItems->first();
+                                    $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))?->mismatch_note;
                                 @endphp
 
-
-                                @foreach ($productGroups as $productItems)
-                                    @php
-                                        $ngItems = $productItems->keyBy(function ($item) {
-                                            return strtoupper($item->ngType?->code ?? '');
-                                        });
-
-                                        $firstItem = $productItems->first();
-                                        $productId = $firstItem->product_id;
-
-                                        $productNote = $productItems->first(fn($item) => filled($item->mismatch_note))
-                                            ?->mismatch_note;
-
-                                        $hasFinalResult = in_array($order->status, ['completed', 'confirmed'], true);
-                                    @endphp
-
-
-                                    <tr>
-
-
-                                        {{-- =========================
-                                             NO + MODEL
-                                        ========================== --}}
-
-                                        @if ($loop->first)
-                                            <td rowspan="{{ $modelRowspan }}" class="no-cell">
-                                                {{ $loop->parent->iteration }}
-                                            </td>
-
-
-                                            <td rowspan="{{ $modelRowspan }}" class="model-cell">
-
-                                                <span class="model-text">
-                                                    {{ $modelItems->first()->masterModel?->model ?? '-' }}
-                                                </span>
-
-                                            </td>
-                                        @endif
-
-
-                                        {{-- =========================
-                                             PRODUK
-                                        ========================== --}}
-
-                                        <td>
-
-                                            <span class="product-text">
-                                                {{ $firstItem->product?->name ?? '-' }}
-                                            </span>
-
+                                <tr>
+                                    @if ($loop->first)
+                                        <td rowspan="{{ $modelRowspan }}" class="no-cell">{{ $loop->parent->iteration }}</td>
+                                        <td rowspan="{{ $modelRowspan }}" class="model-cell">
+                                            <span class="model-text">{{ $modelItems->first()->masterModel?->model ?? '-' }}</span>
                                         </td>
+                                    @endif
 
+                                    <td><span class="product-text">{{ $firstItem->product?->name ?? '-' }}</span></td>
 
-                                        {{-- =========================
-                                             SEBELUM
-                                        ========================== --}}
+                                    @foreach ($ngCodes as $code)
+                                        @php $ngItem = $ngItems->get($code); @endphp
+                                        <td class="ng-cell">
+                                            <div class="ng-value">{{ ((int) ($ngItem?->before_qty ?? 0)) > 0 ? (int) $ngItem->before_qty : '' }}</div>
+                                        </td>
+                                    @endforeach
 
+                                    @if ($showAfter)
                                         @foreach ($ngCodes as $code)
                                             @php
                                                 $ngItem = $ngItems->get($code);
+                                                $beforeQty = (int) ($ngItem?->before_qty ?? 0);
+                                                $afterQty = (int) ($ngItem?->after_qty ?? 0);
+                                                $resultCellClass = '';
+
+                                                if ($beforeQty > 0 || $afterQty > 0) {
+                                                    $resultCellClass = $beforeQty === $afterQty
+                                                        ? 'repair-result-match-cell'
+                                                        : 'repair-result-mismatch-cell';
+                                                }
                                             @endphp
-
-                                            <td class="ng-cell">
-
-                                                @if ($ngItem)
-                                                    <div class="ng-value">
-                                                        {{ $ngItem->before_qty > 0 ? $ngItem->before_qty : '' }}
-                                                    </div>
-                                                @else
-                                                    <div class="ng-value empty-ng"></div>
-                                                @endif
-
+                                            <td class="ng-cell {{ $resultCellClass }}">
+                                                <div class="ng-value">{{ $afterQty > 0 ? $afterQty : '' }}</div>
                                             </td>
                                         @endforeach
+                                    @endif
 
-
-                                        {{-- =========================
-                                             SESUDAH
-                                        ========================== --}}
-
-                                        @if ($showAfter)
-                                            @foreach ($ngCodes as $code)
-                                                @php
-                                                    $ngItem = $ngItems->get($code);
-
-                                                    $beforeQty = (int) ($ngItem?->before_qty ?? 0);
-                                                    $afterQty = (int) ($ngItem?->after_qty ?? 0);
-
-                                                    /*
-                                                     * Highlight hanya jika Qty User/PPIC memang ada.
-                                                     *
-                                                     * Jika Qty User = 0 / kosong:
-                                                     * - Tidak diberi highlight, walaupun OMD mengisi Qty.
-                                                     *
-                                                     * Jika Qty User > 0:
-                                                     * - Hijau jika Qty OMD sama.
-                                                     * - Merah jika Qty OMD berbeda, termasuk kosong.
-                                                     */
-                                                    $resultCellClass = '';
-
-                                                    if ($hasFinalResult && $beforeQty > 0) {
-                                                        $resultCellClass =
-                                                            $beforeQty === $afterQty
-                                                                ? 'repair-result-match-cell'
-                                                                : 'repair-result-mismatch-cell';
-                                                    }
-                                                @endphp
-
-                                                <td class="ng-cell {{ $resultCellClass }}">
-
-                                                    <div class="ng-value">
-                                                        {{ $afterQty > 0 ? $afterQty : '' }}
-                                                    </div>
-
-                                                </td>
-                                            @endforeach
-                                        @endif
-
-
-                                        {{-- =========================
-                                             KETERANGAN PER PRODUK
-                                        ========================== --}}
-
+                                    @if ($showProductNote)
                                         <td class="keterangan-cell">
                                             <div class="keterangan-text">{{ $productNote ?: '-' }}</div>
                                         </td>
-
-                                    </tr>
-                                @endforeach
+                                    @endif
+                                </tr>
                             @endforeach
+                        @endforeach
+                    </tbody>
 
-                        </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="3" class="total-label">Total</td>
+                            @foreach ($ngCodes as $code)
+                                <td class="total-value">{{ $beforeTotals[$code] > 0 ? $beforeTotals[$code] : '' }}</td>
+                            @endforeach
+                            @if ($showAfter)
+                                @foreach ($ngCodes as $code)
+                                    <td class="total-value">{{ $afterTotals[$code] > 0 ? $afterTotals[$code] : '' }}</td>
+                                @endforeach
+                            @endif
+                            @if ($showProductNote)
+                                <td></td>
+                            @endif
+                        </tr>
 
-                    </table>
-
-                </div>
-
-
+                        <tr class="grand-total-row">
+                            <td colspan="3" class="total-label">Grand Total</td>
+                            <td colspan="4" class="grand-total-value">
+                                {{ $beforeGrandTotal > 0 ? $beforeGrandTotal . ' NG' : '' }}
+                            </td>
+                            @if ($showAfter)
+                                <td colspan="4" class="grand-total-value">
+                                    {{ $afterGrandTotal > 0 ? $afterGrandTotal . ' NG' : '' }}
+                                </td>
+                            @endif
+                            @if ($showProductNote)
+                                <td></td>
+                            @endif
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
-
         </div>
     @elseif ($order->result)
         {{-- =====================================================
@@ -1260,30 +1211,44 @@
                 <div class="action-card-info">
 
                     <strong>
-                        Order Repair Box Selesai
+                        Periksa Barang Hasil Repair
                     </strong>
 
                     <span>
-                        OMD telah menyelesaikan proses repair.
-                        Silakan periksa hasil repair dan lakukan
-                        konfirmasi penerimaan.
+                        Cocokkan jumlah barang fisik dengan hasil repair pada sistem. Pilih Barang Sesuai untuk menyelesaikan serah terima, atau Barang Tidak Sesuai agar OMD dapat melakukan koreksi.
                     </span>
 
                 </div>
 
+                <div class="handover-actions">
+                    <form method="POST" action="{{ route('user.orders.requestRevision', $order) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-mismatch"
+                            title="Laporkan ketidaksesuaian agar OMD dapat mengedit hasil repair">
+                            Barang Tidak Sesuai
+                        </button>
+                    </form>
 
-                <form method="POST" action="{{ route('user.orders.confirm', $order) }}">
-
-                    @csrf
-
-                    <button type="submit" class="btn btn-primary">
-                        Konfirmasi Penerimaan
-                    </button>
-
-                </form>
+                    <form method="POST" action="{{ route('user.orders.confirm', $order) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-confirm"
+                            title="Konfirmasi bahwa jumlah barang fisik sudah sesuai dengan hasil repair OMD">
+                            Barang Sesuai — Konfirmasi Serah Terima
+                        </button>
+                    </form>
+                </div>
 
             </div>
 
+        </div>
+    @elseif ($order->status === 'revision_requested')
+        <div class="repair-card revision-waiting">
+            <div class="action-card">
+                <div class="action-card-info">
+                    <strong>Koreksi Hasil Repair Diminta</strong>
+                    <span>OMD sudah menerima status barang tidak sesuai. Tunggu OMD memperbarui hasil repair; setelah disubmit ulang, tombol pengecekan akan muncul kembali.</span>
+                </div>
+            </div>
         </div>
     @elseif ($order->status === 'confirmed')
     @endif

@@ -361,7 +361,8 @@
                             Password Baru
                         </label>
 
-                        <input id="password" type="password" name="password" placeholder="Masukkan password baru">
+                        <input id="password" type="password" name="password" minlength="4"
+                            placeholder="Masukkan password baru">
 
                         <span class="account-helper">
                             Kosongkan jika password lama ingin tetap digunakan.
@@ -383,7 +384,7 @@
                             Konfirmasi Password Baru
                         </label>
 
-                        <input id="password_confirmation" type="password" name="password_confirmation"
+                        <input id="password_confirmation" type="password" name="password_confirmation" minlength="4"
                             placeholder="Ulangi password baru">
 
                         <span class="account-helper">

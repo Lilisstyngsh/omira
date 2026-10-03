@@ -36,15 +36,25 @@
            SUCCESS ALERT
         ===================================================== */
 
-        .account-success-alert {
+        .account-success-alert,
+        .account-error-alert {
             margin-bottom: 22px;
             padding: 18px 20px;
-            border: 1px solid #75e6bc;
             border-radius: 16px;
-            background: #effdf6;
-            color: #059669;
             font-size: 13px;
             line-height: 1.5;
+        }
+
+        .account-success-alert {
+            border: 1px solid #75e6bc;
+            background: #effdf6;
+            color: #059669;
+        }
+
+        .account-error-alert {
+            border: 1px solid #fecaca;
+            background: #fff1f2;
+            color: #be123c;
         }
 
 
@@ -333,6 +343,128 @@
         }
 
 
+
+        .account-filter-bar {
+            display: grid;
+            grid-template-columns: minmax(240px, 1fr) minmax(180px, 220px) 120px auto;
+            gap: 10px;
+            align-items: end;
+            padding: 16px 18px;
+            border-bottom: 1px solid #edf1f5;
+            background: #fbfcfe;
+        }
+
+        .account-filter-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .account-filter-field input,
+        .account-filter-field select {
+            width: 100%;
+            height: 38px;
+            box-sizing: border-box;
+            border: 1px solid #dbe2ea;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0 11px;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 650;
+            outline: none;
+        }
+
+        .account-filter-field input:focus,
+        .account-filter-field select:focus {
+            border-color: #7566ea;
+            box-shadow: 0 0 0 3px rgba(117, 102, 234, .10);
+        }
+
+        .account-filter-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .account-filter-btn {
+            height: 38px;
+            border-radius: 10px;
+            padding: 0 14px;
+            border: 1px solid #dbe2ea;
+            background: #fff;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-filter-btn.primary {
+            border-color: #6d5dfc;
+            background: #6d5dfc;
+            color: #fff;
+        }
+
+        .account-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 18px 18px;
+            border-top: 1px solid #edf1f5;
+            background: #fff;
+        }
+
+        .account-pagination-info {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .account-pagination-list {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .account-page-btn {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid #dbe2ea;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .account-page-btn.active {
+            background: #6d5dfc;
+            border-color: #6d5dfc;
+            color: #fff;
+        }
+
+        .account-page-btn.disabled {
+            background: #f8fafc;
+            color: #cbd5e1;
+            pointer-events: none;
+        }
+
         /* =====================================================
            SWEETALERT
            MENGIKUTI KONSEP DATA MASTER
@@ -450,6 +582,23 @@
             .account-success-alert {
                 padding: 16px;
             }
+
+            .account-filter-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .account-filter-actions {
+                width: 100%;
+            }
+
+            .account-filter-btn {
+                flex: 1;
+            }
+
+            .account-pagination {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 
@@ -486,6 +635,12 @@
         </div>
     @endif
 
+    @if ($errors->has('account_error'))
+        <div class="account-error-alert">
+            {{ $errors->first('account_error') }}
+        </div>
+    @endif
+
 
     {{-- =====================================================
     TABLE CARD
@@ -493,6 +648,43 @@
 
     <div class="account-table-card">
 
+        <form method="GET" action="{{ route('omd.users.index') }}" class="account-filter-bar">
+            <div class="account-filter-field">
+                <label for="account_search">Pencarian</label>
+                <input id="account_search" type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Nama, email, role, plant, atau line">
+            </div>
+
+            <div class="account-filter-field">
+                <label for="account_line">Filter Line</label>
+                <select id="account_line" name="line_id">
+                    <option value="">Semua Line</option>
+                    @foreach ($lines as $line)
+                        <option value="{{ $line->id }}" @selected((string) request('line_id') === (string) $line->id)>
+                            {{ $line->name }}{{ $line->plant?->name ? ' · ' . $line->plant->name : '' }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="account-filter-field">
+                <label for="account_per_page">Tampilkan</label>
+                <select id="account_per_page" name="per_page" onchange="this.form.submit()">
+                    @foreach ([10, 25, 50, 100] as $size)
+                        <option value="{{ $size }}" @selected((int) request('per_page', 10) === $size)>
+                            {{ $size }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="account-filter-actions">
+                <button type="submit" class="account-filter-btn primary">Cari</button>
+                @if (request('search') || request('line_id') || (int) request('per_page', 10) !== 10)
+                    <a href="{{ route('omd.users.index') }}" class="account-filter-btn">Reset</a>
+                @endif
+            </div>
+        </form>
 
         <div class="account-table-wrap">
 
@@ -542,7 +734,7 @@
 
                             {{-- NO --}}
                             <td class="account-number">
-                                {{ $index + 1 }}
+                                {{ $users->firstItem() + $index }}
                             </td>
 
 
@@ -596,7 +788,7 @@
                             <td>
 
                                 @if ($user->role === 'omd')
-                                    -
+                                    <span class="account-badge account-badge-line">OMD Workshop</span>
                                 @else
                                     <span class="account-badge account-badge-line">
                                         {{ $user->line?->name ?? '-' }}
@@ -614,7 +806,7 @@
 
                                     {{-- EDIT --}}
                                     <a href="{{ route('omd.users.edit', $user) }}"
-                                        class="account-action-btn account-action-edit">
+                                        class="account-action-btn account-action-edit" title="Edit akun">
                                         Edit
                                     </a>
 
@@ -625,7 +817,7 @@
 
                                         @csrf
 
-                                        <button type="submit" class="account-action-btn account-action-reset">
+                                        <button type="submit" class="account-action-btn account-action-reset" title="Reset password ke default role">
                                             Reset
                                         </button>
 
@@ -639,7 +831,7 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit" class="account-action-btn account-action-delete">
+                                        <button type="submit" class="account-action-btn account-action-delete" title="Hapus akun">
                                             Hapus
                                         </button>
 
@@ -678,6 +870,31 @@
 
             </table>
 
+        </div>
+
+        <div class="account-pagination">
+            <div class="account-pagination-info">
+                Menampilkan {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} akun
+            </div>
+
+            <div class="account-pagination-list">
+                @if ($users->onFirstPage())
+                    <span class="account-page-btn disabled">Previous</span>
+                @else
+                    <a class="account-page-btn" href="{{ $users->previousPageUrl() }}">Previous</a>
+                @endif
+
+                @for ($page = max(1, $users->currentPage() - 1); $page <= min($users->lastPage(), $users->currentPage() + 1); $page++)
+                    <a class="account-page-btn {{ $users->currentPage() === $page ? 'active' : '' }}"
+                        href="{{ $users->url($page) }}">{{ $page }}</a>
+                @endfor
+
+                @if ($users->hasMorePages())
+                    <a class="account-page-btn" href="{{ $users->nextPageUrl() }}">Next</a>
+                @else
+                    <span class="account-page-btn disabled">Next</span>
+                @endif
+            </div>
         </div>
 
     </div>
@@ -793,7 +1010,7 @@
 
                                     html: 'Password akun <b>' +
                                         userName +
-                                        '</b> akan dikembalikan ke <b>password default sistem</b>.',
+                                        '</b> akan direset ke <b>password default sesuai role</b>.',
 
                                     showCancelButton: true,
 

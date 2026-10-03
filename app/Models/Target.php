@@ -12,7 +12,6 @@ class Target extends Model
         'month',
         'line_id',
         'target_qty',
-        'scrap_limit',
     ];
 
     protected $casts = [
@@ -20,7 +19,6 @@ class Target extends Model
         'month' => 'integer',
         'line_id' => 'integer',
         'target_qty' => 'integer',
-        'scrap_limit' => 'integer',
     ];
 
     public function line(): BelongsTo

@@ -19,11 +19,14 @@ class UserOrderController extends Controller
             'result',
             'confirmation',
         ])
+            ->withSum('items as before_qty_sum', 'before_qty')
+            ->withSum('items as after_qty_sum', 'after_qty')
             ->where('user_id', $request->user()->id)
             ->whereIn('status', [
                 'submitted',
                 'in_repair',
                 'completed',
+                'revision_requested',
             ])
             ->latest('created_at')
             ->paginate(10);
@@ -476,6 +479,34 @@ class UserOrderController extends Controller
             compact('order')
         );
     }
+    public function requestRevision(
+        Request $request,
+        RepairOrder $order
+    ) {
+        abort_unless(
+            $order->user_id === $request->user()->id,
+            403
+        );
+
+        abort_unless(
+            $order->status === 'completed',
+            422,
+            'Permintaan koreksi hanya dapat dilakukan setelah OMD menyerahkan hasil repair.'
+        );
+
+        $order->update([
+            'status' => 'revision_requested',
+        ]);
+
+        return redirect()
+            ->route('user.orders.show', $order)
+            ->with(
+                'success',
+                'Ketidaksesuaian sudah dikirim ke OMD. OMD dapat melakukan koreksi hasil repair.'
+            );
+    }
+
+
     public function confirm(
         Request $request,
         RepairOrder $order
@@ -520,27 +551,17 @@ class UserOrderController extends Controller
     public function history(Request $request)
     {
         $request->validate([
-            'start_date' => [
-                'nullable',
-                'date',
-            ],
-
-            'end_date' => [
-                'nullable',
-                'date',
-                'after_or_equal:start_date',
-            ],
-
-            'per_page' => [
-                'nullable',
-                'integer',
-                'in:10,25,50,100',
-            ],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
+            'search' => ['nullable', 'string', 'max:100'],
+            'line_id' => ['nullable', 'integer', 'exists:lines,id'],
         ]);
 
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-
+        $search = trim((string) $request->input('search', ''));
+        $lineId = $request->filled('line_id') ? (int) $request->input('line_id') : null;
         $perPage = (int) $request->input('per_page', 10);
 
         $query = RepairOrder::with([
@@ -548,31 +569,31 @@ class UserOrderController extends Controller
             'result',
             'confirmation',
         ])
+            ->withSum('items as before_qty_sum', 'before_qty')
+            ->withSum('items as after_qty_sum', 'after_qty')
             ->where('user_id', $request->user()->id)
             ->where('status', 'confirmed');
 
-        /*
-    |--------------------------------------------------------------------------
-    | FILTER TANGGAL
-    |--------------------------------------------------------------------------
-    | Tanggal yang digunakan sama dengan tanggal yang ditampilkan
-    | pada tabel, yaitu created_at.
-    */
+        if ($search !== '') {
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery
+                    ->where('order_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('line', fn ($lineQuery) =>
+                        $lineQuery->where('name', 'like', '%' . $search . '%')
+                    );
+            });
+        }
+
+        if ($lineId) {
+            $query->where('line_id', $lineId);
+        }
 
         if ($startDate) {
-            $query->whereDate(
-                'created_at',
-                '>=',
-                $startDate
-            );
+            $query->whereDate('created_at', '>=', $startDate);
         }
 
         if ($endDate) {
-            $query->whereDate(
-                'created_at',
-                '<=',
-                $endDate
-            );
+            $query->whereDate('created_at', '<=', $endDate);
         }
 
         $orders = $query
@@ -580,14 +601,25 @@ class UserOrderController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return view(
-            'user.orders.history',
-            compact(
-                'orders',
-                'startDate',
-                'endDate'
-            )
-        );
+        $historyLineIds = RepairOrder::query()
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'confirmed')
+            ->whereNotNull('line_id')
+            ->distinct()
+            ->pluck('line_id');
+
+        $lines = Line::query()
+            ->whereIn('id', $historyLineIds)
+            ->orderBy('name')
+            ->get();
+
+        return view('user.orders.history', compact(
+            'orders',
+            'startDate',
+            'endDate',
+            'lines',
+            'lineId'
+        ));
     }
 
     public function historyShow(

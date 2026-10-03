@@ -10,6 +10,7 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\TpsRepairController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\TargetController;
+use App\Http\Controllers\ScrapLimitController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -144,6 +145,9 @@ Route::middleware('auth')->group(function () {
 
             Route::post('/orders/{order}/confirm', [UserOrderController::class, 'confirm'])
                 ->name('orders.confirm');
+
+            Route::post('/orders/{order}/request-revision', [UserOrderController::class, 'requestRevision'])
+                ->name('orders.requestRevision');
         });
 
 
@@ -435,6 +439,16 @@ Route::middleware('auth')->group(function () {
 
             /*
             |--------------------------------------------------------------------------
+            | Dashboard Monitoring
+            |--------------------------------------------------------------------------
+            */
+            Route::post(
+                '/dashboard/abnormality',
+                [DashboardController::class, 'storeAbnormality']
+            )->name('dashboard.abnormality.store');
+
+            /*
+            |--------------------------------------------------------------------------
             | Target
             |--------------------------------------------------------------------------
             */
@@ -443,6 +457,17 @@ Route::middleware('auth')->group(function () {
 
             Route::post('/targets', [TargetController::class, 'store'])
                 ->name('targets.store');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Scrap Limit per Model
+            |--------------------------------------------------------------------------
+            */
+            Route::get('/scrap-limits', [ScrapLimitController::class, 'index'])
+                ->name('scrap-limits.index');
+
+            Route::post('/scrap-limits', [ScrapLimitController::class, 'store'])
+                ->name('scrap-limits.store');
 
             /*
             |--------------------------------------------------------------------------
