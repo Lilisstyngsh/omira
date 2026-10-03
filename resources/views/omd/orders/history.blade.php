@@ -1305,6 +1305,15 @@
 
 
         }
+
+        .history-search-form{display:flex;align-items:center;gap:10px}
+        .history-line-filter-inline select{min-height:40px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;padding:0 32px 0 11px;font-size:12px;outline:none;max-width:190px}
+        .history-line-filter-inline select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+        .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+        @media(max-width:760px){.history-search-form{align-items:stretch;flex-direction:column}.history-line-filter-inline,.history-line-filter-inline select,.history-search-input{width:100%;max-width:none}}
+
+        .history-search{width:auto;max-width:100%}
+        .history-search-input{width:320px;max-width:100%}
     </style>
 
     <div class="page-card">
@@ -1582,7 +1591,17 @@
 
                     <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
 
-                    <input type="hidden" name="line_id" value="{{ request('line_id') }}">
+                    <div class="history-line-filter history-line-filter-inline">
+                        <label for="history_line_id" class="sr-only">Filter Line</label>
+                        <select id="history_line_id" name="line_id" onchange="this.form.submit()">
+                            <option value="">Semua Line</option>
+                            @foreach ($lines as $line)
+                                <option value="{{ $line->id }}" @selected((string) request('line_id') === (string) $line->id)>
+                                    {{ $line->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     <div class="history-search-input">
 
@@ -1804,21 +1823,7 @@
                 @endif
             </div>
 
-            <form method="GET" action="{{ route('omd.orders.history') }}" class="history-line-filter">
-                <input type="hidden" name="start_date" value="{{ request('start_date') }}">
-                <input type="hidden" name="end_date" value="{{ request('end_date') }}">
-                <input type="hidden" name="search" value="{{ request('search') }}">
-                <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
-                <label for="history_line_id">Filter Line</label>
-                <select id="history_line_id" name="line_id" onchange="this.form.submit()">
-                    <option value="">Semua Line</option>
-                    @foreach ($lines as $line)
-                        <option value="{{ $line->id }}" @selected((string) request('line_id') === (string) $line->id)>
-                            {{ $line->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+
 
         </div>
 

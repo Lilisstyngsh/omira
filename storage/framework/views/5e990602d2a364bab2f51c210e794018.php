@@ -27,17 +27,20 @@
 
         .orders-table-wrap {
             overflow-x: auto;
+            border: 1px solid #dfe6ef;
+            border-radius: 12px;
         }
 
         .orders-table {
             width: 100%;
             min-width: 1250px;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .orders-table th {
             background: #f9fafb;
-            text-align: left;
+            text-align: center;
             padding: 12px 14px;
             font-size: 10px;
             font-weight: 800;
@@ -45,15 +48,22 @@
             letter-spacing: .04em;
             color: #6b7280;
             white-space: nowrap;
-            border-bottom: 1px solid #e9eef4;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
         }
 
         .orders-table td {
             padding: 13px 14px;
-            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #dfe6ef;
+            border-bottom: 1px solid #dfe6ef;
             font-size: 12px;
             color: #374151;
             vertical-align: middle;
+        }
+
+        .orders-table th:last-child,
+        .orders-table td:last-child {
+            border-right: 0;
         }
 
         .orders-table tbody tr {
@@ -77,12 +87,12 @@
         .order-no {
             width: 55px;
             color: #94a3b8 !important;
-            font-weight: 700;
+            font-weight: 400;
             text-align: center;
         }
 
         .order-number {
-            font-weight: 800;
+            font-weight: 500;
             color: #111827;
             white-space: nowrap;
         }
@@ -101,7 +111,7 @@
             background: #eff6ff;
             color: #3478c5;
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 600;
             white-space: nowrap;
         }
 
@@ -114,13 +124,13 @@
             background: #f5f3ff;
             color: #6659df;
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 600;
             white-space: nowrap;
         }
 
         .order-qty {
             font-size: 13px !important;
-            font-weight: 800;
+            font-weight: 600;
             color: #172033 !important;
             text-align: center;
         }
@@ -134,7 +144,7 @@
             padding: 0 10px;
             border-radius: 999px;
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 600;
         }
 
         .status-confirmed {
@@ -226,6 +236,21 @@
         }
 
         @media (max-width: 900px) {
+            .history-pagination {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .history-line-filter {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .history-line-filter select {
+                min-width: 0;
+                flex: 1;
+            }
+
             .orders-table-wrap {
                 overflow-x: auto;
             }
@@ -730,10 +755,44 @@
             margin-top: 20px;
 
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
+            gap: 14px;
 
             width: 100%;
+        }
+
+
+        .history-line-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .history-line-filter label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .history-line-filter select {
+            min-width: 170px;
+            height: 34px;
+            padding: 0 30px 0 10px;
+            border: 1px solid #dbe2ea;
+            border-radius: 8px;
+            background: #fff;
+            color: #334155;
+            font-size: 10px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .history-line-filter select:focus {
+            border-color: #7c6cf2;
+            box-shadow: 0 0 0 3px rgba(124, 108, 242, .10);
         }
 
         .history-pagination-list {
@@ -1244,6 +1303,15 @@
 
 
         }
+
+        .history-search-form{display:flex;align-items:center;gap:10px}
+        .history-line-filter-inline select{min-height:40px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;padding:0 32px 0 11px;font-size:12px;outline:none;max-width:190px}
+        .history-line-filter-inline select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+        .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+        @media(max-width:760px){.history-search-form{align-items:stretch;flex-direction:column}.history-line-filter-inline,.history-line-filter-inline select,.history-search-input{width:100%;max-width:none}}
+
+        .history-search{width:auto;max-width:100%}
+        .history-search-input{width:320px;max-width:100%}
     </style>
 
     <div class="page-card">
@@ -1259,6 +1327,9 @@
 
         <div class="history-filter-box">
             <form action="<?php echo e(route('omd.orders.history')); ?>" method="GET" class="history-filter-form">
+                <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
+                <input type="hidden" name="per_page" value="<?php echo e(request('per_page', 10)); ?>">
+                <input type="hidden" name="line_id" value="<?php echo e(request('line_id')); ?>">
 
                 
                 <div class="history-filter-field">
@@ -1436,7 +1507,7 @@
 
 
                     <?php if(request('start_date') || request('end_date')): ?>
-                        <a href="<?php echo e(route('omd.orders.history')); ?>" class="history-filter-btn history-filter-btn-reset">
+                        <a href="<?php echo e(route('omd.orders.history', array_filter(['search' => request('search'), 'per_page' => request('per_page'), 'line_id' => request('line_id')]))); ?>" class="history-filter-btn history-filter-btn-reset">
                             <i class="fa-solid fa-rotate-left"></i>
 
                             Reset
@@ -1492,6 +1563,8 @@
 
                     <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
 
+                    <input type="hidden" name="line_id" value="<?php echo e(request('line_id')); ?>">
+
                     <input type="hidden" name="per_page" id="perPageHidden" value="<?php echo e(request('per_page', 10)); ?>">
 
                 </form>
@@ -1510,6 +1583,18 @@
 
                     <input type="hidden" name="per_page" value="<?php echo e(request('per_page', 10)); ?>">
 
+                    <div class="history-line-filter history-line-filter-inline">
+                        <label for="history_line_id" class="sr-only">Filter Line</label>
+                        <select id="history_line_id" name="line_id" onchange="this.form.submit()">
+                            <option value="">Semua Line</option>
+                            <?php $__currentLoopData = $lines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $line): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($line->id); ?>" <?php if((string) request('line_id') === (string) $line->id): echo 'selected'; endif; ?>>
+                                    <?php echo e($line->name); ?>
+
+                                </option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                    </div>
 
                     <div class="history-search-input">
 
@@ -1618,7 +1703,7 @@
                             </td>
 
                             <td>
-                                <?php echo e($order->quantity); ?>
+                                <?php echo e(in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity)); ?>
 
                             </td>
 
@@ -1661,11 +1746,11 @@
             $lastPage = $orders->lastPage();
         ?>
 
-        <?php if($lastPage > 1): ?>
+        <div class="history-pagination">
 
-            <div class="history-pagination">
+            <div class="history-pagination-list">
 
-                <div class="history-pagination-list">
+                <?php if($lastPage > 1): ?>
 
                     
                     <?php if($orders->onFirstPage()): ?>
@@ -1734,11 +1819,12 @@
                         </span>
                     <?php endif; ?>
 
-                </div>
-
+                <?php endif; ?>
             </div>
 
-        <?php endif; ?>
+
+
+        </div>
 
     </div>
 

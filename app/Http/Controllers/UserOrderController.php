@@ -472,6 +472,9 @@ class UserOrderController extends Controller
             'confirmation',
             'omdVerifier',
             'handedOverBy',
+            'openFeedback.user',
+            'feedbacks.user',
+            'feedbacks.resolvedBy',
         ]);
 
         return view(
@@ -494,15 +497,39 @@ class UserOrderController extends Controller
             'Permintaan koreksi hanya dapat dilakukan setelah OMD menyerahkan hasil repair.'
         );
 
-        $order->update([
-            'status' => 'revision_requested',
+        $data = $request->validate([
+            'reason' => [
+                'required',
+                'string',
+                'max:1000',
+            ],
         ]);
+
+        DB::transaction(function () use ($request, $order, $data) {
+            $order->feedbacks()
+                ->where('status', 'open')
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => now(),
+                    'resolved_by' => $request->user()->id,
+                ]);
+
+            $order->feedbacks()->create([
+                'user_id' => $request->user()->id,
+                'reason' => trim($data['reason']),
+                'status' => 'open',
+            ]);
+
+            $order->update([
+                'status' => 'revision_requested',
+            ]);
+        });
 
         return redirect()
             ->route('user.orders.show', $order)
             ->with(
                 'success',
-                'Ketidaksesuaian sudah dikirim ke OMD. OMD dapat melakukan koreksi hasil repair.'
+                'Feedback ketidaksesuaian sudah dikirim ke OMD untuk diperiksa dan dikoreksi.'
             );
     }
 
@@ -540,10 +567,10 @@ class UserOrderController extends Controller
 
 
         return redirect()
-            ->route('user.orders.index')
+            ->route('user.orders.history')
             ->with(
                 'success',
-                'Order berhasil dikonfirmasi. Proses Repair Box selesai.'
+                'Barang sudah dikonfirmasi sesuai. Order ditutup dan dipindahkan ke History.'
             );
     }
 
@@ -643,6 +670,9 @@ class UserOrderController extends Controller
             'confirmation',
             'omdVerifier',
             'handedOverBy',
+            'openFeedback.user',
+            'feedbacks.user',
+            'feedbacks.resolvedBy',
         ]);
 
         return view(

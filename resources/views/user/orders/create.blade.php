@@ -4,1049 +4,810 @@
 @section('header', 'Buat Order Repair Box')
 
 @section('content')
+<style>
+    :root {
+        --border: #94a3b8;
+        --border-soft: #cbd5e1;
+        --text: #0f172a;
+        --muted: #64748b;
+        --primary: #4f46e5;
+        --primary-dark: #4338ca
+    }
 
-    <style>
-        .order-card {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+    .create-wrap {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 26px rgba(15, 23, 42, .04)
+    }
+
+    .top-info {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 20px
+    }
+
+    .top-info-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 11px 13px;
+        background: #fff
+    }
+
+    .top-info-item span {
+        display: block;
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 3px
+    }
+
+    .top-info-item strong {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text)
+    }
+
+    .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 18px 0 10px
+    }
+
+    .section-head h3 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 650;
+        color: var(--text)
+    }
+
+    .section-head p {
+        margin: 0;
+        font-size: 11px;
+        color: var(--muted)
+    }
+
+    .model-picker {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px
+    }
+
+    .model-card {
+        appearance: none;
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 11px;
+        background: #fff;
+        padding: 12px 13px;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 60px;
+        transition: .15s ease
+    }
+
+    .model-card:hover {
+        border-color: #94a3b8;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .05)
+    }
+
+    .model-card.is-open {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 1px rgba(99, 102, 241, .12)
+    }
+
+    .model-card-main {
+        min-width: 0
+    }
+
+    .model-card-title {
+        display: block;
+        font-size: 13px;
+        font-weight: 650;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis
+    }
+
+    .model-card-meta {
+        display: block;
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px
+    }
+
+    .model-card-total {
+        font-size: 12px;
+        font-weight: 600;
+        color: #4338ca;
+        white-space: nowrap
+    }
+
+    .model-card-chevron {
+        font-size: 20px;
+        color: #64748b;
+        transition: transform .15s
+    }
+
+    .model-card.is-open .model-card-chevron {
+        transform: rotate(90deg)
+    }
+
+    .editor-stack {
+        display: grid;
+        gap: 12px
+    }
+
+    .model-editor {
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        overflow: hidden
+    }
+
+    .model-editor[hidden] {
+        display: none !important
+    }
+
+    .model-editor-head {
+        min-height: 46px;
+        padding: 10px 13px;
+        border-bottom: 1px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px
+    }
+
+    .model-editor-head strong {
+        font-size: 13px;
+        font-weight: 650;
+        color: var(--text)
+    }
+
+    .model-editor-head span {
+        font-size: 11px;
+        color: var(--muted)
+    }
+
+    .qty-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch
+    }
+
+    .qty-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 840px;
+        font-size: 12px
+    }
+
+    .qty-table th,
+    .qty-table td {
+        border: 1px solid #cbd5e1;
+        padding: 7px;
+        vertical-align: middle;
+        font-weight: 400
+    }
+
+    .qty-table thead th {
+        text-align: center;
+        font-weight: 650;
+        color: #0f172a;
+        background: #fff
+    }
+
+    .qty-table th:first-child,
+    .qty-table td:first-child {
+        text-align: left
+    }
+
+    .qty-table .product-name {
+        font-weight: 450;
+        color: #1f2937
+    }
+
+    .qty-table .total-cell {
+        text-align: center;
+        font-weight: 550;
+        color: #334155;
+        min-width: 70px
+    }
+
+    .qty-table tfoot td {
+        font-weight: 550;
+        background: #fff
+    }
+
+    .qty-control {
+        display: grid;
+        grid-template-columns: 42px 56px 42px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        width: 140px;
+        margin: auto
+    }
+
+    .qty-input {
+        width: 56px;
+        height: 48px;
+        border: 0 !important;
+        border-left: 1px solid var(--border) !important;
+        border-right: 1px solid var(--border) !important;
+        outline: 0 !important;
+        text-align: center;
+        font-size: 15px;
+        font-weight: 600;
+        color: #0f172a;
+        background: #fff;
+        padding: 0 3px;
+        -moz-appearance: textfield
+    }
+
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0
+    }
+
+    .qty-control:focus-within {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12)
+    }
+
+    .qty-step {
+        width: 42px;
+        height: 48px;
+        border: 0;
+        background: #f8fafc;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+        touch-action: none;
+        user-select: none
+    }
+
+    .qty-step:active {
+        background: #e2e8f0
+    }
+
+    .review-box {
+        margin-top: 18px
+    }
+
+    .review-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        background: #fff
+    }
+
+    .review-table th,
+    .review-table td {
+        border: 1px solid #cbd5e1;
+        padding: 8px 9px;
+        font-weight: 400
+    }
+
+    .review-table thead th {
+        text-align: center;
+        font-weight: 650;
+        color: #0f172a
+    }
+
+    .review-table .review-model td {
+        font-weight: 600;
+        color: #334155
+    }
+
+    .review-table .review-model-total td {
+        font-weight: 550
+    }
+
+    .review-table .review-grand td {
+        font-weight: 600;
+        background: #fff
+    }
+
+    .review-empty {
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        color: #64748b;
+        font-size: 11px
+    }
+
+    .field {
+        margin-top: 18px
+    }
+
+    .field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px
+    }
+
+    .field textarea {
+        width: 100%;
+        min-height: 84px;
+        border: 1.5px solid #94a3b8;
+        border-radius: 9px;
+        padding: 10px 12px;
+        font-size: 13px;
+        resize: vertical;
+        outline: none
+    }
+
+    .field textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .1)
+    }
+
+    .form-notice {
+        display: none;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border: 1px solid #fecaca;
+        border-radius: 9px;
+        color: #b91c1c;
+        background: #fff;
+        font-size: 11px
+    }
+
+    .form-notice.show {
+        display: block
+    }
+
+    .errors {
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border: 1px solid #fecaca;
+        border-radius: 9px;
+        color: #b91c1c;
+        font-size: 11px
+    }
+
+    .errors ul {
+        margin: 0;
+        padding-left: 18px
+    }
+
+    .actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px
+    }
+
+    .btn-reset,
+    .btn-submit {
+        min-height: 44px;
+        border-radius: 9px;
+        padding: 0 16px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer
+    }
+
+    .btn-reset {
+        border: 1px solid #94a3b8;
+        background: #fff;
+        color: #334155
+    }
+
+    .btn-submit {
+        border: 1px solid var(--primary);
+        background: var(--primary);
+        color: #fff
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        background: var(--primary-dark)
+    }
+
+    .btn-submit:disabled {
+        opacity: .45;
+        cursor: not-allowed
+    }
+
+    @media(max-width:1100px) {
+        .model-picker {
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+    }
+
+    @media(max-width:700px) {
+        .create-wrap {
+            padding: 14px
         }
 
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 6px;
+        .top-info {
+            grid-template-columns: 1fr
         }
 
-        .section-helper {
-            margin: 0 0 16px;
-            color: #64748b;
-            font-size: 12px;
-            line-height: 1.55;
+        .model-picker {
+            grid-template-columns: 1fr
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
+        .section-head {
+            align-items: flex-start;
+            flex-direction: column
         }
 
-        .info-box {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 14px 16px;
-        }
-
-        .info-box span {
-            display: block;
-            font-size: 11px;
-            color: #64748b;
-            margin-bottom: 4px;
-        }
-
-        .info-box strong {
-            font-size: 14px;
-            color: #111827;
-            font-weight: 650;
-        }
-
-        .model-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .model-card {
-            border: 1px solid #dfe5ed;
-            border-radius: 12px;
-            background: #fff;
-            overflow: hidden;
-        }
-
-        .model-card-header {
-            width: 100%;
-            min-height: 66px;
-            border: 0;
-            background: #fff;
-            padding: 13px 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            text-align: left;
-            cursor: pointer;
-            color: inherit;
-        }
-
-        .model-card-header:hover {
-            background: #fff;
-        }
-
-        .model-card-header:focus-visible {
-            outline: 3px solid rgba(79, 70, 229, .15);
-            outline-offset: -3px;
-        }
-
-        .model-main {
-            min-width: 0;
-        }
-
-        .model-title {
-            display: block;
-            color: #111827;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-
-        .model-subtitle {
-            display: block;
-            margin-top: 4px;
-            color: #64748b;
-            font-size: 11px;
-            font-weight: 400;
-        }
-
-        .model-header-right {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 14px;
-            flex-shrink: 0;
-        }
-
-        .model-live-summary {
-            text-align: right;
-            min-width: 126px;
-        }
-
-        .model-live-total {
-            display: block;
-            color: #4f46e5;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1.25;
-        }
-
-        .model-live-meta {
-            display: block;
-            margin-top: 3px;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 400;
-        }
-
-        .model-toggle-label {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 118px;
-            min-height: 36px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 7px 10px;
-            color: #334155;
-            font-size: 11px;
-            font-weight: 650;
-            white-space: nowrap;
-            background: #fff;
-        }
-
-        .model-card.is-open .model-toggle-label {
-            border-color: #a5b4fc;
-            color: #4338ca;
-        }
-
-        .model-card-body {
-            border-top: 1px solid #e2e8f0;
-            padding: 0;
-            background: #fff;
-        }
-
-        .product-grid-head,
-        .product-row,
-        .model-total-row {
-            display: grid;
-            grid-template-columns: minmax(180px, 1fr) repeat(4, 68px) 84px;
-            align-items: stretch;
-        }
-
-        .product-grid-head > div,
-        .product-row > div,
-        .model-total-row > div {
-            min-width: 0;
-            border-right: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .product-grid-head > div:last-child,
-        .product-row > div:last-child,
-        .model-total-row > div:last-child {
-            border-right: 0;
-        }
-
-        .product-grid-head > div {
-            padding: 9px 8px;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 700;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: .025em;
-            background: #fff;
-        }
-
-        .product-grid-head .product-head {
-            text-align: left;
-            padding-left: 13px;
-        }
-
-        .ng-name {
-            display: block;
-            margin-top: 2px;
-            color: #94a3b8;
-            font-size: 9px;
-            font-weight: 400;
-            text-transform: none;
-            letter-spacing: 0;
-        }
-
-        .product-row > div {
-            min-height: 56px;
-            padding: 7px 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #334155;
-            font-size: 12px;
-            font-weight: 400;
-            background: #fff;
-        }
-
-        .product-row .product-cell {
-            justify-content: flex-start;
-            padding-left: 13px;
-            line-height: 1.35;
-        }
-
-        .product-name {
-            color: #334155;
-            font-weight: 500;
-        }
-
-        .qty-input {
-            width: 52px;
-            max-width: 100%;
-            height: 42px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: #fff;
-            color: #0f172a;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 500;
-            outline: none;
-            box-sizing: border-box;
-            transition: border-color .16s ease, box-shadow .16s ease;
-        }
-
-        .qty-input:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, .10);
-        }
-
-        .product-total-value {
-            color: #475569;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .model-total-row > div {
-            min-height: 45px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            color: #4338ca;
-            font-size: 12px;
-            font-weight: 650;
-        }
-
-        .model-total-row .model-total-label {
-            justify-content: flex-end;
-            padding-right: 13px;
-            color: #334155;
-        }
-
-        .model-total-row > div {
-            border-bottom: 0;
-        }
-
-        .order-summary {
-            margin-top: 18px;
-            border: 1px solid #dfe5ed;
-            border-radius: 12px;
-            background: #fff;
-            overflow: hidden;
-        }
-
-        .summary-row {
-            display: grid;
-            grid-template-columns: minmax(180px, 1fr) repeat(4, 68px) 84px;
-            align-items: stretch;
-        }
-
-        .summary-row > div {
-            min-height: 44px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-right: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-            background: #fff;
-            color: #334155;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .summary-row > div:last-child {
-            border-right: 0;
-        }
-
-        .summary-row:last-child > div {
-            border-bottom: 0;
-        }
-
-        .summary-label {
-            justify-content: flex-end !important;
-            padding-right: 13px !important;
-            color: #475569 !important;
-        }
-
-        .grand-summary-label {
-            grid-column: 1 / 6;
-            justify-content: flex-end !important;
-            padding-right: 13px !important;
-            color: #475569 !important;
-        }
-
-        .grand-summary-value {
-            color: #4f46e5 !important;
-            font-size: 15px !important;
-            font-weight: 750 !important;
-        }
-
-        .field {
-            margin-top: 24px;
-        }
-
-        .field label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #374151;
-        }
-
-        .field textarea {
-            width: 100%;
-            min-height: 110px;
-            border: 1px solid #d1d5db;
-            border-radius: 9px;
-            padding: 11px 12px;
-            font-size: 13px;
-            resize: vertical;
-            outline: none;
-            box-sizing: border-box;
-        }
-
-        .field textarea:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, .10);
-        }
-
-        .form-notice {
-            display: none;
-            margin-top: 18px;
-            padding: 11px 13px;
-            border: 1px solid #fecaca;
-            border-radius: 10px;
-            color: #b42318;
-            font-size: 12px;
-            line-height: 1.45;
-            background: #fff;
-        }
-
-        .form-notice.show {
-            display: block;
-        }
-
-        .bottom-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 24px;
+        .actions {
+            flex-direction: column-reverse
         }
 
         .btn-reset,
         .btn-submit {
-            min-height: 42px;
-            border-radius: 9px;
-            padding: 10px 18px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: .18s ease;
+            width: 100%
         }
+    }
+</style>
 
-        .btn-reset {
-            border: 1px solid #d1d5db;
-            background: #fff;
-            color: #374151;
-        }
+<div class="create-wrap">
+    @if($errors->any())
+    <div class="errors">
+        <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+    </div>
+    @endif
 
-        .btn-submit {
-            border: 1px solid #4f46e5;
-            background: #4f46e5;
-            color: #fff;
-        }
+    <div class="top-info">
+        <div class="top-info-item"><span>Plant</span><strong>{{ $line->plant?->name ?? '-' }}</strong></div>
+        <div class="top-info-item"><span>Line</span><strong>{{ $line->name }}</strong></div>
+        <div class="top-info-item"><span>Tanggal</span><strong>{{ now()->format('d-m-Y H:i') }}</strong></div>
+    </div>
 
-        .btn-submit:hover:not(:disabled) {
-            background: #4338ca;
-            border-color: #4338ca;
-        }
+    @php
+    $ngMap = $ngTypes->keyBy(fn($ngType) => strtoupper($ngType->code));
+    $ngCodes = ['P','H','C','S'];
+    $hasProducts = $models->sum(fn($model) => $model->products->count()) > 0;
+    $rowIndex = 0;
+    @endphp
 
-        .btn-submit:disabled {
-            cursor: not-allowed;
-            opacity: .48;
-        }
+    <form method="POST" action="{{ route('user.orders.store') }}" id="orderForm">
+        @csrf
 
-        .empty-state {
-            text-align: center;
-            padding: 35px;
-            color: #94a3b8;
-            font-size: 13px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-        }
-
-        .error-box {
-            margin-bottom: 18px;
-            padding: 12px 15px;
-            border-radius: 10px;
-            background: #fff;
-            border: 1px solid #fecdd3;
-            color: #b42318;
-            font-size: 11px;
-        }
-
-        [hidden] {
-            display: none !important;
-        }
-
-        @media (max-width: 900px) {
-            .order-card {
-                padding: 18px;
-            }
-
-            .product-grid-head,
-            .product-row,
-            .model-total-row,
-            .summary-row {
-                grid-template-columns: minmax(150px, 1fr) repeat(4, 62px) 78px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .model-card-header {
-                align-items: flex-start;
-            }
-
-            .model-header-right {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 7px;
-            }
-
-            .model-live-summary {
-                min-width: 0;
-            }
-
-            .product-grid-head {
-                display: none;
-            }
-
-            .product-row {
-                grid-template-columns: repeat(4, 1fr);
-                padding: 12px;
-                gap: 8px;
-                border-bottom: 1px solid #e2e8f0;
-            }
-
-            .product-row > div {
-                min-height: 0;
-                padding: 0;
-                border: 0;
-            }
-
-            .product-row .product-cell {
-                grid-column: 1 / -1;
-                padding: 0 0 5px;
-            }
-
-            .product-row .qty-cell {
-                position: relative;
-                display: block;
-            }
-
-            .product-row .qty-cell::before {
-                content: attr(data-label);
-                display: block;
-                margin-bottom: 5px;
-                color: #64748b;
-                font-size: 9px;
-                font-weight: 700;
-                text-align: center;
-            }
-
-            .qty-input {
-                width: 100%;
-            }
-
-            .product-row .product-total-cell {
-                grid-column: 1 / -1;
-                justify-content: flex-end;
-                padding-top: 5px;
-            }
-
-            .product-row .product-total-cell::before {
-                content: 'Total Produk: ';
-                color: #64748b;
-                font-size: 11px;
-                font-weight: 500;
-                margin-right: 6px;
-            }
-
-            .model-total-row {
-                grid-template-columns: repeat(4, 1fr);
-                padding: 11px 12px;
-                gap: 6px;
-            }
-
-            .model-total-row > div {
-                min-height: auto;
-                padding: 0;
-                border: 0;
-            }
-
-            .model-total-row .model-total-label {
-                grid-column: 1 / -1;
-                justify-content: flex-start;
-                padding: 0 0 5px;
-            }
-
-            .model-total-row .model-grand-total-cell {
-                grid-column: 1 / -1;
-                justify-content: flex-end;
-                padding-top: 4px;
-            }
-
-            .model-total-row .model-grand-total-cell::before {
-                content: 'Total Model: ';
-                color: #64748b;
-                font-weight: 500;
-                margin-right: 6px;
-            }
-
-            .summary-row {
-                grid-template-columns: repeat(4, 1fr);
-                padding: 11px 12px;
-                gap: 6px;
-            }
-
-            .summary-row > div {
-                min-height: auto;
-                padding: 0;
-                border: 0;
-            }
-
-            .summary-label {
-                grid-column: 1 / -1;
-                justify-content: flex-start !important;
-                padding: 0 0 5px !important;
-            }
-
-            .grand-summary-label {
-                grid-column: 1 / 4;
-                justify-content: flex-start !important;
-                padding: 0 !important;
-            }
-
-            .grand-summary-value {
-                grid-column: 4;
-                justify-content: flex-end !important;
-            }
-
-            .bottom-actions {
-                flex-direction: column-reverse;
-            }
-
-            .btn-reset,
-            .btn-submit {
-                width: 100%;
-            }
-        }
-    </style>
-
-
-    <div class="order-card">
-
-        @if ($errors->any())
-            <div class="error-box">
-                <ul style="margin:0;padding-left:16px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <div class="section-title">Informasi Order</div>
-
-        <div class="info-grid">
-            <div class="info-box">
-                <span>Plant</span>
-                <strong>{{ $line->plant?->name ?? '-' }}</strong>
-            </div>
-
-            <div class="info-box">
-                <span>Line</span>
-                <strong>{{ $line->name }}</strong>
-            </div>
-
-            <div class="info-box">
-                <span>Tanggal</span>
-                <strong>{{ now()->format('d-m-Y H:i') }}</strong>
+        <div class="section-head">
+            <div>
+                <h3>Pilih Model</h3>
+                <p>Tap card untuk membuka atau menutup input.</p>
             </div>
         </div>
 
-        <div class="section-title">Detail Produk & Quantity NG</div>
-        <p class="section-helper">
-            Buka hanya Model yang akan diorder. Seluruh Produk pada Model tersebut akan langsung tersedia untuk input Quantity NG.
-            Kolom yang tidak memiliki Quantity dapat dibiarkan kosong.
-        </p>
+        @if($hasProducts)
+        <div class="model-picker" id="modelPicker">
+            @foreach($models as $model)
+            <button type="button" class="model-card" data-model-card="{{ $model->id }}" aria-expanded="false">
+                <span class="model-card-main">
+                    <span class="model-card-title">Model {{ $model->model }}</span>
+                    <span class="model-card-meta">{{ $model->products->count() }} produk</span>
+                </span>
+                <span style="display:flex;align-items:center;gap:8px">
+                    <span class="model-card-total" data-card-total="{{ $model->id }}"></span>
+                    <span class="model-card-chevron">›</span>
+                </span>
+            </button>
+            @endforeach
+        </div>
 
-        @php
-            $ngMap = $ngTypes->keyBy(function ($ngType) {
-                return strtoupper($ngType->code);
-            });
-
-            $ngCodes = ['P', 'H', 'C', 'S'];
-            $hasProducts = $models->sum(fn($model) => $model->products->count()) > 0;
-        @endphp
-
-        <form method="POST" action="{{ route('user.orders.store') }}" id="orderForm">
-            @csrf
-
-            @if ($hasProducts)
-                <div class="model-list" id="modelList">
-                    @php $rowIndex = 0; @endphp
-
-                    @foreach ($models as $model)
-                        @php
-                            $products = $model->products;
-                            $productCount = $products->count();
-                        @endphp
-
-                        <section class="model-card" data-model-card="{{ $model->id }}">
-                            <button type="button"
-                                class="model-card-header"
-                                data-model-toggle="{{ $model->id }}"
-                                aria-expanded="false"
-                                aria-controls="model-body-{{ $model->id }}">
-
-                                <span class="model-main">
-                                    <span class="model-title">MODEL {{ $model->model }}</span>
-                                    <span class="model-subtitle">{{ $productCount }} Produk tersedia</span>
-                                </span>
-
-                                <span class="model-header-right">
-                                    <span class="model-live-summary">
-                                        <span class="model-live-total" data-model-header-total="{{ $model->id }}">Belum ada Qty</span>
-                                        <span class="model-live-meta" data-model-header-meta="{{ $model->id }}">Belum ada Produk terisi</span>
-                                    </span>
-
-                                    <span class="model-toggle-label" data-model-toggle-label="{{ $model->id }}">＋ Input NG</span>
-                                </span>
-                            </button>
-
-                            <div class="model-card-body"
-                                id="model-body-{{ $model->id }}"
-                                data-model-body="{{ $model->id }}"
-                                hidden>
-
-                                <div class="product-grid-head">
-                                    <div class="product-head">Produk</div>
-                                    @foreach ($ngCodes as $code)
-                                        <div>
-                                            {{ $code }}
-                                            @if (isset($ngMap[$code]))
-                                                <span class="ng-name">{{ $ngMap[$code]->name }}</span>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                    <div>Total</div>
-                                </div>
-
-                                @foreach ($products as $product)
-                                    <div class="product-row"
-                                        data-model-id="{{ $model->id }}"
-                                        data-row-index="{{ $rowIndex }}">
-
-                                        <div class="product-cell">
-                                            <span class="product-name">{{ $product->name }}</span>
-
-                                            <input type="hidden"
-                                                name="items[{{ $rowIndex }}][master_model_id]"
-                                                value="{{ $model->id }}">
-
-                                            <input type="hidden"
-                                                name="items[{{ $rowIndex }}][product_id]"
-                                                value="{{ $product->id }}">
-                                        </div>
-
-                                        @foreach ($ngCodes as $code)
-                                            @php $ng = $ngMap[$code] ?? null; @endphp
-                                            <div class="qty-cell" data-label="{{ $code }}">
-                                                @if ($ng)
-                                                    <input type="number"
-                                                        class="qty-input"
-                                                        data-ng-code="{{ $code }}"
-                                                        data-model-id="{{ $model->id }}"
-                                                        data-row-index="{{ $rowIndex }}"
-                                                        name="items[{{ $rowIndex }}][qty][{{ $ng->id }}]"
-                                                        min="0"
-                                                        step="1"
-                                                        value="{{ old('items.' . $rowIndex . '.qty.' . $ng->id, '') }}"
-                                                        inputmode="numeric"
-                                                        autocomplete="off"
-                                                        placeholder="">
-                                                @endif
-                                            </div>
-                                        @endforeach
-
-                                        <div class="product-total-cell">
-                                            <span class="product-total-value" data-product-total="{{ $rowIndex }}"></span>
-                                        </div>
+        <div class="editor-stack" id="editorStack">
+            @foreach($models as $model)
+            <section class="model-editor" data-model-editor="{{ $model->id }}" hidden>
+                <div class="model-editor-head">
+                    <strong>Model {{ $model->model }}</strong>
+                    <span data-editor-meta="{{ $model->id }}">{{ $model->products->count() }} produk</span>
+                </div>
+                <div class="qty-table-wrap">
+                    <table class="qty-table">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>@foreach($ngCodes as $code)<th>{{ $code }}</th>@endforeach<th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($model->products as $product)
+                            <tr data-product-row="{{ $rowIndex }}" data-model-id="{{ $model->id }}" data-model-name="{{ $model->model }}" data-product-name="{{ $product->name }}">
+                                <td>
+                                    <span class="product-name">{{ $product->name }}</span>
+                                    <input type="hidden" name="items[{{ $rowIndex }}][master_model_id]" value="{{ $model->id }}">
+                                    <input type="hidden" name="items[{{ $rowIndex }}][product_id]" value="{{ $product->id }}">
+                                </td>
+                                @foreach($ngCodes as $code)
+                                @php $ng=$ngMap[$code]??null; @endphp
+                                <td>
+                                    @if($ng)
+                                    <div class="qty-control">
+                                        <button type="button" class="qty-step" data-step="-1" aria-label="Kurangi qty {{ $code }}">▼</button>
+                                        <input type="number" class="qty-input" min="0" step="1" inputmode="numeric" autocomplete="off"
+                                            data-ng-code="{{ $code }}" data-model-id="{{ $model->id }}" data-row-index="{{ $rowIndex }}"
+                                            name="items[{{ $rowIndex }}][qty][{{ $ng->id }}]"
+                                            value="{{ old('items.'.$rowIndex.'.qty.'.$ng->id, '') }}">
+                                        <button type="button" class="qty-step" data-step="1" aria-label="Tambah qty {{ $code }}">▲</button>
                                     </div>
-
-                                    @php $rowIndex++; @endphp
+                                    @endif
+                                </td>
                                 @endforeach
-
-                                <div class="model-total-row" data-model-total-row="{{ $model->id }}">
-                                    <div class="model-total-label">Total Model {{ $model->model }}</div>
-
-                                    @foreach ($ngCodes as $code)
-                                        <div data-model-total-ng="{{ $model->id }}:{{ $code }}"></div>
-                                    @endforeach
-
-                                    <div class="model-grand-total-cell" data-model-grand-total="{{ $model->id }}"></div>
-                                </div>
-                            </div>
-                        </section>
-                    @endforeach
+                                <td class="total-cell" data-product-total="{{ $rowIndex }}"></td>
+                            </tr>
+                            @php $rowIndex++; @endphp
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Total Model {{ $model->model }}</td>
+                                @foreach($ngCodes as $code)<td style="text-align:center" data-model-total-ng="{{ $model->id }}:{{ $code }}"></td>@endforeach
+                                <td class="total-cell" data-model-grand="{{ $model->id }}"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
+            </section>
+            @endforeach
+        </div>
 
-                <div class="order-summary">
-                    <div class="summary-row">
-                        <div class="summary-label">Total Jenis NG</div>
-
-                        @foreach ($ngCodes as $code)
-                            <div data-total-ng="{{ $code }}"></div>
-                        @endforeach
-
-                        <div></div>
-                    </div>
-
-                    <div class="summary-row">
-                        <div class="grand-summary-label">Grand Total Order</div>
-                        <div class="grand-summary-value" id="grandTotal"></div>
-                    </div>
+        <div class="review-box">
+            <div class="section-head">
+                <div>
+                    <h3>Ringkasan Order</h3>
+                    <p>Hanya produk yang memiliki Qty NG yang ditampilkan.</p>
                 </div>
-            @else
-                <div class="empty-state">
-                    Belum ada Model & Produk untuk Line Anda.
-                </div>
-            @endif
-
-            <div class="field">
-                <label>Keterangan</label>
-                <textarea name="description"
-                    placeholder="Tambahkan keterangan jika diperlukan...">{{ old('description') }}</textarea>
             </div>
-
-            <div class="form-notice" id="formNotice">
-                Masukkan minimal satu Quantity NG sebelum mengirim order.
+            <div id="reviewEmpty" class="review-empty">Belum ada Qty NG yang diinput.</div>
+            <div class="qty-table-wrap" id="reviewTableWrap" hidden>
+                <table class="review-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Produk</th>@foreach($ngCodes as $code)<th>{{ $code }}</th>@endforeach<th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewBody"></tbody>
+                    <tfoot>
+                        <tr class="review-grand">
+                            <td colspan="2">Total Jenis NG</td>@foreach($ngCodes as $code)<td style="text-align:center" data-order-total="{{ $code }}"></td>@endforeach<td></td>
+                        </tr>
+                        <tr class="review-grand">
+                            <td colspan="6">Grand Total Order</td>
+                            <td style="text-align:center" id="grandTotal"></td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
+        </div>
+        @else
+        <div class="review-empty">Belum ada Model &amp; Produk untuk Line Anda.</div>
+        @endif
 
-            <div class="bottom-actions">
-                <button type="button"
-                    class="btn-reset"
-                    onclick="resetOrderForm()"
-                    title="Kosongkan seluruh input Quantity NG">
-                    Kosongkan Form
-                </button>
+        <div class="field"><label>Keterangan <span style="font-weight:400;color:#64748b">(opsional)</span></label><textarea name="description" placeholder="Tambahkan keterangan jika diperlukan...">{{ old('description') }}</textarea></div>
+        <div class="form-notice" id="formNotice">Masukkan minimal satu Quantity NG sebelum mengirim order.</div>
+        <div class="actions">
+            <button type="button" class="btn-reset" id="resetButton">Kosongkan Form</button>
+            <button type="submit" class="btn-submit" id="submitButton" disabled>Kirim Order Repair</button>
+        </div>
+    </form>
+</div>
 
-                <button type="submit"
-                    class="btn-submit"
-                    id="submitOrderButton"
-                    title="Kirim Order Repair Box ke OMD Workshop"
-                    {{ $hasProducts ? 'disabled' : 'disabled' }}>
-                    <span id="submitOrderLabel">Kirim Order Repair</span>
-                </button>
-            </div>
-        </form>
-    </div>
+<script>
+    (function() {
+        const codes = ['P', 'H', 'C', 'S'];
+        const form = document.getElementById('orderForm');
+        const editorStack = document.getElementById('editorStack');
+        const submitButton = document.getElementById('submitButton');
+        const notice = document.getElementById('formNotice');
+        const reviewBody = document.getElementById('reviewBody');
+        const reviewWrap = document.getElementById('reviewTableWrap');
+        const reviewEmpty = document.getElementById('reviewEmpty');
 
-
-    <script>
-        function numberValue(input) {
-            var value = parseInt(input.value, 10);
-            return Number.isFinite(value) && value > 0 ? value : 0;
+        function valueOf(input) {
+            const n = parseInt(input.value, 10);
+            return Number.isFinite(n) && n > 0 ? n : 0
         }
 
-        function setOptionalNumber(target, value, suffix) {
-            if (!target) return;
-            target.textContent = value > 0 ? String(value) + (suffix || '') : '';
+        function display(el, n, suffix = '') {
+            if (el) el.textContent = n > 0 ? `${n}${suffix}` : ''
         }
 
-        function setModelOpen(modelId, shouldOpen) {
-            var card = document.querySelector('[data-model-card="' + modelId + '"]');
-            var toggle = document.querySelector('[data-model-toggle="' + modelId + '"]');
-            var body = document.querySelector('[data-model-body="' + modelId + '"]');
-            var label = document.querySelector('[data-model-toggle-label="' + modelId + '"]');
-
-            if (!card || !toggle || !body || !label) return;
-
-            card.classList.toggle('is-open', shouldOpen);
-            toggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
-            body.hidden = !shouldOpen;
-            label.textContent = shouldOpen ? '− Tutup' : '＋ Input NG';
+        function setEditor(modelId, open, bringToTop = true) {
+            const card = document.querySelector(`[data-model-card="${modelId}"]`);
+            const editor = document.querySelector(`[data-model-editor="${modelId}"]`);
+            if (!card || !editor) return;
+            card.classList.toggle('is-open', open);
+            card.setAttribute('aria-expanded', open ? 'true' : 'false');
+            editor.hidden = !open;
+            if (open && bringToTop && editorStack) editorStack.prepend(editor);
         }
 
-        document.querySelectorAll('[data-model-toggle]').forEach(function(toggle) {
-            toggle.addEventListener('click', function() {
-                var modelId = this.dataset.modelToggle;
-                var isOpen = this.getAttribute('aria-expanded') === 'true';
-                setModelOpen(modelId, !isOpen);
-
-                if (isOpen) return;
-
-                window.setTimeout(function() {
-                    var firstInput = document.querySelector(
-                        '[data-model-body="' + modelId + '"] .qty-input'
-                    );
-                    if (firstInput) firstInput.focus();
-                }, 0);
+        document.querySelectorAll('[data-model-card]').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.dataset.modelCard;
+                const open = card.getAttribute('aria-expanded') === 'true';
+                setEditor(id, !open, true)
             });
         });
 
-        function calculateTotals() {
-            var codes = ['P', 'H', 'C', 'S'];
-            var orderTotals = { P: 0, H: 0, C: 0, S: 0 };
-            var modelTotals = {};
-            var modelFilledProducts = {};
-            var productTotals = {};
+        let holdTimer = null,
+            repeatTimer = null;
 
-            document.querySelectorAll('.qty-input').forEach(function(input) {
-                var code = input.dataset.ngCode;
-                var modelId = input.dataset.modelId;
-                var rowIndex = input.dataset.rowIndex;
-                var value = numberValue(input);
+        function stopHold() {
+            clearTimeout(holdTimer);
+            clearInterval(repeatTimer);
+            holdTimer = null;
+            repeatTimer = null
+        }
 
-                if (!codes.includes(code)) return;
-
-                orderTotals[code] += value;
-
-                if (!modelTotals[modelId]) {
-                    modelTotals[modelId] = { P: 0, H: 0, C: 0, S: 0 };
-                }
-
-                modelTotals[modelId][code] += value;
-                productTotals[rowIndex] = (productTotals[rowIndex] || 0) + value;
+        function changeQty(btn) {
+            const control = btn.closest('.qty-control');
+            const input = control?.querySelector('.qty-input');
+            if (!input) return;
+            const step = parseInt(btn.dataset.step, 10) || 0;
+            const current = valueOf(input);
+            const next = Math.max(0, current + step);
+            input.value = next > 0 ? String(next) : '';
+            input.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
+        }
+        document.querySelectorAll('.qty-step').forEach(btn => {
+            btn.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                stopHold();
+                changeQty(btn);
+                holdTimer = setTimeout(() => {
+                    repeatTimer = setInterval(() => changeQty(btn), 120)
+                }, 500)
             });
+            ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => btn.addEventListener(ev, stopHold));
+            btn.addEventListener('contextmenu', e => e.preventDefault());
+        });
 
-            document.querySelectorAll('[data-product-total]').forEach(function(cell) {
-                var rowIndex = cell.dataset.productTotal;
-                var value = productTotals[rowIndex] || 0;
-                setOptionalNumber(cell, value);
-
-                if (value > 0) {
-                    var row = cell.closest('.product-row');
-                    var modelId = row ? row.dataset.modelId : null;
-                    if (modelId) {
-                        modelFilledProducts[modelId] = (modelFilledProducts[modelId] || 0) + 1;
-                    }
-                }
-            });
-
-            document.querySelectorAll('[data-model-total-row]').forEach(function(row) {
-                var modelId = row.dataset.modelTotalRow;
-                var totals = modelTotals[modelId] || { P: 0, H: 0, C: 0, S: 0 };
-                var modelGrandTotal = 0;
-
-                codes.forEach(function(code) {
-                    var value = totals[code] || 0;
-                    modelGrandTotal += value;
-
-                    setOptionalNumber(
-                        document.querySelector('[data-model-total-ng="' + modelId + ':' + code + '"]'),
-                        value
-                    );
+        function calculate() {
+            const orderTotals = {
+                P: 0,
+                H: 0,
+                C: 0,
+                S: 0
+            };
+            const modelTotals = {};
+            const rows = [];
+            document.querySelectorAll('[data-product-row]').forEach(row => {
+                const modelId = row.dataset.modelId,
+                    modelName = row.dataset.modelName,
+                    productName = row.dataset.productName;
+                const vals = {
+                    P: 0,
+                    H: 0,
+                    C: 0,
+                    S: 0
+                };
+                row.querySelectorAll('.qty-input').forEach(input => {
+                    const code = input.dataset.ngCode;
+                    const n = valueOf(input);
+                    vals[code] = n;
+                    orderTotals[code] += n;
+                    if (!modelTotals[modelId]) modelTotals[modelId] = {
+                        name: modelName,
+                        P: 0,
+                        H: 0,
+                        C: 0,
+                        S: 0,
+                        total: 0,
+                        filled: 0
+                    };
+                    modelTotals[modelId][code] += n
                 });
-
-                setOptionalNumber(
-                    document.querySelector('[data-model-grand-total="' + modelId + '"]'),
-                    modelGrandTotal
-                );
-
-                var headerTotal = document.querySelector('[data-model-header-total="' + modelId + '"]');
-                var headerMeta = document.querySelector('[data-model-header-meta="' + modelId + '"]');
-                var filledProducts = modelFilledProducts[modelId] || 0;
-
-                if (headerTotal) {
-                    headerTotal.textContent = modelGrandTotal > 0
-                        ? modelGrandTotal + ' NG'
-                        : 'Belum ada Qty';
+                const total = codes.reduce((sum, c) => sum + vals[c], 0);
+                display(document.querySelector(`[data-product-total="${row.dataset.productRow}"]`), total);
+                if (total > 0) {
+                    rows.push({
+                        modelId,
+                        modelName,
+                        productName,
+                        vals,
+                        total
+                    });
+                    modelTotals[modelId].filled++
                 }
-
-                if (headerMeta) {
-                    headerMeta.textContent = filledProducts > 0
-                        ? filledProducts + ' Produk terisi'
-                        : 'Belum ada Produk terisi';
+                if (modelTotals[modelId]) modelTotals[modelId].total += total;
+            });
+            Object.keys(modelTotals).forEach(id => {
+                const m = modelTotals[id];
+                codes.forEach(c => display(document.querySelector(`[data-model-total-ng="${id}:${c}"]`), m[c]));
+                display(document.querySelector(`[data-model-grand="${id}"]`), m.total);
+                display(document.querySelector(`[data-card-total="${id}"]`), m.total, ' NG');
+                const meta = document.querySelector(`[data-editor-meta="${id}"]`);
+                if (meta) meta.textContent = m.filled > 0 ? `${m.filled} produk terisi · ${m.total} NG` : `${document.querySelectorAll(`[data-product-row][data-model-id="${id}"]`).length} produk`;
+            });
+            document.querySelectorAll('[data-model-card]').forEach(card => {
+                if (!modelTotals[card.dataset.modelCard]) {
+                    const t = card.querySelector('[data-card-total]');
+                    if (t) t.textContent = ''
                 }
             });
-
-            var grandTotal = 0;
-
-            codes.forEach(function(code) {
-                var value = orderTotals[code];
-                grandTotal += value;
-
-                setOptionalNumber(
-                    document.querySelector('[data-total-ng="' + code + '"]'),
-                    value
-                );
-            });
-
-            setOptionalNumber(
-                document.getElementById('grandTotal'),
-                grandTotal,
-                ' NG'
-            );
-
-            var submitButton = document.getElementById('submitOrderButton');
-            var submitLabel = document.getElementById('submitOrderLabel');
-            var formNotice = document.getElementById('formNotice');
-
+            const grand = codes.reduce((sum, c) => sum + orderTotals[c], 0);
+            codes.forEach(c => display(document.querySelector(`[data-order-total="${c}"]`), orderTotals[c]));
+            display(document.getElementById('grandTotal'), grand, ' NG');
+            if (reviewBody) {
+                reviewBody.innerHTML = '';
+                const grouped = {};
+                rows.forEach(r => {
+                    if (!grouped[r.modelId]) grouped[r.modelId] = [];
+                    grouped[r.modelId].push(r)
+                });
+                Object.keys(grouped).forEach(modelId => {
+                    const group = grouped[modelId];
+                    const m = modelTotals[modelId];
+                    const head = document.createElement('tr');
+                    head.className = 'review-model';
+                    head.innerHTML = `<td colspan="7">Model ${escapeHtml(m.name)}</td>`;
+                    reviewBody.appendChild(head);
+                    group.forEach(r => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td></td><td>${escapeHtml(r.productName)}</td>${codes.map(c=>`<td style="text-align:center">${r.vals[c]>0?r.vals[c]:''}</td>`).join('')}<td style="text-align:center;font-weight:550">${r.total}</td>`;
+                        reviewBody.appendChild(tr)
+                    });
+                    const totalRow = document.createElement('tr');
+                    totalRow.className = 'review-model-total';
+                    totalRow.innerHTML = `<td colspan="2">Total Model ${escapeHtml(m.name)}</td>${codes.map(c=>`<td style="text-align:center">${m[c]>0?m[c]:''}</td>`).join('')}<td style="text-align:center">${m.total>0?m.total:''}</td>`;
+                    reviewBody.appendChild(totalRow);
+                });
+            }
+            if (reviewWrap) reviewWrap.hidden = grand <= 0;
+            if (reviewEmpty) reviewEmpty.hidden = grand > 0;
             if (submitButton) {
-                submitButton.disabled = grandTotal <= 0;
+                submitButton.disabled = grand <= 0;
+                submitButton.textContent = grand > 0 ? `Kirim Order Repair · ${grand} NG` : 'Kirim Order Repair'
             }
-
-            if (submitLabel) {
-                submitLabel.textContent = grandTotal > 0
-                    ? 'Kirim Order Repair · ' + grandTotal + ' NG'
-                    : 'Kirim Order Repair';
-            }
-
-            if (formNotice && grandTotal > 0) {
-                formNotice.classList.remove('show');
-            }
-
-            return grandTotal;
+            if (grand > 0 && notice) notice.classList.remove('show');
         }
 
-        document.querySelectorAll('.qty-input').forEach(function(input) {
-            input.addEventListener('input', calculateTotals);
-
-            input.addEventListener('keydown', function(event) {
-                if (event.key !== 'Enter') return;
-
-                event.preventDefault();
-
-                var inputs = Array.from(document.querySelectorAll('.qty-input'));
-                var currentIndex = inputs.indexOf(this);
-
-                if (inputs[currentIndex + 1]) {
-                    var next = inputs[currentIndex + 1];
-                    var nextModelId = next.dataset.modelId;
-                    if (nextModelId) setModelOpen(nextModelId, true);
-                    next.focus();
-                    next.select();
-                }
-            });
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>'"]/g, ch => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#039;',
+                '"': '&quot;'
+            } [ch]))
+        }
+        document.querySelectorAll('.qty-input').forEach(input => input.addEventListener('input', () => {
+            if (input.value !== '' && parseInt(input.value, 10) < 0) input.value = '';
+            calculate()
+        }));
+        document.getElementById('resetButton')?.addEventListener('click', () => {
+            document.querySelectorAll('.qty-input').forEach(i => i.value = '');
+            document.querySelectorAll('[data-model-card]').forEach(c => setEditor(c.dataset.modelCard, false, false));
+            calculate()
         });
-
-        function resetOrderForm() {
-            document.querySelectorAll('.qty-input').forEach(function(input) {
-                input.value = '';
-            });
-
-            var description = document.querySelector('textarea[name="description"]');
-            if (description) description.value = '';
-
-            document.querySelectorAll('[data-model-card]').forEach(function(card) {
-                setModelOpen(card.dataset.modelCard, false);
-            });
-
-            calculateTotals();
-        }
-
-        var orderForm = document.getElementById('orderForm');
-        if (orderForm) {
-            orderForm.addEventListener('submit', function(event) {
-                var grandTotal = calculateTotals();
-
-                if (grandTotal > 0) return;
-
-                event.preventDefault();
-
-                var notice = document.getElementById('formNotice');
-                if (notice) notice.classList.add('show');
-
-                var firstCard = document.querySelector('[data-model-card]');
-                if (firstCard) {
-                    setModelOpen(firstCard.dataset.modelCard, true);
-                    window.setTimeout(function() {
-                        var firstInput = firstCard.querySelector('.qty-input');
-                        if (firstInput) firstInput.focus();
-                    }, 0);
-                }
-            });
-        }
-
-        calculateTotals();
-
-        document.querySelectorAll('[data-model-card]').forEach(function(card) {
-            var modelId = card.dataset.modelCard;
-            var hasOldValue = Array.from(card.querySelectorAll('.qty-input')).some(function(input) {
-                return numberValue(input) > 0;
-            });
-
-            if (hasOldValue) {
-                setModelOpen(modelId, true);
+        form?.addEventListener('submit', e => {
+            const total = Array.from(document.querySelectorAll('.qty-input')).reduce((s, i) => s + valueOf(i), 0);
+            if (total <= 0) {
+                e.preventDefault();
+                notice?.classList.add('show')
             }
         });
-    </script>
-
+        calculate();
+        document.querySelectorAll('[data-model-card]').forEach(card => {
+            const id = card.dataset.modelCard;
+            const hasOld = Array.from(document.querySelectorAll(`[data-product-row][data-model-id="${id}"] .qty-input`)).some(i => valueOf(i) > 0);
+            if (hasOld) setEditor(id, true, true)
+        });
+    })();
+</script>
 @endsection

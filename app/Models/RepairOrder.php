@@ -109,6 +109,18 @@ class RepairOrder extends Model
         );
     }
 
+    public function feedbacks(): HasMany
+    {
+        return $this->hasMany(RepairOrderFeedback::class);
+    }
+
+    public function openFeedback(): HasOne
+    {
+        return $this->hasOne(RepairOrderFeedback::class)
+            ->where('status', 'open')
+            ->latestOfMany();
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return [
@@ -118,6 +130,7 @@ class RepairOrder extends Model
             'in_repair' => 'In Repair',
             'completed' => 'Completed',
             'confirmed' => 'Confirmed',
+            'revision_requested' => 'Revision Requested',
         ][$this->status] ?? ucfirst($this->status);
     }
 }

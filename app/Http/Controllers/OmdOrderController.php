@@ -23,6 +23,7 @@ class OmdOrderController extends Controller
             'ngType',
             'result',
             'confirmation',
+            'openFeedback.user',
         ])
             ->withSum('items as before_qty_sum', 'before_qty')
             ->withSum('items as after_qty_sum', 'after_qty')
@@ -68,6 +69,9 @@ class OmdOrderController extends Controller
             'items.product',
             'items.afterProduct',
             'items.ngType',
+            'openFeedback.user',
+            'feedbacks.user',
+            'feedbacks.resolvedBy',
         ]);
 
         return view(
@@ -643,6 +647,16 @@ class OmdOrderController extends Controller
                     $order->repair_completed_at ?? now(),
 
                 ]);
+
+                if ($order->feedbacks()->where('status', 'open')->exists()) {
+                    $order->feedbacks()
+                        ->where('status', 'open')
+                        ->update([
+                            'status' => 'resolved',
+                            'resolved_at' => now(),
+                            'resolved_by' => auth()->id(),
+                        ]);
+                }
             });
 
             return redirect()
@@ -751,6 +765,14 @@ class OmdOrderController extends Controller
 
                 ]
             );
+
+            $order->feedbacks()
+                ->where('status', 'open')
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => now(),
+                    'resolved_by' => $request->user()->id,
+                ]);
         });
 
         return redirect()
@@ -1013,6 +1035,8 @@ class OmdOrderController extends Controller
             'items.masterModel',
             'items.product',
             'items.ngType',
+            'feedbacks.user',
+            'feedbacks.resolvedBy',
         ]);
 
 

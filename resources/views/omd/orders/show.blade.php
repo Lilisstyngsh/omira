@@ -959,85 +959,15 @@
     </div>
 
 
-    {{-- =====================================================
-         INFORMASI ORDER
-    ===================================================== --}}
+    @include('partials.repair-order-information', ['order' => $order, 'context' => 'omd-show'])
 
-    <div class="repair-card">
-
-        <h3 class="repair-card-title">
-            Informasi Order
-        </h3>
-
-
-        <div class="info-grid">
-
-            <div class="info-item">
-                <span>No Order</span>
-                <strong>{{ $order->order_number }}</strong>
-            </div>
-
-            <div class="info-item">
-                <span>Tanggal</span>
-                <strong>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</strong>
-            </div>
-
-            <div class="info-item">
-                <span>Nama</span>
-                <strong>{{ $order->user?->name ?? '-' }}</strong>
-            </div>
-
-            <div class="info-item">
-                <span>Plant</span>
-                <strong>{{ $order->line?->plant?->name ?? '-' }}</strong>
-            </div>
-
-            <div class="info-item">
-                <span>Line</span>
-                <strong>{{ $order->line?->name ?? '-' }}</strong>
-            </div>
-
-            <div class="info-item">
-                <span>Jenis Order</span>
-                <strong>Repair Box</strong>
-            </div>
-
-            <div class="info-item">
-                <span>Total Qty</span>
-                <strong>{{ $order->quantity }}</strong>
-            </div>
-
-            @if ($hasOmdResult)
-                <div class="info-item total-qty-omd">
-
-                    <span>
-                        Qty OMD
-                    </span>
-
-                    <strong>
-                        {{ $totalQtyOmd }}
-                    </strong>
-
-                </div>
-            @endif
-
+    @if($order->status === 'revision_requested' && $order->openFeedback)
+        <div style="margin-bottom:14px;border:1px solid #f59e0b;border-radius:10px;padding:11px 13px;background:#fff;color:#92400e;font-size:12px;line-height:1.5">
+            <strong style="display:block;margin-bottom:3px">⚠ Feedback User</strong>
+            {{ $order->openFeedback->reason }}
+            <div style="margin-top:4px;font-size:10px;color:#a16207">{{ $order->openFeedback->created_at?->format('d-m-Y H:i') }}</div>
         </div>
-
-
-        <div style="margin-top:18px;">
-
-            <div style="margin-bottom:7px;font-size:11px;font-weight:800;color:#334155;">
-                Keterangan
-            </div>
-
-            <div class="description-box">
-                {{ $order->description ?: '-' }}
-            </div>
-
-        </div>
-
-    </div>
-
+    @endif
 
     {{-- =====================================================
          DETAIL / HASIL REPAIR

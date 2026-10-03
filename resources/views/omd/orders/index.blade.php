@@ -354,6 +354,12 @@
             color: #4d7a5c;
             font-size: 10px;
         }
+
+        .feedback-flag{position:relative;display:inline-flex;align-items:center;margin-left:6px;vertical-align:middle}
+        .feedback-flag-btn{border:0;background:transparent;color:#d97706;font-size:15px;line-height:1;cursor:pointer;padding:4px;border-radius:6px}
+        .feedback-flag-btn:hover{background:#fff7ed}
+        .feedback-popover{position:absolute;z-index:40;top:28px;right:0;width:270px;padding:10px 11px;border:1px solid #f59e0b;border-radius:9px;background:#fff;color:#78350f;box-shadow:0 12px 32px rgba(15,23,42,.16);font-size:11px;line-height:1.45;text-align:left}
+        .feedback-popover strong{display:block;margin-bottom:4px;font-weight:650}.feedback-popover small{display:block;margin-top:5px;color:#a16207}
     </style>
 
     @if ($completedCount > 0)
@@ -480,6 +486,17 @@
 
                             <td class="order-number">
                                 {{ $order->order_number }}
+                                @if($order->openFeedback)
+                                    <span class="feedback-flag">
+                                        <button type="button" class="feedback-flag-btn" title="Ada feedback ketidaksesuaian dari User"
+                                            onclick="event.stopPropagation(); var p=this.nextElementSibling; document.querySelectorAll('.feedback-popover').forEach(function(el){ if(el!==p) el.hidden=true; }); p.hidden=!p.hidden;">⚠</button>
+                                        <span class="feedback-popover" hidden onclick="event.stopPropagation()">
+                                            <strong>Feedback User</strong>
+                                            {{ $order->openFeedback->reason }}
+                                            <small>{{ $order->openFeedback->created_at?->format('d-m-Y H:i') }}</small>
+                                        </span>
+                                    </span>
+                                @endif
                             </td>
 
                             <td>
