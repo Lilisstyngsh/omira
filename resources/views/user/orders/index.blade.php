@@ -342,10 +342,6 @@
                         </th>
 
                         <th rowspan="2">
-                            Jenis Order
-                        </th>
-
-                        <th rowspan="2">
                             Line
                         </th>
 
@@ -397,12 +393,6 @@
 
                             <td class="order-number">
                                 {{ $order->order_number }}
-                            </td>
-
-                            <td>
-                                <span class="order-type-badge">
-                                    Repair Box
-                                </span>
                             </td>
 
                             <td>

@@ -570,7 +570,7 @@ class DatabaseSeeder extends Seeder
                 ],
                 [
                     'name' => trim($account['name']),
-                    'password' => Hash::make('Aiia@2026'),
+                    'password' => Hash::make('aiia'),
                     'role' => 'user',
                     'line_id' => $line->id,
                 ]

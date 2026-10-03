@@ -590,6 +590,35 @@ class UserOrderController extends Controller
         );
     }
 
+    public function historyShow(
+        Request $request,
+        RepairOrder $order
+    ) {
+        abort_unless(
+            $order->user_id === $request->user()->id,
+            403
+        );
+
+        $order->load([
+            'user',
+            'line.plant',
+            'items.masterModel',
+            'items.product',
+            'items.afterProduct',
+            'items.ngType',
+            'result',
+            'result.processedBy',
+            'confirmation',
+            'omdVerifier',
+            'handedOverBy',
+        ]);
+
+        return view(
+            'user.orders.history-show',
+            compact('order')
+        );
+    }
+
 
     public function pendingConfirmationCount(Request $request)
     {

@@ -371,7 +371,7 @@
 
                         <span class="account-helper">
                             Kosongkan untuk menggunakan password default sistem:
-                            <strong>Aiia@2026</strong>
+                            <strong>aiia</strong>
                         </span>
 
                         @error('password')

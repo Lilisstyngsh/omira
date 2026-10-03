@@ -5,6 +5,16 @@
 
 @section('content')
 
+    @php
+        $hasOmdResult = in_array($order->status, ['completed', 'confirmed'], true);
+
+        $totalQtyOmd = 0;
+
+        if ($hasOmdResult) {
+            $totalQtyOmd = $order->items->sum(fn($item) => (int) ($item->after_qty ?? 0));
+        }
+    @endphp
+
     <style>
         .repair-head {
             display: flex;
@@ -96,8 +106,8 @@
         }
 
         /* =================================================
-                                                               INFO
-                                                            ================================================== */
+                                                                           INFO
+                                                                        ================================================== */
 
         .info-grid {
             display: grid;
@@ -138,8 +148,8 @@
         }
 
         /* =================================================
-                                                               REPAIR TABLE
-                                                            ================================================== */
+                                                                           REPAIR TABLE
+                                                                        ================================================== */
 
         .repair-table-scroll {
             width: 100%;
@@ -275,8 +285,8 @@
         }
 
         /* =================================================
-                                                               KETERANGAN
-                                                            ================================================== */
+                                                                           KETERANGAN
+                                                                        ================================================== */
 
         .repair-table .keterangan-head {
             width: 180px !important;
@@ -323,8 +333,8 @@
         }
 
         /* =================================================
-                                                               ACTION CARD
-                                                            ================================================== */
+                                                                           ACTION CARD
+                                                                        ================================================== */
 
         .action-card {
             display: flex;
@@ -351,8 +361,8 @@
         }
 
         /* =================================================
-                                                               CONFIRMED
-                                                            ================================================== */
+                                                                           CONFIRMED
+                                                                        ================================================== */
 
         .confirmed-box {
             padding: 16px;
@@ -376,8 +386,8 @@
         }
 
         /* =================================================
-                                                               BUTTON
-                                                            ================================================== */
+                                                                           BUTTON
+                                                                        ================================================== */
 
         .btn {
             height: 36px;
@@ -415,8 +425,8 @@
         }
 
         /* =================================================
-                                                               LEGACY
-                                                            ================================================== */
+                                                                           LEGACY
+                                                                        ================================================== */
 
         .legacy-result-grid {
             display: grid;
@@ -425,8 +435,8 @@
         }
 
         /* =================================================
-                                                               ERROR
-                                                            ================================================== */
+                                                                           ERROR
+                                                                        ================================================== */
 
         .error-list {
             margin: 0 0 18px;
@@ -439,8 +449,8 @@
         }
 
         /* =================================================
-                                                               RESPONSIVE
-                                                            ================================================== */
+                                                                           RESPONSIVE
+                                                                        ================================================== */
 
         @media (max-width: 1000px) {
             .info-grid {
@@ -466,8 +476,8 @@
         }
 
         /* =================================================
-                                           TIMELINE
-                                        ================================================== */
+                                                       TIMELINE
+                                                    ================================================== */
 
         .timeline-wrap {
             overflow-x: auto;
@@ -545,6 +555,20 @@
             font-size: 9px;
             line-height: 1.5;
             color: #64748b;
+        }
+
+        .info-item.total-qty-omd {
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+        }
+
+        .info-item.total-qty-omd span {
+            color: #15803d;
+        }
+
+        .info-item.total-qty-omd strong {
+            color: #166534;
+            font-size: 14px;
         }
     </style>
 
@@ -626,17 +650,15 @@
                     $repairDone = (bool) $order->repair_completed_at;
                     $handoverDone = (bool) $order->confirmation?->confirmed_at;
 
-                    $verifiedState = $verifiedDone
-                        ? 'completed'
-                        : 'pending';
+                    $verifiedState = $verifiedDone ? 'completed' : 'pending';
 
-                    $repairState = $repairDone
-                        ? 'completed'
-                        : ($repairStarted ? 'in-progress' : 'pending');
+                    $repairState = $repairDone ? 'completed' : ($repairStarted ? 'in-progress' : 'pending');
 
                     $handoverState = $handoverDone
                         ? 'completed'
-                        : ($order->status === 'completed' ? 'in-progress' : 'pending');
+                        : ($order->status === 'completed'
+                            ? 'in-progress'
+                            : 'pending');
                 @endphp
 
 
@@ -836,6 +858,20 @@
                 <span>Total Qty</span>
                 <strong>{{ $order->quantity }}</strong>
             </div>
+
+            @if ($hasOmdResult)
+                <div class="info-item total-qty-omd">
+
+                    <span>
+                        Qty OMD
+                    </span>
+
+                    <strong>
+                        {{ $totalQtyOmd }}
+                    </strong>
+
+                </div>
+            @endif
 
         </div>
 
@@ -1110,21 +1146,27 @@
                                             @foreach ($ngCodes as $code)
                                                 @php
                                                     $ngItem = $ngItems->get($code);
+
                                                     $beforeQty = (int) ($ngItem?->before_qty ?? 0);
                                                     $afterQty = (int) ($ngItem?->after_qty ?? 0);
-                                                    $isNgMatch = $hasFinalResult && $beforeQty === $afterQty;
-                                                    $isNgMismatch = $hasFinalResult && $beforeQty !== $afterQty;
-                                                @endphp
 
-                                                @php
+                                                    /*
+                                                     * Highlight hanya jika Qty User/PPIC memang ada.
+                                                     *
+                                                     * Jika Qty User = 0 / kosong:
+                                                     * - Tidak diberi highlight, walaupun OMD mengisi Qty.
+                                                     *
+                                                     * Jika Qty User > 0:
+                                                     * - Hijau jika Qty OMD sama.
+                                                     * - Merah jika Qty OMD berbeda, termasuk kosong.
+                                                     */
                                                     $resultCellClass = '';
 
-                                                    if ($hasFinalResult && $afterQty > 0) {
-                                                        $resultCellClass = $isNgMatch
-                                                            ? 'repair-result-match-cell'
-                                                            : ($isNgMismatch
-                                                                ? 'repair-result-mismatch-cell'
-                                                                : '');
+                                                    if ($hasFinalResult && $beforeQty > 0) {
+                                                        $resultCellClass =
+                                                            $beforeQty === $afterQty
+                                                                ? 'repair-result-match-cell'
+                                                                : 'repair-result-mismatch-cell';
                                                     }
                                                 @endphp
 
