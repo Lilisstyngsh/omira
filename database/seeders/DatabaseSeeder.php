@@ -8,8 +8,6 @@ use App\Models\Line;
 use App\Models\NgType;
 use App\Models\Target;
 use App\Models\User;
-use App\Models\MasterModel;
-use App\Models\Product;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -63,15 +61,14 @@ class DatabaseSeeder extends Seeder
             [
 
                 // UNIT
-
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'AS Unit'
+                    'name' => 'PPIC Unit'
                 ],
 
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'DC'
+                    'name' => 'AS Unit'
                 ],
 
                 [
@@ -81,20 +78,10 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'PPIC Unit'
+                    'name' => 'DC'
                 ],
 
                 // BODY
-                [
-                    'plant_id' => $body->id,
-                    'name' => 'AS Body'
-                ],
-
-                [
-                    'plant_id' => $body->id,
-                    'name' => 'INJ'
-                ],
-
                 [
                     'plant_id' => $body->id,
                     'name' => 'PPIC Body'
@@ -102,18 +89,28 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $body->id,
+                    'name' => 'AS Body'
+                ],
+
+                [
+                    'plant_id' => $body->id,
                     'name' => 'PT'
+                ],
+
+                [
+                    'plant_id' => $body->id,
+                    'name' => 'INJ'
                 ],
 
                 // ELECTRIC
                 [
                     'plant_id' => $electric->id,
-                    'name' => 'AS Electric'
+                    'name' => 'PPIC Electric'
                 ],
 
                 [
                     'plant_id' => $electric->id,
-                    'name' => 'PPIC Electric'
+                    'name' => 'AS Electric'
                 ],
             ]
 
@@ -139,300 +136,18 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         | MASTER MODEL & PRODUCT
         |--------------------------------------------------------------------------
+        |
+        | Master yang terkait Scrap Limit menggunakan satu source of truth:
+        | ScrapLimitSeedData. Plant/Line mengikuti naming OMIRA, sedangkan
+        | Model/Product mengikuti penulisan file Excel terbaru.
+        |
         */
 
-        $modelProducts = [
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT BODY - PPIC BODY
-            |--------------------------------------------------------------------------
-            */
-            'PPIC Body' => [
-                '660' => [
-                    'Handle',
-                    'Frame FR R',
-                    'Frame FR L',
-                    'Frame RR R',
-                    'Frame RR L',
-                    'Cap',
-                    'Garnish',
-                    'Pad',
-                ],
-                '560' => [
-                    'Handle',
-                    'Frame FR R',
-                    'Frame FR L',
-                    'Frame RR R',
-                    'Frame RR L',
-                    'Garnish',
-                ],
-                '4L45W / 5P45' => [
-                    'Handle',
-                    'Frame R',
-                    'Frame L',
-                    'Cap',
-                    'Pad',
-                ],
-                'TBINA' => [
-                    'Slide R',
-                    'Slide L',
-                    'Reclining R',
-                    'Reclining L',
-                    'Tilt R',
-                    'Tilt L',
-                    'Handle',
-                    'Pad Frame',
-                ],
-                'TTI' => [
-                    'Slide R/L',
-                    'Reclining R/L',
-                    'Tilt R/L',
-                ],
-                'HINO' => [
-                    'Handle',
-                ],
-                'ADM KAP' => [
-                    'Backdoor',
-                ],
-                '230' => [
-                    '230'
-                ],
-                '800A' => [
-                    '800A'
-                ],
-                'SUZUKI' => [
-                    'Handle YHA',
-                    'Handle YTB',
-                ],
-                'DOWA' => [
-                    'CSH',
-                ],
-            ],
+        $this->call(ScrapLimitMasterDataSeeder::class);
 
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT BODY - AS BODY
-            |--------------------------------------------------------------------------
-            */
-            'AS Body' => [
-                'SUZUKI' => [
-                    'Case YHA/YTB',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT BODY - PT
-            |--------------------------------------------------------------------------
-            */
-            'PT' => [
-                '660/230' => [
-                    'Handle',
-                    'Cap',
-                ],
-                '560' => [
-                    'Handle',
-                ],
-                '4L45W/5P45' => [
-                    'Handle',
-                    'Cap',
-                ],
-                'SUZUKI' => [
-                    'Handle YHA/YTB',
-                    'Cap YHA/YTB',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT BODY - INJ
-            |--------------------------------------------------------------------------
-            */
-            'INJ' => [
-                'ALL MODEL' => [
-                    'Handle No 2 / Frame (Box TP 332)',
-                    'Garnish (Box TP 362)',
-                ],
-                'HINO' => [
-                    'Case Hino',
-                    'Handle Hino',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT UNIT - PPIC UNIT
-            |--------------------------------------------------------------------------
-            */
-            'PPIC Unit' => [
-                'D98E (NR)' => [
-                    'TCC',
-                    'CSH',
-                ],
-                'WP' => [
-                    'ISZ/K3',
-                ],
-                'OP' => [
-                    'ISZ/3SZ',
-                ],
-                '889F' => [
-                    'TCC',
-                    'OPN',
-                ],
-                'D72F/D73F' => [
-                    'TCC',
-                    'OPN',
-                ],
-                'D13E' => [
-                    'TCC',
-                ],
-                '922F' => [
-                    'OPN',
-                ],
-                'D18E' => [
-                    'TCC',
-                ],
-                'D41E' => [
-                    'TCC',
-                    'OPN',
-                ],
-                'D05E' => [
-                    'TCC',
-                    'OPN',
-                    'CSH',
-                ],
-                '4A91' => [
-                    'TCC',
-                ],
-                '5445' => [
-                    'TCC',
-                ],
-                '5P45' => [
-                    'TCC',
-                ],
-                'TNGA' => [
-                    'TCC No 1',
-                    'TCC No 2',
-                ],
-                'ALL MODEL' => [
-                    'Komponen OPN',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT UNIT - AS UNIT
-            |--------------------------------------------------------------------------
-            */
-            'AS Unit' => [
-                'Water Pump' => [
-                    'WPNR',
-                    'WP D05E',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT UNIT - MA
-            |--------------------------------------------------------------------------
-            */
-            'MA' => [
-                'ALL MODEL' => [
-                    'TCC',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT UNIT - DC
-            |--------------------------------------------------------------------------
-            */
-            'DC' => [
-                'All Model Kecuali TNGA' => [
-                    'TCC',
-                    'OPN',
-                ],
-                'TNGA' => [
-                    'TCC No 1',
-                    'TCC No 2',
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT ELECTRIC - PPIC ELECTRIC
-            |--------------------------------------------------------------------------
-            */
-            'PPIC Electric' => [
-                '4WD IMV' => [
-                    '4WD IMV'
-                ],
-                'PBD 582D/737D/840D' => [
-                    'PBD 582D/737D/840D'
-                ],
-                'PBD 5P45' => [
-                    'PBD 5P45'
-                ],
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANT ELECTRIC - AS ELECTRIC
-            |--------------------------------------------------------------------------
-            */
-            'AS Electric' => [
-                'EWP EF160' => [
-                    'EWP EF160'
-                ],
-                'EWP GA35' => [
-                    'EWP GA35'
-                ],
-                'OP T431' => [
-                    'OP T431'
-                ],
-                'EWP EF160 Toyota' => [
-                    'EWP EF160 Toyota'
-                ],
-                '4WD 5F00/5K45' => [
-                    '4WD 5F00/5K45'
-                ],
-                'PBD Y17' => [
-                    'PBD Y17'
-                ],
-            ],
-        ];
-
-        foreach ($modelProducts as $lineName => $models) {
-            if (!isset($lines[$lineName])) {
-                continue;
-            }
-
-            $line = $lines[$lineName];
-
-            foreach ($models as $modelName => $products) {
-                $masterModel = MasterModel::firstOrCreate(
-                    [
-                        'line_id' => $line->id,
-                        'model' => $modelName
-                    ],
-                    [
-                        'is_active' => true
-                    ]
-                );
-
-                foreach ($products as $productName) {
-                    Product::firstOrCreate(
-                        [
-                            'master_model_id' => $masterModel->id,
-                            'name' => $productName
-                        ],
-                        [
-                            'is_active' => true
-                        ]
-                    );
-                }
-            }
-        }
+        // Initial Scrap Limit per Product berdasarkan DATA QTY LIMIT BOX SCRAP.
+        // Idempotent: tidak menimpa limit terbaru yang dibuat OMD.
+        $this->call(ProductScrapLimitSeeder::class);
 
         foreach (
             [
@@ -490,71 +205,71 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Ramanda',
                 'email' => 'ramanda_fe@aiia.co.id',
-                'plant' => 'BODY',
-                'line' => 'PPIC BODY',
+                'plant' => 'Body',
+                'line' => 'PPIC Body',
             ],
 
             [
                 'name' => 'Ubaydillah',
                 'email' => 'ubaydillah@aiia.co.id',
-                'plant' => 'BODY',
-                'line' => 'AS BODY',
+                'plant' => 'Body',
+                'line' => 'AS Body',
             ],
 
             [
                 'name' => 'Marcellino',
                 'email' => 'marcellino.reyhan@aiia.co.id',
-                'plant' => 'BODY',
+                'plant' => 'Body',
                 'line' => 'PT',
             ],
 
             [
                 'name' => 'Marcellino',
                 'email' => 'marcellino.reyhan@aiia.co.id',
-                'plant' => 'BODY',
+                'plant' => 'Body',
                 'line' => 'INJ',
             ],
 
             [
                 'name' => 'Taufik',
                 'email' => 'taufik.widodo@aiia.co.id',
-                'plant' => 'UNIT',
-                'line' => 'PPIC UNIT',
+                'plant' => 'Unit',
+                'line' => 'PPIC Unit',
             ],
 
             [
                 'name' => 'Teddy',
                 'email' => 'teddy@aiia.co.id',
-                'plant' => 'UNIT',
-                'line' => 'AS UNIT',
+                'plant' => 'Unit',
+                'line' => 'AS Unit',
             ],
 
             [
                 'name' => 'Anhar',
                 'email' => 'anhar.kurniaji@aiia.co.id',
-                'plant' => 'UNIT',
+                'plant' => 'Unit',
                 'line' => 'MA',
             ],
 
             [
                 'name' => 'Ade F',
                 'email' => 'ade.firmansyah@aiia.co.id',
-                'plant' => 'UNIT',
+                'plant' => 'Unit',
                 'line' => 'DC',
             ],
 
             [
                 'name' => 'Saiful',
                 'email' => 'saiful.safari@aiia.co.id',
-                'plant' => 'ELECTRIC',
-                'line' => 'PPIC ELECTRIC',
+                'plant' => 'Electric',
+                'line' => 'PPIC Electric',
             ],
 
             [
                 'name' => 'Widiyan',
                 'email' => 'widiyan@aiia.co.id',
-                'plant' => 'ELECTRIC',
-                'line' => 'AS ELECTRIC',
+                'plant' => 'Electric',
+                'line' => 'AS Electric',
             ],
         ];
 
@@ -605,7 +320,7 @@ class DatabaseSeeder extends Seeder
                 [
                     'year' => 2026,
                     'month' => $month,
-                    'line_id' => $ppicLine->id
+                    'line_id' => $lines['PPIC Unit']->id
                 ],
 
                 [

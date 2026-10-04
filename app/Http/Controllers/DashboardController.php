@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FiscalYearTarget;
 use App\Models\Line;
-use App\Models\ModelScrapLimit;
+use App\Models\ProductScrapLimit;
 use App\Models\MonitoringAbnormality;
 use App\Models\RepairOrder;
 use App\Models\RepairOrderItem;
@@ -108,11 +108,11 @@ class DashboardController extends Controller
             $periodEnd = now();
         }
 
-        $modelScrapAlerts = $this->modelScrapAlerts(
+        $productScrapAlerts = $this->productScrapAlerts(
             $year,
             $month,
             $lineId,
-            $periodEnd->toDateString()
+            $periodEnd->toDateTimeString()
         );
 
         $orderSeries = $monthlyMetrics->pluck('order')->map(fn ($value) => (int) $value)->values();
@@ -146,7 +146,7 @@ class DashboardController extends Controller
             'targetExceeded',
             'targetDifference',
             'abnormality',
-            'modelScrapAlerts',
+            'productScrapAlerts',
             'months',
             'orderSeries',
             'finishSeries',
@@ -296,15 +296,15 @@ class DashboardController extends Controller
             ->first();
     }
 
-    private function modelScrapAlerts(
+    private function productScrapAlerts(
         int $year,
         int $month,
         ?int $lineId,
-        string $effectiveDate
+        string $effectiveDateTime
     ): Collection {
         $items = RepairOrderItem::query()
-            ->with(['masterModel.line'])
-            ->whereNotNull('master_model_id')
+            ->with(['product.masterModel.line'])
+            ->whereNotNull('product_id')
             ->whereHas('repairOrder', function ($query) use ($year, $month, $lineId) {
                 $this->applyCompletedOrderFilter($query, $year, $month, $lineId);
             })
@@ -314,31 +314,34 @@ class DashboardController extends Controller
             return collect();
         }
 
-        $modelIds = $items
-            ->pluck('master_model_id')
+        $productIds = $items
+            ->pluck('product_id')
             ->filter()
             ->unique()
             ->values();
 
-        $limits = ModelScrapLimit::query()
-            ->whereIn('master_model_id', $modelIds)
-            ->activeOn($effectiveDate)
+        $limits = ProductScrapLimit::query()
+            ->whereIn('product_id', $productIds)
+            ->activeAt($effectiveDateTime)
             ->orderByDesc('effective_from')
+            ->orderByDesc('id')
             ->get()
-            ->groupBy('master_model_id')
+            ->groupBy('product_id')
             ->map(fn ($rows) => $rows->first());
 
         return $items
-            ->groupBy('master_model_id')
-            ->map(function (Collection $modelItems, $masterModelId) use ($limits) {
-                $limit = $limits->get((int) $masterModelId);
+            ->groupBy('product_id')
+            ->map(function (Collection $productItems, $productId) use ($limits) {
+                $limit = $limits->get((int) $productId);
 
                 if (! $limit) {
                     return null;
                 }
 
-                $orderQty = (int) $modelItems->sum('before_qty');
-                $okQty = (int) $modelItems->sum('after_qty');
+                // Formula Scrap dipertahankan seperti dashboard sebelumnya.
+                // Perubahan ini hanya memindahkan level pembanding dari Model ke Product.
+                $orderQty = (int) $productItems->sum('before_qty');
+                $okQty = (int) $productItems->sum('after_qty');
                 $scrapQty = max($orderQty - $okQty, 0);
                 $limitQty = (int) $limit->limit_qty;
 
@@ -346,11 +349,13 @@ class DashboardController extends Controller
                     return null;
                 }
 
-                $model = $modelItems->first()?->masterModel;
+                $product = $productItems->first()?->product;
+                $model = $product?->masterModel;
 
                 return [
-                    'master_model_id' => (int) $masterModelId,
+                    'product_id' => (int) $productId,
                     'model' => $model?->model ?? '-',
+                    'product' => $product?->name ?? '-',
                     'line' => $model?->line?->name ?? '-',
                     'scrap_qty' => $scrapQty,
                     'limit_qty' => $limitQty,

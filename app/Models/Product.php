@@ -53,4 +53,13 @@ class Product extends Model
             RepairOrder::class
         );
     }
+
+
+    public function scrapLimits(): HasMany
+    {
+        return $this->hasMany(
+            ProductScrapLimit::class,
+            'product_id'
+        );
+    }
 }

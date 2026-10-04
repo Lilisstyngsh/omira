@@ -1686,7 +1686,7 @@
                                 <span class="nav-icon">⚠</span>
 
                                 <span>
-                                    Scrap Limit Model
+                                    Scrap Limit Produk
                                 </span>
 
                             </a>

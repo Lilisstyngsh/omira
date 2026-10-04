@@ -749,13 +749,13 @@
             </div>
         @endif
 
-        @if ($modelScrapAlerts->isNotEmpty())
+        @if ($productScrapAlerts->isNotEmpty())
             <div class="monitor-card alert-card scrap-alert">
                 <div class="alert-icon">!</div>
                 <div style="flex:1;min-width:0;">
-                    <h3 class="alert-title">Peringatan Scrap Limit Model</h3>
+                    <h3 class="alert-title">Peringatan Scrap Limit Produk</h3>
                     <p class="alert-copy">
-                        {{ $modelScrapAlerts->count() }} model mencapai atau melewati Scrap Limit pada periode filter.
+                        {{ $productScrapAlerts->count() }} produk mencapai atau melewati Scrap Limit pada periode filter.
                     </p>
                 </div>
             </div>
@@ -887,26 +887,26 @@
             <div class="monitor-card scrap-card">
                 <div class="card-head">
                     <div>
-                        <h3 class="card-title">Scrap Limit per Model</h3>
-                        <p class="card-subtitle">Alert berdasarkan limit model yang aktif pada periode filter.</p>
+                        <h3 class="card-title">Scrap Limit per Produk</h3>
+                        <p class="card-subtitle">Alert berdasarkan limit produk yang aktif pada periode filter.</p>
                     </div>
                 </div>
 
-                @if ($modelScrapAlerts->isEmpty())
+                @if ($productScrapAlerts->isEmpty())
                     <div class="empty-state">
-                        Tidak ada model yang mencapai Scrap Limit pada periode ini.
+                        Tidak ada produk yang mencapai Scrap Limit pada periode ini.
                     </div>
                 @else
                     <div class="scrap-list">
-                        @foreach ($modelScrapAlerts as $alert)
+                        @foreach ($productScrapAlerts as $alert)
                             <div class="scrap-item {{ $alert['status'] }}">
                                 <div class="scrap-item-top">
-                                    <div class="scrap-model">Model {{ $alert['model'] }}</div>
+                                    <div class="scrap-model">{{ $alert['product'] }}</div>
                                     <div class="scrap-status">
                                         {{ $alert['status'] === 'exceeded' ? 'Exceeded' : 'Limit' }}
                                     </div>
                                 </div>
-                                <div class="scrap-line">Line: {{ $alert['line'] }}</div>
+                                <div class="scrap-line">Model {{ $alert['model'] }} · Line {{ $alert['line'] }}</div>
                                 <div class="scrap-values">
                                     Scrap <strong>{{ number_format($alert['scrap_qty']) }}</strong> ·
                                     Limit <strong>{{ number_format($alert['limit_qty']) }}</strong>

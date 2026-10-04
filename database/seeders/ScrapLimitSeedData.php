@@ -1,0 +1,110 @@
+<?php
+
+namespace Database\Seeders;
+
+final class ScrapLimitSeedData
+{
+    /**
+     * Source of truth:
+     * DATA QTY LIMIT BOX SCRAP (1)(1).xlsx
+     *
+     * Plant/Line follow OMIRA naming convention.
+     * Model/Product follow the Excel spelling exactly (outer whitespace trimmed).
+     *
+     * @return array<int, array{0:string,1:string,2:string,3:string,4:int}>
+     */
+    public static function rows(): array
+    {
+        return [
+            ['Body', 'PPIC Body', '660', 'Handle', 15],
+            ['Body', 'PPIC Body', '660', 'Frame FR R', 15],
+            ['Body', 'PPIC Body', '660', 'Frame FR L', 15],
+            ['Body', 'PPIC Body', '660', 'Frame RR R', 15],
+            ['Body', 'PPIC Body', '660', 'Frame RR L', 15],
+            ['Body', 'PPIC Body', '660', 'Cap', 20],
+            ['Body', 'PPIC Body', '660', 'Garnish', 15],
+            ['Body', 'PPIC Body', '660', 'Pad', 20],
+            ['Body', 'PPIC Body', '560', 'Handle', 15],
+            ['Body', 'PPIC Body', '560', 'Frame FR R', 20],
+            ['Body', 'PPIC Body', '560', 'Frame FR L', 20],
+            ['Body', 'PPIC Body', '560', 'Frame RR R', 20],
+            ['Body', 'PPIC Body', '560', 'Frame RR L', 20],
+            ['Body', 'PPIC Body', '560', 'Garnish', 20],
+            ['Body', 'PPIC Body', '4L45W / 5P45', 'Handle', 20],
+            ['Body', 'PPIC Body', '4L45W / 5P45', 'Frame R', 15],
+            ['Body', 'PPIC Body', '4L45W / 5P45', 'Frame L', 15],
+            ['Body', 'PPIC Body', '4L45W / 5P45', 'Cap', 20],
+            ['Body', 'PPIC Body', '4L45W / 5P45', 'Pad', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Slide R', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Slide L', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Reclining R', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Reclining L', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Tilt R', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Tilt L', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Handle', 20],
+            ['Body', 'PPIC Body', 'TBINA', 'Pad, Frame', 20],
+            ['Body', 'PPIC Body', 'TTI', 'Slide R', 20],
+            ['Body', 'PPIC Body', 'TTI', 'Slide L', 20],
+            ['Body', 'PPIC Body', 'TTI', 'Reclining R', 20],
+            ['Body', 'PPIC Body', 'TTI', 'Reclining L', 20],
+            ['Body', 'PPIC Body', 'TTI', 'Tilt R', 20],
+            ['Body', 'PPIC Body', 'TTI', 'Tilt L', 20],
+            ['Body', 'PPIC Body', 'HINO', 'Handle', 20],
+            ['Body', 'PPIC Body', 'ADM KAP', 'Backdoor', 15],
+            ['Body', 'PPIC Body', '230', '230', 20],
+            ['Body', 'PPIC Body', '800A', '800A', 20],
+            ['Body', 'PPIC Body', 'SUZUKI', 'Handle YHA', 15],
+            ['Body', 'PPIC Body', 'SUZUKI', 'Handle YTB', 20],
+            ['Body', 'PPIC Body', 'DOWA', 'CSH', 25],
+            ['Body', 'AS Body', 'SUZUKI', 'Case YHA/YTB', 15],
+            ['Body', 'PT', '660 / 230', 'Handle', 20],
+            ['Body', 'PT', '660 / 230', 'Cap', 20],
+            ['Body', 'PT', '560', 'Handle', 20],
+            ['Body', 'PT', '4L45W / 5P45', 'Handle', 20],
+            ['Body', 'PT', '4L45W / 5P45', 'Cap', 20],
+            ['Body', 'PT', 'SUZUKI', 'Handle YHA/YTB', 20],
+            ['Body', 'PT', 'SUZUKI', 'Cap YHA/YTB', 20],
+            ['Body', 'INJ', 'ALL MODEL', 'Handle No 2 / Frame (Box TP 332)', 20],
+            ['Body', 'INJ', 'ALL MODEL', 'Garnish (Box TP 362)', 20],
+            ['Body', 'INJ', 'HINO', 'Case Hino', 20],
+            ['Body', 'INJ', 'HINO', 'Handle Hino', 20],
+            ['Unit', 'PPIC Unit', 'D98E (NR)', 'TCC', 20],
+            ['Unit', 'PPIC Unit', 'D98E (NR)', 'CSH', 25],
+            ['Unit', 'PPIC Unit', 'WP', '1SZ/K3', 25],
+            ['Unit', 'PPIC Unit', 'OP', '1SZ/3SZ', 25],
+            ['Unit', 'PPIC Unit', '889F', 'TCC', 25],
+            ['Unit', 'PPIC Unit', '889F', 'OPN', 25],
+            ['Unit', 'PPIC Unit', 'D72F/D73F', 'TCC', 20],
+            ['Unit', 'PPIC Unit', 'D72F/D73F', 'OPN', 20],
+            ['Unit', 'PPIC Unit', 'D13E', 'TCC', 25],
+            ['Unit', 'PPIC Unit', '922F', 'OPN', 25],
+            ['Unit', 'PPIC Unit', 'D18E', 'TCC', 20],
+            ['Unit', 'PPIC Unit', 'D41E', 'TCC', 25],
+            ['Unit', 'PPIC Unit', 'D41E', 'OPN', 25],
+            ['Unit', 'PPIC Unit', 'D05E', 'TCC', 20],
+            ['Unit', 'PPIC Unit', 'D05E', 'OPN', 20],
+            ['Unit', 'PPIC Unit', 'D05E', 'CSH', 25],
+            ['Unit', 'PPIC Unit', '4A91', 'TCC', 15],
+            ['Unit', 'PPIC Unit', '5P45', 'TCC', 25],
+            ['Unit', 'PPIC Unit', 'TNGA', 'TCC No 1', 25],
+            ['Unit', 'PPIC Unit', 'TNGA', 'Tcc No 2', 25],
+            ['Unit', 'PPIC Unit', 'ALL MODEL', 'Komponen OPN', 20],
+            ['Unit', 'AS Unit', 'Water Pump', 'WPNR', 25],
+            ['Unit', 'AS Unit', 'Water Pump', 'WP D05E', 25],
+            ['Unit', 'MA', 'ALL MODEL', 'TCC', 20],
+            ['Unit', 'DC', 'ALL MODEL kecuali TNGA', 'TCC', 25],
+            ['Unit', 'DC', 'ALL MODEL kecuali TNGA', 'OPN', 25],
+            ['Unit', 'DC', 'TNGA', 'TCC No 1', 20],
+            ['Unit', 'DC', 'TNGA', 'TCC No 2', 20],
+            ['Electric', 'AS Electric', '4WD IMV', '4WD IMV', 25],
+            ['Electric', 'AS Electric', 'PBD 582D/737D/840D', 'PBD 582D/737D/840D', 25],
+            ['Electric', 'AS Electric', 'PBD 5P45', 'PBD 5P45', 25],
+            ['Electric', 'PPIC Electric', 'EWP EF160', 'EWP EF160', 25],
+            ['Electric', 'PPIC Electric', 'EWP GA35', 'EWP GA35', 25],
+            ['Electric', 'PPIC Electric', 'OP T431', 'OP T431', 25],
+            ['Electric', 'PPIC Electric', 'EWP EF160 Toyota', 'EWP EF160 Toyota', 25],
+            ['Electric', 'PPIC Electric', '4WD 5F00/5K45', '4WD 5F00/5K45', 25],
+            ['Electric', 'PPIC Electric', 'PBD Y17', 'PBD Y17', 25],
+        ];
+    }
+}

@@ -1,458 +1,128 @@
 @extends('layouts.app')
 
-@section('title', 'Scrap Limit Model')
-@section('header', 'Scrap Limit Model')
+@section('title', 'Scrap Limit Produk')
+@section('header', 'Scrap Limit Produk')
 
 @section('content')
+    @php
+        $activeAt = function ($product) use ($now) {
+            return $product->scrapLimits
+                ->first(function ($limit) use ($now) {
+                    return $limit->effective_from->lte($now)
+                        && ($limit->effective_to === null || $limit->effective_to->gte($now));
+                });
+        };
+
+        $modelPayload = $models->mapWithKeys(function ($model) use ($activeAt) {
+            return [
+                (string) $model->id => [
+                    'id' => $model->id,
+                    'model' => $model->model,
+                    'line' => trim(($model->line?->plant?->name ? $model->line->plant->name . ' — ' : '') . ($model->line?->name ?? '-')),
+                    'products' => $model->products->map(function ($product) use ($activeAt) {
+                        $active = $activeAt($product);
+
+                        return [
+                            'id' => $product->id,
+                            'name' => $product->name,
+                            'limit' => $active?->limit_qty,
+                        ];
+                    })->values(),
+                ],
+            ];
+        });
+    @endphp
+
     <style>
-        .sl-page {
-            --sl-border: #dbe3ee;
-            --sl-text: #1e293b;
-            --sl-muted: #64748b;
-            --sl-primary: #5b4ce6;
-            --sl-green: #16a34a;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .sl-heading {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .sl-heading h2 {
-            margin: 0;
-            color: var(--sl-text);
-            font-size: 21px;
-            font-weight: 750;
-        }
-
-        .sl-heading p {
-            margin: 4px 0 0;
-            color: var(--sl-muted);
-            font-size: 12px;
-        }
-
-        .sl-toolbar {
-            display: grid;
-            grid-template-columns: minmax(190px, 240px) minmax(240px, 1fr) auto;
-            gap: 10px;
-            padding: 14px;
-            background: #fff;
-            border: 1px solid var(--sl-border);
-            border-radius: 14px;
-        }
-
-        .sl-field {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            min-width: 0;
-        }
-
-        .sl-field label {
-            color: var(--sl-muted);
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .035em;
-        }
-
-        .sl-field select,
-        .sl-field input,
-        .sl-field textarea {
-            width: 100%;
-            color: #334155;
-            background: #fff;
-            border: 1px solid #b9c5d4;
-            border-radius: 9px;
-            outline: 0;
-            font-size: 12px;
-        }
-
-        .sl-field select,
-        .sl-field input {
-            height: 42px;
-            padding: 0 11px;
-        }
-
-        .sl-field textarea {
-            min-height: 84px;
-            padding: 10px 11px;
-            line-height: 1.5;
-            resize: vertical;
-        }
-
-        .sl-field select:focus,
-        .sl-field input:focus,
-        .sl-field textarea:focus {
-            border-color: var(--sl-primary);
-            box-shadow: 0 0 0 3px rgba(91, 76, 230, .09);
-        }
-
-        .sl-btn {
-            min-height: 42px;
-            padding: 0 15px;
-            border: 1px solid transparent;
-            border-radius: 9px;
-            font-size: 11px;
-            font-weight: 750;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            text-decoration: none;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .sl-btn-primary {
-            background: var(--sl-primary);
-            color: #fff;
-        }
-
-        .sl-btn-success {
-            background: var(--sl-green);
-            color: #fff;
-        }
-
-        .sl-btn-neutral {
-            background: #fff;
-            border-color: #cbd5e1;
-            color: #475569;
-        }
-
-        .sl-btn-soft {
-            background: #f8fafc;
-            border-color: #dbe3ee;
-            color: #475569;
-        }
-
-        .sl-alert {
-            padding: 12px 14px;
-            border-radius: 11px;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .sl-alert.success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-
-        .sl-alert.error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-        }
-
-        .sl-result-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            color: var(--sl-muted);
-            font-size: 11px;
-        }
-
-        .sl-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr));
-            gap: 12px;
-            align-items: stretch;
-        }
-
-        .sl-model-card {
-            min-width: 0;
-            min-height: 176px;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            background: #fff;
-            border: 1px solid var(--sl-border);
-            border-radius: 13px;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
-        }
-
-        .sl-model-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .sl-model-name {
-            color: #172033;
-            font-size: 14px;
-            font-weight: 800;
-            line-height: 1.25;
-            overflow-wrap: anywhere;
-        }
-
-        .sl-model-line {
-            margin-top: 3px;
-            color: var(--sl-muted);
-            font-size: 10.5px;
-            line-height: 1.35;
-        }
-
-        .sl-status {
-            flex: 0 0 auto;
-            padding: 4px 7px;
-            border-radius: 999px;
-            background: #f0fdf4;
-            color: #15803d;
-            font-size: 9px;
-            font-weight: 750;
-        }
-
-        .sl-status.empty {
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        .sl-limit-block {
-            margin-top: 14px;
-        }
-
-        .sl-limit-label {
-            color: var(--sl-muted);
-            font-size: 10px;
-        }
-
-        .sl-limit-value {
-            margin-top: 2px;
-            color: #172033;
-            font-size: 25px;
-            font-weight: 800;
-            line-height: 1.1;
-        }
-
-        .sl-limit-value small {
-            font-size: 10px;
-            color: var(--sl-muted);
-            font-weight: 600;
-        }
-
-        .sl-limit-period {
-            margin-top: 5px;
-            min-height: 30px;
-            color: var(--sl-muted);
-            font-size: 10.5px;
-            line-height: 1.45;
-        }
-
-        .sl-card-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 7px;
-            margin-top: auto;
-            padding-top: 13px;
-        }
-
-        .sl-card-actions .sl-btn {
-            min-height: 36px;
-            padding: 0 9px;
-            font-size: 10px;
-        }
-
-        .sl-empty {
-            padding: 22px;
-            background: #fff;
-            border: 1px dashed #cbd5e1;
-            border-radius: 13px;
-            color: var(--sl-muted);
-            text-align: center;
-            font-size: 12px;
-        }
-
-        .sl-modal-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 1500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 18px;
-            background: rgba(15, 23, 42, .48);
-        }
-
-        .sl-modal-backdrop.is-open {
-            display: flex;
-        }
-
-        .sl-modal {
-            width: min(100%, 500px);
-            max-height: min(88vh, 720px);
-            overflow: auto;
-            background: #fff;
-            border-radius: 17px;
-            box-shadow: 0 22px 65px rgba(15, 23, 42, .22);
-        }
-
-        .sl-modal.wide {
-            width: min(100%, 680px);
-        }
-
-        .sl-modal-head {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 17px 18px 13px;
-            border-bottom: 1px solid #e8edf4;
-        }
-
-        .sl-modal-title {
-            margin: 0;
-            color: #172033;
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .sl-modal-subtitle {
-            margin-top: 3px;
-            color: var(--sl-muted);
-            font-size: 11px;
-        }
-
-        .sl-modal-close {
-            width: 34px;
-            height: 34px;
-            border: 0;
-            border-radius: 8px;
-            background: #f1f5f9;
-            color: #64748b;
-            font-size: 19px;
-            cursor: pointer;
-        }
-
-        .sl-modal-body {
-            padding: 16px 18px;
-        }
-
-        .sl-modal-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 11px;
-        }
-
-        .sl-modal-grid .full {
-            grid-column: 1 / -1;
-        }
-
-        .sl-modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            padding: 13px 18px 17px;
-            border-top: 1px solid #e8edf4;
-        }
-
-        .sl-history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .sl-history-item {
-            display: grid;
-            grid-template-columns: minmax(70px, .7fr) minmax(170px, 1.4fr) minmax(130px, 1fr);
-            gap: 10px;
-            padding: 11px 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            color: #334155;
-            font-size: 11px;
-            line-height: 1.45;
-        }
-
-        .sl-history-limit {
-            color: #172033;
-            font-weight: 800;
-        }
-
-        .sl-history-note {
-            color: var(--sl-muted);
-        }
-
-        .sl-history-empty {
-            color: var(--sl-muted);
-            font-size: 12px;
-            text-align: center;
-            padding: 18px 8px;
-        }
-
-        @media (max-width: 780px) {
-            .sl-toolbar {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .sl-toolbar .sl-btn {
-                grid-column: 1 / -1;
-            }
-
-            .sl-modal-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .sl-modal-grid .full {
-                grid-column: auto;
-            }
-
-            .sl-history-item {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .sl-toolbar {
-                grid-template-columns: 1fr;
-            }
-
-            .sl-toolbar .sl-btn {
-                grid-column: auto;
-            }
-
-            .sl-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .sl-modal-backdrop {
-                padding: 10px;
-            }
-
-            .sl-modal-actions {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-            }
+        .sl-page { display:grid; gap:16px; }
+        .sl-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+        .sl-head h2 { margin:0; font-size:22px; line-height:1.2; color:#172033; }
+        .sl-count { font-size:13px; color:#748095; }
+        .sl-toolbar { display:grid; grid-template-columns:minmax(180px,230px) minmax(220px,1fr) auto; gap:10px; align-items:end; padding:14px; border:1px solid #e4e8ef; background:#fff; border-radius:16px; }
+        .sl-field { display:grid; gap:6px; }
+        .sl-field label { font-size:12px; font-weight:700; color:#5e697b; }
+        .sl-field input, .sl-field select, .sl-field textarea { width:100%; border:1px solid #d9dfe8; border-radius:10px; background:#fff; color:#1f2937; font:inherit; outline:none; }
+        .sl-field input, .sl-field select { min-height:40px; padding:0 11px; }
+        .sl-field textarea { min-height:76px; padding:10px 11px; resize:vertical; }
+        .sl-field input:focus, .sl-field select:focus, .sl-field textarea:focus { border-color:#7cb596; box-shadow:0 0 0 3px rgba(34,197,94,.08); }
+        .sl-toolbar-actions { display:flex; gap:8px; }
+        .sl-btn { min-height:40px; border:0; border-radius:10px; padding:0 14px; display:inline-flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size:13px; cursor:pointer; text-decoration:none; white-space:nowrap; }
+        .sl-btn-neutral { background:#eef1f5; color:#445065; }
+        .sl-btn-soft { background:#eef8f2; color:#237044; }
+        .sl-btn-success { background:#22a65a; color:#fff; }
+        .sl-btn:hover { filter:brightness(.985); }
+        .sl-alert { border:1px solid #d9efe0; background:#f3fbf5; color:#23633b; border-radius:12px; padding:11px 13px; font-size:13px; }
+        .sl-alert.error { border-color:#f2d2d2; background:#fff7f7; color:#a63a3a; }
+        .sl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(285px,1fr)); gap:14px; align-items:stretch; }
+        .sl-card { min-width:0; border:1px solid #e2e7ee; background:#fff; border-radius:16px; padding:15px; display:flex; flex-direction:column; gap:13px; box-shadow:0 2px 8px rgba(19,33,58,.035); }
+        .sl-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .sl-model { min-width:0; }
+        .sl-model-name { font-size:17px; line-height:1.25; font-weight:800; color:#172033; overflow-wrap:anywhere; }
+        .sl-model-line { margin-top:3px; font-size:12px; color:#7a8596; overflow-wrap:anywhere; }
+        .sl-badge { flex:0 0 auto; background:#f4f6f8; color:#657084; border-radius:999px; padding:5px 8px; font-size:11px; font-weight:700; }
+        .sl-product-list { display:grid; border:1px solid #edf0f4; border-radius:12px; overflow:hidden; }
+        .sl-product-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; padding:9px 10px; background:#fff; }
+        .sl-product-row + .sl-product-row { border-top:1px solid #edf0f4; }
+        .sl-product-name { font-size:13px; color:#374151; overflow-wrap:anywhere; }
+        .sl-limit { min-width:44px; text-align:center; border-radius:8px; padding:5px 8px; background:#ecf8f0; color:#216a40; font-weight:800; font-size:12px; }
+        .sl-limit.empty { background:#f3f5f7; color:#8a94a3; font-weight:700; }
+        .sl-card-actions { margin-top:auto; display:flex; gap:8px; }
+        .sl-card-actions .sl-btn { flex:1; min-width:0; }
+        .sl-empty { border:1px dashed #d7dde7; background:#fafbfc; border-radius:16px; padding:30px 16px; text-align:center; color:#7b8798; }
+        .sl-modal-backdrop { position:fixed; inset:0; z-index:1050; background:rgba(16,24,40,.42); padding:20px; display:none; align-items:center; justify-content:center; }
+        .sl-modal-backdrop.is-open { display:flex; }
+        .sl-modal { width:min(620px,100%); max-height:min(88vh,800px); background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 24px 70px rgba(15,23,42,.22); display:flex; flex-direction:column; }
+        .sl-modal.wide { width:min(760px,100%); }
+        .sl-modal-head { padding:17px 18px; border-bottom:1px solid #edf0f4; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+        .sl-modal-title { margin:0; font-size:18px; color:#172033; }
+        .sl-modal-subtitle { margin-top:3px; color:#7b8798; font-size:12px; }
+        .sl-modal-close { border:0; background:#f2f4f7; width:34px; height:34px; border-radius:9px; color:#667085; font-size:20px; cursor:pointer; }
+        .sl-modal-body { padding:17px 18px; overflow:auto; }
+        .sl-modal-actions { padding:13px 18px 17px; border-top:1px solid #edf0f4; display:flex; justify-content:flex-end; gap:8px; }
+        .sl-edit-products { border:1px solid #e6eaf0; border-radius:12px; overflow:hidden; margin-bottom:14px; }
+        .sl-edit-row { display:grid; grid-template-columns:minmax(0,1fr) 92px; gap:10px; align-items:center; padding:10px 11px; }
+        .sl-edit-row + .sl-edit-row { border-top:1px solid #edf0f4; }
+        .sl-edit-name { font-size:13px; font-weight:650; color:#344054; overflow-wrap:anywhere; }
+        .sl-edit-row input { width:100%; min-height:38px; border:1px solid #d8dee7; border-radius:9px; padding:0 8px; text-align:center; font-weight:800; outline:none; }
+        .sl-edit-row input:focus { border-color:#79b793; box-shadow:0 0 0 3px rgba(34,197,94,.08); }
+        .sl-form-grid { display:grid; grid-template-columns:180px minmax(0,1fr); gap:12px; }
+        .sl-form-grid .full { grid-column:1 / -1; }
+        .sl-history-product { border:1px solid #e7ebf1; border-radius:12px; overflow:hidden; }
+        .sl-history-product + .sl-history-product { margin-top:10px; }
+        .sl-history-name { padding:9px 11px; background:#f8f9fb; font-size:13px; font-weight:800; color:#303a4b; }
+        .sl-history-row { display:grid; grid-template-columns:70px minmax(120px,1fr) minmax(95px,auto); gap:10px; align-items:center; padding:9px 11px; font-size:12px; color:#667085; }
+        .sl-history-row + .sl-history-row { border-top:1px solid #edf0f4; }
+        .sl-history-qty { font-size:13px; font-weight:800; color:#216a40; }
+        .sl-history-source { text-align:right; color:#7f8998; }
+        body.sl-modal-open { overflow:hidden; }
+        @media (max-width:760px) {
+            .sl-toolbar { grid-template-columns:1fr; }
+            .sl-toolbar-actions { width:100%; }
+            .sl-toolbar-actions .sl-btn { flex:1; }
+            .sl-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); }
+            .sl-form-grid { grid-template-columns:1fr; }
+            .sl-form-grid .full { grid-column:auto; }
+            .sl-modal-backdrop { padding:10px; align-items:flex-end; }
+            .sl-modal { max-height:92vh; border-radius:18px 18px 12px 12px; }
+            .sl-history-row { grid-template-columns:58px 1fr; }
+            .sl-history-source { grid-column:1 / -1; text-align:left; }
         }
     </style>
 
     <div class="sl-page">
-        <div class="sl-heading">
+        <div class="sl-head">
             <div>
-                <h2>Scrap Limit Model</h2>
-                <p>Atur limit aktif dan riwayatnya per model.</p>
+                <h2>Scrap Limit Produk</h2>
+                <div class="sl-count">{{ $models->count() }} model</div>
             </div>
         </div>
 
         @if (session('success'))
-            <div class="sl-alert success">{{ session('success') }}</div>
+            <div class="sl-alert">{{ session('success') }}</div>
         @endif
 
         @if ($errors->any())
-            <div class="sl-alert error">
-                <strong>Data belum dapat disimpan.</strong>
-                @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
-                @endforeach
-            </div>
+            <div class="sl-alert error">{{ $errors->first() }}</div>
         @endif
 
         <form method="GET" action="{{ route('omd.scrap-limits.index') }}" class="sl-toolbar">
@@ -469,108 +139,91 @@
             </div>
 
             <div class="sl-field">
-                <label for="q">Cari Model / Line</label>
-                <input id="q" type="search" name="q" value="{{ $search }}" placeholder="Contoh: 660 atau PPIC Body">
+                <label for="q">Cari Model / Produk</label>
+                <input id="q" name="q" type="search" value="{{ $search }}" placeholder="Model atau produk...">
             </div>
 
-            <button type="submit" class="sl-btn sl-btn-primary">Tampilkan</button>
+            <div class="sl-toolbar-actions">
+                <button class="sl-btn sl-btn-success" type="submit">Terapkan</button>
+                @if ($search !== '' || $lineFilter !== 'all')
+                    <a class="sl-btn sl-btn-neutral" href="{{ route('omd.scrap-limits.index') }}">Reset</a>
+                @endif
+            </div>
         </form>
 
-        <div class="sl-result-meta">
-            <span>{{ number_format($models->count()) }} model</span>
-            @if ($search !== '')
-                <a class="sl-btn sl-btn-neutral" style="min-height:32px;padding:0 10px;" href="{{ route('omd.scrap-limits.index', ['line_id' => $lineFilter]) }}">Reset pencarian</a>
-            @endif
-        </div>
-
         @if ($models->isEmpty())
-            <div class="sl-empty">
-                Tidak ada model yang sesuai dengan filter.
-            </div>
+            <div class="sl-empty">Model atau produk tidak ditemukan.</div>
         @else
             <div class="sl-grid">
                 @foreach ($models as $model)
                     @php
-                        $activeLimit = $model->scrapLimits->first(function ($limit) use ($today) {
-                            return $limit->effective_from->toDateString() <= $today
-                                && ($limit->effective_to === null || $limit->effective_to->toDateString() >= $today);
-                        });
                         $lineLabel = trim(($model->line?->plant?->name ? $model->line->plant->name . ' — ' : '') . ($model->line?->name ?? '-'));
                     @endphp
-
-                    <article class="sl-model-card">
-                        <div class="sl-model-top">
-                            <div>
+                    <article class="sl-card">
+                        <div class="sl-card-head">
+                            <div class="sl-model">
                                 <div class="sl-model-name">{{ $model->model }}</div>
                                 <div class="sl-model-line">{{ $lineLabel }}</div>
                             </div>
-                            <span class="sl-status {{ $activeLimit ? '' : 'empty' }}">
-                                {{ $activeLimit ? 'Aktif' : 'Belum diatur' }}
-                            </span>
+                            <span class="sl-badge">{{ $model->products->count() }} Produk</span>
                         </div>
 
-                        <div class="sl-limit-block">
-                            <div class="sl-limit-label">Limit</div>
-                            <div class="sl-limit-value">
-                                {{ $activeLimit ? number_format($activeLimit->limit_qty) : '—' }}
-                                @if ($activeLimit)
-                                    <small>box</small>
-                                @endif
-                            </div>
-                            <div class="sl-limit-period">
-                                @if ($activeLimit)
-                                    {{ $activeLimit->effective_from->format('d M Y') }}
-                                    @if ($activeLimit->effective_to)
-                                        – {{ $activeLimit->effective_to->format('d M Y') }}
-                                    @else
-                                        – sekarang
-                                    @endif
-                                @else
-                                    Belum ada limit aktif.
-                                @endif
-                            </div>
+                        <div class="sl-product-list">
+                            @forelse ($model->products as $product)
+                                @php($activeLimit = $activeAt($product))
+                                <div class="sl-product-row">
+                                    <div class="sl-product-name">{{ $product->name }}</div>
+                                    <div class="sl-limit {{ $activeLimit ? '' : 'empty' }}">
+                                        {{ $activeLimit ? number_format($activeLimit->limit_qty) : '—' }}
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="sl-product-row">
+                                    <div class="sl-product-name">Belum ada produk aktif.</div>
+                                </div>
+                            @endforelse
                         </div>
 
                         <div class="sl-card-actions">
-                            <button
-                                type="button"
-                                class="sl-btn sl-btn-primary js-open-limit"
-                                data-model-id="{{ $model->id }}"
-                                data-model="{{ $model->model }}"
-                                data-line="{{ $lineLabel }}"
-                                data-limit="{{ $activeLimit?->limit_qty }}"
-                            >Atur Limit</button>
-
-                            <button
-                                type="button"
-                                class="sl-btn sl-btn-soft js-open-history"
-                                data-model="{{ $model->model }}"
-                                data-history-id="sl-history-{{ $model->id }}"
-                            >Riwayat</button>
+                            <button type="button" class="sl-btn sl-btn-success js-open-limit" data-model-id="{{ $model->id }}" @disabled($model->products->isEmpty())>
+                                Atur Limit
+                            </button>
+                            <button type="button" class="sl-btn sl-btn-neutral js-open-history" data-model-id="{{ $model->id }}" @disabled($model->products->isEmpty())>
+                                Riwayat
+                            </button>
                         </div>
                     </article>
 
                     <template id="sl-history-{{ $model->id }}">
-                        @if ($model->scrapLimits->isEmpty())
-                            <div class="sl-history-empty">Belum ada riwayat limit.</div>
-                        @else
-                            <div class="sl-history-list">
-                                @foreach ($model->scrapLimits as $limit)
-                                    <div class="sl-history-item">
+                        @foreach ($model->products as $product)
+                            <div class="sl-history-product">
+                                <div class="sl-history-name">{{ $product->name }}</div>
+                                @forelse ($product->scrapLimits as $limit)
+                                    <div class="sl-history-row">
+                                        <div class="sl-history-qty">{{ number_format($limit->limit_qty) }}</div>
                                         <div>
-                                            <div class="sl-history-limit">{{ number_format($limit->limit_qty) }} box</div>
-                                            <div>{{ $limit->creator?->name ?? '-' }}</div>
+                                            @if ($limit->source === \App\Models\ProductScrapLimit::SOURCE_SEED)
+                                                Baseline awal
+                                            @else
+                                                {{ $limit->effective_from->format('d/m/Y H:i') }}
+                                                @if ($limit->effective_to)
+                                                    – {{ $limit->effective_to->format('d/m/Y H:i') }}
+                                                @endif
+                                            @endif
                                         </div>
-                                        <div>
-                                            {{ $limit->effective_from->format('d M Y') }}
-                                            –
-                                            {{ $limit->effective_to?->format('d M Y') ?? 'Sekarang' }}
+                                        <div class="sl-history-source">
+                                            {{ $limit->source === \App\Models\ProductScrapLimit::SOURCE_SEED ? 'Seeder' : ($limit->creator?->name ?? 'OMD') }}
                                         </div>
-                                        <div class="sl-history-note">{{ $limit->note ?: '—' }}</div>
                                     </div>
-                                @endforeach
+                                @empty
+                                    <div class="sl-history-row">
+                                        <div class="sl-history-qty">—</div>
+                                        <div>Belum ada riwayat.</div>
+                                        <div></div>
+                                    </div>
+                                @endforelse
                             </div>
-                        @endif
+                        @endforeach
                     </template>
                 @endforeach
             </div>
@@ -589,25 +242,21 @@
 
             <form method="POST" action="{{ route('omd.scrap-limits.store') }}" id="sl-limit-form">
                 @csrf
-                <input type="hidden" name="master_model_id" id="sl-master-model-id" value="{{ old('master_model_id') }}">
+                <input type="hidden" name="master_model_id" id="sl-model-id" value="{{ old('master_model_id') }}">
                 <input type="hidden" name="return_line" value="{{ $lineFilter }}">
                 <input type="hidden" name="return_q" value="{{ $search }}">
 
                 <div class="sl-modal-body">
-                    <div class="sl-modal-grid">
-                        <div class="sl-field">
-                            <label for="sl-limit-qty">Limit Qty</label>
-                            <input id="sl-limit-qty" type="number" name="limit_qty" min="0" value="{{ old('limit_qty') }}" required>
-                        </div>
+                    <div class="sl-edit-products" id="sl-edit-products"></div>
 
+                    <div class="sl-form-grid">
                         <div class="sl-field">
                             <label for="sl-effective-from">Mulai Berlaku</label>
-                            <input id="sl-effective-from" type="date" name="effective_from" value="{{ old('effective_from', $today) }}" required>
+                            <input id="sl-effective-from" name="effective_from" type="date" value="{{ old('effective_from', $today) }}" required>
                         </div>
-
                         <div class="sl-field full">
-                            <label for="sl-note">Keterangan</label>
-                            <textarea id="sl-note" name="note" placeholder="Opsional">{{ old('note') }}</textarea>
+                            <label for="sl-note">Catatan <span style="font-weight:500;color:#98a2b3;">(opsional)</span></label>
+                            <textarea id="sl-note" name="note" placeholder="Catatan perubahan...">{{ old('note') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -637,83 +286,111 @@
     </div>
 
     <script>
-        (() => {
+        document.addEventListener('DOMContentLoaded', function () {
+            const models = @json($modelPayload);
+            const oldModelId = @json((string) old('master_model_id', ''));
+            const oldLimits = @json(old('limits', []));
+            const hasErrors = @json($errors->any());
+
             const limitModal = document.getElementById('sl-limit-modal');
             const historyModal = document.getElementById('sl-history-modal');
-            const modelIdInput = document.getElementById('sl-master-model-id');
-            const limitInput = document.getElementById('sl-limit-qty');
-            const effectiveInput = document.getElementById('sl-effective-from');
-            const noteInput = document.getElementById('sl-note');
             const limitContext = document.getElementById('sl-limit-context');
+            const modelIdInput = document.getElementById('sl-model-id');
+            const productsBox = document.getElementById('sl-edit-products');
             const historyContext = document.getElementById('sl-history-context');
             const historyContent = document.getElementById('sl-history-content');
-            const today = @json($today);
-            const oldModelId = @json((string) old('master_model_id', ''));
-            const hasErrors = @json($errors->any());
 
             function openModal(modal) {
                 modal.classList.add('is-open');
                 modal.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
+                document.body.classList.add('sl-modal-open');
             }
 
             function closeModal(modal) {
                 modal.classList.remove('is-open');
                 modal.setAttribute('aria-hidden', 'true');
                 if (!document.querySelector('.sl-modal-backdrop.is-open')) {
-                    document.body.style.overflow = '';
+                    document.body.classList.remove('sl-modal-open');
                 }
             }
 
-            function openLimit(button, keepOldValues = false) {
-                modelIdInput.value = button.dataset.modelId;
-                limitContext.textContent = `${button.dataset.model} · ${button.dataset.line}`;
+            function esc(value) {
+                return String(value ?? '')
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#039;');
+            }
 
-                if (!keepOldValues) {
-                    limitInput.value = button.dataset.limit || '';
-                    effectiveInput.value = today;
-                    noteInput.value = '';
-                }
+            function openLimit(modelId, keepOldValues = false) {
+                const model = models[String(modelId)];
+                if (!model) return;
+
+                modelIdInput.value = model.id;
+                limitContext.textContent = `${model.model} · ${model.line}`;
+
+                productsBox.innerHTML = model.products.map(product => {
+                    const oldValue = keepOldValues && Object.prototype.hasOwnProperty.call(oldLimits, String(product.id))
+                        ? oldLimits[String(product.id)]
+                        : (product.limit ?? '');
+
+                    return `
+                        <label class="sl-edit-row">
+                            <span class="sl-edit-name">${esc(product.name)}</span>
+                            <input
+                                type="number"
+                                min="0"
+                                inputmode="numeric"
+                                name="limits[${product.id}]"
+                                value="${esc(oldValue)}"
+                                aria-label="Limit ${esc(product.name)}"
+                            >
+                        </label>
+                    `;
+                }).join('');
 
                 openModal(limitModal);
-                setTimeout(() => limitInput.focus(), 60);
             }
 
-            document.querySelectorAll('.js-open-limit').forEach((button) => {
-                button.addEventListener('click', () => openLimit(button));
+            document.querySelectorAll('.js-open-limit').forEach(button => {
+                button.addEventListener('click', () => openLimit(button.dataset.modelId));
             });
 
-            document.querySelectorAll('.js-open-history').forEach((button) => {
+            document.querySelectorAll('.js-open-history').forEach(button => {
                 button.addEventListener('click', () => {
-                    const template = document.getElementById(button.dataset.historyId);
-                    historyContext.textContent = button.dataset.model;
+                    const model = models[String(button.dataset.modelId)];
+                    const template = document.getElementById(`sl-history-${button.dataset.modelId}`);
+                    if (!model) return;
+
+                    historyContext.textContent = `${model.model} · ${model.line}`;
                     historyContent.innerHTML = template ? template.innerHTML : '';
                     openModal(historyModal);
                 });
             });
 
-            document.querySelectorAll('.js-close-modal').forEach((button) => {
+            document.querySelectorAll('.js-close-modal').forEach(button => {
                 button.addEventListener('click', () => {
                     const modal = button.closest('.sl-modal-backdrop');
                     if (modal) closeModal(modal);
                 });
             });
 
-            [limitModal, historyModal].forEach((modal) => {
-                modal.addEventListener('click', (event) => {
+            [limitModal, historyModal].forEach(modal => {
+                modal.addEventListener('click', event => {
                     if (event.target === modal) closeModal(modal);
                 });
             });
 
-            document.addEventListener('keydown', (event) => {
-                if (event.key !== 'Escape') return;
-                document.querySelectorAll('.sl-modal-backdrop.is-open').forEach(closeModal);
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    document.querySelectorAll('.sl-modal-backdrop.is-open').forEach(closeModal);
+                }
             });
 
             if (hasErrors && oldModelId) {
-                const button = document.querySelector(`.js-open-limit[data-model-id="${CSS.escape(oldModelId)}"]`);
-                if (button) openLimit(button, true);
+                openLimit(oldModelId, true);
             }
-        })();
+        });
     </script>
 @endsection
