@@ -567,10 +567,10 @@ class UserOrderController extends Controller
 
 
         return redirect()
-            ->route('user.orders.history')
+            ->route('user.orders.index')
             ->with(
                 'success',
-                'Barang sudah dikonfirmasi sesuai. Order ditutup dan dipindahkan ke History.'
+                'Barang sudah dikonfirmasi sesuai. Order selesai dan tersimpan di History.'
             );
     }
 

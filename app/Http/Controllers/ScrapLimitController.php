@@ -14,7 +14,9 @@ class ScrapLimitController extends Controller
 {
     public function index(Request $request)
     {
-        $lineId = $request->integer('line_id') ?: null;
+        $lineFilter = (string) $request->query('line_id', 'all');
+        $lineId = ctype_digit($lineFilter) ? (int) $lineFilter : null;
+        $search = trim((string) $request->query('q', ''));
         $today = now()->toDateString();
 
         $lines = Line::query()
@@ -24,37 +26,35 @@ class ScrapLimitController extends Controller
             ->orderBy('name')
             ->get();
 
-        $models = collect();
-        $history = collect();
-
-        if ($lineId) {
-            $models = MasterModel::query()
-                ->where('line_id', $lineId)
-                ->where('is_active', true)
-                ->with([
-                    'line',
-                    'scrapLimits' => fn ($query) => $query
-                        ->orderByDesc('effective_from'),
-                ])
-                ->orderBy('model')
-                ->get();
-
-            $history = ModelScrapLimit::query()
-                ->whereHas(
-                    'masterModel',
-                    fn ($query) => $query->where('line_id', $lineId)
-                )
-                ->with(['masterModel', 'creator'])
-                ->orderByDesc('effective_from')
-                ->orderByDesc('id')
-                ->get();
-        }
+        $models = MasterModel::query()
+            ->where('is_active', true)
+            ->when($lineId, fn ($query) => $query->where('line_id', $lineId))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('model', 'like', '%' . $search . '%')
+                        ->orWhereHas('line', function ($lineQuery) use ($search) {
+                            $lineQuery->where('name', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->with([
+                'line.plant',
+                'scrapLimits' => fn ($query) => $query
+                    ->with('creator')
+                    ->orderByDesc('effective_from')
+                    ->orderByDesc('id'),
+            ])
+            ->orderBy('line_id')
+            ->orderBy('model')
+            ->get();
 
         return view('omd.scrap-limits.index', compact(
+            'lineFilter',
             'lineId',
+            'search',
             'lines',
             'models',
-            'history',
             'today'
         ));
     }
@@ -136,10 +136,16 @@ class ScrapLimitController extends Controller
             ]);
         });
 
+        $returnLine = (string) $request->input('return_line', 'all');
+        if ($returnLine !== 'all' && !ctype_digit($returnLine)) {
+            $returnLine = (string) $model->line_id;
+        }
+
         return redirect()
-            ->route('omd.scrap-limits.index', [
-                'line_id' => $model->line_id,
-            ])
-            ->with('success', 'Scrap Limit model berhasil disimpan. Histori limit sebelumnya tetap dipertahankan.');
+            ->route('omd.scrap-limits.index', array_filter([
+                'line_id' => $returnLine,
+                'q' => trim((string) $request->input('return_q', '')) ?: null,
+            ], fn ($value) => $value !== null && $value !== ''))
+            ->with('success', 'Scrap Limit berhasil disimpan.');
     }
 }

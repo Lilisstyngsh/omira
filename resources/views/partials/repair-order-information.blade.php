@@ -1,148 +1,146 @@
 @php
-$context = $context ?? 'default';
-$infoId = 'repair-info-' . $order->id . '-' . preg_replace('/[^A-Za-z0-9_-]/', '-', $context);
-$hasOmdResult = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
-$totalQtyOmd = (int) $order->items->sum(fn ($item) => (int) ($item->after_qty ?? 0));
+    $hasOmdResult = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
+    $qtyUser = (int) $order->items->sum(fn ($item) => (int) ($item->before_qty ?? 0));
+    $qtyOmd = (int) $order->items->sum(fn ($item) => (int) ($item->after_qty ?? 0));
 @endphp
 
 <style>
-    .repair-info-disclosure {
-        background: #fff;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        overflow: hidden
+    .repair-info-card{
+        background:#fff;
+        border:1px solid #dbe3ee;
+        border-radius:14px;
+        padding:14px;
+        margin-bottom:16px;
     }
-
-    .repair-info-toggle {
-        width: 100%;
-        min-height: 52px;
-        padding: 12px 15px;
-        border: 0;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        cursor: pointer;
-        color: #0f172a;
-        text-align: left
+    .repair-info-title{
+        margin:0 0 11px;
+        font-size:14px;
+        font-weight:650;
+        color:#0f172a;
     }
-
-    .repair-info-toggle:hover {
-        background: #f8fafc
+    .repair-info-grid{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:9px;
     }
-
-    .repair-info-toggle strong {
-        font-size: 14px;
-        font-weight: 650
+    .repair-info-mini{
+        min-width:0;
+        min-height:62px;
+        padding:10px 11px;
+        border:1px solid transparent;
+        border-radius:10px;
     }
-
-    .repair-info-chevron {
-        font-size: 22px;
-        line-height: 1;
-        color: #475569;
-        transition: transform .18s ease
+    .repair-info-mini span{
+        display:block;
+        margin-bottom:4px;
+        font-size:9px;
+        font-weight:550;
+        letter-spacing:.02em;
+        text-transform:uppercase;
+        color:#64748b;
     }
-
-    .repair-info-toggle[aria-expanded="true"] .repair-info-chevron {
-        transform: rotate(90deg)
+    .repair-info-mini strong{
+        display:block;
+        font-size:12px;
+        font-weight:600;
+        line-height:1.35;
+        color:#0f172a;
+        word-break:break-word;
     }
-
-    .repair-info-content {
-        padding: 0 15px 15px;
-        border-top: 1px solid #e2e8f0
+    .repair-info-blue{background:#eff6ff;border-color:#dbeafe}
+    .repair-info-slate{background:#f8fafc;border-color:#e2e8f0}
+    .repair-info-indigo{background:#eef2ff;border-color:#e0e7ff}
+    .repair-info-violet{background:#f5f3ff;border-color:#ede9fe}
+    .repair-info-cyan{background:#ecfeff;border-color:#cffafe}
+    .repair-info-amber{background:#fffbeb;border-color:#fde68a}
+    .repair-info-green{background:#f0fdf4;border-color:#bbf7d0}
+    .repair-info-green span,.repair-info-green strong{color:#166534}
+    .repair-info-qty-grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:9px;
+        margin-top:9px;
     }
-
-    .repair-info-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
-        padding-top: 14px
+    .repair-info-qty-grid .repair-info-mini strong{font-size:15px}
+    .repair-info-description{
+        margin-top:9px;
+        padding:10px 11px;
+        border:1px solid #e2e8f0;
+        border-radius:10px;
+        background:#fff;
     }
-
-    .repair-info-item {
-        min-width: 0
+    .repair-info-description span{
+        display:block;
+        margin-bottom:4px;
+        font-size:9px;
+        font-weight:550;
+        text-transform:uppercase;
+        color:#64748b;
     }
-
-    .repair-info-item span {
-        display: block;
-        font-size: 10px;
-        color: #64748b;
-        margin-bottom: 3px
+    .repair-info-description div{
+        font-size:11px;
+        line-height:1.5;
+        color:#334155;
+        white-space:pre-wrap;
+        word-break:break-word;
     }
-
-    .repair-info-item strong {
-        display: block;
-        font-size: 12px;
-        font-weight: 550;
-        color: #0f172a;
-        word-break: break-word
+    @media(max-width:900px){
+        .repair-info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
     }
-
-    .repair-info-description {
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid #e2e8f0
+    @media(max-width:680px){
+        .repair-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .repair-info-qty-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
-
-    .repair-info-description span {
-        display: block;
-        font-size: 10px;
-        color: #64748b;
-        margin-bottom: 5px
-    }
-
-    .repair-info-description div {
-        font-size: 12px;
-        color: #334155;
-        line-height: 1.5;
-        white-space: pre-wrap
-    }
-
-    @media(max-width:900px) {
-        .repair-info-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr))
-        }
-    }
-
-    @media(max-width:520px) {
-        .repair-info-grid {
-            grid-template-columns: 1fr
-        }
-
-        .repair-info-toggle {
-            min-height: 56px
-        }
+    @media(max-width:420px){
+        .repair-info-grid,.repair-info-qty-grid{grid-template-columns:1fr}
     }
 </style>
 
-<div class="repair-info-disclosure">
-    <button type="button"
-        class="repair-info-toggle"
-        aria-expanded="false"
-        aria-controls="{{ $infoId }}"
-        onclick="(function(btn){var panel=document.getElementById(btn.getAttribute('aria-controls'));var open=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded',open?'false':'true');panel.hidden=open;})(this)">
-        <strong>Informasi Order</strong>
-        <span class="repair-info-chevron" aria-hidden="true">›</span>
-    </button>
+<div class="repair-info-card">
+    <h3 class="repair-info-title">Informasi Order</h3>
 
-    <div id="{{ $infoId }}" class="repair-info-content" hidden>
-        <div class="repair-info-grid">
-            <div class="repair-info-item"><span>No Order</span><strong>{{ $order->order_number }}</strong></div>
-            <div class="repair-info-item"><span>Tanggal</span><strong>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</strong></div>
-            <div class="repair-info-item"><span>Nama</span><strong>{{ $order->user?->name ?? '-' }}</strong></div>
-            <div class="repair-info-item"><span>Plant</span><strong>{{ $order->line?->plant?->name ?? '-' }}</strong></div>
-            <div class="repair-info-item"><span>Line</span><strong>{{ $order->line?->name ?? '-' }}</strong></div>
-            <div class="repair-info-item"><span>Jenis Order</span><strong>Repair Box</strong></div>
-            <div class="repair-info-item"><span>Qty User</span><strong>{{ (int) $order->items->sum('before_qty') }}</strong></div>
-            @if($hasOmdResult)
-            <div class="repair-info-item"><span>Qty OMD</span><strong>{{ $totalQtyOmd }}</strong></div>
-            @endif
+    <div class="repair-info-grid">
+        <div class="repair-info-mini repair-info-blue">
+            <span>No Order</span>
+            <strong>{{ $order->order_number }}</strong>
         </div>
-        <div class="repair-info-description">
-            <span>Keterangan</span>
-            <div>{{ $order->description ?: '-' }}</div>
+        <div class="repair-info-mini repair-info-slate">
+            <span>Tanggal</span>
+            <strong>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</strong>
         </div>
+        <div class="repair-info-mini repair-info-violet">
+            <span>User</span>
+            <strong>{{ $order->user?->name ?? '-' }}</strong>
+        </div>
+        <div class="repair-info-mini repair-info-cyan">
+            <span>Plant</span>
+            <strong>{{ $order->line?->plant?->name ?? '-' }}</strong>
+        </div>
+        <div class="repair-info-mini repair-info-indigo">
+            <span>Line</span>
+            <strong>{{ $order->line?->name ?? '-' }}</strong>
+        </div>
+        <div class="repair-info-mini repair-info-slate">
+            <span>Jenis</span>
+            <strong>Repair Box</strong>
+        </div>
+    </div>
+
+    <div class="repair-info-qty-grid">
+        <div class="repair-info-mini repair-info-amber">
+            <span>Qty User</span>
+            <strong>{{ $qtyUser > 0 ? $qtyUser . ' NG' : '-' }}</strong>
+        </div>
+        @if($hasOmdResult)
+            <div class="repair-info-mini repair-info-green">
+                <span>Qty OMD</span>
+                <strong>{{ $qtyOmd > 0 ? $qtyOmd . ' NG' : '-' }}</strong>
+            </div>
+        @endif
+    </div>
+
+    <div class="repair-info-description">
+        <span>Keterangan</span>
+        <div>{{ $order->description ?: '-' }}</div>
     </div>
 </div>

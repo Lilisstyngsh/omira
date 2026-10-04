@@ -63,14 +63,15 @@ class DatabaseSeeder extends Seeder
             [
 
                 // UNIT
-                [
-                    'plant_id' => $unit->id,
-                    'name' => 'PPIC Unit'
-                ],
 
                 [
                     'plant_id' => $unit->id,
                     'name' => 'AS Unit'
+                ],
+
+                [
+                    'plant_id' => $unit->id,
+                    'name' => 'DC'
                 ],
 
                 [
@@ -80,15 +81,10 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'DC'
+                    'name' => 'PPIC Unit'
                 ],
 
                 // BODY
-                [
-                    'plant_id' => $body->id,
-                    'name' => 'PPIC Body'
-                ],
-
                 [
                     'plant_id' => $body->id,
                     'name' => 'AS Body'
@@ -96,23 +92,28 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $body->id,
-                    'name' => 'PT'
+                    'name' => 'INJ'
                 ],
 
                 [
                     'plant_id' => $body->id,
-                    'name' => 'INJ'
+                    'name' => 'PPIC Body'
+                ],
+
+                [
+                    'plant_id' => $body->id,
+                    'name' => 'PT'
                 ],
 
                 // ELECTRIC
                 [
                     'plant_id' => $electric->id,
-                    'name' => 'PPIC Electric'
+                    'name' => 'AS Electric'
                 ],
 
                 [
                     'plant_id' => $electric->id,
-                    'name' => 'AS Electric'
+                    'name' => 'PPIC Electric'
                 ],
             ]
 
@@ -183,12 +184,9 @@ class DatabaseSeeder extends Seeder
                     'Pad Frame',
                 ],
                 'TTI' => [
-                    'Slide R',
-                    'Slide L',
-                    'Reclining R',
-                    'Reclining L',
-                    'Tilt R',
-                    'Tilt L',
+                    'Slide R/L',
+                    'Reclining R/L',
+                    'Tilt R/L',
                 ],
                 'HINO' => [
                     'Handle',
@@ -206,7 +204,9 @@ class DatabaseSeeder extends Seeder
                     'Handle YHA',
                     'Handle YTB',
                 ],
-                'DOWA' => [],
+                'DOWA' => [
+                    'CSH',
+                ],
             ],
 
             /*
@@ -226,14 +226,14 @@ class DatabaseSeeder extends Seeder
             |--------------------------------------------------------------------------
             */
             'PT' => [
-                '660 / 230' => [
+                '660/230' => [
                     'Handle',
                     'Cap',
                 ],
                 '560' => [
                     'Handle',
                 ],
-                '4L45W / 5P45' => [
+                '4L45W/5P45' => [
                     'Handle',
                     'Cap',
                 ],
@@ -269,11 +269,11 @@ class DatabaseSeeder extends Seeder
                     'TCC',
                     'CSH',
                 ],
-                'ISZ/K3' => [
-                    'WP',
+                'WP' => [
+                    'ISZ/K3',
                 ],
-                '1SZ/3SZ' => [
-                    'OP',
+                'OP' => [
+                    'ISZ/3SZ',
                 ],
                 '889F' => [
                     'TCC',
@@ -302,6 +302,9 @@ class DatabaseSeeder extends Seeder
                     'CSH',
                 ],
                 '4A91' => [
+                    'TCC',
+                ],
+                '5445' => [
                     'TCC',
                 ],
                 '5P45' => [

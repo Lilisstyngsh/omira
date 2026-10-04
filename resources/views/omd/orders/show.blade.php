@@ -259,19 +259,27 @@
             display: block;
             width: 44px;
             max-width: 100%;
-            height: 28px;
+            height: 36px;
             box-sizing: border-box;
-            border: 1px solid #64748b;
-            border-radius: 7px;
+            border: 2px solid #64748b;
+            border-radius: 9px;
             outline: none;
             text-align: center;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 600;
             color: #334155;
             background: #fff;
-            padding: 0 4px;
+            padding: 0 3px;
             margin: 0 auto;
             transition: border-color .15s ease, box-shadow .15s ease;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .repair-table .ng-input::-webkit-outer-spin-button,
+        .repair-table .ng-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .repair-table .ng-input:focus {
@@ -282,6 +290,49 @@
         .repair-table .ng-input::placeholder {
             color: #cbd5e1;
         }
+
+        .repair-qty-control {
+            display: grid;
+            grid-template-columns: 28px 44px 28px;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            width: 104px;
+            margin: 0 auto;
+        }
+
+        .repair-qty-control .ng-input {
+            width: 44px;
+            height: 36px;
+            border-width: 2px;
+            border-radius: 9px;
+            font-size: 14px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
+        }
+
+        .repair-qty-step {
+            width: 28px;
+            height: 38px;
+            border: 0;
+            padding: 0;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            font-weight: 500;
+            line-height: 1;
+            cursor: pointer;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .repair-qty-step[data-step="-1"] { color: #b91c1c; }
+        .repair-qty-step[data-step="1"] { color: #15803d; }
+        .repair-qty-step:active { transform: scale(.94); opacity: .75; }
+        .repair-qty-step:disabled { opacity: .35; cursor: not-allowed; }
+
+        .repair-table .model-text { font-weight: 700; color: #0f172a; }
 
         .repair-table .ng-input.user-focus {
             background: #fff7d6;
@@ -347,16 +398,17 @@
         }
 
         .repair-table .total-row td {
-            background: #f8fafc;
-            font-weight: 800;
-            border-top: 1px solid #cbd5e1;
+            background: #fff;
+            color: #334155;
+            font-weight: 550;
+            border-top: 1px solid #dbe2ea;
         }
 
         .repair-table .grand-total-row td {
-            background: #eef2ff;
-            color: #312e81;
-            font-weight: 900;
-            border-top: 2px solid #818cf8;
+            background: #fff;
+            color: #334155;
+            font-weight: 600;
+            border-top: 1px solid #dbe2ea;
         }
 
         .repair-table .total-label {
@@ -368,7 +420,7 @@
 
         .repair-table .total-value {
             text-align: center;
-            font-weight: 900;
+            font-weight: 550;
         }
 
 
@@ -390,14 +442,18 @@
         }
 
         .repair-table-unified tfoot td {
-            border-bottom: 0;
+            border-bottom: 1px solid #dbe2ea;
+        }
+
+        .repair-table-editable {
+            min-width: 1040px;
         }
 
         .repair-table .grand-total-value {
             text-align: center;
-            font-weight: 900;
+            font-weight: 600;
             font-size: 12px;
-            letter-spacing: .02em;
+            letter-spacing: .01em;
         }
 
         .repair-result-actions {
@@ -418,10 +474,10 @@
         }
 
         .correction-banner {
-            margin: 12px 0 14px;
-            padding: 12px 14px;
+            margin: 10px 0 12px;
+            padding: 9px 11px;
             border: 1px solid #f0c36b;
-            border-radius: 11px;
+            border-radius: 9px;
             background: #fffaf0;
             color: #8a5a13;
         }
@@ -435,7 +491,19 @@
         .correction-banner span {
             display: block;
             font-size: 10px;
-            line-height: 1.5;
+            line-height: 1.4;
+        }
+
+        .correction-editor {
+            display: none !important;
+        }
+
+        .correction-mode .correction-editor {
+            display: grid !important;
+        }
+
+        .repair-result-actions [hidden] {
+            display: none !important;
         }
 
         .correction-input {
@@ -1042,8 +1110,8 @@
 
             @if ($isCorrection)
                 <div class="correction-banner" id="correctionBanner" hidden>
-                    <strong>Mode Koreksi Hasil Repair</strong>
-                    <span>Perubahan yang disimpan akan langsung menjadi data terbaru yang dilihat User. Pastikan jumlah sudah sesuai dengan barang fisik.</span>
+                    <strong>⚠ Mode Koreksi</strong>
+                    <span>Periksa qty sebelum menyimpan perubahan.</span>
                 </div>
             @endif
 
@@ -1053,7 +1121,7 @@
             @endif
 
             <div class="repair-table-scroll">
-                <table class="repair-table repair-table-unified">
+                <table class="repair-table repair-table-unified {{ $canEditResult && $showAfter ? 'repair-table-editable' : '' }}">
                     <colgroup>
                         <col style="width:38px;">
                         <col style="width:88px;">
@@ -1063,11 +1131,11 @@
                         @endforeach
                         @if ($showAfter)
                             @foreach ($ngCodes as $code)
-                                <col style="width:44px;">
+                                <col style="width:{{ $canEditResult ? '104px' : '44px' }};">
                             @endforeach
                         @endif
                         @if ($showProductNote)
-                            <col style="width:128px;">
+                            <col style="width:{{ $canEditResult ? '150px' : '128px' }};">
                         @endif
                     </colgroup>
 
@@ -1076,16 +1144,16 @@
                             <th rowspan="{{ $showAfter ? 3 : 2 }}">No</th>
                             <th rowspan="{{ $showAfter ? 3 : 2 }}">Model</th>
                             <th rowspan="{{ $showAfter ? 3 : 2 }}">Produk</th>
-                            <th colspan="{{ $showAfter ? 8 : 4 }}">Jenis &amp; Qty NG</th>
+                            <th colspan="{{ $showAfter ? 8 : 4 }}">Qty NG</th>
                             @if ($showProductNote)
-                                <th rowspan="{{ $showAfter ? 3 : 2 }}" class="keterangan-head">Keterangan OMD</th>
+                                <th rowspan="{{ $showAfter ? 3 : 2 }}" class="keterangan-head">Catatan</th>
                             @endif
                         </tr>
 
                         @if ($showAfter)
                             <tr>
-                                <th colspan="4">Sebelum</th>
-                                <th colspan="4">Sesudah</th>
+                                <th colspan="4">Order</th>
+                                <th colspan="4">Hasil</th>
                             </tr>
                         @endif
 
@@ -1153,26 +1221,28 @@
                                                     @if ($isCorrection)
                                                         <div class="correction-readonly ng-value">{{ $afterQty > 0 ? $afterQty : '' }}</div>
                                                     @endif
-
-                                                    @if ($ngItem)
-                                                        <input type="number"
-                                                            name="items[{{ $ngItem->id }}][after_qty]"
-                                                            class="ng-input repair-after-input correction-input {{ $isInRepair ? 'input-active' : '' }} {{ $isInRepair && $hasBeforeQty ? 'user-focus' : '' }}"
-                                                            data-ng-code="{{ $code }}"
-                                                            min="0"
-                                                            value="{{ old('items.' . $ngItem->id . '.after_qty', ((int) ($ngItem->after_qty ?? 0)) > 0 ? $ngItem->after_qty : '') }}"
-                                                            placeholder=""
-                                                            @disabled($isCorrection)>
-                                                    @else
-                                                        <input type="number"
-                                                            name="new_items[{{ $productId }}][{{ $code }}]"
-                                                            class="ng-input repair-after-input correction-input {{ $isInRepair ? 'input-active' : '' }}"
-                                                            data-ng-code="{{ $code }}"
-                                                            min="0"
-                                                            value="{{ old('new_items.' . $productId . '.' . $code, '') }}"
-                                                            placeholder=""
-                                                            @disabled($isCorrection)>
-                                                    @endif
+                                                    @php $qtyInputId = $ngItem ? 'after_qty_' . $ngItem->id : 'new_after_' . $productId . '_' . $code; @endphp
+                                                    <div class="repair-qty-control {{ $isCorrection ? 'correction-editor' : '' }}">
+                                                        <button type="button" class="repair-qty-step correction-step" data-step="-1" data-target="{{ $qtyInputId }}" aria-label="Kurangi qty {{ $code }}" @disabled($isCorrection)>−</button>
+                                                        @if ($ngItem)
+                                                            <input type="number"
+                                                                id="{{ $qtyInputId }}"
+                                                                name="items[{{ $ngItem->id }}][after_qty]"
+                                                                class="ng-input repair-after-input correction-input {{ $isInRepair ? 'input-active' : '' }} {{ $isInRepair && $hasBeforeQty ? 'user-focus' : '' }}"
+                                                                data-ng-code="{{ $code }}" min="0" inputmode="numeric"
+                                                                value="{{ old('items.' . $ngItem->id . '.after_qty', ((int) ($ngItem->after_qty ?? 0)) > 0 ? $ngItem->after_qty : '') }}"
+                                                                @disabled($isCorrection)>
+                                                        @else
+                                                            <input type="number"
+                                                                id="{{ $qtyInputId }}"
+                                                                name="new_items[{{ $productId }}][{{ $code }}]"
+                                                                class="ng-input repair-after-input correction-input {{ $isInRepair ? 'input-active' : '' }}"
+                                                                data-ng-code="{{ $code }}" min="0" inputmode="numeric"
+                                                                value="{{ old('new_items.' . $productId . '.' . $code, '') }}"
+                                                                @disabled($isCorrection)>
+                                                        @endif
+                                                        <button type="button" class="repair-qty-step correction-step" data-step="1" data-target="{{ $qtyInputId }}" aria-label="Tambah qty {{ $code }}" @disabled($isCorrection)>+</button>
+                                                    </div>
                                                 @else
                                                     <div class="ng-value">{{ $afterQty > 0 ? $afterQty : '' }}</div>
                                                 @endif
@@ -1243,10 +1313,10 @@
                         </button>
 
                         <div class="correction-actions" id="correctionActions" hidden>
-                            <button type="button" class="btn btn-secondary" id="cancelCorrectionButton" title="Batalkan perubahan dan kembali ke data terakhir">Batal Koreksi</button>
+                            <button type="button" class="btn btn-secondary" id="cancelCorrectionButton" title="Batalkan perubahan dan kembali ke data terakhir">Batal</button>
                             <button type="submit" class="btn btn-warning"
                                 title="Simpan koreksi hasil repair agar User melihat data terbaru">
-                                Simpan Koreksi Hasil Repair
+                                Update
                             </button>
                         </div>
                     @else
@@ -1267,6 +1337,7 @@
                     const card = document.getElementById('repairResultCard');
                     const inputs = Array.from(document.querySelectorAll('.repair-after-input'));
                     const correctionInputs = Array.from(document.querySelectorAll('.correction-input'));
+                    const correctionSteps = Array.from(document.querySelectorAll('.correction-step'));
                     const enableButton = document.getElementById('enableCorrectionButton');
                     const cancelButton = document.getElementById('cancelCorrectionButton');
                     const correctionActions = document.getElementById('correctionActions');
@@ -1303,10 +1374,41 @@
                         input.addEventListener('input', refreshTotals);
                     });
 
+                    function changeRepairQty(button) {
+                        if (button.disabled) return;
+                        const input = document.getElementById(button.dataset.target);
+                        if (!input || input.disabled) return;
+                        const step = parseInt(button.dataset.step || '0', 10);
+                        const current = numberValue(input);
+                        const next = Math.max(0, current + step);
+                        input.value = next > 0 ? String(next) : '';
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+
+                    correctionSteps.forEach(function (button) {
+                        let holdTimer = null;
+                        let repeatTimer = null;
+                        const stop = function () {
+                            if (holdTimer) clearTimeout(holdTimer);
+                            if (repeatTimer) clearInterval(repeatTimer);
+                            holdTimer = null; repeatTimer = null;
+                        };
+                        button.addEventListener('pointerdown', function (event) {
+                            event.preventDefault();
+                            if (button.disabled) return;
+                            changeRepairQty(button);
+                            holdTimer = setTimeout(function () {
+                                repeatTimer = setInterval(function () { changeRepairQty(button); }, 120);
+                            }, 500);
+                        });
+                        ['pointerup','pointercancel','pointerleave'].forEach(function (name) { button.addEventListener(name, stop); });
+                    });
+
                     if (enableButton) {
                         enableButton.addEventListener('click', function () {
                             card.classList.add('correction-mode');
                             correctionInputs.forEach(function (input) { input.disabled = false; });
+                            correctionSteps.forEach(function (button) { button.disabled = false; });
                             enableButton.hidden = true;
                             correctionActions.hidden = false;
                             correctionBanner.hidden = false;
