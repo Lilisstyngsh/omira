@@ -97,13 +97,17 @@ class DashboardController extends Controller
 
         $globalScopeKey = FiscalYearTarget::scopeKey(null);
 
-        $abnormality = MonitoringAbnormality::query()
+        $abnormalitiesByMonth = MonitoringAbnormality::query()
             ->with(['creator', 'updater'])
             ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
             ->where('year', $year)
-            ->where('month', $month)
             ->where('scope_key', $globalScopeKey)
-            ->first();
+            ->whereBetween('month', [1, $month])
+            ->orderBy('month')
+            ->get()
+            ->keyBy(fn ($row) => (int) $row->month);
+
+        $abnormality = $abnormalitiesByMonth->get($month);
 
         $periodEnd = Carbon::create($year, $month, 1)->endOfMonth();
 
@@ -131,7 +135,10 @@ class DashboardController extends Controller
             $target
         );
 
-        $chartMax = $this->roundChartMax($maxMetric);
+        // Target FY adalah reference line, bukan batas maksimum chart.
+        // Beri headroom agar batang yang melebihi target tetap terlihat menembus
+        // garis Target FY dan label angka di atas batang tidak terpotong.
+        $chartMax = $this->roundChartMax((int) ceil($maxMetric * 1.15));
 
         return view('omd.dashboard.index', compact(
             'month',
@@ -149,6 +156,7 @@ class DashboardController extends Controller
             'targetExceeded',
             'targetDifference',
             'abnormality',
+            'abnormalitiesByMonth',
             'productScrapAlerts',
             'months',
             'orderSeries',
@@ -381,16 +389,20 @@ class DashboardController extends Controller
             return 10;
         }
 
-        $magnitude = 10 ** floor(log10($value));
-        $normalized = $value / $magnitude;
-
-        $rounded = match (true) {
-            $normalized <= 1 => 1,
-            $normalized <= 2 => 2,
-            $normalized <= 5 => 5,
-            default => 10,
+        /*
+         * Hindari pembulatan 1/2/5 yang dapat meloncat terlalu jauh
+         * (contoh 1.056 menjadi 2.000). Step yang lebih rapat menjaga
+         * perbedaan Actual vs Target tetap terbaca jelas pada grafik.
+         */
+        $step = match (true) {
+            $value <= 100 => 10,
+            $value <= 500 => 25,
+            $value <= 1000 => 50,
+            $value <= 5000 => 100,
+            $value <= 10000 => 250,
+            default => 500,
         };
 
-        return (int) ($rounded * $magnitude);
+        return (int) (ceil($value / $step) * $step);
     }
 }

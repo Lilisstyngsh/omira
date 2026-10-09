@@ -267,7 +267,7 @@
             max-width: 100%;
             height: 36px;
             box-sizing: border-box;
-            border: 2px solid #64748b;
+            border: 1px solid #64748b;
             border-radius: 9px;
             outline: none;
             text-align: center;
@@ -310,7 +310,7 @@
         .repair-qty-control .ng-input {
             width: 44px;
             height: 36px;
-            border-width: 2px;
+            border-width: 1px;
             border-radius: 9px;
             font-size: 14px;
             box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
@@ -325,8 +325,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 25px;
-            font-weight: 500;
+            font-size: 23px;
+            font-weight: 400;
             line-height: 1;
             cursor: pointer;
             touch-action: none;

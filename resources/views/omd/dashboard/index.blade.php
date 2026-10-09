@@ -165,7 +165,7 @@
         .kpi-dot.order { background: #7678ED; }
         .kpi-dot.ok { background: #F7B801; }
         .kpi-dot.scrap { background: #F35B04; }
-        .kpi-dot.target { background: #f97316; }
+        .kpi-dot.target { background: #5B9BD5; }
 
         .kpi-value {
             margin-top: 13px;
@@ -189,9 +189,60 @@
             padding: 15px 16px;
         }
 
-        .alert-card.target-alert {
-            border-color: #fdba74;
-            background: #fff7ed;
+        .target-reason-card {
+            padding: 16px;
+            border-color: #f3cf7a;
+            background: #fffaf0;
+            box-shadow: 0 10px 28px rgba(180, 120, 20, .07);
+        }
+
+        .target-reason-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .target-reason-heading {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+        }
+
+        .target-reason-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            color: #d97706;
+            font-size: 17px;
+            line-height: 1;
+        }
+
+        .target-reason-title {
+            margin: 0;
+            color: #172033;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .target-reason-meta {
+            color: #92400e;
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .target-reason-card .abnormality-form textarea {
+            background: #fff;
+            border-color: #e9c46a;
+        }
+
+        .target-reason-card .abnormality-form textarea:focus {
+            border-color: #d9a514;
+            box-shadow: 0 0 0 3px rgba(217, 165, 20, .12);
         }
 
         .alert-card.scrap-alert {
@@ -208,11 +259,6 @@
             justify-content: center;
             border-radius: 11px;
             font-weight: 900;
-        }
-
-        .target-alert .alert-icon {
-            background: #ffedd5;
-            color: #ea580c;
         }
 
         .scrap-alert .alert-icon {
@@ -246,11 +292,47 @@
             resize: vertical;
         }
 
-        .abnormality-meta {
-            margin-top: 8px;
-            color: #9a3412;
-            font-size: 10px;
+        .chart-abnormality-popover {
+            position: fixed;
+            z-index: 1400;
+            width: min(280px, calc(100vw - 28px));
+            padding: 12px 13px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, .16);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(4px);
+            transition: opacity .14s ease, transform .14s ease, visibility .14s ease;
+        }
+
+        .chart-abnormality-popover.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .chart-abnormality-title {
+            margin: 0;
+            color: #172033;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .chart-abnormality-meta {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 9px;
             font-weight: 700;
+        }
+
+        .chart-abnormality-reason {
+            margin-top: 8px;
+            color: #334155;
+            font-size: 10px;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
         }
 
         .chart-card {
@@ -306,7 +388,7 @@
         .legend-color.order { background: #7678ED; }
         .legend-color.ok { background: #F7B801; }
         .legend-color.scrap { background: #F35B04; }
-        .legend-color.target { background: #f97316; height: 3px; }
+        .legend-color.target { background: #5B9BD5; height: 3px; }
 
         .chart-scroll {
             width: 100%;
@@ -336,9 +418,24 @@
             min-width: 0;
         }
 
-        .chart-grid {
+        /*
+         * Grid dan garis Target FY harus memakai area data yang SAMA dengan
+         * tinggi batang (area chart dikurangi 27px untuk label bulan).
+         * Sebelumnya target memakai persentase terhadap tinggi chart penuh,
+         * sehingga garis bisa tampak lebih tinggi dari batang walaupun nilai
+         * batang sebenarnya sudah melewati target.
+         */
+        .chart-data-layer {
             position: absolute;
             inset: 0 0 27px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .chart-grid {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
             background: repeating-linear-gradient(
                 to bottom,
                 transparent 0,
@@ -349,26 +446,70 @@
             border-bottom: 1px solid #cbd5e1;
         }
 
+        /*
+         * Target FY dibuat sebagai overlay TERPISAH di atas batang.
+         * Dengan begitu garis tetap terlihat di depan ketika batang Order / OK / Scrap
+         * sudah melewati target, seperti grafik kombinasi bar + target line.
+         */
+        .target-overlay {
+            position: absolute;
+            inset: 0 0 27px;
+            z-index: 6;
+            pointer-events: none;
+        }
+
         .target-line {
             position: absolute;
             left: 0;
             right: 0;
-            bottom: calc(27px + var(--target-height));
-            z-index: 3;
-            border-top: 2px dashed #f97316;
-            pointer-events: none;
+            bottom: var(--target-height);
+            border-top: 3px solid #5B9BD5;
+            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .55));
         }
 
-        .target-line span {
+        .target-points {
             position: absolute;
-            right: 3px;
-            top: -21px;
-            padding: 2px 6px;
+            left: 0;
+            right: 0;
+            bottom: var(--target-height);
+            height: 0;
+            display: grid;
+            grid-template-columns: repeat(var(--month-count), minmax(48px, 1fr));
+            gap: 7px;
+        }
+
+        .target-point {
+            position: relative;
+            height: 0;
+            min-width: 0;
+        }
+
+        .target-marker {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 9px;
+            height: 9px;
+            border: 2px solid #5B9BD5;
             border-radius: 999px;
-            background: #fff7ed;
-            color: #c2410c;
-            font-size: 9px;
+            background: #fff;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 2px rgba(91, 155, 213, .10);
+        }
+
+        .target-value {
+            position: absolute;
+            left: 50%;
+            top: -23px;
+            transform: translateX(-50%);
+            padding: 1px 4px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, .92);
+            color: #315f8b;
+            font-size: 8px;
             font-weight: 900;
+            line-height: 1.3;
+            white-space: nowrap;
         }
 
         .chart-months {
@@ -377,7 +518,7 @@
             display: grid;
             grid-template-columns: repeat(var(--month-count), minmax(48px, 1fr));
             gap: 7px;
-            z-index: 2;
+            z-index: 3;
         }
 
         .month-group {
@@ -397,38 +538,47 @@
 
         .chart-bar {
             position: relative;
+            z-index: 3;
             width: min(18px, 28%);
             min-height: 2px;
             height: var(--bar-height);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding-top: 0;
-            overflow: hidden;
+            overflow: visible;
             border-radius: 6px 6px 2px 2px;
             transition: opacity .15s ease, transform .15s ease;
         }
 
         .chart-bar-value {
-            position: relative;
-            z-index: 1;
-            color: #ffffff;
+            position: absolute;
+            left: 50%;
+            top: -18px;
+            z-index: 5;
+            transform: translateX(-50%);
+            color: #334155;
             font-size: 8px;
             font-weight: 900;
             line-height: 1;
             white-space: nowrap;
             pointer-events: none;
-            text-shadow: 0 1px 2px rgba(15, 23, 42, .22);
-        }
-
-        .chart-bar.ok .chart-bar-value {
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(15, 23, 42, .30);
         }
 
         .chart-bar:hover {
-            opacity: .86;
+            opacity: .88;
+        }
+
+        .chart-bar.has-abnormality {
+            cursor: pointer;
+        }
+
+        .chart-bar.has-abnormality:hover {
             transform: translateY(-2px);
+        }
+
+        .chart-bar.has-abnormality:focus-visible {
+            outline: 2px solid rgba(124, 58, 237, .35);
+            outline-offset: 3px;
         }
 
         .chart-bar.order { background: #7678ED; }
@@ -639,6 +789,16 @@
             .alert-card {
                 padding: 13px;
             }
+
+            .target-reason-head {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .target-reason-meta {
+                white-space: normal;
+            }
         }
     </style>
 
@@ -724,47 +884,38 @@
             </div>
         </div>
 
-        @if ($targetExceeded)
-            <div class="monitor-card alert-card target-alert">
-                <div class="alert-icon">!</div>
-                <div style="flex:1;min-width:0;">
-                    <h3 class="alert-title">Target FY global terlampaui</h3>
-                    <p class="alert-copy">
-                        Order {{ $monthNames[$month] }} <strong>{{ number_format($globalOrder) }}</strong>
-                        · Target <strong>{{ number_format($target) }}</strong>
-                        · Selisih <strong>+{{ number_format($targetDifference) }}</strong>
-                    </p>
-
-                    @if ($abnormality)
-                        <div class="abnormality-meta">
-                            ✓ Alasan bulan ini sudah dicatat oleh
-                            {{ $abnormality->creator?->name ?? $abnormality->updater?->name ?? 'OMD' }}
-                            pada {{ optional($abnormality->created_at)->format('d/m/Y H:i') }}.
-                        </div>
-                        <div class="alert-copy" style="margin-top:8px;">
-                            “{{ $abnormality->reason }}”
-                        </div>
-                    @else
-                        <form class="abnormality-form" method="POST" action="{{ route('omd.dashboard.abnormality.store') }}">
-                            @csrf
-                            <input type="hidden" name="year" value="{{ $year }}">
-                            <input type="hidden" name="month" value="{{ $month }}">
-                            @if ($lineId)
-                                <input type="hidden" name="line_id" value="{{ $lineId }}">
-                            @endif
-
-                            <textarea name="reason" placeholder="Tuliskan penyebab total Order bulan ini melewati Target FY..." required>{{ old('reason') }}</textarea>
-
-                            @error('reason')
-                                <div class="field-error">{{ $message }}</div>
-                            @enderror
-
-                            <div>
-                                <button type="submit" class="btn btn-primary">Simpan Alasan</button>
-                            </div>
-                        </form>
-                    @endif
+        @if ($targetExceeded && ! $abnormality)
+            <div class="monitor-card target-reason-card">
+                <div class="target-reason-head">
+                    <div class="target-reason-heading">
+                        <span class="target-reason-icon" aria-hidden="true">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </span>
+                        <h3 class="target-reason-title">Alasan Target FY</h3>
+                    </div>
+                    <span class="target-reason-meta">
+                        {{ $monthNames[$month] }} · Order {{ number_format($globalOrder) }} · Target {{ number_format($target) }} · +{{ number_format($targetDifference) }}
+                    </span>
                 </div>
+
+                <form class="abnormality-form" method="POST" action="{{ route('omd.dashboard.abnormality.store') }}">
+                    @csrf
+                    <input type="hidden" name="year" value="{{ $year }}">
+                    <input type="hidden" name="month" value="{{ $month }}">
+                    @if ($lineId)
+                        <input type="hidden" name="line_id" value="{{ $lineId }}">
+                    @endif
+
+                    <textarea name="reason" placeholder="Tuliskan penyebab..." required>{{ old('reason') }}</textarea>
+
+                    @error('reason')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+
+                    <div style="display:flex;justify-content:flex-end;">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
             </div>
         @endif
 
@@ -789,7 +940,7 @@
                     <span class="legend-item"><i class="legend-color order"></i>Order</span>
                     <span class="legend-item"><i class="legend-color ok"></i>OK</span>
                     <span class="legend-item"><i class="legend-color scrap"></i>Scrap</span>
-                    <span class="legend-item"><i class="legend-color target"></i>Target FY</span>
+                    <span class="legend-item"><i class="legend-color target"></i>Target FY {{ number_format($target) }}</span>
                 </div>
             </div>
 
@@ -802,11 +953,22 @@
                     </div>
 
                     <div class="chart-plot">
-                        <div class="chart-grid"></div>
+                        <div class="chart-data-layer">
+                            <div class="chart-grid"></div>
+                        </div>
 
                         @if ($target > 0)
-                            <div class="target-line" style="--target-height: {{ number_format($targetPercent, 2, '.', '') }}%;">
-                                <span>{{ number_format($target) }}</span>
+                            <div class="target-overlay"
+                                style="--target-height: {{ number_format($targetPercent, 2, '.', '') }}%; --month-count: {{ max($months->count(), 1) }};">
+                                <div class="target-line"></div>
+                                <div class="target-points">
+                                    @foreach ($months as $targetMonth)
+                                        <span class="target-point" aria-hidden="true">
+                                            <i class="target-marker"></i>
+                                            <span class="target-value">{{ number_format($target) }}</span>
+                                        </span>
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
 
@@ -821,27 +983,49 @@
                                     $okHeight = $chartMax > 0 ? ($okValue / $chartMax) * 100 : 0;
                                     $scrapHeight = $chartMax > 0 ? ($scrapValue / $chartMax) * 100 : 0;
 
-                                    // Batang bernilai > 0 diberi tinggi visual minimum agar label tetap terbaca di dalam batang.
-                                    $orderVisualHeight = $orderValue > 0 ? max($orderHeight, 6) : 0;
-                                    $okVisualHeight = $okValue > 0 ? max($okHeight, 6) : 0;
-                                    $scrapVisualHeight = $scrapValue > 0 ? max($scrapHeight, 6) : 0;
+                                    // Batang kecil tetap diberi tinggi minimum visual, tanpa mengubah nilai aslinya.
+                                    $orderVisualHeight = $orderValue > 0 ? max($orderHeight, 2) : 0;
+                                    $okVisualHeight = $okValue > 0 ? max($okHeight, 2) : 0;
+                                    $scrapVisualHeight = $scrapValue > 0 ? max($scrapHeight, 2) : 0;
+                                    $monthAbnormality = $abnormalitiesByMonth->get($index + 1);
                                 @endphp
 
                                 <div class="month-group">
                                     <div class="month-bars">
-                                        <div class="chart-bar order"
-                                            title="{{ $monthLabel }} · Order {{ number_format($orderValue) }}"
-                                            style="--bar-height: {{ number_format($orderVisualHeight, 2, '.', '') }}%;">
+                                        <div class="chart-bar order {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                            style="--bar-height: {{ number_format($orderVisualHeight, 2, '.', '') }}%;"
+                                            @if ($monthAbnormality)
+                                                role="button" tabindex="0"
+                                                data-abnormality-month="{{ $monthNames[$index + 1] ?? $monthLabel }}"
+                                                data-abnormality-year="{{ $year }}"
+                                                data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
+                                                data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
+                                                data-abnormality-reason="{{ $monthAbnormality->reason }}"
+                                            @endif>
                                             @if ($orderValue > 0)<span class="chart-bar-value">{{ number_format($orderValue) }}</span>@endif
                                         </div>
-                                        <div class="chart-bar ok"
-                                            title="{{ $monthLabel }} · OK {{ number_format($okValue) }}"
-                                            style="--bar-height: {{ number_format($okVisualHeight, 2, '.', '') }}%;">
+                                        <div class="chart-bar ok {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                            style="--bar-height: {{ number_format($okVisualHeight, 2, '.', '') }}%;"
+                                            @if ($monthAbnormality)
+                                                role="button" tabindex="0"
+                                                data-abnormality-month="{{ $monthNames[$index + 1] ?? $monthLabel }}"
+                                                data-abnormality-year="{{ $year }}"
+                                                data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
+                                                data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
+                                                data-abnormality-reason="{{ $monthAbnormality->reason }}"
+                                            @endif>
                                             @if ($okValue > 0)<span class="chart-bar-value">{{ number_format($okValue) }}</span>@endif
                                         </div>
-                                        <div class="chart-bar scrap"
-                                            title="{{ $monthLabel }} · Scrap {{ number_format($scrapValue) }}"
-                                            style="--bar-height: {{ number_format($scrapVisualHeight, 2, '.', '') }}%;">
+                                        <div class="chart-bar scrap {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                            style="--bar-height: {{ number_format($scrapVisualHeight, 2, '.', '') }}%;"
+                                            @if ($monthAbnormality)
+                                                role="button" tabindex="0"
+                                                data-abnormality-month="{{ $monthNames[$index + 1] ?? $monthLabel }}"
+                                                data-abnormality-year="{{ $year }}"
+                                                data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
+                                                data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
+                                                data-abnormality-reason="{{ $monthAbnormality->reason }}"
+                                            @endif>
                                             @if ($scrapValue > 0)<span class="chart-bar-value">{{ number_format($scrapValue) }}</span>@endif
                                         </div>
                                     </div>
@@ -861,5 +1045,74 @@
             @endif
         </div>
 
+        <div class="chart-abnormality-popover" id="chartAbnormalityPopover" role="dialog" aria-hidden="true">
+            <h4 class="chart-abnormality-title" id="chartAbnormalityTitle">Abnormality Global</h4>
+            <div class="chart-abnormality-meta" id="chartAbnormalityMeta"></div>
+            <div class="chart-abnormality-reason" id="chartAbnormalityReason"></div>
+        </div>
+
     </div>
+
+    <script>
+        (() => {
+            const popover = document.getElementById('chartAbnormalityPopover');
+            const title = document.getElementById('chartAbnormalityTitle');
+            const meta = document.getElementById('chartAbnormalityMeta');
+            const reason = document.getElementById('chartAbnormalityReason');
+            const bars = document.querySelectorAll('.chart-bar.has-abnormality');
+
+            if (!popover || bars.length === 0) return;
+
+            const formatNumber = value => new Intl.NumberFormat('id-ID').format(Number(value || 0));
+
+            const closePopover = () => {
+                popover.classList.remove('show');
+                popover.setAttribute('aria-hidden', 'true');
+            };
+
+            const openPopover = bar => {
+                const actual = Number(bar.dataset.abnormalityActual || 0);
+                const target = Number(bar.dataset.abnormalityTarget || 0);
+                const difference = Math.max(actual - target, 0);
+
+                title.textContent = `Abnormality Global · ${bar.dataset.abnormalityMonth} ${bar.dataset.abnormalityYear}`;
+                meta.textContent = `Order ${formatNumber(actual)} · Target ${formatNumber(target)} · Selisih +${formatNumber(difference)}`;
+                reason.textContent = bar.dataset.abnormalityReason || '-';
+
+                popover.classList.add('show');
+                popover.setAttribute('aria-hidden', 'false');
+
+                const rect = bar.getBoundingClientRect();
+                const popupRect = popover.getBoundingClientRect();
+                const gap = 10;
+                let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+                let top = rect.top - popupRect.height - gap;
+
+                left = Math.max(12, Math.min(left, window.innerWidth - popupRect.width - 12));
+                if (top < 12) top = Math.min(window.innerHeight - popupRect.height - 12, rect.bottom + gap);
+
+                popover.style.left = `${left}px`;
+                popover.style.top = `${Math.max(12, top)}px`;
+            };
+
+            bars.forEach(bar => {
+                bar.addEventListener('click', event => {
+                    event.stopPropagation();
+                    openPopover(bar);
+                });
+                bar.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openPopover(bar);
+                    }
+                });
+            });
+
+            document.addEventListener('click', event => {
+                if (!popover.contains(event.target)) closePopover();
+            });
+            window.addEventListener('resize', closePopover);
+            window.addEventListener('scroll', closePopover, true);
+        })();
+    </script>
 @endsection
