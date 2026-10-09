@@ -7,6 +7,7 @@ use App\Models\Plant;
 use App\Models\Line;
 use App\Models\NgType;
 use App\Models\Target;
+use App\Models\FiscalYearTarget;
 use App\Models\User;
 
 use Illuminate\Database\Seeder;
@@ -299,34 +300,34 @@ class DatabaseSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | TARGET
+        | TARGET FY GLOBAL
         |--------------------------------------------------------------------------
+        | Baseline 2026 = 855 untuk seluruh Plant & Line. firstOrCreate dipakai
+        | agar db:seed berikutnya tidak menimpa target terbaru yang sudah diubah OMD.
         */
-        foreach (
-
+        FiscalYearTarget::firstOrCreate(
             [
-                4 => 950,
-                5 => 855,
-                6 => 855,
-                7 => 855,
-                8 => 855,
-                9 => 855
+                'year' => 2026,
+                'scope_key' => FiscalYearTarget::scopeKey(null),
+            ],
+            [
+                'line_id' => null,
+                'target_qty' => 855,
+                'created_by' => null,
+                'updated_by' => null,
             ]
-            as $month => $qty
+        );
 
-        ) {
-
-            Target::updateOrCreate(
+        foreach (range(1, 12) as $month) {
+            Target::firstOrCreate(
                 [
                     'year' => 2026,
                     'month' => $month,
-                    'line_id' => $lines['PPIC Unit']->id
+                    'line_id' => null,
                 ],
-
                 [
-                    'target_qty' => $qty
+                    'target_qty' => 855,
                 ]
-
             );
         }
     }

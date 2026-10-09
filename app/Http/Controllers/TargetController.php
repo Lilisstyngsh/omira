@@ -3,58 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\FiscalYearTarget;
-use App\Models\Line;
 use App\Models\MonitoringAbnormality;
 use App\Models\Target;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class TargetController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $year = (int) $request->input('year', now()->year);
-        $lineId = $request->filled('line_id')
-            ? (int) $request->input('line_id')
-            : null;
-        $scopeKey = FiscalYearTarget::scopeKey($lineId);
-
-        $lines = Line::query()
-            ->with('plant')
-            ->where('is_active', true)
-            ->orderBy('plant_id')
-            ->orderBy('name')
-            ->get();
-
-        $target = FiscalYearTarget::query()
-            ->with(['line', 'updater'])
-            ->where('year', $year)
-            ->where('scope_key', $scopeKey)
-            ->first();
+        $currentYear = now()->year;
+        $globalScopeKey = FiscalYearTarget::scopeKey(null);
 
         $targetHistory = FiscalYearTarget::query()
-            ->with(['line', 'updater'])
-            ->where('year', $year)
-            ->orderByRaw("CASE WHEN line_id IS NULL THEN 0 ELSE 1 END")
-            ->orderBy('line_id')
+            ->with(['creator', 'updater'])
+            ->where('scope_key', $globalScopeKey)
+            ->orderByDesc('year')
             ->get();
 
         $abnormalities = MonitoringAbnormality::query()
-            ->with(['line', 'creator', 'updater'])
+            ->with(['creator', 'updater'])
             ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
-            ->where('year', $year)
-            ->where('scope_key', $scopeKey)
+            ->where('scope_key', $globalScopeKey)
+            ->orderByDesc('year')
             ->orderByDesc('month')
-            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
             ->get();
 
         return view('omd.targets.index', compact(
-            'year',
-            'lineId',
-            'scopeKey',
-            'lines',
-            'target',
+            'currentYear',
             'targetHistory',
             'abnormalities'
         ));
@@ -62,95 +39,90 @@ class TargetController extends Controller
 
     public function store(Request $request)
     {
+        $currentYear = now()->year;
+
         $data = $request->validate([
             'year' => [
                 'required',
                 'integer',
-                'min:2020',
+                'min:' . $currentYear,
                 'max:2100',
-            ],
-            'line_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('lines', 'id')->where(
-                    fn ($query) => $query->where('is_active', true)
-                ),
             ],
             'target_qty' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+        ], [
+            'year.min' => 'Target FY hanya dapat ditambah atau diperbarui untuk tahun berjalan dan tahun berikutnya.',
         ]);
 
-        $lineId = isset($data['line_id'])
-            ? (int) $data['line_id']
-            : null;
-        $scopeKey = FiscalYearTarget::scopeKey($lineId);
+        $year = (int) $data['year'];
+        $targetQty = (int) $data['target_qty'];
+        $scopeKey = FiscalYearTarget::scopeKey(null);
         $userId = $request->user()->id;
 
-        DB::transaction(function () use ($data, $lineId, $scopeKey, $userId) {
+        DB::transaction(function () use ($year, $targetQty, $scopeKey, $userId) {
             $target = FiscalYearTarget::query()
-                ->where('year', (int) $data['year'])
+                ->where('year', $year)
                 ->where('scope_key', $scopeKey)
                 ->lockForUpdate()
                 ->first();
 
             if ($target) {
                 $target->update([
-                    'line_id' => $lineId,
-                    'target_qty' => (int) $data['target_qty'],
+                    'line_id' => null,
+                    'target_qty' => $targetQty,
                     'updated_by' => $userId,
                 ]);
             } else {
-                FiscalYearTarget::create([
-                    'year' => (int) $data['year'],
+                $target = FiscalYearTarget::create([
+                    'year' => $year,
                     'scope_key' => $scopeKey,
-                    'line_id' => $lineId,
-                    'target_qty' => (int) $data['target_qty'],
+                    'line_id' => null,
+                    'target_qty' => $targetQty,
                     'created_by' => $userId,
                     'updated_by' => $userId,
                 ]);
             }
 
             /*
-             * Compatibility bridge sementara untuk Dashboard lama.
-             * Batch Dashboard berikutnya akan membaca fiscal_year_targets
-             * secara langsung dan bridge ini dapat dihapus bersama tabel
-             * targets legacy.
+             * Sinkronisasi tabel legacy agar modul lama yang masih membaca
+             * targets tetap menerima target global terbaru untuk tahun tersebut.
              */
             foreach (range(1, 12) as $month) {
-                $legacyTarget = Target::query()
-                    ->where('year', (int) $data['year'])
-                    ->where('month', $month)
-                    ->when(
-                        $lineId,
-                        fn ($query) => $query->where('line_id', $lineId),
-                        fn ($query) => $query->whereNull('line_id')
-                    )
-                    ->first();
-
-                if (! $legacyTarget) {
-                    $legacyTarget = new Target([
-                        'year' => (int) $data['year'],
+                Target::query()->updateOrCreate(
+                    [
+                        'year' => $year,
                         'month' => $month,
-                        'line_id' => $lineId,
-                    ]);
-                }
-
-                $legacyTarget->target_qty = (int) $data['target_qty'];
-                $legacyTarget->save();
+                        'line_id' => null,
+                    ],
+                    [
+                        'target_qty' => $targetQty,
+                    ]
+                );
             }
+
+            /*
+             * Requirement terbaru: target yang tampil pada Histori Abnormality
+             * selalu mengikuti Target FY terbaru di tahun yang sama. Alasan,
+             * actual order, creator, dan waktu input abnormality tetap dipertahankan.
+             */
+            DB::table('monitoring_abnormalities')
+                ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
+                ->where('year', $year)
+                ->where('scope_key', $scopeKey)
+                ->update([
+                    'fiscal_year_target_id' => $target->id,
+                    'threshold_qty' => $targetQty,
+                ]);
         });
 
         return redirect()
-            ->route('omd.targets.index', [
-                'year' => $data['year'],
-                'line_id' => $lineId,
-            ])
+            ->route('omd.targets.index')
             ->with(
                 'success',
-                'Target FY berhasil disimpan. Nilai ini berlaku sebagai pembanding bulanan pada tahun dan scope yang dipilih.'
+                'Target FY berhasil disimpan dan berlaku untuk seluruh Plant & Line.'
             );
     }
 }

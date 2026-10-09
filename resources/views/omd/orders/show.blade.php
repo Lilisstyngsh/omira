@@ -66,6 +66,12 @@
             margin-top: 18px;
         }
 
+        /* Informasi Order adalah partial berbeda dari .repair-card; samakan jarak antarkartu di OMD Show. */
+        .repair-card + .repair-info-card,
+        .repair-info-card + .repair-card {
+            margin-top: 18px;
+        }
+
         .repair-card-title {
             margin: 0 0 4px;
             font-size: 16px;
@@ -644,13 +650,13 @@
         }
 
         .btn-success {
-            background: #16a34a;
+            background: #7c3aed;
             color: #fff;
-            box-shadow: 0 6px 15px rgba(22, 163, 74, .18);
+            box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
         }
 
         .btn-success:hover {
-            background: #15803d;
+            background: #6d28d9;
             color: #fff;
         }
 

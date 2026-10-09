@@ -671,13 +671,12 @@ Jenis NG
                             <div class="ng-action">
 
                                 <button type="button"
-                                    class="btn btn-secondary edit-ng-btn"
+                                    class="btn btn-secondary edit-ng-btn action-icon-only"
                                     data-id="{{ $ngType->id }}"
                                     data-code="{{ $ngType->code }}"
-                                    data-name="{{ $ngType->name }}">
-
-                                    Edit
-
+                                    data-name="{{ $ngType->name }}"
+                                    title="Edit Jenis NG" aria-label="Edit Jenis NG">
+                                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                 </button>
 
 
@@ -690,10 +689,8 @@ Jenis NG
                                     @method('DELETE')
 
                                     <button type="submit"
-                                        class="btn btn-danger">
-
-                                        Hapus
-
+                                        class="btn btn-danger action-icon-only" title="Hapus Jenis NG" aria-label="Hapus Jenis NG">
+                                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                     </button>
 
                                 </form>

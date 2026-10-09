@@ -213,10 +213,11 @@
             height: 55px;
             border-radius: 15px;
             background: #ede9fe;
+            color: #6d28d9;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 22px;
             flex-shrink: 0;
         }
 
@@ -305,7 +306,8 @@
             margin: 0 auto 10px;
             border-radius: 14px;
             background: #ede9fe;
-            font-size: 22px;
+            color: #6d28d9;
+            font-size: 20px;
         }
 
         .empty-dashboard strong {
@@ -682,8 +684,8 @@
 
                         <div class="plant-header">
 
-                            <div class="plant-icon">
-                                🏭
+                            <div class="plant-icon" title="Plant">
+                                <i class="fa-solid fa-industry" aria-hidden="true"></i>
                             </div>
 
                             <div>
@@ -710,7 +712,7 @@
         this.closest('.plant-card').dataset.name
     )"
                                 data-name="{{ $plant->name }}" title="Edit Plant">
-                                <i class="fas fa-pen"></i>
+                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                             </button>
 
 
@@ -720,7 +722,7 @@
                                 @method('DELETE')
 
                                 <button type="submit" class="plant-mini-btn plant-mini-delete" title="Hapus Plant">
-                                    <i class="fas fa-trash"></i>
+                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                 </button>
                             </form>
 
@@ -735,7 +737,7 @@
                     <div class="empty-dashboard">
 
                         <div class="empty-dashboard-icon">
-                            🏭
+                            <i class="fa-solid fa-industry" aria-hidden="true"></i>
                         </div>
 
                         <strong>
@@ -1121,7 +1123,7 @@
                             <div class="empty-dashboard">
 
                                 <div class="empty-dashboard-icon">
-                                    📋
+                                    <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
                                 </div>
 
                                 <strong>
@@ -1169,14 +1171,16 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-warning btn-sm"
+                                        class="btn btn-warning btn-sm action-icon-only"
+                                        title="Edit Line"
+                                        aria-label="Edit Line"
                                         onclick="editLine(
                                             ${line.id},
                                             '${safeName}',
                                             ${id}
                                         )"
                                     >
-                                        Edit
+                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                     </button>
 
 
@@ -1200,9 +1204,11 @@
 
                                         <button
                                             type="submit"
-                                            class="btn btn-danger btn-sm"
+                                            class="btn btn-danger btn-sm action-icon-only"
+                                            title="Hapus Line"
+                                            aria-label="Hapus Line"
                                         >
-                                            Hapus
+                                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                         </button>
 
                                     </form>

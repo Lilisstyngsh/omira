@@ -7,7 +7,7 @@
 <style>
     .history-detail-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.history-detail-head h2{margin:0;font-size:20px;font-weight:700;color:#0f172a}.history-detail-head p{margin:3px 0 0;font-size:11px;color:#64748b}
     .btn-history-back{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:9px;background:#334155;color:#fff!important;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #334155}.btn-history-back:hover{background:#1e293b}
-    .history-card{background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-bottom:16px}.history-card h3{margin:0 0 12px;font-size:14px;font-weight:650;color:#0f172a}
+    .history-card{background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-bottom:16px}.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px}.history-card h3{margin:0 0 12px;font-size:14px;font-weight:650;color:#0f172a}
 
     /* Progress Order dipertahankan seperti tampilan awal */
     .timeline-wrap{overflow-x:auto;padding:8px 2px 5px}

@@ -639,6 +639,27 @@
             transform: translateY(-1px);
         }
 
+        /* Compact icon-only actions used in table/card action areas. */
+        .action-icon-only {
+            width: 32px !important;
+            min-width: 32px !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0 !important;
+            line-height: 1 !important;
+        }
+
+        .action-icon-only i {
+            margin: 0 !important;
+            font-size: 12px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
         .btn-primary {
             color: white;
 
@@ -671,8 +692,14 @@
         }
 
         .btn-success {
-            color: #047857;
-            background: #d1fae5;
+            color: #ffffff;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, .18);
+        }
+
+        .btn-success:hover {
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, .26);
         }
 
         /* =========================================================
@@ -1528,7 +1555,7 @@
                     
                     <a href="<?php echo e(route('dashboard')); ?>" class="<?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
 
-                        <span class="nav-icon">⌂</span>
+                        <span class="nav-icon"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i></span>
 
                         <span>
                             Dashboard
@@ -1541,14 +1568,14 @@
                     <?php if(auth()->user()->role === 'user'): ?>
                         <a href="<?php echo e(route('user.orders.index')); ?>"
                             class="<?php echo e(request()->routeIs('user.orders.index') ? 'active' : ''); ?>">
-                            <span class="nav-icon">▣</span>
+                            <span class="nav-icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></span>
                             <span>Order Repair Box</span>
                             <span id="userOrderNotification" class="nav-notification hidden">0</span>
                         </a>
 
                         <a href="<?php echo e(route('user.orders.history')); ?>"
                             class="<?php echo e(request()->routeIs('user.orders.history') ? 'active' : ''); ?>">
-                            <span class="nav-icon">↺</span>
+                            <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></span>
                             <span>History Order Repair Box</span>
                         </a>
 
@@ -1556,7 +1583,7 @@
                         <a href="<?php echo e(route('user.tps.index')); ?>"
                             class="<?php echo e(request()->routeIs('user.tps.*') ? 'active' : ''); ?>">
 
-                            <span class="nav-icon">⚙</span>
+                            <span class="nav-icon"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i></span>
 
                             <span>
                                 Order TPS Tools
@@ -1569,7 +1596,7 @@
                         <a href="<?php echo e(route('omd.orders.index')); ?>"
                             class="<?php echo e(request()->routeIs('omd.orders.index') ? 'active' : ''); ?>">
 
-                            <span class="nav-icon">▣</span>
+                            <span class="nav-icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></span>
 
                             <span>
                                 Order Repair Box
@@ -1584,7 +1611,7 @@
                         <a href="<?php echo e(route('omd.orders.history')); ?>"
                             class="<?php echo e(request()->routeIs('omd.orders.history') ? 'active' : ''); ?>">
 
-                            <span class="nav-icon">↺</span>
+                            <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></span>
 
                             <span>
                                 History Order Repair Box
@@ -1595,7 +1622,7 @@
                         <a href="<?php echo e(route('omd.tps.index')); ?>"
                             class="<?php echo e(request()->routeIs('omd.tps.*') ? 'active' : ''); ?>">
 
-                            <span class="nav-icon">⚙</span>
+                            <span class="nav-icon"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i></span>
 
                             <span>
                                 Order TPS Tool
@@ -1627,9 +1654,7 @@
                                     onclick="this.parentElement.classList.toggle('open')">
 
 
-                                    <span class="nav-icon">
-                                        ▤
-                                    </span>
+                                    <span class="nav-icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
 
 
                                     <span class="nav-dropdown-title">
@@ -1683,7 +1708,7 @@
                             <a href="<?php echo e(route('omd.scrap-limits.index')); ?>"
                                 class="<?php echo e(request()->routeIs('omd.scrap-limits.*') ? 'active' : ''); ?>">
 
-                                <span class="nav-icon">⚠</span>
+                                <span class="nav-icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i></span>
 
                                 <span>
                                     Scrap Limit Produk
@@ -1694,7 +1719,7 @@
                             <a href="<?php echo e(route('omd.targets.index')); ?>"
                                 class="<?php echo e(request()->routeIs('omd.targets.*') ? 'active' : ''); ?>">
 
-                                <span class="nav-icon">◎</span>
+                                <span class="nav-icon"><i class="fa-solid fa-bullseye" aria-hidden="true"></i></span>
 
                                 <span>
                                     Target FY
@@ -1708,9 +1733,7 @@
                             <a href="<?php echo e(route('omd.users.index')); ?>"
                                 class="<?php echo e(request()->routeIs('omd.users.*') ? 'active' : ''); ?>">
 
-                                <span class="nav-icon">
-                                    👥
-                                </span>
+                                <span class="nav-icon"><i class="fa-solid fa-users-gear" aria-hidden="true"></i></span>
 
                                 <span>
                                     Manajemen Akun

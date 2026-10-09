@@ -38,36 +38,32 @@
         .sl-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
         .sl-head h2 { margin:0; font-size:22px; line-height:1.2; color:#172033; }
         .sl-count { font-size:13px; color:#748095; }
-        .sl-toolbar { display:grid; grid-template-columns:minmax(180px,230px) minmax(220px,1fr) auto; gap:10px; align-items:end; padding:14px; border:1px solid #e4e8ef; background:#fff; border-radius:16px; }
+        .sl-toolbar { display:grid; grid-template-columns:minmax(180px,230px) minmax(220px,1fr); gap:10px; align-items:end; padding:14px; border:1px solid #e4e8ef; background:#fff; border-radius:16px; }
         .sl-field { display:grid; gap:6px; }
         .sl-field label { font-size:12px; font-weight:700; color:#5e697b; }
         .sl-field input, .sl-field select, .sl-field textarea { width:100%; border:1px solid #d9dfe8; border-radius:10px; background:#fff; color:#1f2937; font:inherit; outline:none; }
         .sl-field input, .sl-field select { min-height:40px; padding:0 11px; }
         .sl-field textarea { min-height:76px; padding:10px 11px; resize:vertical; }
-        .sl-field input:focus, .sl-field select:focus, .sl-field textarea:focus { border-color:#7cb596; box-shadow:0 0 0 3px rgba(34,197,94,.08); }
-        .sl-toolbar-actions { display:flex; gap:8px; }
-        .sl-btn { min-height:40px; border:0; border-radius:10px; padding:0 14px; display:inline-flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size:13px; cursor:pointer; text-decoration:none; white-space:nowrap; }
+        .sl-field input:focus, .sl-field select:focus, .sl-field textarea:focus { border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(124,58,237,.10); }
+                .sl-btn { min-height:40px; border:0; border-radius:10px; padding:0 14px; display:inline-flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size:13px; cursor:pointer; text-decoration:none; white-space:nowrap; }
         .sl-btn-neutral { background:#eef1f5; color:#445065; }
-        .sl-btn-soft { background:#eef8f2; color:#237044; }
-        .sl-btn-success { background:#22a65a; color:#fff; }
+        .sl-btn-soft { background:#f5f3ff; color:#6d28d9; }
+        .sl-btn-success { background:#7c3aed; color:#fff; box-shadow:0 6px 15px rgba(124,58,237,.16); }
+        .sl-btn-success:hover { background:#6d28d9; }
         .sl-btn:hover { filter:brightness(.985); }
         .sl-alert { border:1px solid #d9efe0; background:#f3fbf5; color:#23633b; border-radius:12px; padding:11px 13px; font-size:13px; }
         .sl-alert.error { border-color:#f2d2d2; background:#fff7f7; color:#a63a3a; }
-        .sl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(285px,1fr)); gap:14px; align-items:stretch; }
+        .sl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; align-items:start; }
         .sl-card { min-width:0; border:1px solid #e2e7ee; background:#fff; border-radius:16px; padding:15px; display:flex; flex-direction:column; gap:13px; box-shadow:0 2px 8px rgba(19,33,58,.035); }
         .sl-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
         .sl-model { min-width:0; }
         .sl-model-name { font-size:17px; line-height:1.25; font-weight:800; color:#172033; overflow-wrap:anywhere; }
         .sl-model-line { margin-top:3px; font-size:12px; color:#7a8596; overflow-wrap:anywhere; }
         .sl-badge { flex:0 0 auto; background:#f4f6f8; color:#657084; border-radius:999px; padding:5px 8px; font-size:11px; font-weight:700; }
-        .sl-product-list { display:grid; border:1px solid #edf0f4; border-radius:12px; overflow:hidden; }
-        .sl-product-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; padding:9px 10px; background:#fff; }
-        .sl-product-row + .sl-product-row { border-top:1px solid #edf0f4; }
-        .sl-product-name { font-size:13px; color:#374151; overflow-wrap:anywhere; }
-        .sl-limit { min-width:44px; text-align:center; border-radius:8px; padding:5px 8px; background:#ecf8f0; color:#216a40; font-weight:800; font-size:12px; }
-        .sl-limit.empty { background:#f3f5f7; color:#8a94a3; font-weight:700; }
         .sl-card-actions { margin-top:auto; display:flex; gap:8px; }
-        .sl-card-actions .sl-btn { flex:1; min-width:0; }
+        .sl-card-actions .sl-btn-primary { flex:1; min-width:0; }
+        .sl-history-icon { width:40px; min-width:40px; padding:0; background:#f1f5f9; color:#475569; }
+        .sl-history-icon:hover { background:#e2e8f0; color:#334155; }
         .sl-empty { border:1px dashed #d7dde7; background:#fafbfc; border-radius:16px; padding:30px 16px; text-align:center; color:#7b8798; }
         .sl-modal-backdrop { position:fixed; inset:0; z-index:1050; background:rgba(16,24,40,.42); padding:20px; display:none; align-items:center; justify-content:center; }
         .sl-modal-backdrop.is-open { display:flex; }
@@ -84,7 +80,7 @@
         .sl-edit-row + .sl-edit-row { border-top:1px solid #edf0f4; }
         .sl-edit-name { font-size:13px; font-weight:650; color:#344054; overflow-wrap:anywhere; }
         .sl-edit-row input { width:100%; min-height:38px; border:1px solid #d8dee7; border-radius:9px; padding:0 8px; text-align:center; font-weight:800; outline:none; }
-        .sl-edit-row input:focus { border-color:#79b793; box-shadow:0 0 0 3px rgba(34,197,94,.08); }
+        .sl-edit-row input:focus { border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(124,58,237,.10); }
         .sl-form-grid { display:grid; grid-template-columns:180px minmax(0,1fr); gap:12px; }
         .sl-form-grid .full { grid-column:1 / -1; }
         .sl-history-product { border:1px solid #e7ebf1; border-radius:12px; overflow:hidden; }
@@ -97,8 +93,6 @@
         body.sl-modal-open { overflow:hidden; }
         @media (max-width:760px) {
             .sl-toolbar { grid-template-columns:1fr; }
-            .sl-toolbar-actions { width:100%; }
-            .sl-toolbar-actions .sl-btn { flex:1; }
             .sl-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); }
             .sl-form-grid { grid-template-columns:1fr; }
             .sl-form-grid .full { grid-column:auto; }
@@ -125,10 +119,10 @@
             <div class="sl-alert error">{{ $errors->first() }}</div>
         @endif
 
-        <form method="GET" action="{{ route('omd.scrap-limits.index') }}" class="sl-toolbar">
+        <form method="GET" action="{{ route('omd.scrap-limits.index') }}" class="sl-toolbar" id="scrapLimitFilterForm">
             <div class="sl-field">
                 <label for="line_id">Line</label>
-                <select id="line_id" name="line_id">
+                <select id="line_id" name="line_id" onchange="this.form.submit()">
                     <option value="all" @selected($lineFilter === 'all')>Semua Line</option>
                     @foreach ($lines as $line)
                         <option value="{{ $line->id }}" @selected((string) $lineId === (string) $line->id)>
@@ -140,14 +134,16 @@
 
             <div class="sl-field">
                 <label for="q">Cari Model / Produk</label>
-                <input id="q" name="q" type="search" value="{{ $search }}" placeholder="Model atau produk...">
-            </div>
-
-            <div class="sl-toolbar-actions">
-                <button class="sl-btn sl-btn-success" type="submit">Terapkan</button>
-                @if ($search !== '' || $lineFilter !== 'all')
-                    <a class="sl-btn sl-btn-neutral" href="{{ route('omd.scrap-limits.index') }}">Reset</a>
-                @endif
+                <div style="position:relative">
+                    <input id="q" name="q" type="search" value="{{ $search }}" placeholder="Model atau produk..." style="padding-right:38px">
+                    @if ($search !== '')
+                        <button type="button" title="Hapus pencarian" aria-label="Hapus pencarian"
+                            onclick="this.closest('form').querySelector('[name=q]').value=''; this.closest('form').submit();"
+                            style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:#94a3b8;cursor:pointer">
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    @endif
+                </div>
             </div>
         </form>
 
@@ -168,28 +164,12 @@
                             <span class="sl-badge">{{ $model->products->count() }} Produk</span>
                         </div>
 
-                        <div class="sl-product-list">
-                            @forelse ($model->products as $product)
-                                @php($activeLimit = $activeAt($product))
-                                <div class="sl-product-row">
-                                    <div class="sl-product-name">{{ $product->name }}</div>
-                                    <div class="sl-limit {{ $activeLimit ? '' : 'empty' }}">
-                                        {{ $activeLimit ? number_format($activeLimit->limit_qty) : '—' }}
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="sl-product-row">
-                                    <div class="sl-product-name">Belum ada produk aktif.</div>
-                                </div>
-                            @endforelse
-                        </div>
-
                         <div class="sl-card-actions">
-                            <button type="button" class="sl-btn sl-btn-success js-open-limit" data-model-id="{{ $model->id }}" @disabled($model->products->isEmpty())>
+                            <button type="button" class="sl-btn sl-btn-success sl-btn-primary js-open-limit" data-model-id="{{ $model->id }}" @disabled($model->products->isEmpty())>
                                 Atur Limit
                             </button>
-                            <button type="button" class="sl-btn sl-btn-neutral js-open-history" data-model-id="{{ $model->id }}" @disabled($model->products->isEmpty())>
-                                Riwayat
+                            <button type="button" class="sl-btn sl-history-icon js-open-history" data-model-id="{{ $model->id }}" @disabled($model->products->isEmpty()) title="Riwayat limit" aria-label="Riwayat limit">
+                                <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
                             </button>
                         </div>
                     </article>

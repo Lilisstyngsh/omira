@@ -99,7 +99,8 @@
             justify-content: center;
             border-radius: 12px;
             background: #ede9fe;
-            font-size: 22px;
+            color: #6d28d9;
+            font-size: 18px;
         }
 
         .line-info h4 {
@@ -885,8 +886,8 @@
 
                         <div class="line-card-top">
 
-                            <div class="line-icon">
-                                🏭
+                            <div class="line-icon" title="Line">
+                                <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
                             </div>
 
                             <div class="line-info">
@@ -940,7 +941,7 @@
                     <div class="empty-table">
 
                         <div class="empty-table-icon">
-                            🏭
+                            <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
                         </div>
 
                         <strong>
@@ -1080,10 +1081,10 @@
 
                                     <div class="action-group">
 
-                                        <button type="button" class="btn btn-warning btn-sm edit-model-btn"
+                                        <button type="button" class="btn btn-warning btn-sm edit-model-btn action-icon-only"
                                             data-id="{{ $model->id }}" data-line-id="{{ $model->line_id }}"
-                                            data-name="{{ $model->model }}">
-                                            Edit
+                                            data-name="{{ $model->model }}" title="Edit Model" aria-label="Edit Model">
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                         </button>
 
 
@@ -1093,8 +1094,8 @@
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                Hapus
+                                            <button type="submit" class="btn btn-danger btn-sm action-icon-only" title="Hapus Model" aria-label="Hapus Model">
+                                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                             </button>
 
                                         </form>
@@ -1123,11 +1124,11 @@
                                         <div class="popup-product-actions">
 
                                             <button type="button"
-                                                class="popup-action-btn popup-action-edit edit-product-btn"
+                                                class="popup-action-btn popup-action-edit edit-product-btn action-icon-only"
                                                 data-id="{{ $product->id }}"
                                                 data-model-id="{{ $product->master_model_id }}"
-                                                data-name="{{ $product->name }}">
-                                                Edit
+                                                data-name="{{ $product->name }}" title="Edit Produk" aria-label="Edit Produk">
+                                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                             </button>
 
 
@@ -1138,8 +1139,8 @@
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button type="submit" class="popup-action-btn popup-action-delete">
-                                                    Hapus
+                                                <button type="submit" class="popup-action-btn popup-action-delete action-icon-only" title="Hapus Produk" aria-label="Hapus Produk">
+                                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                                 </button>
 
                                             </form>

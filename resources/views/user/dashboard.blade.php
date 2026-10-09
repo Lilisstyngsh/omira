@@ -1,653 +1,548 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard User')
-
 @section('header', 'Dashboard User')
 
 @section('content')
+<style>
+    .user-dashboard {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
 
-    <style>
-        .dashboard-welcome {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 22px;
+    .dashboard-welcome {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .dashboard-welcome h2 {
+        margin: 0 0 4px;
+        color: #172033;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .dashboard-welcome p {
+        margin: 0;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .dashboard-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .dashboard-kpi {
+        position: relative;
+        min-height: 102px;
+        padding: 17px;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e5eaf1;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, .045);
+    }
+
+    .dashboard-kpi-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .dashboard-kpi-label {
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .035em;
+        text-transform: uppercase;
+    }
+
+    .dashboard-kpi-icon {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #f5f3ff;
+        color: #7c3aed;
+        font-size: 13px;
+    }
+
+    .dashboard-kpi.attention {
+        border-color: #ddd6fe;
+        box-shadow: 0 8px 26px rgba(124, 58, 237, .08);
+    }
+
+    .dashboard-kpi.attention .dashboard-kpi-icon {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .dashboard-kpi-value {
+        margin-top: 10px;
+        color: #172033;
+        font-size: 27px;
+        font-weight: 850;
+        line-height: 1;
+    }
+
+    .dashboard-panel {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e5eaf1;
+        border-radius: 17px;
+        box-shadow: 0 9px 28px rgba(15, 23, 42, .045);
+    }
+
+    .dashboard-panel-head {
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #edf1f5;
+    }
+
+    .dashboard-panel-title {
+        margin: 0;
+        color: #172033;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .action-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .action-order {
+        display: grid;
+        grid-template-columns: minmax(150px, 1fr) minmax(170px, 1.4fr) auto;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #eef2f6;
+    }
+
+    .action-order:last-child {
+        border-bottom: 0;
+    }
+
+    .action-order-number {
+        color: #172033;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .action-order-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px 10px;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 9.5px;
+    }
+
+    .action-order-message {
+        color: #475569;
+        font-size: 10.5px;
+        line-height: 1.45;
+    }
+
+    .action-order-message strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #6d28d9;
+        font-size: 10.5px;
+    }
+
+    .dashboard-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 58px;
+        padding: 14px 18px;
+        color: #64748b;
+        font-size: 10.5px;
+    }
+
+    .dashboard-empty i {
+        color: #16a34a;
+    }
+
+    .recent-table-wrap {
+        overflow-x: auto;
+    }
+
+    .recent-table {
+        width: 100%;
+        min-width: 820px;
+        border-collapse: collapse;
+    }
+
+    .recent-table th {
+        padding: 10px 13px;
+        background: #fafbfc;
+        border-bottom: 1px solid #e8edf4;
+        color: #64748b;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .025em;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .recent-table td {
+        padding: 12px 13px;
+        border-bottom: 1px solid #eef2f6;
+        color: #334155;
+        font-size: 10.5px;
+        vertical-align: middle;
+    }
+
+    .recent-table tbody tr {
+        cursor: pointer;
+        transition: background .16s ease;
+    }
+
+    .recent-table tbody tr:hover {
+        background: #fafaff;
+    }
+
+    .recent-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .order-number {
+        color: #172033;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .order-model-product {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .order-model-product strong {
+        color: #172033;
+        font-size: 10.5px;
+    }
+
+    .order-model-product span {
+        color: #64748b;
+        font-size: 9.5px;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 25px;
+        padding: 0 9px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-pill.submitted {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .status-pill.in-repair {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .status-pill.completed {
+        background: #f5f3ff;
+        color: #6d28d9;
+    }
+
+    .status-pill.revision {
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+    .status-pill.confirmed {
+        background: #ecfdf3;
+        color: #15803d;
+    }
+
+    .row-action {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #475569;
+        text-decoration: none;
+    }
+
+    .row-action:hover {
+        border-color: #ddd6fe;
+        background: #f5f3ff;
+        color: #6d28d9;
+    }
+
+    @media (max-width: 1100px) {
+        .dashboard-kpis {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .dashboard-welcome h2 {
-            margin: 0 0 6px;
-            font-size: 22px;
-            font-weight: 800;
-            color: #172033;
+    }
+
+    @media (max-width: 760px) {
+        .dashboard-welcome,
+        .dashboard-panel-head {
+            align-items: flex-start;
+            flex-direction: column;
         }
 
-        .dashboard-welcome .muted {
-            font-size: 12px;
+        .dashboard-kpis {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .dashboard-alert {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            margin-bottom: 18px;
-            padding: 15px 18px;
-            border: 1px solid #fde68a;
-            border-radius: 14px;
-            background: #fffbeb;
+        .action-order {
+            grid-template-columns: 1fr auto;
         }
 
-        .dashboard-alert-icon {
-            width: 34px;
-            height: 34px;
-            flex: 0 0 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: #fef3c7;
-            color: #d97706;
-            font-size: 16px;
-            font-weight: 800;
+        .action-order-message {
+            grid-column: 1 / -1;
+            grid-row: 2;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .dashboard-kpis {
+            grid-template-columns: 1fr;
         }
 
-        .dashboard-alert strong {
-            display: block;
-            margin-bottom: 3px;
-            color: #92400e;
-            font-size: 12px;
-            font-weight: 800;
+        .action-order {
+            grid-template-columns: 1fr;
         }
 
-        .dashboard-alert span {
-            color: #a16207;
-            font-size: 10px;
+        .action-order-message {
+            grid-column: auto;
+            grid-row: auto;
         }
+    }
+</style>
 
-        .dashboard-cards {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+@php
+    $lineName = auth()->user()->line?->name ?? 'Line belum ditentukan';
 
-        .dashboard-stat-card {
-            position: relative;
-            overflow: hidden;
-            background: #fff;
-            border: 1px solid #e8edf4;
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
-            transition: .18s ease;
-        }
+    $statusMap = [
+        'submitted' => ['label' => 'Menunggu Verifikasi', 'class' => 'submitted', 'icon' => 'fa-clock'],
+        'in_repair' => ['label' => 'Sedang Repair', 'class' => 'in-repair', 'icon' => 'fa-screwdriver-wrench'],
+        'completed' => ['label' => 'Perlu Konfirmasi', 'class' => 'completed', 'icon' => 'fa-circle-check'],
+        'revision_requested' => ['label' => 'Dalam Koreksi', 'class' => 'revision', 'icon' => 'fa-triangle-exclamation'],
+        'confirmed' => ['label' => 'Selesai', 'class' => 'confirmed', 'icon' => 'fa-check-double'],
+    ];
+@endphp
 
-        .dashboard-stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(15, 23, 42, .07);
-        }
-
-        .dashboard-stat-card::after {
-            content: '';
-            position: absolute;
-            width: 90px;
-            height: 90px;
-            right: -35px;
-            top: -35px;
-            border-radius: 50%;
-            background: rgba(124, 58, 237, .05);
-        }
-
-        .dashboard-stat-label {
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-
-        .dashboard-stat-value {
-            margin-top: 8px;
-            color: #172033;
-            font-size: 26px;
-            font-weight: 850;
-            letter-spacing: -.6px;
-        }
-
-        .dashboard-stat-help {
-            margin-top: 4px;
-            color: #94a3b8;
-            font-size: 9px;
-            line-height: 1.4;
-        }
-
-        .dashboard-section {
-            background: #fff;
-            border: 1px solid #e8edf4;
-            border-radius: 18px;
-            box-shadow: 0 10px 35px rgba(15, 23, 42, .05);
-            overflow: hidden;
-        }
-
-        .dashboard-section-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            padding: 20px 22px;
-            border-bottom: 1px solid #edf1f5;
-            background: linear-gradient(135deg,
-                    #f8f7ff 0%,
-                    #fff 75%);
-        }
-
-        .dashboard-section-head h3 {
-            margin: 0 0 4px;
-            font-size: 15px;
-            font-weight: 800;
-            color: #172033;
-        }
-
-        .dashboard-section-head p {
-            margin: 0;
-            font-size: 10px;
-            color: #64748b;
-        }
-
-        .dashboard-section-head .btn {
-            white-space: nowrap;
-        }
-
-        .dashboard-table-wrap {
-            overflow-x: auto;
-        }
-
-        .dashboard-table {
-            width: 100%;
-            min-width: 1100px;
-            border-collapse: collapse;
-        }
-
-        .dashboard-table th {
-            padding: 12px 13px;
-            background: #fafbfc;
-            border-bottom: 1px solid #e9eef4;
-            color: #64748b;
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            text-align: left;
-            white-space: nowrap;
-        }
-
-        .dashboard-table thead tr:first-child th {
-            background: #f6f7fb;
-            text-align: center;
-        }
-
-        .dashboard-table thead tr:first-child th[rowspan="2"] {
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        .dashboard-table thead tr:nth-child(2) th {
-            text-align: center;
-            font-size: 8px;
-            padding: 10px 8px;
-        }
-
-        .dashboard-table td {
-            padding: 13px;
-            border-bottom: 1px solid #eef2f6;
-            color: #334155;
-            font-size: 11px;
-            vertical-align: middle;
-        }
-
-        .dashboard-table tbody tr {
-            cursor: pointer;
-            transition: .18s ease;
-        }
-
-        .dashboard-table tbody tr:hover {
-            background: #fafaff;
-            transform: translateY(-1px);
-        }
-
-        .dashboard-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .order-number {
-            color: #172033;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        .order-line {
-            display: inline-flex;
-            align-items: center;
-            min-height: 26px;
-            padding: 0 9px;
-            border-radius: 8px;
-            background: #eff6ff;
-            color: #3478c5;
-            font-size: 9px;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        .order-product {
-            max-width: 180px;
-            color: #475569;
-        }
-
-        .process-cell {
-            width: 105px;
-            text-align: center !important;
-            padding: 10px 7px !important;
-        }
-
-        .process-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .process-done {
-            background: #dcfce7;
-            color: #16a34a;
-            box-shadow: inset 0 0 0 1px #bbf7d0;
-        }
-
-        .process-progress {
-            background: #fef3c7;
-            color: #d97706;
-            box-shadow: inset 0 0 0 1px #fde68a;
-        }
-
-        .process-pending {
-            background: #fee2e2;
-            color: #dc2626;
-            box-shadow: inset 0 0 0 1px #fecaca;
-        }
-
-        .empty-dashboard {
-            padding: 45px 20px !important;
-            text-align: center !important;
-            color: #94a3b8 !important;
-            font-size: 11px !important;
-        }
-
-        @media (max-width: 1100px) {
-            .dashboard-cards {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 700px) {
-            .dashboard-welcome {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .dashboard-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-section-head {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-        }
-    </style>
-
-
-    @php
-        $completedOrders = $recentOrders->where('status', 'completed')->count();
-    @endphp
-
-
-    {{-- =========================================================
-     WELCOME
-========================================================= --}}
-
+<div class="user-dashboard">
     <div class="dashboard-welcome">
-
         <div>
-
-            <h2>
-                Selamat datang, {{ auth()->user()->name }}
-            </h2>
-
+            <h2>Selamat datang, {{ auth()->user()->name }}</h2>
+            <p>{{ $lineName }}</p>
         </div>
 
         <a class="btn btn-primary" href="{{ route('user.orders.create') }}">
             <i class="fa-solid fa-plus"></i>
             Buat Order Repair
         </a>
-
     </div>
 
-
-    {{-- =========================================================
-     NOTIFICATION
-========================================================= --}}
-
-    @if ($completedOrders > 0)
-        <div class="dashboard-alert">
-
-            <div class="dashboard-alert-icon">
-                !
+    <div class="dashboard-kpis">
+        <div class="dashboard-kpi">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-label">Order Aktif</div>
+                <span class="dashboard-kpi-icon"><i class="fa-solid fa-box-open"></i></span>
             </div>
-
-            <div>
-
-                <strong>
-                    Hasil Repair dari OMD
-                </strong>
-
-                <span>
-                    {{ $completedOrders }}
-                    order telah selesai diperbaiki dan menunggu konfirmasi Anda.
-                </span>
-
-            </div>
-
-        </div>
-    @endif
-
-
-    {{-- =========================================================
-     STAT CARDS
-========================================================= --}}
-
-    <div class="dashboard-cards">
-
-        <div class="dashboard-stat-card">
-
-            <div class="dashboard-stat-label">
-                Total Order
-            </div>
-
-            <div class="dashboard-stat-value">
-                {{ $total }}
-            </div>
-
-            <div class="dashboard-stat-help">
-                Seluruh Order Repair Box yang pernah dibuat.
-            </div>
-
+            <div class="dashboard-kpi-value">{{ $orderActive }}</div>
         </div>
 
-
-        <div class="dashboard-stat-card">
-
-            <div class="dashboard-stat-label">
-                Open
+        <div class="dashboard-kpi">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-label">Diproses OMD</div>
+                <span class="dashboard-kpi-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
             </div>
-
-            <div class="dashboard-stat-value">
-                {{ $submitted }}
-            </div>
-
-            <div class="dashboard-stat-help">
-                Menunggu verifikasi dari OMD.
-            </div>
-
+            <div class="dashboard-kpi-value">{{ $processedOmd }}</div>
         </div>
 
-
-        <div class="dashboard-stat-card">
-
-            <div class="dashboard-stat-label">
-                Progress
+        <div class="dashboard-kpi {{ $needConfirmation > 0 ? 'attention' : '' }}">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
+                <span class="dashboard-kpi-icon"><i class="fa-solid fa-circle-exclamation"></i></span>
             </div>
-
-            <div class="dashboard-stat-value">
-                {{ $inRepair }}
-            </div>
-
-            <div class="dashboard-stat-help">
-                Sedang berada dalam proses repair.
-            </div>
-
+            <div class="dashboard-kpi-value">{{ $needConfirmation }}</div>
         </div>
 
-
-        <div class="dashboard-stat-card">
-
-            <div class="dashboard-stat-label">
-                Waiting Confirmation
+        <div class="dashboard-kpi">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
+                <span class="dashboard-kpi-icon"><i class="fa-solid fa-check-double"></i></span>
             </div>
-
-            <div class="dashboard-stat-value">
-                {{ $completed }}
-            </div>
-
-            <div class="dashboard-stat-help">
-                Repair selesai dan menunggu konfirmasi User.
-            </div>
-
+            <div class="dashboard-kpi-value">{{ $completedThisMonth }}</div>
         </div>
-
     </div>
 
-
-    {{-- =========================================================
-     RECENT ORDERS
-========================================================= --}}
-
-    <div class="dashboard-section">
-
-        <div class="dashboard-section-head">
-
+    <section class="dashboard-panel">
+        <div class="dashboard-panel-head">
             <div>
+                <h3 class="dashboard-panel-title">Perlu Tindakan</h3>
+            </div>
+        </div>
 
-                <h3>
-                    Order Terbaru
-                </h3>
+        @if ($actionOrders->isNotEmpty())
+            <div class="action-list">
+                @foreach ($actionOrders as $order)
+                    @php
+                        $firstItem = $order->items->first();
+                        $modelName = $firstItem?->masterModel?->model ?? $order->model ?? '-';
+                        $qty = $order->after_qty_sum !== null
+                            ? (int) $order->after_qty_sum
+                            : (int) ($order->quantity ?? 0);
+                        $isCorrection = (int) $order->feedbacks_count > 0;
+                    @endphp
 
-                <p>
-                    Enam Order Repair Box terakhir.
-                </p>
+                    <div class="action-order">
+                        <div>
+                            <div class="action-order-number">{{ $order->order_number }}</div>
+                            <div class="action-order-meta">
+                                <span>{{ $order->line?->name ?? '-' }}</span>
+                                <span>Model {{ $modelName }}</span>
+                                <span>{{ $qty }} NG</span>
+                            </div>
+                        </div>
 
+                        <div class="action-order-message">
+                            <strong>{{ $isCorrection ? 'Hasil koreksi siap diperiksa' : 'Hasil repair siap diperiksa' }}</strong>
+                        </div>
+
+                        <a href="{{ route('user.orders.show', $order) }}" class="btn btn-primary">
+                            <i class="fa-solid fa-arrow-right"></i>
+                            Cek Order
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="dashboard-empty">
+                <i class="fa-solid fa-circle-check"></i>
+                Tidak ada order yang perlu dikonfirmasi.
+            </div>
+        @endif
+    </section>
+
+    <section class="dashboard-panel">
+        <div class="dashboard-panel-head">
+            <div>
+                <h3 class="dashboard-panel-title">Order Terbaru</h3>
             </div>
 
             <a class="btn btn-secondary" href="{{ route('user.orders.index') }}">
-                Lihat Semua
+                Lihat Semua Order
             </a>
-
         </div>
 
-
-        <div class="dashboard-table-wrap">
-
-            <table class="dashboard-table">
-
+        <div class="recent-table-wrap">
+            <table class="recent-table">
                 <thead>
-
                     <tr>
-
-                        <th rowspan="2">
-                            No Order
-                        </th>
-
-                        <th rowspan="2">
-                            Tanggal
-                        </th>
-
-                        <th rowspan="2">
-                            Line
-                        </th>
-
-                        <th rowspan="2">
-                            Produk
-                        </th>
-
-                        <th colspan="4" style="text-align:center;">
-                            Status
-                        </th>
-
+                        <th>No Order</th>
+                        <th>Tanggal</th>
+                        <th>Line</th>
+                        <th>Model / Produk</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th style="width:58px;text-align:center;">Aksi</th>
                     </tr>
-
-                    <tr>
-
-                        <th class="process-cell">
-                            User Submit
-                        </th>
-
-                        <th class="process-cell">
-                            Verified OMD
-                        </th>
-
-                        <th class="process-cell">
-                            Repair OMD
-                        </th>
-
-                        <th class="process-cell">
-                            Serah Terima
-                        </th>
-
-                    </tr>
-
                 </thead>
-
-
                 <tbody>
+                    @forelse ($recentOrders as $order)
+                        @php
+                            $firstItem = $order->items->first();
+                            $modelName = $firstItem?->masterModel?->model ?? $order->model ?? '-';
+                            $productName = $firstItem?->product?->name ?? $order->product?->name ?? '-';
+                            $productCount = $order->items->pluck('product_id')->filter()->unique()->count();
+                            $showAfterQty = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
+                            $qty = $showAfterQty
+                                ? ($order->after_qty_sum !== null
+                                    ? (int) $order->after_qty_sum
+                                    : (int) ($order->quantity ?? 0))
+                                : ($order->before_qty_sum !== null
+                                    ? (int) $order->before_qty_sum
+                                    : (int) ($order->quantity ?? 0));
+                            $status = $statusMap[$order->status] ?? [
+                                'label' => $order->status_label,
+                                'class' => 'submitted',
+                                'icon' => 'fa-circle',
+                            ];
+                        @endphp
 
-                    @forelse($recentOrders as $order)
-
-                        <tr onclick="window.location='{{ route('user.orders.show', $order) }}'"
-                            title="Klik untuk melihat detail order">
-
-                            <td class="order-number">
-                                {{ $order->order_number }}
-                            </td>
-
-
+                        <tr onclick="window.location='{{ route('user.orders.show', $order) }}'" title="Lihat detail order">
+                            <td class="order-number">{{ $order->order_number }}</td>
+                            <td>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</td>
+                            <td>{{ $order->line?->name ?? '-' }}</td>
                             <td>
-                                {{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}
+                                <div class="order-model-product">
+                                    <strong>{{ $modelName }}</strong>
+                                    <span>
+                                        {{ $productName }}
+                                        @if ($productCount > 1)
+                                            +{{ $productCount - 1 }} produk
+                                        @endif
+                                    </span>
+                                </div>
                             </td>
-
-
+                            <td>{{ $qty }} NG</td>
                             <td>
-
-                                <span class="order-line">
-                                    {{ $order->line?->name ?? '-' }}
+                                <span class="status-pill {{ $status['class'] }}">
+                                    <i class="fa-solid {{ $status['icon'] }}"></i>
+                                    {{ $status['label'] }}
                                 </span>
-
                             </td>
-
-
-                            <td class="order-product">
-
-                                @if ($order->items->isNotEmpty())
-                                    {{ $order->items->first()->product?->name ?? '-' }}
-
-                                    @if ($order->items->count() > 1)
-                                        <span class="muted">
-                                            +{{ $order->items->count() - 1 }}
-                                        </span>
-                                    @endif
-                                @else
-                                    {{ $order->product?->name ?? '-' }}
-                                @endif
-
+                            <td style="text-align:center;">
+                                <a href="{{ route('user.orders.show', $order) }}"
+                                   class="row-action"
+                                   title="Lihat detail order"
+                                   aria-label="Lihat detail order"
+                                   onclick="event.stopPropagation();">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
                             </td>
-
-
-                            {{-- USER SUBMIT --}}
-                            <td class="process-cell">
-
-                                <span class="process-icon process-done" title="User sudah submit order">
-                                    ✓
-                                </span>
-
-                            </td>
-
-
-                            {{-- VERIFIED OMD --}}
-                            <td class="process-cell">
-
-                                @if (in_array($order->status, ['in_repair', 'completed', 'confirmed']))
-                                    <span class="process-icon process-done" title="Order sudah diverifikasi OMD">
-                                        ✓
-                                    </span>
-                                @else
-                                    <span class="process-icon process-pending" title="Belum diverifikasi OMD">
-                                        ✕
-                                    </span>
-                                @endif
-
-                            </td>
-
-
-                            {{-- REPAIR OMD --}}
-                            <td class="process-cell">
-
-                                @if (in_array($order->status, ['completed', 'confirmed']))
-                                    <span class="process-icon process-done" title="Repair OMD sudah selesai">
-                                        ✓
-                                    </span>
-                                @elseif ($order->status === 'in_repair')
-                                    <span class="process-icon process-progress" title="Repair OMD sedang diproses">
-                                        △
-                                    </span>
-                                @else
-                                    <span class="process-icon process-pending" title="Repair OMD belum dimulai">
-                                        ✕
-                                    </span>
-                                @endif
-
-                            </td>
-
-
-                            {{-- SERAH TERIMA --}}
-                            <td class="process-cell">
-
-                                @if ($order->status === 'confirmed')
-                                    <span class="process-icon process-done" title="Serah terima sudah selesai">
-                                        ✓
-                                    </span>
-                                @elseif ($order->status === 'completed')
-                                    <span class="process-icon process-progress" title="Menunggu konfirmasi User">
-                                        △
-                                    </span>
-                                @else
-                                    <span class="process-icon process-pending" title="Belum masuk tahap serah terima">
-                                        ✕
-                                    </span>
-                                @endif
-
-                            </td>
-
                         </tr>
-
                     @empty
-
                         <tr>
-
-                            <td colspan="8" class="empty-dashboard">
-                                Belum ada Order Repair Box.
+                            <td colspan="7">
+                                <div class="dashboard-empty">
+                                    <i class="fa-solid fa-box-open"></i>
+                                    Belum ada Order Repair Box.
+                                </div>
                             </td>
-
                         </tr>
-
                     @endforelse
-
                 </tbody>
-
             </table>
-
         </div>
-
-    </div>
-
+    </section>
+</div>
 @endsection

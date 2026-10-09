@@ -608,9 +608,11 @@ class OmdOrderController extends Controller
             |--------------------------------------------------------------------------
             */
 
-                $orderQty = (int) $order->items()->sum('before_qty');
-                $okQty = (int) $order->items()->sum('after_qty');
-                $scrapQty = max($orderQty - $okQty, 0);
+                $orderQty = (int) $order->items()->sum('after_qty');
+                $scrapQty = (int) $order->items()
+                    ->whereHas('ngType', fn ($query) => $query->where('code', 'S'))
+                    ->sum('after_qty');
+                $okQty = max($orderQty - $scrapQty, 0);
 
                 $order->result()->updateOrCreate(
                     [

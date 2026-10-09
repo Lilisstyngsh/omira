@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\FiscalYearTarget;
 use App\Models\Line;
-use App\Models\ProductScrapLimit;
 use App\Models\MonitoringAbnormality;
+use App\Models\ProductScrapLimit;
 use App\Models\RepairOrder;
 use App\Models\RepairOrderItem;
 use App\Models\RepairResult;
@@ -16,11 +16,7 @@ use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
 {
-    private const MONITORED_STATUSES = [
-        'completed',
-        'revision_requested',
-        'confirmed',
-    ];
+    private const MONITORED_STATUS = 'confirmed';
 
     public function index(Request $request)
     {
@@ -81,25 +77,32 @@ class DashboardController extends Controller
         $finishedOrders = (int) $selectedMetrics['ok'];
         $scrap = (int) $selectedMetrics['scrap'];
 
-        $targetRecord = $this->resolveTarget($year, $lineId);
+        /*
+         * Target FY hanya 1 nilai global per tahun untuk seluruh Plant & Line.
+         * Filter Line tetap berlaku untuk KPI/grafik, tetapi abnormality selalu
+         * membandingkan total Order global bulanan dengan Target FY global.
+         */
+        $targetRecord = $this->resolveTarget($year);
         $target = (int) ($targetRecord?->target_qty ?? 0);
         $targetScopeLabel = $targetRecord
-            ? ($targetRecord->line_id ? 'Target Line' : 'Target Global')
+            ? 'Seluruh Plant & Line'
             : 'Target belum diatur';
 
-        $targetExceeded = $target > 0 && $totalOrders > $target;
+        $globalMetrics = $this->metricsForMonth($year, $month, null);
+        $globalOrder = (int) $globalMetrics['order'];
+        $targetExceeded = $target > 0 && $globalOrder > $target;
         $targetDifference = $targetExceeded
-            ? $totalOrders - $target
+            ? $globalOrder - $target
             : 0;
 
-        $scopeKey = FiscalYearTarget::scopeKey($lineId);
+        $globalScopeKey = FiscalYearTarget::scopeKey(null);
 
         $abnormality = MonitoringAbnormality::query()
             ->with(['creator', 'updater'])
             ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
             ->where('year', $year)
             ->where('month', $month)
-            ->where('scope_key', $scopeKey)
+            ->where('scope_key', $globalScopeKey)
             ->first();
 
         $periodEnd = Carbon::create($year, $month, 1)->endOfMonth();
@@ -119,7 +122,6 @@ class DashboardController extends Controller
         $finishSeries = $monthlyMetrics->pluck('ok')->map(fn ($value) => (int) $value)->values();
         $scrapSeries = $monthlyMetrics->pluck('scrap')->map(fn ($value) => (int) $value)->values();
         $months = $monthlyMetrics->pluck('label')->values();
-        $targetSeries = $monthlyMetrics->map(fn () => $target)->values();
 
         $maxMetric = max(
             1,
@@ -143,6 +145,7 @@ class DashboardController extends Controller
             'target',
             'targetRecord',
             'targetScopeLabel',
+            'globalOrder',
             'targetExceeded',
             'targetDifference',
             'abnormality',
@@ -151,7 +154,6 @@ class DashboardController extends Controller
             'orderSeries',
             'finishSeries',
             'scrapSeries',
-            'targetSeries',
             'chartMax'
         ));
     }
@@ -173,123 +175,131 @@ class DashboardController extends Controller
 
         $year = (int) $data['year'];
         $month = (int) $data['month'];
-        $lineId = isset($data['line_id'])
+        $returnLineId = isset($data['line_id'])
             ? (int) $data['line_id']
             : null;
 
-        $metrics = $this->metricsForMonth($year, $month, $lineId);
-        $targetRecord = $this->resolveTarget($year, $lineId);
+        $scopeKey = FiscalYearTarget::scopeKey(null);
+
+        $existing = MonitoringAbnormality::query()
+            ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->where('scope_key', $scopeKey)
+            ->first();
+
+        if ($existing) {
+            return redirect()
+                ->route('dashboard', array_filter([
+                    'month' => $month,
+                    'year' => $year,
+                    'line_id' => $returnLineId,
+                ], fn ($value) => $value !== null && $value !== ''))
+                ->withErrors([
+                    'reason' => 'Alasan abnormality untuk bulan ini sudah pernah disimpan dan tidak dapat diinput ulang.',
+                ]);
+        }
+
+        $metrics = $this->metricsForMonth($year, $month, null);
+        $targetRecord = $this->resolveTarget($year);
         $target = (int) ($targetRecord?->target_qty ?? 0);
 
         if ($target <= 0 || $metrics['order'] <= $target) {
-            return back()->withErrors([
-                'reason' => 'Alasan abnormality hanya dapat disimpan ketika Order melewati Target FY.',
-            ]);
+            return redirect()
+                ->route('dashboard', array_filter([
+                    'month' => $month,
+                    'year' => $year,
+                    'line_id' => $returnLineId,
+                ], fn ($value) => $value !== null && $value !== ''))
+                ->withErrors([
+                    'reason' => 'Alasan abnormality hanya dapat disimpan ketika total Order seluruh Line melewati Target FY.',
+                ]);
         }
 
-        $scopeKey = FiscalYearTarget::scopeKey($lineId);
-        $userId = $request->user()->id;
-
-        MonitoringAbnormality::query()->updateOrCreate(
-            [
-                'metric' => MonitoringAbnormality::METRIC_TARGET_FY,
-                'year' => $year,
-                'month' => $month,
-                'scope_key' => $scopeKey,
-            ],
-            [
-                'line_id' => $lineId,
-                'fiscal_year_target_id' => $targetRecord?->id,
-                'actual_qty' => (int) $metrics['order'],
-                'threshold_qty' => $target,
-                'reason' => trim($data['reason']),
-                'created_by' => MonitoringAbnormality::query()
-                    ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
-                    ->where('year', $year)
-                    ->where('month', $month)
-                    ->where('scope_key', $scopeKey)
-                    ->value('created_by') ?: $userId,
-                'updated_by' => $userId,
-            ]
-        );
+        MonitoringAbnormality::create([
+            'metric' => MonitoringAbnormality::METRIC_TARGET_FY,
+            'year' => $year,
+            'month' => $month,
+            'scope_key' => $scopeKey,
+            'line_id' => null,
+            'fiscal_year_target_id' => $targetRecord?->id,
+            'actual_qty' => (int) $metrics['order'],
+            'threshold_qty' => $target,
+            'reason' => trim($data['reason']),
+            'created_by' => $request->user()->id,
+            'updated_by' => $request->user()->id,
+        ]);
 
         return redirect()
             ->route('dashboard', array_filter([
                 'month' => $month,
                 'year' => $year,
-                'line_id' => $lineId,
+                'line_id' => $returnLineId,
             ], fn ($value) => $value !== null && $value !== ''))
-            ->with('success', 'Alasan abnormality berhasil disimpan.');
+            ->with('success', 'Alasan abnormality bulan ini berhasil disimpan.');
     }
 
     private function metricsForMonth(int $year, int $month, ?int $lineId): array
     {
         $itemQuery = RepairOrderItem::query()
             ->whereHas('repairOrder', function ($query) use ($year, $month, $lineId) {
-                $this->applyCompletedOrderFilter($query, $year, $month, $lineId);
+                $this->applyConfirmedOrderFilter($query, $year, $month, $lineId);
             });
-
-        $order = (int) (clone $itemQuery)->sum('before_qty');
-        $ok = (int) (clone $itemQuery)->sum('after_qty');
-        $scrap = max($order - $ok, 0);
 
         /*
-         * Compatibility untuk format order lama yang belum mempunyai
-         * repair_order_items.
+         * Dashboard baru membaca hasil final OMD setelah barang dikonfirmasi
+         * sesuai oleh User:
+         * Order = P + H + C + S (after_qty)
+         * Scrap = S (after_qty)
+         * OK    = Order - Scrap
          */
-        $legacyOrders = RepairOrder::query()
-            ->whereDoesntHave('items')
-            ->whereIn('status', self::MONITORED_STATUSES)
-            ->whereYear('repair_completed_at', $year)
-            ->whereMonth('repair_completed_at', $month)
-            ->when($lineId, fn ($query) => $query->where('line_id', $lineId));
+        $order = (int) (clone $itemQuery)->sum('after_qty');
+        $scrap = (int) (clone $itemQuery)
+            ->whereHas('ngType', fn ($query) => $query->where('code', 'S'))
+            ->sum('after_qty');
+        $ok = max($order - $scrap, 0);
 
-        $legacyOrderQty = (int) (clone $legacyOrders)->sum('quantity');
-
+        /*
+         * Compatibility untuk order lama yang belum mempunyai repair_order_items.
+         * Periode tetap memakai tanggal User melakukan konfirmasi penerimaan.
+         */
         $legacyResults = RepairResult::query()
             ->whereHas('order', function ($query) use ($year, $month, $lineId) {
-                $query
-                    ->whereDoesntHave('items')
-                    ->whereIn('status', self::MONITORED_STATUSES)
-                    ->whereYear('repair_completed_at', $year)
-                    ->whereMonth('repair_completed_at', $month)
-                    ->when($lineId, fn ($q) => $q->where('line_id', $lineId));
+                $query->whereDoesntHave('items');
+                $this->applyConfirmedOrderFilter($query, $year, $month, $lineId);
             });
 
+        $legacyOk = (int) (clone $legacyResults)->sum('ok_qty');
+        $legacyScrap = (int) (clone $legacyResults)->sum('scrap_qty');
+        $legacyNg = (int) (clone $legacyResults)->sum('ng_qty');
+        $legacyOrder = $legacyOk + $legacyScrap + $legacyNg;
+
         return [
-            'order' => $order + $legacyOrderQty,
-            'ok' => $ok + (int) (clone $legacyResults)->sum('ok_qty'),
-            'scrap' => $scrap + (int) (clone $legacyResults)->sum('scrap_qty'),
+            'order' => $order + $legacyOrder,
+            'ok' => $ok + max($legacyOrder - $legacyScrap, 0),
+            'scrap' => $scrap + $legacyScrap,
         ];
     }
 
-    private function applyCompletedOrderFilter(
+    private function applyConfirmedOrderFilter(
         $query,
         int $year,
         int $month,
         ?int $lineId
     ): void {
         $query
-            ->whereIn('status', self::MONITORED_STATUSES)
-            ->whereNotNull('repair_completed_at')
-            ->whereYear('repair_completed_at', $year)
-            ->whereMonth('repair_completed_at', $month)
+            ->where('status', self::MONITORED_STATUS)
+            ->whereHas('confirmation', function ($confirmationQuery) use ($year, $month) {
+                $confirmationQuery
+                    ->whereNotNull('confirmed_at')
+                    ->whereYear('confirmed_at', $year)
+                    ->whereMonth('confirmed_at', $month);
+            })
             ->when($lineId, fn ($q) => $q->where('line_id', $lineId));
     }
 
-    private function resolveTarget(int $year, ?int $lineId): ?FiscalYearTarget
+    private function resolveTarget(int $year): ?FiscalYearTarget
     {
-        if ($lineId) {
-            $lineTarget = FiscalYearTarget::query()
-                ->where('year', $year)
-                ->where('scope_key', FiscalYearTarget::scopeKey($lineId))
-                ->first();
-
-            if ($lineTarget) {
-                return $lineTarget;
-            }
-        }
-
         return FiscalYearTarget::query()
             ->where('year', $year)
             ->where('scope_key', FiscalYearTarget::scopeKey(null))
@@ -303,10 +313,11 @@ class DashboardController extends Controller
         string $effectiveDateTime
     ): Collection {
         $items = RepairOrderItem::query()
-            ->with(['product.masterModel.line'])
+            ->with(['product.masterModel.line', 'ngType'])
             ->whereNotNull('product_id')
+            ->whereHas('ngType', fn ($query) => $query->where('code', 'S'))
             ->whereHas('repairOrder', function ($query) use ($year, $month, $lineId) {
-                $this->applyCompletedOrderFilter($query, $year, $month, $lineId);
+                $this->applyConfirmedOrderFilter($query, $year, $month, $lineId);
             })
             ->get();
 
@@ -338,11 +349,7 @@ class DashboardController extends Controller
                     return null;
                 }
 
-                // Formula Scrap dipertahankan seperti dashboard sebelumnya.
-                // Perubahan ini hanya memindahkan level pembanding dari Model ke Product.
-                $orderQty = (int) $productItems->sum('before_qty');
-                $okQty = (int) $productItems->sum('after_qty');
-                $scrapQty = max($orderQty - $okQty, 0);
+                $scrapQty = (int) $productItems->sum('after_qty');
                 $limitQty = (int) $limit->limit_qty;
 
                 if ($scrapQty < $limitQty) {

@@ -355,11 +355,14 @@
             font-size: 10px;
         }
 
-        .feedback-flag{position:relative;display:inline-flex;align-items:center;margin-left:6px;vertical-align:middle}
-        .feedback-flag-btn{border:0;background:transparent;color:#d97706;font-size:15px;line-height:1;cursor:pointer;padding:4px;border-radius:6px}
-        .feedback-flag-btn:hover{background:#fff7ed}
-        .feedback-popover{position:absolute;z-index:40;top:28px;right:0;width:270px;padding:10px 11px;border:1px solid #f59e0b;border-radius:9px;background:#fff;color:#78350f;box-shadow:0 12px 32px rgba(15,23,42,.16);font-size:11px;line-height:1.45;text-align:left}
-        .feedback-popover strong{display:block;margin-bottom:4px;font-weight:650}.feedback-popover small{display:block;margin-top:5px;color:#a16207}
+        .feedback-flag{display:inline-flex;align-items:center;margin-left:6px;vertical-align:middle}
+        .feedback-flag-btn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #fed7aa;background:#fff7ed;color:#ea580c;font-size:11px;line-height:1;cursor:pointer;padding:0;border-radius:7px;transition:background .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease}
+        .feedback-flag-btn:hover{background:#ffedd5;border-color:#fdba74;color:#c2410c;box-shadow:0 3px 8px rgba(234,88,12,.12)}
+        .feedback-flag-btn:focus-visible{outline:2px solid rgba(234,88,12,.22);outline-offset:2px}
+        .feedback-popover{position:fixed;z-index:10050;width:min(300px,calc(100vw - 24px));padding:12px 13px;border:1px solid #fed7aa;border-radius:12px;background:#fffdf9;color:#7c2d12;box-shadow:0 18px 44px rgba(15,23,42,.18);font-size:11px;line-height:1.5;text-align:left}
+        .feedback-popover strong{display:flex;align-items:center;gap:7px;margin-bottom:6px;color:#9a3412;font-size:11px;font-weight:750}
+        .feedback-popover .feedback-popover-reason{white-space:pre-wrap;word-break:break-word;color:#7c2d12}
+        .feedback-popover small{display:block;margin-top:7px;color:#a16207}
     </style>
 
     @if ($completedCount > 0)
@@ -488,13 +491,17 @@
                                 {{ $order->order_number }}
                                 @if($order->openFeedback)
                                     <span class="feedback-flag">
-                                        <button type="button" class="feedback-flag-btn" title="Ada feedback ketidaksesuaian dari User"
-                                            onclick="event.stopPropagation(); var p=this.nextElementSibling; document.querySelectorAll('.feedback-popover').forEach(function(el){ if(el!==p) el.hidden=true; }); p.hidden=!p.hidden;">⚠</button>
-                                        <span class="feedback-popover" hidden onclick="event.stopPropagation()">
-                                            <strong>Feedback User</strong>
-                                            {{ $order->openFeedback->reason }}
-                                            <small>{{ $order->openFeedback->created_at?->format('d-m-Y H:i') }}</small>
-                                        </span>
+                                        <button type="button"
+                                            class="feedback-flag-btn"
+                                            title="Lihat feedback User"
+                                            aria-label="Lihat feedback User"
+                                            aria-expanded="false"
+                                            data-feedback-id="{{ $order->id }}"
+                                            data-feedback-reason="{{ $order->openFeedback->reason }}"
+                                            data-feedback-time="{{ $order->openFeedback->created_at?->format('d-m-Y H:i') }}"
+                                            onclick="toggleFeedbackPopover(event, this)">
+                                            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                                        </button>
                                     </span>
                                 @endif
                             </td>
@@ -603,5 +610,94 @@
     <div style="margin-top:18px;">
         {{ $orders->links() }}
     </div>
+
+
+    <div id="feedbackFloatingPopover" class="feedback-popover" hidden onclick="event.stopPropagation()">
+        <strong><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> Feedback User</strong>
+        <div class="feedback-popover-reason" id="feedbackPopoverReason"></div>
+        <small id="feedbackPopoverTime"></small>
+    </div>
+
+    <script>
+        const feedbackPopover = document.getElementById('feedbackFloatingPopover');
+        const feedbackReason = document.getElementById('feedbackPopoverReason');
+        const feedbackTime = document.getElementById('feedbackPopoverTime');
+        let activeFeedbackButton = null;
+
+        function closeFeedbackPopover() {
+            if (!feedbackPopover) return;
+            feedbackPopover.hidden = true;
+            feedbackPopover.style.left = '';
+            feedbackPopover.style.top = '';
+            feedbackPopover.dataset.owner = '';
+            if (activeFeedbackButton) {
+                activeFeedbackButton.setAttribute('aria-expanded', 'false');
+            }
+            activeFeedbackButton = null;
+        }
+
+        function positionFeedbackPopover(button) {
+            if (!feedbackPopover) return;
+            const buttonRect = button.getBoundingClientRect();
+            const popoverRect = feedbackPopover.getBoundingClientRect();
+            const gap = 10;
+            const edge = 12;
+
+            // Prioritas kanan-atas icon. Jika ruang tidak cukup, otomatis bergeser tanpa masuk area scroll tabel.
+            let left = buttonRect.right + gap;
+            let top = buttonRect.top - popoverRect.height + 8;
+
+            if (left + popoverRect.width > window.innerWidth - edge) {
+                left = buttonRect.left - popoverRect.width - gap;
+            }
+            left = Math.max(edge, Math.min(left, window.innerWidth - popoverRect.width - edge));
+
+            if (top < edge) {
+                top = buttonRect.bottom + gap;
+            }
+            top = Math.max(edge, Math.min(top, window.innerHeight - popoverRect.height - edge));
+
+            feedbackPopover.style.left = Math.round(left) + 'px';
+            feedbackPopover.style.top = Math.round(top) + 'px';
+        }
+
+        function toggleFeedbackPopover(event, button) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!feedbackPopover) return;
+
+            const feedbackId = button.dataset.feedbackId || '';
+            const isSameOpen = !feedbackPopover.hidden && feedbackPopover.dataset.owner === feedbackId;
+            if (isSameOpen) {
+                closeFeedbackPopover();
+                return;
+            }
+
+            if (activeFeedbackButton && activeFeedbackButton !== button) {
+                activeFeedbackButton.setAttribute('aria-expanded', 'false');
+            }
+
+            feedbackReason.textContent = button.dataset.feedbackReason || '-';
+            feedbackTime.textContent = button.dataset.feedbackTime || '';
+            feedbackPopover.dataset.owner = feedbackId;
+            feedbackPopover.hidden = false;
+            activeFeedbackButton = button;
+            button.setAttribute('aria-expanded', 'true');
+
+            requestAnimationFrame(function () {
+                positionFeedbackPopover(button);
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            if (!feedbackPopover || feedbackPopover.hidden) return;
+            if (feedbackPopover.contains(event.target)) return;
+            if (event.target.closest('.feedback-flag-btn')) return;
+            closeFeedbackPopover();
+        });
+
+        window.addEventListener('resize', closeFeedbackPopover);
+        window.addEventListener('scroll', closeFeedbackPopover, true);
+    </script>
 
 @endsection

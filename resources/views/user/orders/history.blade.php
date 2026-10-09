@@ -905,17 +905,6 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
 
             <div class="history-toolbar-query">
-                <div class="history-line-filter history-line-filter-inline">
-                    <label for="history_line_id" class="sr-only">Filter Line</label>
-                    <select id="history_line_id" name="line_id" onchange="this.form.submit()">
-                        <option value="">Semua Line</option>
-                        @foreach ($lines as $line)
-                        <option value="{{ $line->id }}" @selected((string) request('line_id')===(string) $line->id)>
-                            {{ $line->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
 
                 <div class="history-search">
 

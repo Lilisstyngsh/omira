@@ -255,9 +255,9 @@ Data Master Plant
 
                         <td>
                             <div class="plant-action">
-                                <button type="button" class="btn btn-secondary edit-plant-btn"
-                                    data-id="{{ $plant->id }}" data-name="{{ $plant->name }}">
-                                    Edit
+                                <button type="button" class="btn btn-secondary edit-plant-btn action-icon-only"
+                                    data-id="{{ $plant->id }}" data-name="{{ $plant->name }}" title="Edit Plant" aria-label="Edit Plant">
+                                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                 </button>
 
                                 <form method="POST" action="{{ route('omd.master.plant.destroy', $plant->id) }}"
@@ -265,8 +265,8 @@ Data Master Plant
                                     @csrf
                                     @method('DELETE')
 
-                                    <button class="btn btn-danger">
-                                        Hapus
+                                    <button class="btn btn-danger action-icon-only" title="Hapus Plant" aria-label="Hapus Plant">
+                                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                     </button>
                                 </form>
                             </div>

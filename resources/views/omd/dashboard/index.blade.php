@@ -162,9 +162,9 @@
             border-radius: 999px;
         }
 
-        .kpi-dot.order { background: #4f46e5; }
-        .kpi-dot.ok { background: #16a34a; }
-        .kpi-dot.scrap { background: #dc2626; }
+        .kpi-dot.order { background: #7678ED; }
+        .kpi-dot.ok { background: #F7B801; }
+        .kpi-dot.scrap { background: #F35B04; }
         .kpi-dot.target { background: #f97316; }
 
         .kpi-value {
@@ -303,9 +303,9 @@
             border-radius: 3px;
         }
 
-        .legend-color.order { background: #4f46e5; }
-        .legend-color.ok { background: #16a34a; }
-        .legend-color.scrap { background: #dc2626; }
+        .legend-color.order { background: #7678ED; }
+        .legend-color.ok { background: #F7B801; }
+        .legend-color.scrap { background: #F35B04; }
         .legend-color.target { background: #f97316; height: 3px; }
 
         .chart-scroll {
@@ -396,21 +396,44 @@
         }
 
         .chart-bar {
+            position: relative;
             width: min(18px, 28%);
             min-height: 2px;
             height: var(--bar-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 0;
+            overflow: hidden;
             border-radius: 6px 6px 2px 2px;
             transition: opacity .15s ease, transform .15s ease;
         }
 
+        .chart-bar-value {
+            position: relative;
+            z-index: 1;
+            color: #ffffff;
+            font-size: 8px;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+            pointer-events: none;
+            text-shadow: 0 1px 2px rgba(15, 23, 42, .22);
+        }
+
+        .chart-bar.ok .chart-bar-value {
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(15, 23, 42, .30);
+        }
+
         .chart-bar:hover {
-            opacity: .82;
+            opacity: .86;
             transform: translateY(-2px);
         }
 
-        .chart-bar.order { background: #4f46e5; }
-        .chart-bar.ok { background: #16a34a; }
-        .chart-bar.scrap { background: #dc2626; }
+        .chart-bar.order { background: #7678ED; }
+        .chart-bar.ok { background: #F7B801; }
+        .chart-bar.scrap { background: #F35B04; }
 
         .month-label {
             display: flex;
@@ -623,9 +646,6 @@
         <div class="monitor-head">
             <div>
                 <h2>Monitoring Repair Box</h2>
-                <div class="monitor-muted">
-                    Data realtime hasil repair yang sudah disubmit OMD. Grafik menampilkan Januari sampai bulan filter.
-                </div>
             </div>
 
             <div class="monitor-pills">
@@ -677,7 +697,6 @@
                     <span class="kpi-dot order"></span>
                 </div>
                 <div class="kpi-value">{{ number_format($totalOrders) }}</div>
-                <div class="kpi-note">Grand total NG P + H + C + S hasil OMD bulan terpilih.</div>
             </div>
 
             <div class="monitor-card monitor-kpi">
@@ -686,7 +705,6 @@
                     <span class="kpi-dot ok"></span>
                 </div>
                 <div class="kpi-value">{{ number_format($finishedOrders) }}</div>
-                <div class="kpi-note">Qty hasil repair yang dinyatakan OK.</div>
             </div>
 
             <div class="monitor-card monitor-kpi">
@@ -695,7 +713,6 @@
                     <span class="kpi-dot scrap"></span>
                 </div>
                 <div class="kpi-value">{{ number_format($scrap) }}</div>
-                <div class="kpi-note">Order dikurangi qty OK hasil repair.</div>
             </div>
 
             <div class="monitor-card monitor-kpi">
@@ -704,7 +721,6 @@
                     <span class="kpi-dot target"></span>
                 </div>
                 <div class="kpi-value">{{ number_format($target) }}</div>
-                <div class="kpi-note">{{ $targetScopeLabel }} untuk tahun {{ $year }}.</div>
             </div>
         </div>
 
@@ -712,38 +728,41 @@
             <div class="monitor-card alert-card target-alert">
                 <div class="alert-icon">!</div>
                 <div style="flex:1;min-width:0;">
-                    <h3 class="alert-title">Target FY terlampaui</h3>
+                    <h3 class="alert-title">Target FY global terlampaui</h3>
                     <p class="alert-copy">
-                        Order {{ number_format($totalOrders) }} melewati target {{ number_format($target) }}
-                        sebanyak <strong>{{ number_format($targetDifference) }}</strong> box.
-                        OMD wajib mencatat alasan abnormality.
+                        Order {{ $monthNames[$month] }} <strong>{{ number_format($globalOrder) }}</strong>
+                        · Target <strong>{{ number_format($target) }}</strong>
+                        · Selisih <strong>+{{ number_format($targetDifference) }}</strong>
                     </p>
-
-                    <form class="abnormality-form" method="POST" action="{{ route('omd.dashboard.abnormality.store') }}">
-                        @csrf
-                        <input type="hidden" name="year" value="{{ $year }}">
-                        <input type="hidden" name="month" value="{{ $month }}">
-                        @if ($lineId)
-                            <input type="hidden" name="line_id" value="{{ $lineId }}">
-                        @endif
-
-                        <textarea name="reason" placeholder="Tuliskan penyebab Order melewati Target FY..." required>{{ old('reason', $abnormality?->reason) }}</textarea>
-
-                        @error('reason')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-
-                        <div>
-                            <button type="submit" class="btn btn-primary">
-                                {{ $abnormality ? 'Perbarui Alasan' : 'Simpan Alasan' }}
-                            </button>
-                        </div>
-                    </form>
 
                     @if ($abnormality)
                         <div class="abnormality-meta">
-                            Alasan terakhir tersimpan {{ optional($abnormality->updated_at)->format('d/m/Y H:i') }}.
+                            ✓ Alasan bulan ini sudah dicatat oleh
+                            {{ $abnormality->creator?->name ?? $abnormality->updater?->name ?? 'OMD' }}
+                            pada {{ optional($abnormality->created_at)->format('d/m/Y H:i') }}.
                         </div>
+                        <div class="alert-copy" style="margin-top:8px;">
+                            “{{ $abnormality->reason }}”
+                        </div>
+                    @else
+                        <form class="abnormality-form" method="POST" action="{{ route('omd.dashboard.abnormality.store') }}">
+                            @csrf
+                            <input type="hidden" name="year" value="{{ $year }}">
+                            <input type="hidden" name="month" value="{{ $month }}">
+                            @if ($lineId)
+                                <input type="hidden" name="line_id" value="{{ $lineId }}">
+                            @endif
+
+                            <textarea name="reason" placeholder="Tuliskan penyebab total Order bulan ini melewati Target FY..." required>{{ old('reason') }}</textarea>
+
+                            @error('reason')
+                                <div class="field-error">{{ $message }}</div>
+                            @enderror
+
+                            <div>
+                                <button type="submit" class="btn btn-primary">Simpan Alasan</button>
+                            </div>
+                        </form>
                     @endif
                 </div>
             </div>
@@ -754,9 +773,7 @@
                 <div class="alert-icon">!</div>
                 <div style="flex:1;min-width:0;">
                     <h3 class="alert-title">Peringatan Scrap Limit Produk</h3>
-                    <p class="alert-copy">
-                        {{ $productScrapAlerts->count() }} produk mencapai atau melewati Scrap Limit pada periode filter.
-                    </p>
+                    <p class="alert-copy">{{ $productScrapAlerts->count() }} produk mencapai/melewati Scrap Limit.</p>
                 </div>
             </div>
         @endif
@@ -765,9 +782,7 @@
             <div class="card-head">
                 <div>
                     <h3 class="card-title">Grafik Monitoring Repair Box {{ $year }}</h3>
-                    <p class="card-subtitle">
-                        Januari s.d. {{ $monthNames[$month] }} · data berdasarkan tanggal OMD submit hasil repair.
-                    </p>
+                    <p class="card-subtitle">Januari – {{ $monthNames[$month] }} {{ $year }}</p>
                 </div>
 
                 <div class="chart-legend">
@@ -791,7 +806,7 @@
 
                         @if ($target > 0)
                             <div class="target-line" style="--target-height: {{ number_format($targetPercent, 2, '.', '') }}%;">
-                                <span>Target {{ number_format($target) }}</span>
+                                <span>{{ number_format($target) }}</span>
                             </div>
                         @endif
 
@@ -805,19 +820,30 @@
                                     $orderHeight = $chartMax > 0 ? ($orderValue / $chartMax) * 100 : 0;
                                     $okHeight = $chartMax > 0 ? ($okValue / $chartMax) * 100 : 0;
                                     $scrapHeight = $chartMax > 0 ? ($scrapValue / $chartMax) * 100 : 0;
+
+                                    // Batang bernilai > 0 diberi tinggi visual minimum agar label tetap terbaca di dalam batang.
+                                    $orderVisualHeight = $orderValue > 0 ? max($orderHeight, 6) : 0;
+                                    $okVisualHeight = $okValue > 0 ? max($okHeight, 6) : 0;
+                                    $scrapVisualHeight = $scrapValue > 0 ? max($scrapHeight, 6) : 0;
                                 @endphp
 
                                 <div class="month-group">
                                     <div class="month-bars">
                                         <div class="chart-bar order"
                                             title="{{ $monthLabel }} · Order {{ number_format($orderValue) }}"
-                                            style="--bar-height: {{ number_format($orderHeight, 2, '.', '') }}%;"></div>
+                                            style="--bar-height: {{ number_format($orderVisualHeight, 2, '.', '') }}%;">
+                                            @if ($orderValue > 0)<span class="chart-bar-value">{{ number_format($orderValue) }}</span>@endif
+                                        </div>
                                         <div class="chart-bar ok"
                                             title="{{ $monthLabel }} · OK {{ number_format($okValue) }}"
-                                            style="--bar-height: {{ number_format($okHeight, 2, '.', '') }}%;"></div>
+                                            style="--bar-height: {{ number_format($okVisualHeight, 2, '.', '') }}%;">
+                                            @if ($okValue > 0)<span class="chart-bar-value">{{ number_format($okValue) }}</span>@endif
+                                        </div>
                                         <div class="chart-bar scrap"
                                             title="{{ $monthLabel }} · Scrap {{ number_format($scrapValue) }}"
-                                            style="--bar-height: {{ number_format($scrapHeight, 2, '.', '') }}%;"></div>
+                                            style="--bar-height: {{ number_format($scrapVisualHeight, 2, '.', '') }}%;">
+                                            @if ($scrapValue > 0)<span class="chart-bar-value">{{ number_format($scrapValue) }}</span>@endif
+                                        </div>
                                     </div>
                                     <div class="month-label">{{ $monthLabel }}</div>
                                 </div>
@@ -829,96 +855,11 @@
 
             @if ($orderSeries->sum() === 0 && $finishSeries->sum() === 0 && $scrapSeries->sum() === 0)
                 <div class="empty-state" style="margin-top:12px;">
-                    Grafik sudah aktif, tetapi belum ada hasil repair OMD pada periode/filter ini.
-                    Batang akan muncul otomatis setelah OMD submit hasil repair.
+                    Grafik sudah aktif, tetapi belum ada order yang sudah dikonfirmasi User pada periode/filter ini.
+                    Batang akan muncul otomatis setelah User mengonfirmasi barang sesuai.
                 </div>
             @endif
         </div>
 
-        <div class="monitor-grid">
-            <div class="monitor-card table-card">
-                <div class="card-head">
-                    <div>
-                        <h3 class="card-title">Rekap Realtime</h3>
-                        <p class="card-subtitle">Angka yang menjadi sumber grafik Dashboard.</p>
-                    </div>
-                </div>
-
-                <div class="summary-scroll">
-                    <table class="summary-table">
-                        <thead>
-                            <tr>
-                                <th>Summary</th>
-                                @foreach ($months as $monthLabel)
-                                    <th>{{ $monthLabel }}</th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="summary-target">
-                                <td>Target FY</td>
-                                @foreach ($targetSeries as $value)
-                                    <td>{{ number_format($value) }}</td>
-                                @endforeach
-                            </tr>
-                            <tr class="summary-order">
-                                <td>Order</td>
-                                @foreach ($orderSeries as $value)
-                                    <td>{{ number_format($value) }}</td>
-                                @endforeach
-                            </tr>
-                            <tr class="summary-ok">
-                                <td>OK</td>
-                                @foreach ($finishSeries as $value)
-                                    <td>{{ number_format($value) }}</td>
-                                @endforeach
-                            </tr>
-                            <tr class="summary-scrap">
-                                <td>Scrap</td>
-                                @foreach ($scrapSeries as $value)
-                                    <td>{{ number_format($value) }}</td>
-                                @endforeach
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="monitor-card scrap-card">
-                <div class="card-head">
-                    <div>
-                        <h3 class="card-title">Scrap Limit per Produk</h3>
-                        <p class="card-subtitle">Alert berdasarkan limit produk yang aktif pada periode filter.</p>
-                    </div>
-                </div>
-
-                @if ($productScrapAlerts->isEmpty())
-                    <div class="empty-state">
-                        Tidak ada produk yang mencapai Scrap Limit pada periode ini.
-                    </div>
-                @else
-                    <div class="scrap-list">
-                        @foreach ($productScrapAlerts as $alert)
-                            <div class="scrap-item {{ $alert['status'] }}">
-                                <div class="scrap-item-top">
-                                    <div class="scrap-model">{{ $alert['product'] }}</div>
-                                    <div class="scrap-status">
-                                        {{ $alert['status'] === 'exceeded' ? 'Exceeded' : 'Limit' }}
-                                    </div>
-                                </div>
-                                <div class="scrap-line">Model {{ $alert['model'] }} · Line {{ $alert['line'] }}</div>
-                                <div class="scrap-values">
-                                    Scrap <strong>{{ number_format($alert['scrap_qty']) }}</strong> ·
-                                    Limit <strong>{{ number_format($alert['limit_qty']) }}</strong>
-                                    @if ($alert['difference'] > 0)
-                                        · Melewati <strong>{{ number_format($alert['difference']) }}</strong>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </div>
     </div>
 @endsection

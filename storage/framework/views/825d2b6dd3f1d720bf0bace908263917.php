@@ -1,447 +1,399 @@
-<?php $__env->startSection('title', 'Target FY'); ?>
-<?php $__env->startSection('header', 'Target FY'); ?>
-
 <?php $__env->startSection('content'); ?>
     <style>
-        .target-page {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .target-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .fy-page {
+            display: grid;
             gap: 16px;
         }
 
-        .target-head h2 {
-            margin: 0 0 5px;
-            font-size: 22px;
-            font-weight: 800;
-            color: #172033;
-        }
-
-        .target-head p {
-            margin: 0;
-            color: #64748b;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .target-card {
-            background: #fff;
-            border: 1px solid #e8edf4;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(15, 23, 42, .04);
-            padding: 20px;
-        }
-
-        .filter-grid,
-        .target-form-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            align-items: end;
-        }
-
-        .field {
+        .fy-header {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .field label {
-            font-size: 10px;
-            font-weight: 800;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-
-        .field select,
-        .field input {
-            width: 100%;
-            height: 42px;
-            padding: 0 12px;
-            border: 1px solid #dbe2ea;
-            border-radius: 9px;
-            background: #fff;
-            color: #334155;
-            font-size: 12px;
-            outline: none;
-        }
-
-        .field select:focus,
-        .field input:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, .08);
-        }
-
-        .btn {
-            min-height: 42px;
-            padding: 0 16px;
-            border: none;
-            border-radius: 9px;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
         }
 
-        .btn-primary {
-            background: #5b4ce6;
-            color: #fff;
-        }
-
-        .btn-success {
-            background: #16a34a;
-            color: #fff;
-        }
-
-        .alert-success,
-        .alert-error {
-            padding: 13px 15px;
-            border-radius: 11px;
-            font-size: 12px;
-        }
-
-        .alert-success {
-            background: #ecfdf3;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            font-weight: 700;
-        }
-
-        .alert-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-        }
-
-        .section-title {
-            margin-bottom: 14px;
-        }
-
-        .section-title h3 {
-            margin: 0 0 4px;
-            font-size: 16px;
-            font-weight: 800;
-            color: #172033;
-        }
-
-        .section-title p {
+        .fy-header h2 {
             margin: 0;
-            color: #64748b;
-            font-size: 11px;
-            line-height: 1.6;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .summary-box {
-            border: 1px solid #e8edf4;
-            border-radius: 13px;
-            background: #f8fafc;
-            padding: 14px;
-        }
-
-        .summary-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: .04em;
-            color: #94a3b8;
-            margin-bottom: 5px;
-        }
-
-        .summary-value {
+            color: #172033;
             font-size: 22px;
             font-weight: 900;
-            color: #172033;
         }
 
-        .summary-sub {
-            margin-top: 4px;
-            color: #64748b;
+        .fy-header p {
+            margin: 5px 0 0;
+            color: #94a3b8;
             font-size: 11px;
         }
 
-        .scope-badge {
-            display: inline-flex;
-            align-items: center;
-            min-height: 26px;
-            padding: 0 9px;
-            border-radius: 999px;
-            background: #eef2ff;
-            color: #4338ca;
-            font-size: 10px;
-            font-weight: 800;
-        }
-
-        .info-box {
-            padding: 13px 15px;
+        .fy-action {
+            min-height: 42px;
+            padding: 0 15px;
+            border: 0;
             border-radius: 11px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
+            background: #6d5dfc;
+            color: #fff;
             font-size: 11px;
-            line-height: 1.65;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(109, 93, 252, .18);
         }
 
-        .info-box strong {
-            color: #334155;
+        .fy-action:hover {
+            background: #5b4ce0;
         }
 
-        .table-wrap {
-            overflow-x: auto;
+        .fy-card {
+            border: 1px solid #e5eaf1;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            overflow: hidden;
         }
 
-        .data-table {
-            width: 100%;
-            min-width: 760px;
-            border-collapse: collapse;
-        }
-
-        .data-table th {
-            padding: 11px 12px;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            text-align: left;
-        }
-
-        .data-table td {
-            padding: 11px 12px;
+        .fy-card-head {
+            padding: 15px 17px 12px;
             border-bottom: 1px solid #eef2f7;
-            font-size: 11px;
+            background: #fff;
+        }
+
+        .fy-card-head h3 {
+            margin: 0;
+            color: #172033;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .fy-card-head p {
+            margin: 4px 0 0;
+            color: #94a3b8;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        .fy-scroll {
+            max-height: 330px;
+            overflow: auto;
+        }
+
+        .fy-scroll.abnormality {
+            max-height: 390px;
+        }
+
+        .fy-table {
+            width: 100%;
+            min-width: 720px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .fy-table th,
+        .fy-table td {
+            padding: 11px 13px;
+            border-bottom: 1px solid #eef2f7;
             color: #334155;
+            font-size: 10.5px;
+            text-align: left;
             vertical-align: top;
         }
 
-        .data-table tbody tr:last-child td {
-            border-bottom: none;
+        .fy-table th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 9.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .04em;
         }
 
-        .empty-state {
-            padding: 22px;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 11px;
-            border: 1px dashed #dbe2ea;
-            border-radius: 12px;
-            background: #fbfdff;
+        .fy-table tbody tr:last-child td {
+            border-bottom: 0;
         }
 
-        .reason-cell {
+        .fy-year {
+            color: #172033;
+            font-weight: 900;
+        }
+
+        .fy-target {
+            color: #4338ca;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .fy-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 22px;
+            padding: 0 8px;
+            margin-left: 6px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .fy-reason {
             min-width: 260px;
             white-space: normal;
             line-height: 1.55;
         }
 
-        @media (max-width: 1100px) {
-            .filter-grid,
-            .target-form-grid,
-            .summary-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+        .fy-difference.positive {
+            color: #dc2626;
+            font-weight: 900;
+        }
+
+        .fy-difference.neutral {
+            color: #64748b;
+            font-weight: 800;
+        }
+
+        .fy-difference.negative {
+            color: #16a34a;
+            font-weight: 800;
+        }
+
+        .fy-empty {
+            padding: 28px 18px;
+            color: #94a3b8;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .fy-alert {
+            padding: 12px 14px;
+            border-radius: 11px;
+            font-size: 11px;
+            line-height: 1.55;
+        }
+
+        .fy-alert.success {
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .fy-alert.error {
+            border: 1px solid #fecaca;
+            background: #fff7f7;
+            color: #b91c1c;
+        }
+
+        .fy-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(15, 23, 42, .48);
+        }
+
+        .fy-modal-backdrop.is-open {
+            display: flex;
+        }
+
+        .fy-modal {
+            width: min(430px, 100%);
+            border: 1px solid #e5eaf1;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+            overflow: hidden;
+        }
+
+        .fy-modal-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 17px 18px 13px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .fy-modal-head h3 {
+            margin: 0;
+            color: #172033;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .fy-modal-head p {
+            margin: 4px 0 0;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .fy-modal-close {
+            width: 32px;
+            height: 32px;
+            border: 0;
+            border-radius: 9px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .fy-modal-body {
+            display: grid;
+            gap: 13px;
+            padding: 17px 18px;
+        }
+
+        .fy-field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .fy-field label {
+            color: #475569;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .fy-field input {
+            width: 100%;
+            min-height: 43px;
+            padding: 0 12px;
+            border: 1px solid #dbe3ee;
+            border-radius: 11px;
+            background: #fff;
+            color: #172033;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .fy-field input:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .10);
+        }
+
+        .fy-note {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 10px;
+            line-height: 1.55;
+        }
+
+        .fy-field-error {
+            color: #dc2626;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .fy-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            padding: 13px 18px 17px;
+            border-top: 1px solid #eef2f7;
+        }
+
+        .fy-btn {
+            min-height: 40px;
+            padding: 0 14px;
+            border-radius: 10px;
+            font-size: 10.5px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .fy-btn.cancel {
+            border: 1px solid #dbe3ee;
+            background: #fff;
+            color: #64748b;
+        }
+
+        .fy-btn.save {
+            border: 1px solid #6d5dfc;
+            background: #6d5dfc;
+            color: #fff;
         }
 
         @media (max-width: 700px) {
-            .target-card {
-                padding: 15px;
-                border-radius: 13px;
+            .fy-header {
+                align-items: stretch;
             }
 
-            .target-head h2 {
-                font-size: 19px;
-            }
-
-            .filter-grid,
-            .target-form-grid,
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .btn {
+            .fy-action {
                 width: 100%;
-                min-height: 46px;
             }
 
-            .field select,
-            .field input {
-                min-height: 46px;
+            .fy-scroll,
+            .fy-scroll.abnormality {
+                max-height: 320px;
+            }
+
+            .fy-modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .fy-btn {
+                width: 100%;
+                min-height: 44px;
             }
         }
     </style>
 
     <?php
         $monthNames = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
         ];
 
-        $selectedLine = $lineId ? $lines->firstWhere('id', $lineId) : null;
-        $scopeLabel = $selectedLine
-            ? ($selectedLine->plant?->name ? $selectedLine->plant->name . ' — ' : '') . $selectedLine->name
-            : 'Semua Line (Global)';
+        $targetMap = $targetHistory
+            ->mapWithKeys(fn ($row) => [(string) $row->year => (int) $row->target_qty]);
     ?>
 
-    <div class="target-page">
-        <div class="target-head">
+    <div class="fy-page">
+        <div class="fy-header">
             <div>
                 <h2>Target FY</h2>
-                <p>
-                    Satu nilai target untuk setiap tahun dan scope. Target ini akan menjadi pembanding realtime
-                    Order pada Dashboard dan dapat berbeda pada tahun berikutnya.
-                </p>
+                <p>Target tahunan global untuk seluruh Plant & Line.</p>
             </div>
+
+            <button type="button" class="fy-action" id="openTargetModal">
+                + Tambah / Update Target FY
+            </button>
         </div>
 
         <?php if(session('success')): ?>
-            <div class="alert-success"><?php echo e(session('success')); ?></div>
+            <div class="fy-alert success"><?php echo e(session('success')); ?></div>
         <?php endif; ?>
 
         <?php if($errors->any()): ?>
-            <div class="alert-error">
-                <strong>Data belum dapat disimpan.</strong>
-                <div style="margin-top:5px;">
-                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div><?php echo e($error); ?></div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </div>
+            <div class="fy-alert error">
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div><?php echo e($error); ?></div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         <?php endif; ?>
 
-        <div class="target-card">
-            <div class="section-title">
-                <h3>Pilih periode dan scope</h3>
-                <p>Gunakan Global untuk target seluruh Line atau pilih Line jika mempunyai target khusus.</p>
-            </div>
-
-            <form method="GET" action="<?php echo e(route('omd.targets.index')); ?>" class="filter-grid">
-                <div class="field">
-                    <label for="year">Tahun</label>
-                    <input type="number" id="year" name="year" value="<?php echo e($year); ?>" min="2020" max="2100">
-                </div>
-
-                <div class="field">
-                    <label for="line_id">Scope Target</label>
-                    <select id="line_id" name="line_id">
-                        <option value="">Semua Line (Global)</option>
-                        <?php $__currentLoopData = $lines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $line): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($line->id); ?>" <?php if((string) $lineId === (string) $line->id): echo 'selected'; endif; ?>>
-                                <?php echo e($line->plant?->name ? $line->plant->name . ' — ' : ''); ?><?php echo e($line->name); ?>
-
-                            </option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Tampilkan</button>
-            </form>
-        </div>
-
-        <div class="target-card">
-            <div class="section-title">
-                <h3>Target <?php echo e($year); ?> — <?php echo e($scopeLabel); ?></h3>
-                <p>
-                    Nilai target digunakan sebagai garis pembanding bulanan. Jika Order realtime melewati nilai ini,
-                    Dashboard akan menampilkan abnormality dan meminta alasan dari OMD pada Batch Dashboard.
-                </p>
-            </div>
-
-            <div class="summary-grid">
-                <div class="summary-box">
-                    <div class="summary-label">Target Aktif</div>
-                    <div class="summary-value"><?php echo e(number_format((int) ($target?->target_qty ?? 0), 0, ',', '.')); ?></div>
-                    <div class="summary-sub">Box / qty pembanding per bulan</div>
-                </div>
-
-                <div class="summary-box">
-                    <div class="summary-label">Tahun</div>
-                    <div class="summary-value"><?php echo e($year); ?></div>
-                    <div class="summary-sub">Berubah berdasarkan tahun pengaturan</div>
-                </div>
-
-                <div class="summary-box">
-                    <div class="summary-label">Scope</div>
-                    <div style="margin-top:8px;">
-                        <span class="scope-badge"><?php echo e($scopeLabel); ?></span>
-                    </div>
-                    <div class="summary-sub">
-                        <?php echo e($target?->updated_at ? 'Update ' . $target->updated_at->format('d-m-Y H:i') : 'Belum pernah disimpan'); ?>
-
-                    </div>
-                </div>
-            </div>
-
-            <form method="POST" action="<?php echo e(route('omd.targets.store')); ?>" class="target-form-grid">
-                <?php echo csrf_field(); ?>
-                <input type="hidden" name="year" value="<?php echo e($year); ?>">
-                <?php if($lineId): ?>
-                    <input type="hidden" name="line_id" value="<?php echo e($lineId); ?>">
-                <?php endif; ?>
-
-                <div class="field">
-                    <label for="target_qty">Target Qty</label>
-                    <input
-                        type="number"
-                        id="target_qty"
-                        name="target_qty"
-                        min="0"
-                        required
-                        value="<?php echo e(old('target_qty', $target?->target_qty ?? 0)); ?>"
-                    >
-                </div>
-
-                <div class="info-box">
-                    <strong>Rule Dashboard:</strong><br>
-                    Line spesifik menggunakan target Line jika tersedia. Jika tidak ada, Dashboard dapat memakai target Global sebagai fallback.
-                </div>
-
-                <button type="submit" class="btn btn-success">Simpan Target FY</button>
-            </form>
-        </div>
-
-        <div class="target-card">
-            <div class="section-title">
-                <h3>Ringkasan Target <?php echo e($year); ?></h3>
-                <p>Memudahkan OMD memeriksa target Global dan target khusus per Line dalam tahun yang sama.</p>
+        <div class="fy-card">
+            <div class="fy-card-head">
+                <h3>Ringkasan Target</h3>
+                <p>Riwayat Target FY per tahun. Target pada tahun yang sama selalu menggunakan nilai update terbaru.</p>
             </div>
 
             <?php if($targetHistory->isEmpty()): ?>
-                <div class="empty-state">Belum ada Target FY untuk tahun <?php echo e($year); ?>.</div>
+                <div class="fy-empty">Belum ada Target FY.</div>
             <?php else: ?>
-                <div class="table-wrap">
-                    <table class="data-table">
+                <div class="fy-scroll">
+                    <table class="fy-table">
                         <thead>
                             <tr>
-                                <th>Scope</th>
-                                <th>Target</th>
+                                <th>Tahun</th>
+                                <th>Target FY</th>
                                 <th>Diubah Oleh</th>
                                 <th>Update Terakhir</th>
                             </tr>
@@ -450,13 +402,13 @@
                             <?php $__currentLoopData = $targetHistory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td>
-                                        <span class="scope-badge">
-                                            <?php echo e($row->line?->name ?? 'Semua Line (Global)'); ?>
-
-                                        </span>
+                                        <span class="fy-year"><?php echo e($row->year); ?></span>
+                                        <?php if((int) $row->year === (int) $currentYear): ?>
+                                            <span class="fy-badge">Aktif</span>
+                                        <?php endif; ?>
                                     </td>
-                                    <td><strong><?php echo e(number_format($row->target_qty, 0, ',', '.')); ?></strong></td>
-                                    <td><?php echo e($row->updater?->name ?? '-'); ?></td>
+                                    <td><span class="fy-target"><?php echo e(number_format($row->target_qty, 0, ',', '.')); ?></span></td>
+                                    <td><?php echo e($row->updater?->name ?? $row->creator?->name ?? '-'); ?></td>
                                     <td><?php echo e($row->updated_at?->format('d-m-Y H:i') ?? '-'); ?></td>
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -466,26 +418,22 @@
             <?php endif; ?>
         </div>
 
-        <div class="target-card">
-            <div class="section-title">
-                <h3>Histori Abnormality — <?php echo e($scopeLabel); ?></h3>
-                <p>
-                    Tabel ini disiapkan untuk menyimpan alasan ketika Order melewati Target FY. Form alasan dan alert
-                    realtime akan dihubungkan dari Dashboard pada Batch 4 agar actual qty berasal dari perhitungan sistem,
-                    bukan input manual.
-                </p>
+        <div class="fy-card">
+            <div class="fy-card-head">
+                <h3>Histori Abnormality</h3>
+                <p>Satu abnormality per bulan. History bulan sebelumnya tetap tersimpan ketika bulan berikutnya terjadi abnormality baru.</p>
             </div>
 
             <?php if($abnormalities->isEmpty()): ?>
-                <div class="empty-state">Belum ada abnormality Target FY pada scope ini.</div>
+                <div class="fy-empty">Belum ada histori abnormality Target FY.</div>
             <?php else: ?>
-                <div class="table-wrap">
-                    <table class="data-table">
+                <div class="fy-scroll abnormality">
+                    <table class="fy-table">
                         <thead>
                             <tr>
-                                <th>Bulan</th>
+                                <th>Periode</th>
                                 <th>Actual Order</th>
-                                <th>Target</th>
+                                <th>Target FY</th>
                                 <th>Selisih</th>
                                 <th>Alasan</th>
                                 <th>Diinput Oleh</th>
@@ -493,15 +441,24 @@
                         </thead>
                         <tbody>
                             <?php $__currentLoopData = $abnormalities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
+                                    $difference = (int) $row->actual_qty - (int) $row->threshold_qty;
+                                    $differenceClass = $difference > 0
+                                        ? 'positive'
+                                        : ($difference < 0 ? 'negative' : 'neutral');
+                                ?>
                                 <tr>
-                                    <td><?php echo e($monthNames[$row->month] ?? $row->month); ?> <?php echo e($row->year); ?></td>
+                                    <td><strong><?php echo e($monthNames[$row->month] ?? $row->month); ?> <?php echo e($row->year); ?></strong></td>
                                     <td><?php echo e(number_format($row->actual_qty, 0, ',', '.')); ?></td>
                                     <td><?php echo e(number_format($row->threshold_qty, 0, ',', '.')); ?></td>
                                     <td>
-                                        <strong>+<?php echo e(number_format(max(0, $row->actual_qty - $row->threshold_qty), 0, ',', '.')); ?></strong>
+                                        <span class="fy-difference <?php echo e($differenceClass); ?>">
+                                            <?php echo e($difference > 0 ? '+' : ''); ?><?php echo e(number_format($difference, 0, ',', '.')); ?>
+
+                                        </span>
                                     </td>
-                                    <td class="reason-cell"><?php echo e($row->reason); ?></td>
-                                    <td><?php echo e($row->updater?->name ?? $row->creator?->name ?? '-'); ?></td>
+                                    <td class="fy-reason"><?php echo e($row->reason); ?></td>
+                                    <td><?php echo e($row->creator?->name ?? $row->updater?->name ?? '-'); ?></td>
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
@@ -510,6 +467,124 @@
             <?php endif; ?>
         </div>
     </div>
+
+    <div class="fy-modal-backdrop <?php if($errors->has('year') || $errors->has('target_qty')): ?> is-open <?php endif; ?>" id="targetModal" aria-hidden="true">
+        <div class="fy-modal" role="dialog" aria-modal="true" aria-labelledby="targetModalTitle">
+            <div class="fy-modal-head">
+                <div>
+                    <h3 id="targetModalTitle">Tambah / Update Target FY</h3>
+                    <p>Gunakan tahun berjalan atau tahun berikutnya.</p>
+                </div>
+                <button type="button" class="fy-modal-close" id="closeTargetModal" aria-label="Tutup">×</button>
+            </div>
+
+            <form method="POST" action="<?php echo e(route('omd.targets.store')); ?>">
+                <?php echo csrf_field(); ?>
+
+                <div class="fy-modal-body">
+                    <div class="fy-field">
+                        <label for="target_year">Tahun</label>
+                        <input
+                            type="number"
+                            id="target_year"
+                            name="year"
+                            min="<?php echo e($currentYear); ?>"
+                            max="2100"
+                            value="<?php echo e(old('year', $currentYear)); ?>"
+                            required
+                        >
+                        <?php $__errorArgs = ['year'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="fy-field-error"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                    </div>
+
+                    <div class="fy-field">
+                        <label for="target_qty">Target FY</label>
+                        <input
+                            type="number"
+                            id="target_qty"
+                            name="target_qty"
+                            min="0"
+                            value="<?php echo e(old('target_qty', $targetMap->get((string) old('year', $currentYear), ''))); ?>"
+                            required
+                        >
+                        <?php $__errorArgs = ['target_qty'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="fy-field-error"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                    </div>
+
+                    <div class="fy-note">
+                        Berlaku untuk seluruh Plant & Line. Jika tahun tersebut sudah memiliki target, nilai baru akan menjadi Target FY aktif.
+                    </div>
+                </div>
+
+                <div class="fy-modal-actions">
+                    <button type="button" class="fy-btn cancel" id="cancelTargetModal">Batal</button>
+                    <button type="submit" class="fy-btn save">Simpan Target</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const modal = document.getElementById('targetModal');
+            const openButton = document.getElementById('openTargetModal');
+            const closeButton = document.getElementById('closeTargetModal');
+            const cancelButton = document.getElementById('cancelTargetModal');
+            const yearInput = document.getElementById('target_year');
+            const targetInput = document.getElementById('target_qty');
+            const targets = <?php echo json_encode($targetMap, 15, 512) ?>;
+
+            const openModal = () => {
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                setTimeout(() => yearInput?.focus(), 0);
+            };
+
+            const closeModal = () => {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            };
+
+            openButton?.addEventListener('click', openModal);
+            closeButton?.addEventListener('click', closeModal);
+            cancelButton?.addEventListener('click', closeModal);
+
+            modal?.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal?.classList.contains('is-open')) {
+                    closeModal();
+                }
+            });
+
+            yearInput?.addEventListener('input', () => {
+                const key = String(yearInput.value || '');
+                targetInput.value = Object.prototype.hasOwnProperty.call(targets, key)
+                    ? targets[key]
+                    : '';
+            });
+        })();
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/omd/targets/index.blade.php ENDPATH**/ ?>

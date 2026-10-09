@@ -55,32 +55,13 @@
     .repair-info-amber{background:#fffbeb;border-color:#fde68a}
     .repair-info-green{background:#f0fdf4;border-color:#bbf7d0}
     .repair-info-green span,.repair-info-green strong{color:#166534}
-    .repair-info-qty-grid{
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:9px;
-        margin-top:9px;
-    }
-    .repair-info-qty-grid .repair-info-mini strong{font-size:15px}
-    .repair-info-description{
-        margin-top:9px;
-        padding:10px 11px;
-        border:1px solid #e2e8f0;
-        border-radius:10px;
-        background:#fff;
-    }
-    .repair-info-description span{
-        display:block;
-        margin-bottom:4px;
-        font-size:9px;
-        font-weight:550;
-        text-transform:uppercase;
-        color:#64748b;
-    }
+    .repair-info-qty strong{font-size:15px}
+    .repair-info-description{background:#fff7ed;border-color:#fed7aa}
+    .repair-info-description span{color:#9a3412}
     .repair-info-description div{
         font-size:11px;
-        line-height:1.5;
-        color:#334155;
+        line-height:1.45;
+        color:#7c2d12;
         white-space:pre-wrap;
         word-break:break-word;
     }
@@ -89,10 +70,9 @@
     }
     @media(max-width:680px){
         .repair-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-        .repair-info-qty-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
     @media(max-width:420px){
-        .repair-info-grid,.repair-info-qty-grid{grid-template-columns:1fr}
+        .repair-info-grid{grid-template-columns:1fr}
     }
 </style>
 
@@ -124,23 +104,19 @@
             <span>Jenis</span>
             <strong>Repair Box</strong>
         </div>
-    </div>
-
-    <div class="repair-info-qty-grid">
-        <div class="repair-info-mini repair-info-amber">
+        <div class="repair-info-mini repair-info-amber repair-info-qty">
             <span>Qty User</span>
             <strong>{{ $qtyUser > 0 ? $qtyUser . ' NG' : '-' }}</strong>
         </div>
         @if($hasOmdResult)
-            <div class="repair-info-mini repair-info-green">
+            <div class="repair-info-mini repair-info-green repair-info-qty">
                 <span>Qty OMD</span>
                 <strong>{{ $qtyOmd > 0 ? $qtyOmd . ' NG' : '-' }}</strong>
             </div>
         @endif
-    </div>
-
-    <div class="repair-info-description">
-        <span>Keterangan</span>
-        <div>{{ $order->description ?: '-' }}</div>
+        <div class="repair-info-mini repair-info-description">
+            <span>Keterangan</span>
+            <div>{{ $order->description ?: '-' }}</div>
+        </div>
     </div>
 </div>

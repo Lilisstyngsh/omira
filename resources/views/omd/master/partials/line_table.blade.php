@@ -42,13 +42,14 @@
 
                     <div class="action-group">
 
-                        <button type="button" class="btn btn-warning btn-sm"
+                        <button type="button" class="btn btn-warning btn-sm action-icon-only"
+                            title="Edit Line" aria-label="Edit Line"
                             onclick="editLine(
                                 {{ $line->id }},
                                 '{{ addslashes($line->name) }}',
                                 {{ $selectedPlant?->id ?? 'null' }}
                             )">
-                            Edit
+                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                         </button>
 
 
@@ -59,8 +60,8 @@
 
                             @method('DELETE')
 
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                Hapus
+                            <button type="submit" class="btn btn-danger btn-sm action-icon-only" title="Hapus Line" aria-label="Hapus Line">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                             </button>
 
                         </form>
