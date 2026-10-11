@@ -21,7 +21,7 @@
         gap: 14px;
         padding: 18px 20px;
         border-bottom: 1px solid #edf1f5;
-        background: linear-gradient(135deg, #f8f7ff 0%, #fff 75%);
+        background: linear-gradient(135deg, #F4F8F5 0%, #fff 75%);
     }
 
     .page-head h2 {

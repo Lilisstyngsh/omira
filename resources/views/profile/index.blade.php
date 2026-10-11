@@ -37,8 +37,8 @@
             padding: 13px 16px;
             border: 1px solid #cfc8ff;
             border-radius: 12px;
-            background: #f5f3ff;
-            color: #6d5dfc;
+            background: #F2F7F2;
+            color: #5F9278;
             font-size: 12px;
             font-weight: 600;
         }
@@ -66,7 +66,7 @@
             width: 170px;
             height: 170px;
             border-radius: 50%;
-            background: rgba(109, 93, 252, .06);
+            background: rgba(95, 146, 120, .06);
         }
 
         .profile-avatar-large {
@@ -79,9 +79,9 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: linear-gradient(135deg, #6d5dfc, #8175f7);
+            background: linear-gradient(135deg, #5F9278, #77A48A);
             border: 4px solid #ffffff;
-            box-shadow: 0 7px 20px rgba(109, 93, 252, .22);
+            box-shadow: 0 7px 20px rgba(95, 146, 120, .20);
             color: #ffffff;
             font-size: 32px;
             font-weight: 800;
@@ -108,7 +108,7 @@
             padding: 5px 10px;
             border-radius: 20px;
             background: #f0edff;
-            color: #6d5dfc;
+            color: #5F9278;
             font-size: 10px;
             font-weight: 700;
         }
@@ -120,7 +120,7 @@
 
         .profile-hero-email i {
             margin-right: 6px;
-            color: #6d5dfc;
+            color: #5F9278;
         }
 
         .profile-card {
@@ -181,7 +181,7 @@
         }
 
         .profile-info-label i {
-            color: #6d5dfc;
+            color: #5F9278;
             font-size: 11px;
         }
 
@@ -246,7 +246,7 @@
             flex: 0 0 38px;
             border-radius: 11px;
             background: #f0edff;
-            color: #6d5dfc;
+            color: #5F9278;
             font-size: 14px;
         }
 
@@ -310,7 +310,7 @@
         }
 
         .profile-field input:focus {
-            border-color: #7c6cf4;
+            border-color: #6E9F82;
             box-shadow: 0 0 0 3px rgba(124, 108, 244, .10);
         }
 
@@ -347,12 +347,12 @@
             padding: 0 19px;
             border: none;
             border-radius: 10px;
-            background: #6d5dfc;
+            background: #5F9278;
             color: #ffffff;
             font-size: 11px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(109, 93, 252, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
             transition: .2s ease;
         }
 

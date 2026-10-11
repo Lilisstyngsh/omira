@@ -82,14 +82,14 @@
         }
 
         .btn-primary {
-            background: #7c3aed;
-            border-color: #7c3aed;
+            background: #5F9278;
+            border-color: #5F9278;
             color: #ffffff;
         }
 
         .btn-primary:hover {
-            background: #6d28d9;
-            border-color: #6d28d9;
+            background: #376B52;
+            border-color: #376B52;
             color: #ffffff;
         }
 
@@ -197,9 +197,9 @@
         }
 
         .plant-card.active {
-            border-color: #7c3aed;
+            border-color: #5F9278;
             background: #faf5ff;
-            box-shadow: 0 8px 22px rgba(124, 58, 237, .10);
+            box-shadow: 0 8px 22px rgba(95,146,120,.12);
         }
 
         .plant-header {
@@ -212,8 +212,8 @@
             width: 55px;
             height: 55px;
             border-radius: 15px;
-            background: #ede9fe;
-            color: #6d28d9;
+            background: #E7F1E9;
+            color: #376B52;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -305,8 +305,8 @@
             height: 48px;
             margin: 0 auto 10px;
             border-radius: 14px;
-            background: #ede9fe;
-            color: #6d28d9;
+            background: #E7F1E9;
+            color: #376B52;
             font-size: 20px;
         }
 
@@ -530,8 +530,8 @@
         }
 
         .modal-box input:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, .10);
+            border-color: #5F9278;
+            box-shadow: 0 0 0 3px rgba(95,146,120,.12);
         }
 
         .modal-action {

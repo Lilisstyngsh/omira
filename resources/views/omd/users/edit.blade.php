@@ -39,7 +39,7 @@
             padding: 22px 24px;
             border-bottom: 1px solid #edf1f5;
             background: linear-gradient(135deg,
-                    #f8f7ff 0%,
+                    #F4F8F5 0%,
                     #ffffff 75%);
         }
 
@@ -95,7 +95,7 @@
 
         .account-field input:focus,
         .account-field select:focus {
-            border-color: #7c6cf4;
+            border-color: #6E9F82;
             box-shadow: 0 0 0 3px rgba(124, 108, 244, .10);
         }
 
@@ -156,9 +156,9 @@
         }
 
         .account-btn-primary {
-            background: #6d5dfc;
+            background: #5F9278;
             color: #ffffff;
-            box-shadow: 0 6px 15px rgba(109, 93, 252, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
         }
 
         .account-btn-primary:hover {

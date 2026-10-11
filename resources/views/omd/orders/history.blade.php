@@ -123,7 +123,7 @@
             min-height: 28px;
             padding: 0 10px;
             border-radius: 8px;
-            background: #f5f3ff;
+            background: #F2F7F2;
             color: #6659df;
             font-size: 10px;
             font-weight: 600;
@@ -207,7 +207,7 @@
             height: 23px;
             padding: 0 7px;
             border-radius: 7px;
-            background: #f5f3ff;
+            background: #F2F7F2;
             color: #6557dc;
             font-size: 9px;
             font-weight: 800;
@@ -1308,26 +1308,55 @@
 
         .history-search-form{display:flex;align-items:center;gap:10px}
         .history-line-filter-inline select{min-height:40px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;padding:0 32px 0 11px;font-size:12px;outline:none;max-width:190px}
-        .history-line-filter-inline select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+        .history-line-filter-inline select:focus{border-color:#5F9278;box-shadow:0 0 0 3px rgba(95,146,120,.12)}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
         @media(max-width:760px){.history-search-form{align-items:stretch;flex-direction:column}.history-line-filter-inline,.history-line-filter-inline select,.history-search-input{width:100%;max-width:none}}
 
         .history-search{width:auto;max-width:100%}
         .history-search-input{width:320px;max-width:100%}
-    </style>
+/* OMIRA — Calendar soft-green 2026. Controls and date selection stay unchanged. */
+.calendar-popup{background:#fff!important;border:1px solid #ddebe0!important;border-radius:22px!important;box-shadow:0 16px 38px rgba(35,69,48,.11)!important;padding:19px!important;width:min(340px,calc(100vw - 38px))!important;color:#263b30!important}
+.calendar-header{margin-bottom:17px!important;align-items:center!important}
+.calendar-header strong{color:#263b30!important;font-size:17px!important;font-weight:750!important;letter-spacing:-.3px}
+.calendar-header button,.calendar-nav{width:42px!important;height:42px!important;border-radius:50%!important;background:#f0f6f1!important;color:#5f947a!important;border:0!important;box-shadow:none!important;font-size:18px!important;font-weight:650!important}
+.calendar-header button:hover,.calendar-nav:hover{background:#e1eee5!important;color:#346d50!important}
+.calendar-week,.calendar-days{gap:5px!important}
+.calendar-week span{color:#819489!important;font-weight:750!important;font-size:12px!important;padding:7px 0!important}
+.calendar-day{height:40px!important;min-height:40px!important;border-radius:50%!important;color:#293d32!important;font-size:13px!important;font-weight:650!important;box-shadow:none!important;border:0!important}
+.calendar-day:hover:not(:disabled){background:#edf5ef!important;color:#326a4d!important}
+.calendar-day.active,.calendar-day.selected{background:#5f947a!important;color:#fff!important;border-radius:50%!important}
+.calendar-day.range,.calendar-day.in-range,.calendar-day.selected-range{background:#e4f0e7!important;color:#34684e!important;border-radius:50%!important}
+.calendar-day.today:not(.active){box-shadow:inset 0 0 0 1px #9cbea8!important}
+.history-filter-btn-primary{background:#5f947a!important;color:#fff!important;border:1px solid #5f947a!important;box-shadow:none!important}
+.history-filter-btn-primary:hover{background:#4c8167!important;border-color:#4c8167!important}
+
+        /* Export actions: identical to former Rekap Data page. */
+        .omira-recap-btn{min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border-radius:10px;border:1px solid transparent;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;text-decoration:none}
+        .omira-recap-btn-pdf{color:#b42318;background:#fff1f2;border-color:#fecdd3}
+        .omira-recap-btn-excel{color:#166534;background:#ecfdf3;border-color:#bbf7d0}
+
+</style>
 
     <div class="page-card">
 
-        <div class="page-head">
-            <h2>
-                History Order Repair Box
-            </h2>
-        </div>
 
 
         {{-- =========================================================
      FILTER TANGGAL
 ========================================================= --}}
+
+        {{-- Export menggunakan filter History aktif; tetap memakai route rekap OMD yang sudah ada. --}}
+        @php
+            $exportParams = array_filter([
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ], static function ($value) {
+                return $value !== null && $value !== '';
+            });
+            if (request('line_id')) {
+                $exportParams['line_ids'] = [(int) request('line_id')];
+            }
+        @endphp
 
         <div class="history-filter-box">
             <form action="{{ route('omd.orders.history') }}" method="GET" class="history-filter-form">
@@ -1522,6 +1551,15 @@
 
             </form>
 
+        </div>
+
+        <div class="omira-history-exports" aria-label="Export History" style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin:14px 0 18px">
+            <a class="omira-recap-btn omira-recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
+                <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF
+            </a>
+            <a class="omira-recap-btn omira-recap-btn-excel" href="{{ route('omd.recap.excel', $exportParams) }}">
+                <i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel
+            </a>
         </div>
 
         <div class="history-toolbar">
@@ -1745,15 +1783,13 @@
         @php
             $orders->appends(request()->query());
 
-            $currentPage = $orders->currentPage();
-            $lastPage = $orders->lastPage();
         @endphp
 
         <div class="history-pagination">
 
             <div class="history-pagination-list">
 
-                @if ($lastPage > 1)
+                @if ($orders->lastPage() > 1)
 
                     {{-- PREVIOUS --}}
                     @if ($orders->onFirstPage())
@@ -1770,13 +1806,13 @@
 
                     {{-- PAGE 1 --}}
                     <a href="{{ $orders->url(1) }}"
-                        class="history-pagination-btn {{ $currentPage == 1 ? 'active' : '' }}">
+                        class="history-pagination-btn {{ $orders->currentPage() == 1 ? 'active' : '' }}">
                         1
                     </a>
 
 
                     {{-- DOTS BEFORE --}}
-                    @if ($currentPage > 3)
+                    @if ($orders->currentPage() > 3)
                         <span class="history-pagination-dots">
                             ...
                         </span>
@@ -1784,16 +1820,16 @@
 
 
                     {{-- HALAMAN SEKITAR CURRENT PAGE --}}
-                    @for ($page = max(2, $currentPage - 1); $page <= min($lastPage - 1, $currentPage + 1); $page++)
+                    @for ($page = max(2, $orders->currentPage() - 1); $page <= min($orders->lastPage() - 1, $orders->currentPage() + 1); $page++)
                         <a href="{{ $orders->url($page) }}"
-                            class="history-pagination-btn {{ $currentPage == $page ? 'active' : '' }}">
+                            class="history-pagination-btn {{ $orders->currentPage() == $page ? 'active' : '' }}">
                             {{ $page }}
                         </a>
                     @endfor
 
 
                     {{-- DOTS AFTER --}}
-                    @if ($currentPage < $lastPage - 2)
+                    @if ($orders->currentPage() < $orders->lastPage() - 2)
                         <span class="history-pagination-dots">
                             ...
                         </span>
@@ -1801,10 +1837,10 @@
 
 
                     {{-- LAST PAGE --}}
-                    @if ($lastPage > 1)
-                        <a href="{{ $orders->url($lastPage) }}"
-                            class="history-pagination-btn {{ $currentPage == $lastPage ? 'active' : '' }}">
-                            {{ $lastPage }}
+                    @if ($orders->lastPage() > 1)
+                        <a href="{{ $orders->url($orders->lastPage()) }}"
+                            class="history-pagination-btn {{ $orders->currentPage() == $orders->lastPage() ? 'active' : '' }}">
+                            {{ $orders->lastPage() }}
                         </a>
                     @endif
 

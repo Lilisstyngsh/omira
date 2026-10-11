@@ -85,7 +85,7 @@
             height: 38px;
             padding: 0 16px;
             border-radius: 9px;
-            background: #6d5dfc;
+            background: #5F9278;
             color: #fff;
             text-decoration: none;
             display: inline-flex;
@@ -93,7 +93,7 @@
             justify-content: center;
             font-size: 12px;
             font-weight: 750;
-            box-shadow: 0 6px 15px rgba(109, 93, 252, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
             transition: .2s ease;
         }
 
@@ -124,7 +124,7 @@
             justify-content: space-between;
             gap: 15px;
             background: linear-gradient(135deg,
-                    #f8f7ff 0%,
+                    #F4F8F5 0%,
                     #fff 75%);
         }
 
@@ -148,7 +148,7 @@
             height: 32px;
             padding: 0 12px;
             border-radius: 10px;
-            background: #f1efff;
+            background: #EAF3EC;
             color: #6557dc;
             font-size: 11px;
             font-weight: 800;
@@ -223,7 +223,7 @@
             width: 36px;
             height: 36px;
             border-radius: 11px;
-            background: #f1efff;
+            background: #EAF3EC;
             color: #6659df;
             display: flex;
             align-items: center;
@@ -264,7 +264,7 @@
         }
 
         .account-badge-plant {
-            background: #f5f3ff;
+            background: #F2F7F2;
             color: #6659df;
         }
 
@@ -525,8 +525,8 @@
         }
 
         .account-page-btn.active {
-            background: #6d5dfc;
-            border-color: #6d5dfc;
+            background: #5F9278;
+            border-color: #5F9278;
             color: #fff;
         }
 
@@ -589,7 +589,7 @@
         .account-edit-actions { display: flex; justify-content: flex-end; gap: 9px; padding: 14px 20px 18px; border-top: 1px solid #edf1f5; }
         .account-edit-btn { min-height: 40px; padding: 0 16px; border: 0; border-radius: 9px; font-size: 12px; font-weight: 750; cursor: pointer; }
         .account-edit-cancel { background: #f1f5f9; color: #475569; }
-        .account-edit-save { background: #6d5dfc; color: #fff; box-shadow: 0 6px 15px rgba(109, 93, 252, .18); }
+        .account-edit-save { background: #5F9278; color: #fff; box-shadow: 0 6px 15px rgba(95,146,120,.18); }
         .account-edit-save:hover { background: #5d4df0; }
         body.account-modal-open { overflow: hidden; }
 

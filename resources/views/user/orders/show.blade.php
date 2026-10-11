@@ -86,7 +86,7 @@
         }
 
         .status-submitted {
-            background: #f1efff;
+            background: #EAF3EC;
             color: #6557dc;
         }
 
@@ -345,7 +345,7 @@
 
         .repair-table .grand-total-row td {
             background: #eef2ff;
-            color: #312e81;
+            color: #376B52;
             font-weight: 900;
             border-top: 2px solid #818cf8;
         }
@@ -464,13 +464,13 @@
         }
 
         .btn-primary {
-            background: #7c3aed;
+            background: #5F9278;
             color: #fff;
-            box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
         }
 
         .btn-primary:hover {
-            background: #6d28d9;
+            background: #376B52;
             color: #fff;
         }
 
@@ -484,13 +484,13 @@
         }
 
         .btn-confirm {
-            background: #7c3aed;
+            background: #5F9278;
             color: #fff;
-            box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
         }
 
         .btn-confirm:hover {
-            background: #6d28d9;
+            background: #376B52;
             color: #fff;
         }
 
@@ -646,13 +646,13 @@
         .handover-direct{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;flex-wrap:wrap}
         .handover-direct .btn{min-height:44px;padding:0 16px;border-radius:9px;font-weight:600;border:1px solid transparent;cursor:pointer}
         .handover-direct .btn-mismatch{background:#fff;color:#b91c1c;border-color:#ef4444}.handover-direct .btn-mismatch:hover{background:#fef2f2}
-        .handover-direct .btn-confirm{background:#7c3aed;color:#fff;border-color:#7c3aed}.handover-direct .btn-confirm:hover{background:#6d28d9}
+        .handover-direct .btn-confirm{background:#5F9278;color:#fff;border-color:#5F9278}.handover-direct .btn-confirm:hover{background:#376B52}
         .feedback-waiting{margin-top:12px;padding:10px 12px;border:1px solid #f59e0b;border-radius:9px;color:#92400e;background:#fff;font-size:11px}
         .repair-dialog{border:0;border-radius:22px;padding:0;max-width:520px;width:calc(100% - 28px);box-shadow:0 26px 80px rgba(15,23,42,.28);overflow:hidden}
         .repair-dialog::backdrop{background:rgba(15,23,42,.42)}
         .repair-dialog-body{padding:22px 24px}.repair-dialog h4{margin:0;font-size:17px;font-weight:650;color:#0f172a}.repair-dialog p{margin:7px 0 16px;color:#64748b;font-size:12px;line-height:1.55}
         .repair-dialog textarea{width:100%;min-height:120px;border:1.5px solid #64748b;border-radius:10px;padding:11px 12px;font-size:13px;resize:vertical;outline:none;background:#fff;color:#0f172a;box-sizing:border-box}.repair-dialog textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-        .repair-dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.repair-dialog-actions button{min-height:42px;padding:0 15px;border-radius:9px;font-weight:600;cursor:pointer}.dialog-cancel{background:#f8fafc;color:#334155;border:1px solid #e2e8f0}.dialog-cancel:hover{background:#f1f5f9}.dialog-confirm,.dialog-submit{background:#7c3aed;color:#fff;border:1px solid #7c3aed;transition:background .16s ease,border-color .16s ease,color .16s ease,opacity .16s ease}.dialog-confirm:hover,.dialog-submit:not(:disabled):hover{background:#6d28d9}.dialog-submit:disabled{background:#e5e7eb;border-color:#e5e7eb;color:#94a3b8;cursor:not-allowed;box-shadow:none;opacity:1}
+        .repair-dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.repair-dialog-actions button{min-height:42px;padding:0 15px;border-radius:9px;font-weight:600;cursor:pointer}.dialog-cancel{background:#f8fafc;color:#334155;border:1px solid #e2e8f0}.dialog-cancel:hover{background:#f1f5f9}.dialog-confirm,.dialog-submit{background:#5F9278;color:#fff;border:1px solid #5F9278;transition:background .16s ease,border-color .16s ease,color .16s ease,opacity .16s ease}.dialog-confirm:hover,.dialog-submit:not(:disabled):hover{background:#376B52}.dialog-submit:disabled{background:#e5e7eb;border-color:#e5e7eb;color:#94a3b8;cursor:not-allowed;box-shadow:none;opacity:1}
         .confirm-dialog-body{text-align:center;padding:24px 28px 22px}.confirm-dialog-icon{margin:0 auto 14px;color:#f97316;font-size:54px;line-height:1;display:flex;align-items:center;justify-content:center}.confirm-dialog-body h4{font-size:20px}.confirm-dialog-body p{max-width:330px;margin:8px auto 18px}.confirm-dialog-body .repair-dialog-actions{justify-content:center}
         .mismatch-dialog-body{padding:18px 20px 20px}.repair-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.repair-dialog-close{width:34px;height:34px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#475569;font-size:20px;line-height:1;cursor:pointer}.repair-dialog-close:hover{background:#f8fafc}.mismatch-field{padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}.mismatch-field label{display:block;margin-bottom:7px;font-size:11px;font-weight:600;color:#0f172a}.mismatch-error{display:none;margin-top:6px;font-size:10px;color:#b91c1c}.mismatch-field.has-error textarea{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.08)}.mismatch-field.has-error .mismatch-error{display:block}
         @media(max-width:600px){.handover-direct{display:grid;grid-template-columns:1fr}.handover-direct .btn{width:100%}.repair-dialog-actions{display:grid;grid-template-columns:1fr 1fr}.repair-dialog{border-radius:18px}.repair-dialog-body{padding:18px}}

@@ -6,12 +6,12 @@
 @section('content')
     <style>
         .master-hero {
-            background: linear-gradient(135deg, #5b21b6, #7c3aed 58%, #8b5cf6);
+            background: linear-gradient(135deg, #315E49, #5F9278 58%, #7FA58C);
             color: #fff;
             border-radius: 18px;
             padding: 24px;
             margin-bottom: 20px;
-            box-shadow: 0 12px 30px rgba(124, 58, 237, .18);
+            box-shadow: 0 12px 30px rgba(95,146,120,.18);
         }
 
         .master-hero h2 {
@@ -34,7 +34,7 @@
         }
 
         .breadcrumb a {
-            color: #6d28d9;
+            color: #376B52;
             font-weight: 650;
         }
 
@@ -59,7 +59,7 @@
         .master-card:hover {
             transform: translateY(-3px);
             border-color: #c4b5fd;
-            box-shadow: 0 12px 28px rgba(124, 58, 237, .12);
+            box-shadow: 0 12px 28px rgba(95, 146, 120, .12);
         }
 
         .master-card-top {
@@ -76,8 +76,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #ede9fe;
-            color: #6d28d9;
+            background: #E7F1E9;
+            color: #376B52;
             font-weight: 800;
             font-size: 20px;
         }
@@ -104,14 +104,14 @@
         .badge-soft {
             padding: 5px 9px;
             border-radius: 999px;
-            background: #f5f3ff;
-            color: #6d28d9;
+            background: #F2F7F2;
+            color: #376B52;
             font-size: 11px;
             font-weight: 700;
         }
 
         .btn-link {
-            color: #6d28d9;
+            color: #376B52;
             font-weight: 700;
             font-size: 12px;
         }
@@ -142,7 +142,17 @@
                 min-width: 0;
             }
         }
-    </style>
+    
+/* Modern industrial master directory — flat hierarchy, no ornamental icon tiles */
+.master-hero{background:#fff!important;color:#233b2d!important;border:1px solid #e2ebe4!important;box-shadow:none!important;border-radius:14px!important}
+.master-hero p{color:#6a7c70!important}
+.master-card,.area-card{border:1px solid #e0e9e2!important;border-radius:12px!important;box-shadow:none!important;padding:18px!important;transition:border-color .15s ease,background .15s ease!important}
+.master-card:hover,.area-card:hover{transform:none!important;box-shadow:none!important;border-color:#93b69f!important;background:#fbfdfb!important}
+.master-icon,.area-icon{display:none!important}
+.master-card h3,.area-card h3{margin-top:0!important;font-weight:700!important;color:#263b30!important}
+.master-card-footer,.area-footer{border-top:1px solid #edf1ed;padding-top:12px;margin-top:15px!important}
+
+</style>
 
 
     {{-- Breadcrumb --}}

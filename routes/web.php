@@ -11,6 +11,7 @@ use App\Http\Controllers\TpsRepairController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\ScrapLimitController;
+use App\Http\Controllers\RecapController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -127,6 +128,8 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/orders/history', [UserOrderController::class, 'history'])
                 ->name('orders.history');
+
+            Route::get('/orders/history/{order}/export/{format}', [UserOrderController::class, 'exportHistory'])->where('format', 'pdf|excel')->name('orders.history.export');
 
             Route::get('/orders/history/{order}', [UserOrderController::class, 'historyShow'])
                 ->name('orders.history.show');
@@ -475,9 +478,13 @@ Route::middleware('auth')->group(function () {
             |--------------------------------------------------------------------------
             */
 
-            Route::get(
-                '/recap',
-                fn() => redirect()->route('dashboard')
-            )->name('recap');
+            Route::get('/recap', [RecapController::class, 'index'])
+                ->name('recap');
+
+            Route::get('/recap/export/pdf', [RecapController::class, 'exportPdf'])
+                ->name('recap.pdf');
+
+            Route::get('/recap/export/excel', [RecapController::class, 'exportExcel'])
+                ->name('recap.excel');
         });
 });

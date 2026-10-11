@@ -8,6 +8,7 @@ use App\Models\MonitoringAbnormality;
 use App\Models\ProductScrapLimit;
 use App\Models\RepairOrder;
 use App\Models\RepairOrderItem;
+use App\Models\RepairMonthlySnapshot;
 use App\Models\RepairResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -249,6 +250,26 @@ class DashboardController extends Controller
 
     private function metricsForMonth(int $year, int $month, ?int $lineId): array
     {
+        /*
+         * Historical snapshot April–Agustus 2026 hanya tersedia dalam agregat
+         * global. Gunakan persis nilai sumber ketika Dashboard tidak difilter
+         * per Line. Snapshot tidak dibuat menjadi Repair Order fiktif.
+         */
+        if ($lineId === null) {
+            $snapshot = RepairMonthlySnapshot::query()
+                ->where('year', $year)
+                ->where('month', $month)
+                ->first();
+
+            if ($snapshot) {
+                return [
+                    'order' => (int) $snapshot->order_qty,
+                    'ok' => (int) $snapshot->ok_qty,
+                    'scrap' => (int) $snapshot->scrap_qty,
+                ];
+            }
+        }
+
         $itemQuery = RepairOrderItem::query()
             ->whereHas('repairOrder', function ($query) use ($year, $month, $lineId) {
                 $this->applyConfirmedOrderFilter($query, $year, $month, $lineId);

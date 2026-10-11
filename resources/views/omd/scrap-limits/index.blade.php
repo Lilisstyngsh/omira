@@ -44,12 +44,12 @@
         .sl-field input, .sl-field select, .sl-field textarea { width:100%; border:1px solid #d9dfe8; border-radius:10px; background:#fff; color:#1f2937; font:inherit; outline:none; }
         .sl-field input, .sl-field select { min-height:40px; padding:0 11px; }
         .sl-field textarea { min-height:76px; padding:10px 11px; resize:vertical; }
-        .sl-field input:focus, .sl-field select:focus, .sl-field textarea:focus { border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(124,58,237,.10); }
+        .sl-field input:focus, .sl-field select:focus, .sl-field textarea:focus { border-color:#7FA58C; box-shadow:0 0 0 3px rgba(95,146,120,.12); }
                 .sl-btn { min-height:40px; border:0; border-radius:10px; padding:0 14px; display:inline-flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size:13px; cursor:pointer; text-decoration:none; white-space:nowrap; }
         .sl-btn-neutral { background:#eef1f5; color:#445065; }
-        .sl-btn-soft { background:#f5f3ff; color:#6d28d9; }
-        .sl-btn-success { background:#7c3aed; color:#fff; box-shadow:0 6px 15px rgba(124,58,237,.16); }
-        .sl-btn-success:hover { background:#6d28d9; }
+        .sl-btn-soft { background:#F2F7F2; color:#376B52; }
+        .sl-btn-success { background:#5F9278; color:#fff; box-shadow:0 6px 15px rgba(95,146,120,.18); }
+        .sl-btn-success:hover { background:#376B52; }
         .sl-btn:hover { filter:brightness(.985); }
         .sl-alert { border:1px solid #d9efe0; background:#f3fbf5; color:#23633b; border-radius:12px; padding:11px 13px; font-size:13px; }
         .sl-alert.error { border-color:#f2d2d2; background:#fff7f7; color:#a63a3a; }
@@ -80,7 +80,7 @@
         .sl-edit-row + .sl-edit-row { border-top:1px solid #edf0f4; }
         .sl-edit-name { font-size:13px; font-weight:650; color:#344054; overflow-wrap:anywhere; }
         .sl-edit-row input { width:100%; min-height:38px; border:1px solid #d8dee7; border-radius:9px; padding:0 8px; text-align:center; font-weight:800; outline:none; }
-        .sl-edit-row input:focus { border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(124,58,237,.10); }
+        .sl-edit-row input:focus { border-color:#7FA58C; box-shadow:0 0 0 3px rgba(95,146,120,.12); }
         .sl-form-grid { display:grid; grid-template-columns:180px minmax(0,1fr); gap:12px; }
         .sl-form-grid .full { grid-column:1 / -1; }
         .sl-history-product { border:1px solid #e7ebf1; border-radius:12px; overflow:hidden; }

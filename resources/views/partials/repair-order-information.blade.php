@@ -50,7 +50,7 @@
     .repair-info-blue{background:#eff6ff;border-color:#dbeafe}
     .repair-info-slate{background:#f8fafc;border-color:#e2e8f0}
     .repair-info-indigo{background:#eef2ff;border-color:#e0e7ff}
-    .repair-info-violet{background:#f5f3ff;border-color:#ede9fe}
+    .repair-info-violet{background:#F2F7F2;border-color:#E7F1E9}
     .repair-info-cyan{background:#ecfeff;border-color:#cffafe}
     .repair-info-amber{background:#fffbeb;border-color:#fde68a}
     .repair-info-green{background:#f0fdf4;border-color:#bbf7d0}

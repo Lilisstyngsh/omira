@@ -42,7 +42,7 @@
             gap: 15px;
             padding: 20px 22px;
             border-bottom: 1px solid #edf1f5;
-            background: linear-gradient(135deg, #f8f7ff 0%, #fff 75%);
+            background: linear-gradient(135deg, #F4F8F5 0%, #fff 75%);
         }
 
         .order-table-header h3 {
@@ -65,7 +65,7 @@
             height: 32px;
             padding: 0 12px;
             border-radius: 10px;
-            background: #f1efff;
+            background: #EAF3EC;
             color: #6557dc;
             font-size: 11px;
             font-weight: 600;
@@ -215,7 +215,7 @@
             min-height: 28px;
             padding: 0 10px;
             border-radius: 8px;
-            background: #f5f3ff;
+            background: #F2F7F2;
             color: #6659df;
             font-size: 10px;
             font-weight: 600;
@@ -278,8 +278,8 @@
             align-items: center;
             justify-content: center;
             border-radius: 14px;
-            background: #f5f3ff;
-            color: #7c3aed;
+            background: #F2F7F2;
+            color: #5F9278;
             font-size: 19px;
             font-weight: 800;
         }

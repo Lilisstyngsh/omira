@@ -1,3 +1,6 @@
+<?php $__env->startSection('title', 'Target Fiscal Year'); ?>
+<?php $__env->startSection('header', 'Target Fiscal Year'); ?>
+
 <?php $__env->startSection('content'); ?>
     <style>
         .fy-page {
@@ -31,12 +34,12 @@
             padding: 0 15px;
             border: 0;
             border-radius: 11px;
-            background: #6d5dfc;
+            background: #5F9278;
             color: #fff;
             font-size: 11px;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 8px 18px rgba(109, 93, 252, .18);
+            box-shadow: 0 8px 18px rgba(95,146,120,.18);
         }
 
         .fy-action:hover {
@@ -119,7 +122,7 @@
         }
 
         .fy-target {
-            color: #4338ca;
+            color: #376B52;
             font-size: 12px;
             font-weight: 900;
         }
@@ -132,7 +135,7 @@
             margin-left: 6px;
             border-radius: 999px;
             background: #eef2ff;
-            color: #4338ca;
+            color: #376B52;
             font-size: 9px;
             font-weight: 900;
         }
@@ -272,7 +275,7 @@
 
         .fy-field input:focus {
             border-color: #818cf8;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, .10);
+            box-shadow: 0 0 0 3px rgba(95, 146, 120, .10);
         }
 
         .fy-note {
@@ -314,8 +317,8 @@
         }
 
         .fy-btn.save {
-            border: 1px solid #6d5dfc;
-            background: #6d5dfc;
+            border: 1px solid #5F9278;
+            background: #5F9278;
             color: #fff;
         }
 
@@ -358,12 +361,12 @@
     <div class="fy-page">
         <div class="fy-header">
             <div>
-                <h2>Target FY</h2>
+                <h2>Target Fiscal Year</h2>
                 <p>Target tahunan global untuk seluruh Plant & Line.</p>
             </div>
 
             <button type="button" class="fy-action" id="openTargetModal">
-                + Tambah / Update Target FY
+                + Tambah / Update Target Fiscal Year
             </button>
         </div>
 
@@ -382,18 +385,18 @@
         <div class="fy-card">
             <div class="fy-card-head">
                 <h3>Ringkasan Target</h3>
-                <p>Riwayat Target FY per tahun. Target pada tahun yang sama selalu menggunakan nilai update terbaru.</p>
+                <p>Riwayat Target Fiscal Year per tahun. Target pada tahun yang sama selalu menggunakan nilai update terbaru.</p>
             </div>
 
             <?php if($targetHistory->isEmpty()): ?>
-                <div class="fy-empty">Belum ada Target FY.</div>
+                <div class="fy-empty">Belum ada Target Fiscal Year.</div>
             <?php else: ?>
                 <div class="fy-scroll">
                     <table class="fy-table">
                         <thead>
                             <tr>
                                 <th>Tahun</th>
-                                <th>Target FY</th>
+                                <th>Target Fiscal Year</th>
                                 <th>Diubah Oleh</th>
                                 <th>Update Terakhir</th>
                             </tr>
@@ -425,7 +428,7 @@
             </div>
 
             <?php if($abnormalities->isEmpty()): ?>
-                <div class="fy-empty">Belum ada histori abnormality Target FY.</div>
+                <div class="fy-empty">Belum ada histori abnormality Target Fiscal Year.</div>
             <?php else: ?>
                 <div class="fy-scroll abnormality">
                     <table class="fy-table">
@@ -433,7 +436,7 @@
                             <tr>
                                 <th>Periode</th>
                                 <th>Actual Order</th>
-                                <th>Target FY</th>
+                                <th>Target Fiscal Year</th>
                                 <th>Selisih</th>
                                 <th>Alasan</th>
                                 <th>Diinput Oleh</th>
@@ -472,7 +475,7 @@
         <div class="fy-modal" role="dialog" aria-modal="true" aria-labelledby="targetModalTitle">
             <div class="fy-modal-head">
                 <div>
-                    <h3 id="targetModalTitle">Tambah / Update Target FY</h3>
+                    <h3 id="targetModalTitle">Tambah / Update Target Fiscal Year</h3>
                     <p>Gunakan tahun berjalan atau tahun berikutnya.</p>
                 </div>
                 <button type="button" class="fy-modal-close" id="closeTargetModal" aria-label="Tutup">×</button>
@@ -506,7 +509,7 @@ unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="fy-field">
-                        <label for="target_qty">Target FY</label>
+                        <label for="target_qty">Target Fiscal Year</label>
                         <input
                             type="number"
                             id="target_qty"
@@ -528,7 +531,7 @@ unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="fy-note">
-                        Berlaku untuk seluruh Plant & Line. Jika tahun tersebut sudah memiliki target, nilai baru akan menjadi Target FY aktif.
+                        Berlaku untuk seluruh Plant & Line. Jika tahun tersebut sudah memiliki target, nilai baru akan menjadi Target Fiscal Year aktif.
                     </div>
                 </div>
 

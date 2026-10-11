@@ -95,6 +95,59 @@
             padding: 16px;
         }
 
+        /* Soft-green abstract cloud pattern, decorative only. */
+        .monitor-filter {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            border-color: #d5e9dc;
+            background:
+                radial-gradient(ellipse 165px 82px at 6% 112%, rgba(157, 210, 171, .25) 0 65%, transparent 66%),
+                radial-gradient(ellipse 185px 105px at 27% 116%, rgba(204, 232, 204, .53) 0 65%, transparent 66%),
+                radial-gradient(ellipse 160px 90px at 61% 115%, rgba(139, 197, 163, .24) 0 65%, transparent 66%),
+                radial-gradient(ellipse 205px 95px at 92% 111%, rgba(187, 227, 198, .5) 0 65%, transparent 66%),
+                radial-gradient(circle at 18% 23%, rgba(122, 180, 147, .30) 0 2px, transparent 3px),
+                radial-gradient(circle at 68% 17%, rgba(122, 180, 147, .20) 0 2px, transparent 3px),
+                linear-gradient(112deg, #f0f8f2 0%, #e5f2e9 54%, #f5faf5 100%);
+        }
+        .monitor-filter::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 37% 18%, rgba(255,255,255,.84) 0 1.5px, transparent 2.5px),
+                radial-gradient(circle at 79% 55%, rgba(255,255,255,.88) 0 2px, transparent 3px);
+        }
+        .monitor-filter .monitor-field label { color: #365c44; }
+        .monitor-filter .monitor-field select,
+        .monitor-filter .monitor-field input {
+            background: rgba(255,255,255,.94);
+            border-color: #d2e5d8;
+        }
+
+        /* Color-tinted KPI cards; values and card hierarchy stay unchanged. */
+        .monitor-kpis .monitor-kpi { position: relative; overflow: hidden; }
+        .monitor-kpis .monitor-kpi:nth-child(1) {
+            background: linear-gradient(135deg, #f2f6ff, #e8efff);
+            border-color: #d4e1ff;
+        }
+        .monitor-kpis .monitor-kpi:nth-child(2) {
+            background: linear-gradient(135deg, #f4fbed, #e9f6df);
+            border-color: #d9ebcc;
+        }
+        .monitor-kpis .monitor-kpi:nth-child(3) {
+            background: linear-gradient(135deg, #fff9ef, #fbf0dd);
+            border-color: #f0e1c6;
+        }
+        .monitor-kpis .monitor-kpi:nth-child(4) {
+            background: linear-gradient(135deg, #fff5f5, #fde9eb);
+            border-color: #f1d4d8;
+        }
+        .monitor-kpis .kpi-label { color: #34413b; }
+        .monitor-kpis .kpi-value { color: #1a2922; }
+
         .monitor-field label {
             display: block;
             margin-bottom: 6px;
@@ -123,7 +176,7 @@
         .monitor-field input:focus,
         .abnormality-form textarea:focus {
             border-color: #818cf8;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, .10);
+            box-shadow: 0 0 0 3px rgba(95, 146, 120, .10);
         }
 
         .monitor-filter .btn {
@@ -162,10 +215,10 @@
             border-radius: 999px;
         }
 
-        .kpi-dot.order { background: #7678ED; }
-        .kpi-dot.ok { background: #F7B801; }
-        .kpi-dot.scrap { background: #F35B04; }
-        .kpi-dot.target { background: #5B9BD5; }
+        .kpi-dot.order { background: #578EF5; }
+        .kpi-dot.ok { background: #76C457; }
+        .kpi-dot.scrap { background: #D39A53; }
+        .kpi-dot.target { background: #D75B62; }
 
         .kpi-value {
             margin-top: 13px;
@@ -385,10 +438,10 @@
             border-radius: 3px;
         }
 
-        .legend-color.order { background: #7678ED; }
-        .legend-color.ok { background: #F7B801; }
-        .legend-color.scrap { background: #F35B04; }
-        .legend-color.target { background: #5B9BD5; height: 3px; }
+        .legend-color.order { background: #578EF5; }
+        .legend-color.ok { background: #76C457; }
+        .legend-color.scrap { background: #D39A53; }
+        .legend-color.target { background: #D75B62; height: 3px; }
 
         .chart-scroll {
             width: 100%;
@@ -463,7 +516,7 @@
             left: 0;
             right: 0;
             bottom: var(--target-height);
-            border-top: 3px solid #5B9BD5;
+            border-top: 3px solid #D75B62;
             filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .55));
         }
 
@@ -490,11 +543,11 @@
             top: 0;
             width: 9px;
             height: 9px;
-            border: 2px solid #5B9BD5;
+            border: 2px solid #D75B62;
             border-radius: 999px;
             background: #fff;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 2px rgba(91, 155, 213, .10);
+            box-shadow: 0 0 0 2px rgba(199, 110, 110, .10);
         }
 
         .target-value {
@@ -505,7 +558,7 @@
             padding: 1px 4px;
             border-radius: 5px;
             background: rgba(255, 255, 255, .92);
-            color: #315f8b;
+            color: #B84650;
             font-size: 8px;
             font-weight: 900;
             line-height: 1.3;
@@ -577,13 +630,13 @@
         }
 
         .chart-bar.has-abnormality:focus-visible {
-            outline: 2px solid rgba(124, 58, 237, .35);
+            outline: 2px solid rgba(95, 146, 120, .28);
             outline-offset: 3px;
         }
 
-        .chart-bar.order { background: #7678ED; }
-        .chart-bar.ok { background: #F7B801; }
-        .chart-bar.scrap { background: #F35B04; }
+        .chart-bar.order { background: #578EF5; }
+        .chart-bar.ok { background: #76C457; }
+        .chart-bar.scrap { background: #D39A53; }
 
         .month-label {
             display: flex;
@@ -647,7 +700,7 @@
         .summary-table th:last-child,
         .summary-table td:last-child { border-right: 0; }
 
-        .summary-order td:first-child { color: #4f46e5; }
+        .summary-order td:first-child { color: #5F9278; }
         .summary-ok td:first-child { color: #16a34a; }
         .summary-scrap td:first-child { color: #dc2626; }
         .summary-target td { background: #fff7ed; color: #c2410c; }
@@ -850,39 +903,6 @@
             <button type="submit" class="btn btn-primary">Tampilkan</button>
         </form>
 
-        <div class="monitor-kpis">
-            <div class="monitor-card monitor-kpi">
-                <div class="kpi-top">
-                    <span class="kpi-label">Order</span>
-                    <span class="kpi-dot order"></span>
-                </div>
-                <div class="kpi-value">{{ number_format($totalOrders) }}</div>
-            </div>
-
-            <div class="monitor-card monitor-kpi">
-                <div class="kpi-top">
-                    <span class="kpi-label">OK</span>
-                    <span class="kpi-dot ok"></span>
-                </div>
-                <div class="kpi-value">{{ number_format($finishedOrders) }}</div>
-            </div>
-
-            <div class="monitor-card monitor-kpi">
-                <div class="kpi-top">
-                    <span class="kpi-label">Scrap</span>
-                    <span class="kpi-dot scrap"></span>
-                </div>
-                <div class="kpi-value">{{ number_format($scrap) }}</div>
-            </div>
-
-            <div class="monitor-card monitor-kpi">
-                <div class="kpi-top">
-                    <span class="kpi-label">Target FY</span>
-                    <span class="kpi-dot target"></span>
-                </div>
-                <div class="kpi-value">{{ number_format($target) }}</div>
-            </div>
-        </div>
 
         @if ($targetExceeded && ! $abnormality)
             <div class="monitor-card target-reason-card">

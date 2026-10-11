@@ -682,6 +682,53 @@ class UserOrderController extends Controller
     }
 
 
+    /** Download only the authenticated user's own Repair Order. */
+    public function exportHistory(Request $request, RepairOrder $order, string $format)
+    {
+        abort_unless((int) $order->user_id === (int) $request->user()->id, 403);
+        abort_unless(in_array($format, ['pdf', 'excel'], true), 404);
+        $order->load(['user', 'line.plant', 'items.masterModel', 'items.product', 'items.afterProduct', 'items.ngType', 'result', 'confirmation']);
+        $rows = $order->items->map(function ($item) {
+            return [
+                $item->masterModel?->name ?? '-',
+                $item->product?->name ?? '-',
+                $item->ngType?->code ?? '-',
+                (int) ($item->before_qty ?? 0),
+                (int) ($item->after_qty ?? 0),
+                $item->afterProduct?->name ?? '-',
+            ];
+        });
+        $filename = 'History_Repair_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string)$order->order_number);
+        if ($format === 'pdf') {
+            return \Barryvdh\DomPDF\Facade\Pdf::loadView('user.orders.history-export-pdf', compact('order', 'rows'))
+                ->setPaper('a4', 'landscape')->download($filename . '.pdf');
+        }
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Repair Order');
+        $sheet->fromArray([['History Repair Box', $order->order_number], ['Tanggal', optional($order->created_at)->format('d-m-Y H:i')], ['Line', $order->line?->name ?? '-'], ['Status', $order->status], [], ['Model', 'Produk', 'NG', 'Qty User', 'Qty OMD', 'Produk Setelah Repair']], null, 'A1');
+        $line = 7;
+        foreach ($rows as $values) {
+            // Prevent spreadsheet formula injection in editable master-data names.
+            foreach ($values as $column => $value) {
+                $cell = $sheet->getCell(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column + 1) . $line);
+                if (is_string($value)) {
+                    $cell->setValueExplicit($value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                } else {
+                    $cell->setValue($value);
+                }
+            }
+            $line++;
+        }
+        foreach (range('A', 'F') as $column) $sheet->getColumnDimension($column)->setAutoSize(true);
+        $sheet->getStyle('A6:F6')->getFont()->setBold(true);
+        $temporary = tempnam(sys_get_temp_dir(), 'omira_history_');
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($temporary);
+        $spreadsheet->disconnectWorksheets();
+        return response()->download($temporary, $filename . '.xlsx')->deleteFileAfterSend(true);
+    }
+
     public function pendingConfirmationCount(Request $request)
     {
         $count = RepairOrder::query()

@@ -79,9 +79,9 @@
         }
 
         .line-card.active {
-            border-color: #7c3aed;
+            border-color: #5F9278;
             background: #faf5ff;
-            box-shadow: 0 8px 22px rgba(124, 58, 237, .10);
+            box-shadow: 0 8px 22px rgba(95,146,120,.12);
         }
 
         .line-card-top {
@@ -98,8 +98,8 @@
             align-items: center;
             justify-content: center;
             border-radius: 12px;
-            background: #ede9fe;
-            color: #6d28d9;
+            background: #E7F1E9;
+            color: #376B52;
             font-size: 18px;
         }
 
@@ -318,7 +318,7 @@
             height: 29px;
             padding: 0 10px;
             border-radius: 999px;
-            background: #f1efff;
+            background: #EAF3EC;
             color: #6557dc;
             font-size: 10px;
             font-weight: 800;
@@ -395,7 +395,7 @@
             height: 48px;
             margin-bottom: 10px;
             border-radius: 14px;
-            background: #ede9fe;
+            background: #E7F1E9;
             font-size: 22px;
         }
 
@@ -499,7 +499,7 @@
             margin-bottom: 17px;
             border-radius: 10px;
             background: #faf5ff;
-            border: 1px solid #ede9fe;
+            border: 1px solid #E7F1E9;
         }
 
         .selected-line-box span {
@@ -507,13 +507,13 @@
             margin-bottom: 3px;
             font-size: 9px;
             font-weight: 700;
-            color: #8b5cf6;
+            color: #7FA58C;
             text-transform: uppercase;
         }
 
         .selected-line-box strong {
             font-size: 12px;
-            color: #4c1d95;
+            color: #315E49;
         }
 
         .modal-action {
@@ -576,7 +576,7 @@
             height: 29px;
             padding: 0 9px;
             border-radius: 999px;
-            background: #f1efff;
+            background: #EAF3EC;
             color: #6557dc;
             font-size: 10px;
             font-weight: 800;
@@ -718,14 +718,14 @@
         }
 
         .btn-primary {
-            background: #7c3aed;
-            border-color: #7c3aed;
+            background: #5F9278;
+            border-color: #5F9278;
             color: #ffffff;
         }
 
         .btn-primary:hover {
-            background: #6d28d9;
-            border-color: #6d28d9;
+            background: #376B52;
+            border-color: #376B52;
             color: #ffffff;
         }
 
@@ -859,7 +859,16 @@
             }
 
         }
-    </style>
+    
+/* Flat Model Box browsing: clean list cards, no nested icon badges */
+.line-card{border:1px solid #e0e9e2!important;box-shadow:none!important;border-radius:12px!important;background:#fff!important}
+.line-card:hover{transform:none!important;border-color:#a7c7b0!important;box-shadow:none!important}
+.line-card.active{border-color:#5f947a!important;background:#f4f9f5!important}
+.line-icon,.empty-table-icon{display:none!important}
+.line-card-top{gap:8px!important}
+.stat-box{background:transparent!important;box-shadow:none!important;border:0!important;padding:4px 0!important}
+
+</style>
 
 
     {{-- =====================================================

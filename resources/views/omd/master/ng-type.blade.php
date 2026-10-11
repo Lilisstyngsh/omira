@@ -238,8 +238,8 @@ Jenis NG
         height: 30px;
         padding: 0 9px;
         border-radius: 8px;
-        background: #ede9fe;
-        color: #6d28d9;
+        background: #E7F1E9;
+        color: #376B52;
         font-size: 11px;
         font-weight: 800;
     }
@@ -324,8 +324,8 @@ Jenis NG
         height: 46px;
         margin: 0 auto 10px;
         border-radius: 13px;
-        background: #ede9fe;
-        color: #7c3aed;
+        background: #E7F1E9;
+        color: #5F9278;
         font-size: 20px;
     }
 

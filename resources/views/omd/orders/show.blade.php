@@ -289,8 +289,8 @@
         }
 
         .repair-table .ng-input:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, .12);
+            border-color: #5F9278;
+            box-shadow: 0 0 0 3px rgba(95, 146, 120, .12);
         }
 
         .repair-table .ng-input::placeholder {
@@ -399,8 +399,8 @@
         }
 
         .repair-table .keterangan-input:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, .12);
+            border-color: #5F9278;
+            box-shadow: 0 0 0 3px rgba(95, 146, 120, .12);
         }
 
         .repair-table .total-row td {
@@ -608,13 +608,13 @@
         }
 
         .btn-primary {
-            background: #7c3aed;
+            background: #5F9278;
             color: #fff;
-            box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
         }
 
         .btn-primary:hover {
-            background: #6d28d9;
+            background: #376B52;
             color: #fff;
         }
 
@@ -650,13 +650,13 @@
         }
 
         .btn-success {
-            background: #7c3aed;
+            background: #5F9278;
             color: #fff;
-            box-shadow: 0 6px 15px rgba(124, 58, 237, .18);
+            box-shadow: 0 6px 15px rgba(95,146,120,.18);
         }
 
         .btn-success:hover {
-            background: #6d28d9;
+            background: #376B52;
             color: #fff;
         }
 

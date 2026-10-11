@@ -330,5 +330,16 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HISTORICAL DASHBOARD SNAPSHOT APRIL–AGUSTUS 2026
+        |--------------------------------------------------------------------------
+        | Data sumber lama hanya memiliki agregat bulanan Order / Finish / Scrap,
+        | sehingga tidak dibuat menjadi Repair Order fiktif. Snapshot ini hanya
+        | dipakai untuk histori grafik Dashboard dan tidak ikut export detail.
+        */
+        $this->call(RepairMonthlySnapshotSeeder::class);
     }
 }

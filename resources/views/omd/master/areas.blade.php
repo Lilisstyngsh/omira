@@ -16,7 +16,7 @@
     }
 
     .breadcrumb a {
-        color: #6d28d9;
+        color: #376B52;
         font-weight: 650;
     }
 
@@ -57,7 +57,7 @@
     .area-card:hover {
         transform: translateY(-3px);
         border-color: #c4b5fd;
-        box-shadow: 0 12px 28px rgba(124, 58, 237, .12);
+        box-shadow: 0 12px 28px rgba(95, 146, 120, .12);
     }
 
     .area-card h3 {
@@ -74,8 +74,8 @@
         width: 44px;
         height: 44px;
         border-radius: 13px;
-        background: #ede9fe;
-        color: #6d28d9;
+        background: #E7F1E9;
+        color: #376B52;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -92,11 +92,21 @@
     .badge-soft {
         padding: 5px 9px;
         border-radius: 999px;
-        background: #f5f3ff;
-        color: #6d28d9;
+        background: #F2F7F2;
+        color: #376B52;
         font-size: 11px;
         font-weight: 700;
     }
+
+/* Modern industrial master directory — flat hierarchy, no ornamental icon tiles */
+.master-hero{background:#fff!important;color:#233b2d!important;border:1px solid #e2ebe4!important;box-shadow:none!important;border-radius:14px!important}
+.master-hero p{color:#6a7c70!important}
+.master-card,.area-card{border:1px solid #e0e9e2!important;border-radius:12px!important;box-shadow:none!important;padding:18px!important;transition:border-color .15s ease,background .15s ease!important}
+.master-card:hover,.area-card:hover{transform:none!important;box-shadow:none!important;border-color:#93b69f!important;background:#fbfdfb!important}
+.master-icon,.area-icon{display:none!important}
+.master-card h3,.area-card h3{margin-top:0!important;font-weight:700!important;color:#263b30!important}
+.master-card-footer,.area-footer{border-top:1px solid #edf1ed;padding-top:12px;margin-top:15px!important}
+
 </style>
 
 <div class="breadcrumb">
@@ -144,7 +154,7 @@
         <p>{{ $area->master_models_count }} Model aktif</p>
         <div class="area-footer">
             <span class="badge-soft">{{ $plant->name }}</span>
-            <span style="color:#6d28d9;font-weight:700;font-size:12px;">Lihat Model →</span>
+            <span style="color:#376B52;font-weight:700;font-size:12px;">Lihat Model →</span>
         </div>
     </a>
     @endforeach

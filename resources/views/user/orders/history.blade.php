@@ -107,7 +107,7 @@
 
     .history-date-input input:focus,
     .history-date-input.open input {
-        border-color: #7c6cf4;
+        border-color: #6E9F82;
         box-shadow: 0 0 0 3px rgba(124, 108, 244, .12);
     }
 
@@ -139,9 +139,9 @@
     }
 
     .history-filter-btn-primary {
-        background: #6d5dfc;
+        background: #5F9278;
         color: #fff;
-        box-shadow: 0 6px 15px rgba(109, 93, 252, .20);
+        box-shadow: 0 6px 15px rgba(95, 146, 120, .18);
     }
 
     .history-filter-btn-primary:hover {
@@ -215,7 +215,7 @@
         height: 30px;
         border: none;
         border-radius: 50%;
-        background: #f1efff;
+        background: #EAF3EC;
         color: #6557dc;
         font-weight: 900;
         cursor: pointer;
@@ -265,7 +265,7 @@
     }
 
     .calendar-day:hover:not(:disabled) {
-        background: #f1efff;
+        background: #EAF3EC;
         color: #5d4df0;
     }
 
@@ -274,13 +274,13 @@
     }
 
     .calendar-day.in-range {
-        background: #f1efff;
+        background: #EAF3EC;
         color: #5d4df0;
         border-radius: 8px;
     }
 
     .calendar-day.active {
-        background: #6d5dfc;
+        background: #5F9278;
         color: #fff;
         border-radius: 50%;
     }
@@ -360,7 +360,7 @@
     }
 
     .history-per-page select:focus {
-        border-color: #7c6cf4;
+        border-color: #6E9F82;
         box-shadow: 0 0 0 3px rgba(124, 108, 244, .12);
     }
 
@@ -412,7 +412,7 @@
     }
 
     .history-search input:focus {
-        border-color: #7c6cf4;
+        border-color: #6E9F82;
         box-shadow: 0 0 0 3px rgba(124, 108, 244, .12);
     }
 
@@ -489,7 +489,7 @@
     }
 
     .orders-table tbody tr:hover {
-        background: #f8f7ff;
+        background: #F4F8F5;
     }
 
     .orders-table tbody tr:last-child td {
@@ -624,8 +624,8 @@
     }
 
     .history-pagination-btn.active {
-        background: #6d5dfc;
-        border-color: #6d5dfc;
+        background: #5F9278;
+        border-color: #5F9278;
         color: #fff;
     }
 
@@ -752,8 +752,8 @@
     }
 
     .history-line-filter-inline select:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, .1)
+        border-color: #5F9278;
+        box-shadow: 0 0 0 3px rgba(95, 146, 120, .10)
     }
 
     .sr-only {
@@ -794,6 +794,23 @@
             align-items: stretch
         }
     }
+
+/* OMIRA — Calendar soft-green 2026. Controls and date selection stay unchanged. */
+.calendar-popup{background:#fff!important;border:1px solid #ddebe0!important;border-radius:22px!important;box-shadow:0 16px 38px rgba(35,69,48,.11)!important;padding:19px!important;width:min(340px,calc(100vw - 38px))!important;color:#263b30!important}
+.calendar-header{margin-bottom:17px!important;align-items:center!important}
+.calendar-header strong{color:#263b30!important;font-size:17px!important;font-weight:750!important;letter-spacing:-.3px}
+.calendar-header button,.calendar-nav{width:42px!important;height:42px!important;border-radius:50%!important;background:#f0f6f1!important;color:#5f947a!important;border:0!important;box-shadow:none!important;font-size:18px!important;font-weight:650!important}
+.calendar-header button:hover,.calendar-nav:hover{background:#e1eee5!important;color:#346d50!important}
+.calendar-week,.calendar-days{gap:5px!important}
+.calendar-week span{color:#819489!important;font-weight:750!important;font-size:12px!important;padding:7px 0!important}
+.calendar-day{height:40px!important;min-height:40px!important;border-radius:50%!important;color:#293d32!important;font-size:13px!important;font-weight:650!important;box-shadow:none!important;border:0!important}
+.calendar-day:hover:not(:disabled){background:#edf5ef!important;color:#326a4d!important}
+.calendar-day.active,.calendar-day.selected{background:#5f947a!important;color:#fff!important;border-radius:50%!important}
+.calendar-day.range,.calendar-day.in-range,.calendar-day.selected-range{background:#e4f0e7!important;color:#34684e!important;border-radius:50%!important}
+.calendar-day.today:not(.active){box-shadow:inset 0 0 0 1px #9cbea8!important}
+.history-filter-btn-primary{background:#5f947a!important;color:#fff!important;border:1px solid #5f947a!important;box-shadow:none!important}
+.history-filter-btn-primary:hover{background:#4c8167!important;border-color:#4c8167!important}
+
 </style>
 
 
@@ -905,6 +922,17 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
 
             <div class="history-toolbar-query">
+                <div class="history-line-filter history-line-filter-inline">
+                    <label for="history_line_id" class="sr-only">Filter Line</label>
+                    <select id="history_line_id" name="line_id" onchange="this.form.submit()">
+                        <option value="">Semua Line</option>
+                        @foreach ($lines as $line)
+                        <option value="{{ $line->id }}" @selected((string) request('line_id')===(string) $line->id)>
+                            {{ $line->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <div class="history-search">
 
