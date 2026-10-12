@@ -20,7 +20,8 @@
     .repair-detail-table .product-name{font-weight:450;color:#1f2937}
     .repair-detail-table .model-total-row td{font-weight:550;color:#334155;background:#fff}
     .repair-detail-table .total-row td{font-weight:550;background:#fff}
-    .repair-detail-table .grand-total-row td{font-weight:600;background:#fff;color:#334155}
+    .repair-detail-table .grand-total-row td{font-weight:650;background:#fff;color:#334155}
+    .repair-detail-table tfoot .summary-label{text-align:right;padding-right:12px}
     .repair-detail-table .match-cell{background:#dcfce7}
     .repair-detail-table .mismatch-cell{background:#fee2e2}
     .repair-detail-table .note-cell{min-width:130px;white-space:normal;line-height:1.4}
@@ -80,23 +81,17 @@
                         @if($showProductNote)<td class="note-cell">{{ $productNote ?: '-' }}</td>@endif
                     </tr>
                 @endforeach
-                <tr class="model-total-row">
-                    <td colspan="2">Total</td>
-                    @foreach($ngCodes as $code)<td class="cell-center">{{ $modelBeforeTotals[$code] > 0 ? $modelBeforeTotals[$code] : '' }}</td>@endforeach
-                    @if($showAfter) @foreach($ngCodes as $code)<td class="cell-center">{{ $modelAfterTotals[$code] > 0 ? $modelAfterTotals[$code] : '' }}</td>@endforeach @endif
-                    @if($showProductNote)<td></td>@endif
-                </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="2">Total NG</td>
+                <td colspan="2" class="summary-label">Sub Total</td>
                 @foreach($ngCodes as $code)<td class="cell-center">{{ $beforeTotals[$code] > 0 ? $beforeTotals[$code] : '' }}</td>@endforeach
                 @if($showAfter) @foreach($ngCodes as $code)<td class="cell-center">{{ $afterTotals[$code] > 0 ? $afterTotals[$code] : '' }}</td>@endforeach @endif
                 @if($showProductNote)<td></td>@endif
             </tr>
             <tr class="grand-total-row">
-                <td colspan="2">Grand Total</td>
+                <td colspan="2" class="summary-label">Grand Total</td>
                 <td colspan="4" class="cell-center">{{ $beforeGrandTotal > 0 ? $beforeGrandTotal . ' NG' : '' }}</td>
                 @if($showAfter)<td colspan="4" class="cell-center">{{ $afterGrandTotal > 0 ? $afterGrandTotal . ' NG' : '' }}</td>@endif
                 @if($showProductNote)<td></td>@endif

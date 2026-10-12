@@ -107,8 +107,7 @@
         padding: 9px 5px;
     }
 
-    .orders-table th:nth-child(6),
-    .orders-table td:nth-child(6) {
+    .orders-table tbody td:nth-child(5) {
         border-left: 1px solid #dfe6ef;
     }
 
@@ -361,15 +360,14 @@ $completedOrders = $orders->where('status', 'completed')->count();
         <table class="orders-table">
 
             <colgroup>
-                <col style="width:44px;">
-                <col style="width:94px;">
-                <col style="width:122px;">
-                <col style="width:110px;">
-                <col style="width:55px;">
-                <col style="width:78px;">
-                <col style="width:82px;">
-                <col style="width:78px;">
-                <col style="width:88px;">
+                <col style="width:6%;">
+                <col style="width:13%;">
+                <col style="width:20%;">
+                <col style="width:9%;">
+                <col style="width:13%;">
+                <col style="width:13%;">
+                <col style="width:13%;">
+                <col style="width:13%;">
             </colgroup>
 
             <thead>
@@ -386,10 +384,6 @@ $completedOrders = $orders->where('status', 'completed')->count();
 
                     <th rowspan="2">
                         No Order
-                    </th>
-
-                    <th rowspan="2">
-                        Line
                     </th>
 
                     <th rowspan="2">
@@ -445,12 +439,6 @@ $completedOrders = $orders->where('status', 'completed')->count();
 
                     <td class="order-number">
                         {{ $order->order_number }}
-                    </td>
-
-                    <td>
-                        <span class="order-line-badge">
-                            {{ $order->line?->name ?? '-' }}
-                        </span>
                     </td>
 
                     <td class="order-qty">
@@ -531,7 +519,7 @@ $completedOrders = $orders->where('status', 'completed')->count();
 
                 <tr>
 
-                    <td colspan="9" class="order-empty">
+                    <td colspan="8" class="order-empty">
                         <div class="order-empty-text">
                             Belum ada Order Repair Box
                         </div>

@@ -1335,6 +1335,17 @@
         .omira-recap-btn-pdf{color:#b42318;background:#fff1f2;border-color:#fecdd3}
         .omira-recap-btn-excel{color:#166534;background:#ecfdf3;border-color:#bbf7d0}
 
+
+/* Calendar compact: narrower outer footprint without shrinking touch targets excessively. */
+.history-filter-field{min-width:0;width:160px;max-width:100%}
+.calendar-popup{width:min(292px,calc(100vw - 32px))!important;padding:12px!important;border-radius:15px!important}
+.calendar-header{margin-bottom:9px!important}
+.calendar-header strong{font-size:14px!important}
+.calendar-header button,.calendar-nav{width:38px!important;height:38px!important;font-size:16px!important}
+.calendar-week,.calendar-days{gap:2px!important}
+.calendar-week span{font-size:11px!important;padding:4px 0!important}
+.calendar-day{height:36px!important;min-height:36px!important;font-size:12px!important}
+@media(max-width:600px){.history-filter-field{width:100%;max-width:none}.calendar-popup{max-width:calc(100vw - 32px)!important}}
 </style>
 
     <div class="page-card">

@@ -9,15 +9,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <script>
-        (function() {
-            try {
-                document.documentElement.dataset.theme = localStorage.getItem('omira-theme') || 'light';
-            } catch (e) {
-                document.documentElement.dataset.theme = 'light';
-            }
-        })();
-    </script>
+    <script>document.documentElement.dataset.theme = 'light';</script>
 
     <style>
         :root {
@@ -2521,34 +2513,25 @@
                     
                     <?php if(auth()->user()->role === 'user'): ?>
                         <a href="<?php echo e(route('user.orders.index')); ?>"
-                            class="<?php echo e(request()->routeIs('user.orders.index') ? 'active' : ''); ?>">
+                            class="<?php echo e((request()->routeIs('user.orders.index') || request()->routeIs('user.orders.show')) ? 'active' : ''); ?>">
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
                             <span>Order Repair Box</span>
                             <span id="userOrderNotification" class="nav-notification hidden">0</span>
                         </a>
 
                         <a href="<?php echo e(route('user.orders.history')); ?>"
-                            class="<?php echo e(request()->routeIs('user.orders.history') ? 'active' : ''); ?>">
+                            class="<?php echo e((request()->routeIs('user.orders.history') || request()->routeIs('user.orders.history.show')) ? 'active' : ''); ?>">
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 7v5l3 2"/></svg></span>
                             <span>History Order Repair Box</span>
                         </a>
 
 
-                        <a href="<?php echo e(route('user.tps.index')); ?>"
-                            class="<?php echo e(request()->routeIs('user.tps.*') ? 'active' : ''); ?>">
-
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4-4 4 4-4 4"/><path d="m2 22 9-9"/><path d="M14 10 4 20l-2 2"/><path d="m11 3 2 2-4 4-2-2"/><path d="m3 3 4 4"/></svg></span>
-
-                            <span>
-                                Order TPS Tools
-                            </span>
-
-                        </a>
+                        
                     <?php else: ?>
                         
 
                         <a href="<?php echo e(route('omd.orders.index')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.orders.index') ? 'active' : ''); ?>">
+                            class="<?php echo e((request()->routeIs('omd.orders.index') || request()->routeIs('omd.orders.show')) ? 'active' : ''); ?>">
 
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
 
@@ -2563,7 +2546,7 @@
                         </a>
 
                         <a href="<?php echo e(route('omd.orders.history')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.orders.history') ? 'active' : ''); ?>">
+                            class="<?php echo e((request()->routeIs('omd.orders.history') || request()->routeIs('omd.orders.history.show')) ? 'active' : ''); ?>">
 
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 7v5l3 2"/></svg></span>
 
@@ -2573,16 +2556,7 @@
 
                         </a>
 
-                        <a href="<?php echo e(route('omd.tps.index')); ?>"
-                            class="<?php echo e(request()->routeIs('omd.tps.*') ? 'active' : ''); ?>">
-
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4-4 4 4-4 4"/><path d="m2 22 9-9"/><path d="M14 10 4 20l-2 2"/><path d="m11 3 2 2-4 4-2-2"/><path d="m3 3 4 4"/></svg></span>
-
-                            <span>
-                                Order TPS Tool
-                            </span>
-
-                        </a>
+                        
                     <?php endif; ?>
 
                 </nav>
@@ -2716,10 +2690,6 @@
 
 
                     <div class="topbar-right">
-
-                        <button type="button" class="theme-toggle" id="themeToggle" title="Ganti tema" aria-label="Ganti tema">
-                            <i class="fa-solid fa-moon" id="themeToggleIcon" aria-hidden="true"></i>
-                        </button>
 
                         <div class="profile-dropdown">
 
@@ -3050,36 +3020,6 @@
             );
         </script>
     <?php endif; ?>
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const button = document.getElementById('themeToggle');
-            const icon = document.getElementById('themeToggleIcon');
-
-            if (!button || !icon) return;
-
-            const renderThemeIcon = () => {
-                const theme = document.documentElement.dataset.theme || 'light';
-                icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-                button.title = theme === 'dark' ? 'Gunakan tema terang' : 'Gunakan tema gelap';
-                button.setAttribute('aria-label', button.title);
-            };
-
-            renderThemeIcon();
-
-            button.addEventListener('click', function() {
-                const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-                document.documentElement.dataset.theme = nextTheme;
-
-                try {
-                    localStorage.setItem('omira-theme', nextTheme);
-                } catch (e) {}
-
-                renderThemeIcon();
-            });
-        });
-    </script>
 
     
 
