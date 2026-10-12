@@ -82,6 +82,7 @@
         ===================================================== */
 
         .account-btn-primary {
+            border: none !important;
             height: 38px;
             padding: 0 16px;
             border-radius: 9px;
@@ -98,7 +99,7 @@
         }
 
         .account-btn-primary:hover {
-            background: #5d4df0;
+            background: #47775c;
             transform: translateY(-1px);
             color: #fff;
         }
@@ -149,7 +150,7 @@
             padding: 0 12px;
             border-radius: 10px;
             background: #EAF3EC;
-            color: #6557dc;
+            color: #376d4d;
             font-size: 11px;
             font-weight: 800;
             white-space: nowrap;
@@ -224,7 +225,7 @@
             height: 36px;
             border-radius: 11px;
             background: #EAF3EC;
-            color: #6659df;
+            color: #376d4d;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -265,7 +266,7 @@
 
         .account-badge-plant {
             background: #F2F7F2;
-            color: #6659df;
+            color: #376d4d;
         }
 
         .account-badge-line {
@@ -590,7 +591,7 @@
         .account-edit-btn { min-height: 40px; padding: 0 16px; border: 0; border-radius: 9px; font-size: 12px; font-weight: 750; cursor: pointer; }
         .account-edit-cancel { background: #f1f5f9; color: #475569; }
         .account-edit-save { background: #5F9278; color: #fff; box-shadow: 0 6px 15px rgba(95,146,120,.18); }
-        .account-edit-save:hover { background: #5d4df0; }
+        .account-edit-save:hover { background: #47775c; }
         body.account-modal-open { overflow: hidden; }
 
         /* =====================================================
@@ -741,6 +742,32 @@
                 flex-direction: column;
             }
         }
+
+        /* Manajemen Akun — modal minimalis dan toolbar compact (tablet friendly). */
+        .account-filter-bar .account-filter-right { gap: 10px; margin-left: auto; width: auto; }
+        .account-filter-bar .account-filter-line { flex: 0 0 158px; width: 158px; min-width: 0; }
+        .account-filter-bar .account-filter-search { flex: 0 0 235px; width: 235px; min-width: 0; }
+        .account-filter-bar .account-filter-field input,
+        .account-filter-bar .account-filter-field select { max-width: 100%; }
+        .account-create-modal { width: min(620px, calc(100vw - 24px)); max-height: min(90vh, 780px); overflow-y: auto; background: #fff; }
+        .account-create-modal .account-edit-body { padding: 20px 24px; }
+        .account-create-modal .account-edit-grid { gap: 16px; }
+        .account-create-modal .account-edit-head { background: #fff; }
+        .account-create-modal .account-edit-actions { background: #fff; }
+        .account-create-modal .account-edit-field input:focus,
+        .account-create-modal .account-edit-field select:focus { border-color: #76a88b; outline: 2px solid #e5f2e9; outline-offset: 0; }
+        @media(max-width: 780px) {
+            .account-filter-bar .account-filter-right { margin-left: auto; justify-content: flex-end; width: auto; flex: 1 1 auto; }
+            .account-filter-bar .account-filter-line { flex: 0 1 145px; width: 145px; }
+            .account-filter-bar .account-filter-search { flex: 0 1 195px; width: 195px; }
+            .account-create-modal .account-edit-grid { grid-template-columns: 1fr; }
+        }
+        @media(max-width: 560px) {
+            .account-filter-bar { flex-wrap: wrap; }
+            .account-filter-bar .account-filter-right { width: 100%; flex: 1 1 100%; }
+            .account-filter-bar .account-filter-search { flex: 1 1 auto; }
+            .account-create-modal .account-edit-body { padding: 16px; }
+        }
     </style>
 
 
@@ -759,9 +786,9 @@
         </div>
 
 
-        <a href="{{ route('omd.users.create') }}" class="account-btn-primary">
-            + Tambah Akun
-        </a>
+        <button type="button" class="account-btn-primary" id="openAccountCreate" aria-haspopup="dialog">
+            <i class="fa-solid fa-plus" aria-hidden="true" style="margin-right:8px"></i>Tambah Akun
+        </button>
 
     </div>
 
@@ -819,7 +846,7 @@
                     <div class="account-search-wrap">
                         <i class="fa-solid fa-magnifying-glass account-search-icon" aria-hidden="true"></i>
                         <input id="account_search" type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari nama, email, role, plant, atau line..." autocomplete="off" aria-label="Pencarian akun">
+                            placeholder="Cari akun..." autocomplete="off" aria-label="Pencarian akun">
                         @if (request('search'))
                             <button type="button" class="account-search-clear" title="Hapus pencarian" aria-label="Hapus pencarian"
                                 onclick="this.closest('form').querySelector('[name=search]').value=''; this.closest('form').submit();">
@@ -1047,6 +1074,37 @@
 
 
 
+
+
+    {{-- Tambah akun: modal menggunakan endpoint store dan validasi Laravel yang sama. --}}
+    <div class="account-edit-overlay" id="accountCreateModal" aria-hidden="true">
+        <div class="account-edit-modal account-create-modal" role="dialog" aria-modal="true" aria-labelledby="accountCreateTitle">
+            <div class="account-edit-head">
+                <h3 class="account-edit-title" id="accountCreateTitle">Tambah Akun</h3>
+                <button type="button" class="account-edit-close js-close-create" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form action="{{ route('omd.users.store') }}" method="POST" id="accountCreateForm">
+                @csrf
+                <div class="account-edit-body">
+                    @if ($errors->any() && !old('edit_user_id'))
+                        <div class="account-edit-errors" role="alert">
+                            @foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach
+                        </div>
+                    @endif
+                    <div class="account-edit-grid">
+                        <div class="account-edit-field"><label for="create_name">Nama</label><input type="text" id="create_name" name="name" maxlength="100" value="{{ old('name') }}" required autocomplete="name"></div>
+                        <div class="account-edit-field"><label for="create_email">Email</label><input type="email" id="create_email" name="email" maxlength="255" value="{{ old('email') }}" required autocomplete="email"></div>
+                        <div class="account-edit-field"><label for="create_role">Role</label><select id="create_role" name="role" required><option value="user" @selected(old('role','user') === 'user')>User</option><option value="omd" @selected(old('role') === 'omd')>OMD</option></select></div>
+                        <div class="account-edit-field" id="createPlantField"><label for="create_plant">Plant</label><select id="create_plant" name="plant_id"><option value="">Pilih Plant</option>@foreach ($accountPlants as $plant)<option value="{{ $plant->id }}" @selected((string)old('plant_id') === (string)$plant->id)>{{ $plant->name }}</option>@endforeach</select></div>
+                        <div class="account-edit-field" id="createLineField"><label for="create_line">Line</label><select id="create_line" name="line_id"><option value="">Pilih Line</option></select></div>
+                        <div class="account-edit-field"><label for="create_password">Password</label><input type="password" name="password" id="create_password" minlength="4" autocomplete="new-password" placeholder="Opsional (default sesuai role)"></div>
+                        <div class="account-edit-field"><label for="create_password_confirm">Konfirmasi Password</label><input type="password" name="password_confirmation" id="create_password_confirm" minlength="4" autocomplete="new-password" placeholder="Ulangi password"></div>
+                    </div>
+                </div>
+                <div class="account-edit-actions"><button type="button" class="account-edit-btn account-edit-cancel js-close-create">Batal</button><button type="submit" class="account-edit-btn account-edit-save">Simpan Akun</button></div>
+            </form>
+        </div>
+    </div>
 
     <div class="account-edit-overlay" id="accountEditModal" aria-hidden="true">
         <div class="account-edit-modal" role="dialog" aria-modal="true" aria-labelledby="accountEditTitle">
@@ -1370,4 +1428,70 @@
         );
     </script>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('accountCreateModal');
+            const open = document.getElementById('openAccountCreate');
+            const form = document.getElementById('accountCreateForm');
+            const role = document.getElementById('create_role');
+            const plant = document.getElementById('create_plant');
+            const line = document.getElementById('create_line');
+            const plantField = document.getElementById('createPlantField');
+            const lineField = document.getElementById('createLineField');
+            const linesByPlant = @json($accountLinesByPlant);
+            const originalLine = @json((string) old('line_id',''));
+            let previousFocus = null;
+            function syncLines(selected = '') {
+                const lines = linesByPlant[String(plant.value || '')] || [];
+                line.replaceChildren(new Option('Pilih Line', ''));
+                lines.forEach(item => line.add(new Option(item.name, String(item.id))));
+                if (selected) line.value = String(selected);
+            }
+            function syncRole() {
+                const user = role.value === 'user';
+                plantField.hidden = !user;
+                lineField.hidden = !user;
+                plantField.style.display = user ? "" : "none";
+                lineField.style.display = user ? "" : "none";
+                plant.disabled = !user;
+                line.disabled = !user;
+                plant.required = user;
+                line.required = user;
+            }
+            function show() {
+                previousFocus = document.activeElement;
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden','false');
+                document.body.classList.add('account-modal-open');
+                document.getElementById('create_name').focus();
+            }
+            function hide() {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden','true');
+                if (!document.getElementById('accountEditModal')?.classList.contains('is-open')) document.body.classList.remove('account-modal-open');
+                previousFocus?.focus?.();
+            }
+            open.addEventListener('click', show);
+            modal.querySelectorAll('.js-close-create').forEach(button => button.addEventListener('click',hide));
+            modal.addEventListener('click', e => { if (e.target === modal) hide(); });
+            document.addEventListener('keydown', e => {
+                if (!modal.classList.contains('is-open')) return;
+                if (e.key === 'Escape') hide();
+                if (e.key === 'Tab') {
+                    const fields = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled])')].filter(el => el.getClientRects().length);
+                    if (!fields.length) return;
+                    if (e.shiftKey && document.activeElement === fields[0]) {e.preventDefault();fields[fields.length-1].focus();}
+                    else if (!e.shiftKey && document.activeElement === fields[fields.length-1]) {e.preventDefault();fields[0].focus();}
+                }
+            });
+            plant.addEventListener('change',()=>syncLines());
+            role.addEventListener('change',syncRole);
+            syncLines(originalLine);
+            syncRole();
+            @if ($errors->any() && !old('edit_user_id'))
+                show();
+            @endif
+        });
+    </script>
 @endsection

@@ -5,6 +5,18 @@
 
 @section('content')
 <style>
+/* OMIRA tablet-first detail: predictable spacing and touch-size export actions. */
+.omira-detail-export-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.omira-detail-export-head h3{margin:0!important}
+.omira-detail-export-actions{display:flex;gap:8px;flex-wrap:wrap}
+.omira-detail-export-actions a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:8px 14px;border:1px solid;border-radius:9px;text-decoration:none!important;font-size:12px;font-weight:700;white-space:nowrap}
+.omira-detail-export-actions .pdf{background:#fff1f1;border-color:#f2cccc;color:#ad454d!important}
+.omira-detail-export-actions .excel{background:#edf8f0;border-color:#cbe9d1;color:#247447!important}
+.omira-detail-export-actions .pdf:hover{background:#ffe7e7}
+.omira-detail-export-actions .excel:hover{background:#dff2e5}
+.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:20px!important}
+@media(max-width:768px){.omira-detail-export-actions a{min-height:44px}.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px!important}}
+
     .history-detail-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.history-detail-head h2{margin:0;font-size:20px;font-weight:700;color:#0f172a}.history-detail-head p{margin:3px 0 0;font-size:11px;color:#64748b}
     .btn-history-back{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:9px;background:#334155;color:#fff!important;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #334155}.btn-history-back:hover{background:#1e293b}
     .history-card{background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-bottom:16px}.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px}.history-card h3{margin:0 0 12px;font-size:14px;font-weight:650;color:#0f172a}
@@ -85,7 +97,13 @@
 @include('partials.repair-order-information', ['order' => $order, 'context' => 'omd-history'])
 
 <div class="history-card">
-    <h3>Detail Repair</h3>
+    <div class="omira-detail-export-head">
+        <h3>Detail Repair</h3>
+        <div class="omira-detail-export-actions">
+            <a class="pdf" href="{{ route('omd.orders.history.export', ['order' => $order, 'format' => 'pdf']) }}"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> PDF</a>
+            <a class="excel" href="{{ route('omd.orders.history.export', ['order' => $order, 'format' => 'excel']) }}"><i class="fa-regular fa-file-excel" aria-hidden="true"></i> Excel</a>
+        </div>
+    </div>
     @include('partials.repair-order-readonly-table', ['order' => $order, 'showAfter' => true, 'showProductNote' => true])
 </div>
 

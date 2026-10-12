@@ -10,15 +10,15 @@
         .month-heading { text-align: center; font-weight: bold; font-size: 10px; margin: 8px 0; }
         .month-section { page-break-after: always; }
         .month-section:last-child { page-break-after: auto; }
-        .matrix { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .matrix th, .matrix td { border: 0.5px solid #748379; padding: 3px 2px; text-align: center; vertical-align: middle; overflow-wrap: break-word; }
+        .matrix { width: 100%; border-collapse: collapse; table-layout: auto; }
+        .matrix th, .matrix td { border: 0.5px solid #748379; padding: 2px 1px; text-align: center; vertical-align: middle; overflow-wrap: break-word; }
         .matrix thead th { background: #e5eee8; font-weight: bold; }
         .matrix .group { font-weight: bold; background: #fff; }
         .matrix .product { text-align: left; padding-left: 5px; }
         .matrix .status { font-weight: normal; background: #fff; }
         .matrix .grandrow td { background: #d9e9df; font-weight: bold; }
         .matrix .empty { color: #64748b; padding: 15px; }
-        .matrix .daycol { width: auto; }
+        .matrix .daycol { width: 18px; min-width: 18px; white-space: nowrap; padding: 2px 1px; }
         .matrix .totalcol { width: 45px; font-weight: bold; }
         .matrix .plantcol { width: 55px; }
         .matrix .linecol { width: 56px; }
@@ -31,8 +31,9 @@
 <body>
 @foreach ($monthlyReports as $report)
     <div class="month-section">
-        <div class="title">DATA REKAP REPAIR BOX ALL PLANT</div>
-        <div class="period">Periode: {{ $startDate->format('d-m-Y') }} s.d. {{ $endDate->format('d-m-Y') }} | Line: {{ $selectedLineNames->implode(', ') }}</div>
+        <div class="title">DATA REKAP REPAIR BOX</div>
+        <div class="period">Periode: {{ $startDate->format('d-m-Y') }} s.d. {{ $endDate->format('d-m-Y') }}</div>
+        <div class="period">Line: {{ $selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ') }}</div>
         <div class="month-heading">Bulan: {{ $report['label'] }}</div>
         <table class="matrix">
             <thead>
@@ -42,7 +43,7 @@
                     <th rowspan="2" class="modelcol">MODEL</th>
                     <th rowspan="2" class="productcol">PRODUK</th>
                     <th rowspan="2" class="statuscol">JENIS</th>
-                    <th colspan="{{ count($report['days']) }}">TANGGAL — {{ $report['label'] }}</th>
+                    <th colspan="{{ count($report['days']) }}">TANGGAL</th>
                     <th rowspan="2" class="totalcol">GRAND TOTAL</th>
                 </tr>
                 <tr>
@@ -75,7 +76,7 @@
                                     @php $value = (int) ($product['daily'][$day][$key] ?? 0); @endphp
                                     <td>{{ $value > 0 ? number_format($value, 0, ',', '.') : '' }}</td>
                                 @endforeach
-                                <td>{{ number_format($product['totals'][$key], 0, ',', '.') }}</td>
+                                <td>{{ $product['totals'][$key] ? number_format($product['totals'][$key], 0, ',', '.') : '' }}</td>
                             </tr>
                             @endforeach
                         @endforeach
@@ -94,7 +95,7 @@
                         @php $value = (int) ($report['grandDaily'][$day][$key] ?? 0); @endphp
                         <td>{{ $value > 0 ? number_format($value, 0, ',', '.') : '' }}</td>
                     @endforeach
-                    <td>{{ number_format($report['grandTotals'][$key], 0, ',', '.') }}</td>
+                    <td>{{ $report['grandTotals'][$key] ? number_format($report['grandTotals'][$key], 0, ',', '.') : '' }}</td>
                 </tr>
             @endforeach
             </tbody>

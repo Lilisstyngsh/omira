@@ -193,7 +193,7 @@ class RecapController extends Controller
             );
         }
 
-        $this->buildChartSheet($spreadsheet, $chartRows);
+        $this->buildChartSheet($spreadsheet, $chartRows, $selectedLineNames);
         $spreadsheet->setActiveSheetIndex(0);
 
         $filename = sprintf(
@@ -439,67 +439,61 @@ class RecapController extends Controller
         $firstDay = $monthStart->day;
         $lastDay = $monthEnd->day;
         $daysInPeriod = $lastDay - $firstDay + 1;
-        // F: status, G onward: selected dates, final column: grand total.
-        $lastColumnIndex = 7 + $daysInPeriod;
+        // A-E: Plant, Line, Model, Produk, Jenis; F onward: dates.
+        $firstDayColumn = 6;
+        $lastColumnIndex = $firstDayColumn + $daysInPeriod;
         $totalColumn = Coordinate::stringFromColumnIndex($lastColumnIndex);
         $lastDayColumn = Coordinate::stringFromColumnIndex($lastColumnIndex - 1);
-        $lastColumn = Coordinate::stringFromColumnIndex($lastColumnIndex);
-        $periodLabel = $monthStart->locale('id')->translatedFormat('F Y');
+        $lastColumn = $totalColumn;
 
         $sheet->mergeCells("A1:{$lastColumn}1");
-        $sheet->setCellValue('A1', 'DATA REKAP ORDER REPAIR BOX SEMUA PLANT');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(18);
+        $sheet->setCellValue('A1', 'DATA REKAP REPAIR BOX');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $sheet->mergeCells("A2:{$lastColumn}2");
-        $sheet->setCellValue(
-            'A2',
-            'Periode: ' . $monthStart->format('d-m-Y') . ' s.d. ' . $monthEnd->format('d-m-Y')
-            . ' | Line: ' . $selectedLineNames->implode(', ')
-        );
-        $sheet->getStyle('A2')->getFont()->setSize(10)->getColor()->setARGB('FF64748B');
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        foreach (['A' => 'NO', 'B' => 'PLANT', 'C' => 'LINE', 'D' => 'MODEL', 'E' => 'PRODUK', 'F' => ''] as $col => $label) {
-            $sheet->mergeCells("{$col}3:{$col}4");
-            $sheet->setCellValue("{$col}3", $label);
+        $details = [
+            2 => 'Periode: ' . $monthStart->format('d-m-Y') . ' s.d. ' . $monthEnd->format('d-m-Y'),
+            3 => 'Line: ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ')),
+            4 => 'Bulan: ' . $monthStart->locale('id')->translatedFormat('F Y'),
+        ];
+        foreach ($details as $row => $value) {
+            $sheet->mergeCells("A{$row}:{$lastColumn}{$row}");
+            $sheet->setCellValue("A{$row}", $value);
+            $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("A{$row}")->getFont()->setSize(10)->getColor()->setARGB('FF475569');
         }
 
-        $firstDayColumn = 7;
+        foreach (['A' => 'PLANT', 'B' => 'LINE', 'C' => 'MODEL', 'D' => 'PRODUK', 'E' => 'JENIS'] as $col => $label) {
+            $sheet->mergeCells("{$col}5:{$col}6");
+            $sheet->setCellValue("{$col}5", $label);
+        }
         $firstDayLetter = Coordinate::stringFromColumnIndex($firstDayColumn);
-        $sheet->mergeCells("{$firstDayLetter}3:{$lastDayColumn}3");
-        $sheet->mergeCells("{$totalColumn}3:{$totalColumn}4");
-        $sheet->setCellValue("{$totalColumn}3", 'GRAND TOTAL');
-        $sheet->setCellValue("{$firstDayLetter}3", 'Bulan : ' . $periodLabel);
-
+        $sheet->mergeCells("{$firstDayLetter}5:{$lastDayColumn}5");
+        $sheet->setCellValue("{$firstDayLetter}5", 'TANGGAL');
+        $sheet->mergeCells("{$totalColumn}5:{$totalColumn}6");
+        $sheet->setCellValue("{$totalColumn}5", 'GRAND TOTAL');
         for ($day = $firstDay; $day <= $lastDay; $day++) {
             $col = Coordinate::stringFromColumnIndex($firstDayColumn + $day - $firstDay);
-            $sheet->setCellValue("{$col}4", $day);
+            $sheet->setCellValue("{$col}6", $day);
         }
 
-        $headerRange = "A3:{$lastColumn}4";
-        $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(10);
+        $headerRange = "A5:{$lastColumn}6";
+        $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(10)->getColor()->setARGB('FF24332B');
         $sheet->getStyle($headerRange)->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE7E6E6');
-        $sheet->getStyle($headerRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFB7B7B7');
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE5EEE8');
+        $sheet->getStyle($headerRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFB7C8BA');
 
-        $row = 5;
-        $number = 1;
+        $row = 7;
         $plantSpans = [];
         $lineSpans = [];
         $modelSpans = [];
-
         foreach ($matrixRows as $item) {
             $startRow = $row;
             $endRow = $row + 2;
-
-            $sheet->mergeCells("A{$startRow}:A{$endRow}");
-            $sheet->mergeCells("E{$startRow}:E{$endRow}");
-            $sheet->setCellValue("A{$startRow}", $number++);
-            $sheet->setCellValue("E{$startRow}", $item['produk']);
+            $sheet->mergeCells("D{$startRow}:D{$endRow}");
+            $sheet->setCellValue("D{$startRow}", $item['produk']);
 
             $plantKey = $item['plant'];
             $lineKey = $plantKey . '|' . $item['line'];
@@ -508,60 +502,44 @@ class RecapController extends Controller
             $lineSpans[$lineKey] = $this->extendSpan($lineSpans[$lineKey] ?? null, $startRow, $endRow, $item['line']);
             $modelSpans[$modelKey] = $this->extendSpan($modelSpans[$modelKey] ?? null, $startRow, $endRow, $item['model']);
 
-            $statuses = [
-                ['label' => 'NG', 'key' => 'order'],
-                ['label' => 'OK', 'key' => 'ok'],
-                ['label' => 'Scrap', 'key' => 'scrap'],
-            ];
-
-            foreach ($statuses as $offset => $status) {
+            foreach ([['order', 'NG'], ['ok', 'OK'], ['scrap', 'Scrap']] as $offset => [$key, $label]) {
                 $statusRow = $startRow + $offset;
-                $sheet->setCellValue("F{$statusRow}", $status['label']);
+                $sheet->setCellValue("E{$statusRow}", $label);
                 $productTotal = 0;
                 for ($day = $firstDay; $day <= $lastDay; $day++) {
                     $col = Coordinate::stringFromColumnIndex($firstDayColumn + $day - $firstDay);
-                    $value = (int) ($item['daily'][$day][$status['key']] ?? 0);
+                    $value = (int) ($item['daily'][$day][$key] ?? 0);
                     $productTotal += $value;
-                    if ($value > 0) {
+                    if ($value !== 0) {
                         $sheet->setCellValue("{$col}{$statusRow}", $value);
                     }
                 }
-                $sheet->setCellValue("{$totalColumn}{$statusRow}", $productTotal);
+                if ($productTotal !== 0) {
+                    $sheet->setCellValue("{$totalColumn}{$statusRow}", $productTotal);
+                }
             }
-
             $row += 3;
         }
+        foreach ($plantSpans as $span) { $this->mergeGroupedCell($sheet, 'A', $span); }
+        foreach ($lineSpans as $span) { $this->mergeGroupedCell($sheet, 'B', $span); }
+        foreach ($modelSpans as $span) { $this->mergeGroupedCell($sheet, 'C', $span); }
 
-        foreach ($plantSpans as $span) {
-            $this->mergeGroupedCell($sheet, 'B', $span);
-        }
-        foreach ($lineSpans as $span) {
-            $this->mergeGroupedCell($sheet, 'C', $span);
-        }
-        foreach ($modelSpans as $span) {
-            $this->mergeGroupedCell($sheet, 'D', $span);
-        }
-
-        $lastDataRow = max(5, $row - 1);
+        $lastDataRow = max(7, $row - 1);
         if ($matrixRows->isEmpty()) {
-            $sheet->mergeCells("A5:{$lastColumn}6");
-            $sheet->setCellValue('A5', 'Tidak ada data confirmed pada periode dan Line yang dipilih.');
-            $sheet->getStyle('A5')->getFont()->setItalic(true)->getColor()->setARGB('FF64748B');
-            $sheet->getStyle('A5')->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-            $lastDataRow = 6;
+            $sheet->mergeCells("A7:{$lastColumn}8");
+            $sheet->setCellValue('A7', 'Tidak ada data confirmed pada periode dan Line yang dipilih.');
+            $sheet->getStyle('A7')->getFont()->setItalic(true)->getColor()->setARGB('FF64748B');
+            $sheet->getStyle('A7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $lastDataRow = 8;
         }
 
-        // A single three-row summary at the very end; no per-model subtotal rows.
         $summaryStart = $lastDataRow + 1;
         $summaryEnd = $summaryStart + 2;
-        $sheet->mergeCells("A{$summaryStart}:E{$summaryEnd}");
+        $sheet->mergeCells("A{$summaryStart}:D{$summaryEnd}");
         $sheet->setCellValue("A{$summaryStart}", 'TOTAL');
-        $statusKeys = ['order' => 'NG', 'ok' => 'OK', 'scrap' => 'SCRAP'];
-        foreach ($statusKeys as $key => $label) {
-            $summaryRow = $summaryStart + array_search($key, array_keys($statusKeys), true);
-            $sheet->setCellValue("F{$summaryRow}", $label);
+        foreach (['order' => 'NG', 'ok' => 'OK', 'scrap' => 'SCRAP'] as $key => $label) {
+            $summaryRow = $summaryStart + array_search($key, ['order', 'ok', 'scrap'], true);
+            $sheet->setCellValue("E{$summaryRow}", $label);
             $grand = 0;
             for ($day = $firstDay; $day <= $lastDay; $day++) {
                 $dailyTotal = 0;
@@ -569,10 +547,14 @@ class RecapController extends Controller
                     $dailyTotal += (int) ($item['daily'][$day][$key] ?? 0);
                 }
                 $col = Coordinate::stringFromColumnIndex($firstDayColumn + $day - $firstDay);
-                $sheet->setCellValue("{$col}{$summaryRow}", $dailyTotal);
+                if ($dailyTotal !== 0) {
+                    $sheet->setCellValue("{$col}{$summaryRow}", $dailyTotal);
+                }
                 $grand += $dailyTotal;
             }
-            $sheet->setCellValue("{$totalColumn}{$summaryRow}", $grand);
+            if ($grand !== 0) {
+                $sheet->setCellValue("{$totalColumn}{$summaryRow}", $grand);
+            }
         }
         $sheet->getStyle("A{$summaryStart}:{$lastColumn}{$summaryEnd}")->getFill()
             ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE8F2EC');
@@ -582,38 +564,34 @@ class RecapController extends Controller
         $sheet->getStyle("A{$summaryStart}:{$lastColumn}{$summaryEnd}")->getAlignment()
             ->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        $dataRange = "A5:{$lastColumn}{$lastDataRow}";
+        $dataRange = "A7:{$lastColumn}{$lastDataRow}";
         $sheet->getStyle($dataRange)->getFont()->setSize(9);
         $sheet->getStyle($dataRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFD1D5DB');
-        $sheet->getStyle("A5:A{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle("F5:{$lastColumn}{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A7:C{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("D7:D{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle("E7:{$lastColumn}{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        $sheet->getColumnDimension('A')->setWidth(6);
-        $sheet->getColumnDimension('B')->setWidth(14);
-        $sheet->getColumnDimension('C')->setWidth(18);
-        $sheet->getColumnDimension('D')->setWidth(22);
-        $sheet->getColumnDimension('E')->setWidth(28);
-        $sheet->getColumnDimension('F')->setWidth(10);
+        foreach (['A' => 14, 'B' => 18, 'C' => 22, 'D' => 28, 'E' => 10] as $column => $width) {
+            $sheet->getColumnDimension($column)->setWidth($width);
+        }
         for ($columnIndex = $firstDayColumn; $columnIndex < $lastColumnIndex; $columnIndex++) {
             $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($columnIndex))->setWidth(5);
         }
-
         $sheet->getColumnDimension($totalColumn)->setWidth(16);
-        $sheet->freezePane('G5');
+        $sheet->freezePane('F7');
         $sheet->setShowGridlines(false);
         $sheet->getPageSetup()->setOrientation('landscape');
-        $sheet->getPageSetup()->setFitToWidth(1);
-        $sheet->getPageSetup()->setFitToHeight(0);
-        $sheet->getPageSetup()->setPaperSize('8'); // A3
-        $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(3, 4);
+        $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
+        $sheet->getPageSetup()->setPaperSize('8');
+        $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(5, 6);
         $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
     }
 
-    private function buildChartSheet(Spreadsheet $spreadsheet, Collection $chartRows): void
+    private function buildChartSheet(Spreadsheet $spreadsheet, Collection $chartRows, Collection $selectedLineNames): void
     {
         $chartSheet = $spreadsheet->createSheet();
-        $chartSheet->setTitle('Grafik');
+        $chartSheet->setTitle('Monitoring');
         $chartSheet->fromArray([
             ['Bulan', 'Order', 'OK', 'Scrap', 'Target FY'],
         ], null, 'A1');
@@ -622,17 +600,17 @@ class RecapController extends Controller
         foreach ($chartRows as $data) {
             $chartSheet->fromArray([
                 $data['label'],
-                $data['order'],
-                $data['ok'],
-                $data['scrap'],
-                $data['target'],
+                $data['order'] ?: null,
+                $data['ok'] ?: null,
+                $data['scrap'] ?: null,
+                $data['target'] ?: null,
             ], null, 'A' . $chartRow);
             $chartRow++;
         }
 
         $lastChartRow = max(2, $chartRow - 1);
         $chartSheet->getStyle('A1:E1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $chartSheet->getStyle('A1:E1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF6D28D9');
+        $chartSheet->getStyle('A1:E1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF5E9378');
         $chartSheet->getStyle("A1:E{$lastChartRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFE5E7EB');
         foreach (['A' => 16, 'B' => 12, 'C' => 12, 'D' => 12, 'E' => 14] as $column => $width) {
             $chartSheet->getColumnDimension($column)->setWidth($width);
@@ -644,19 +622,23 @@ class RecapController extends Controller
         }
 
         $categories = [
-            new DataSeriesValues('String', "'Grafik'!\$A\$2:\$A\$$lastChartRow", null, $chartRows->count()),
+            new DataSeriesValues('String', "'Monitoring'!\$A\$2:\$A\$$lastChartRow", null, $chartRows->count()),
         ];
 
         $barLabels = [
-            new DataSeriesValues('String', "'Grafik'!\$B\$1", null, 1),
-            new DataSeriesValues('String', "'Grafik'!\$C\$1", null, 1),
-            new DataSeriesValues('String', "'Grafik'!\$D\$1", null, 1),
+            new DataSeriesValues('String', "'Monitoring'!\$B\$1", null, 1),
+            new DataSeriesValues('String', "'Monitoring'!\$C\$1", null, 1),
+            new DataSeriesValues('String', "'Monitoring'!\$D\$1", null, 1),
         ];
         $barValues = [
-            new DataSeriesValues('Number', "'Grafik'!\$B\$2:\$B\$$lastChartRow", null, $chartRows->count()),
-            new DataSeriesValues('Number', "'Grafik'!\$C\$2:\$C\$$lastChartRow", null, $chartRows->count()),
-            new DataSeriesValues('Number', "'Grafik'!\$D\$2:\$D\$$lastChartRow", null, $chartRows->count()),
+            new DataSeriesValues('Number', "'Monitoring'!\$B\$2:\$B\$$lastChartRow", null, $chartRows->count()),
+            new DataSeriesValues('Number', "'Monitoring'!\$C\$2:\$C\$$lastChartRow", null, $chartRows->count()),
+            new DataSeriesValues('Number', "'Monitoring'!\$D\$2:\$D\$$lastChartRow", null, $chartRows->count()),
         ];
+
+        foreach (['578EF5', '76C457', 'F0A44B'] as $index => $hex) {
+            $barValues[$index]->setFillColor($hex);
+        }
 
         $barSeries = new DataSeries(
             DataSeries::TYPE_BARCHART,
@@ -668,23 +650,27 @@ class RecapController extends Controller
         );
         $barSeries->setPlotDirection(DataSeries::DIRECTION_COL);
 
+        $targetValues = new DataSeriesValues('Number', "'Monitoring'!\$E\$2:\$E\$$lastChartRow", null, $chartRows->count());
+        $targetValues->setLineColorProperties('D75B62');
+        $targetValues->setLineWidth(28575);
+
         $lineSeries = new DataSeries(
             DataSeries::TYPE_LINECHART,
             null,
             [0],
-            [new DataSeriesValues('String', "'Grafik'!\$E\$1", null, 1)],
+            [new DataSeriesValues('String', "'Monitoring'!\$E\$1", null, 1)],
             $categories,
-            [new DataSeriesValues('Number', "'Grafik'!\$E\$2:\$E\$$lastChartRow", null, $chartRows->count())]
+            [$targetValues]
         );
 
         $plotArea = new PlotArea(null, [$barSeries, $lineSeries]);
         $chart = new Chart(
             'repair_box_chart',
-            new Title('Monitoring Repair Box'),
+            new Title('Grafik Order Repair Box  Fiscal Year  — ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', '))),
             new Legend(Legend::POSITION_BOTTOM, null, false),
             $plotArea,
             true,
-            DataSeries::EMPTY_AS_ZERO,
+            DataSeries::EMPTY_AS_GAP,
             new Title('Periode'),
             new Title('Qty')
         );

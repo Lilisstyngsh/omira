@@ -25,6 +25,31 @@
     .actions{margin-top:18px;display:flex;justify-content:flex-end;gap:10px}.btn-reset,.btn-submit{min-height:44px;border-radius:9px;padding:0 16px;font-weight:600;font-size:12px;cursor:pointer}.btn-reset{border:1px solid #94a3b8;background:#fff;color:#334155}.btn-submit{border:1px solid var(--primary);background:var(--primary);color:#fff}.btn-submit:hover:not(:disabled){background:var(--primary-dark)}.btn-submit:disabled{opacity:.45;cursor:not-allowed}
     @media(max-width:1100px){.model-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:700px){.create-wrap{padding:14px}.top-info{grid-template-columns:1fr}.model-picker{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.actions{flex-direction:column-reverse}.btn-reset,.btn-submit{width:100%}}
+    /* Unified Create User table — no model-picker cards or per-model subtotals. */
+    .all-model-table{min-width:980px;table-layout:fixed}
+    .all-model-table th,.all-model-table td{border:1px solid #d1d5db;padding:9px 7px}
+    .all-model-table thead th{background:#f8fafc;text-align:center!important;font-size:11px;letter-spacing:.015em;font-weight:700;color:#243347}
+    .all-model-table td.merged-model{text-align:center!important;vertical-align:middle;font-size:12px;color:#172b22}
+    .all-model-table .product-name{text-align:left;font-size:12px;font-weight:500}
+    
+    .all-model-table tfoot td{font-weight:650;background:#f8fafc;text-align:center}
+    .all-model-table tfoot td:first-child{text-align:left;padding-left:14px}
+    .all-model-table .grand-row td{background:#edf5ef;color:#214d36}
+    .all-model-table .qty-input{width:40px;height:36px;font-size:13px;border-radius:7px}
+    .all-model-table .qty-step{width:27px;height:36px;font-size:20px}
+    .all-model-table .qty-control{gap:2px}
+
+    /* Minimalist Create User improvements */
+    .top-info-item:nth-child(1){background:#edf5ef;border-color:#dbe8de}
+    .top-info-item:nth-child(2){background:#edf4f8;border-color:#dbe6eb}
+    .top-info-item:nth-child(3){background:#f8f3eb;border-color:#eee4d5}
+    .all-model-table{min-width:940px}
+    .all-model-table thead th{position:sticky;z-index:3;background:#f4f7f6;box-shadow:inset 0 -1px 0 #aebdb6}
+    .all-model-table thead tr:first-child th{top:0;height:42px}
+    .all-model-table thead tr:nth-child(2) th{top:42px;height:36px}
+    .all-model-table .product-name{overflow-wrap:anywhere}
+    .qty-table-wrap{max-height:min(68vh,690px);overflow:auto;position:relative;border:1px solid #d1d5db;border-radius:9px}
+    .all-model-table th,.all-model-table td{border-color:#d1d5db}
 </style>
 
 <div class="create-wrap">
@@ -48,96 +73,66 @@
     <form method="POST" action="{{ route('user.orders.store') }}" id="orderForm">
         @csrf
 
-        <div class="section-head">
-            <div><h3>Pilih Model</h3><p>Pilih model yang akan diinput.</p></div>
-        </div>
+        <div class="section-head"><h3>Input Order Repair Box</h3></div>
 
         @if($hasProducts)
-            <div class="model-picker" id="modelPicker">
-                @foreach($models as $model)
-                    <button type="button" class="model-card" data-model-card="{{ $model->id }}" aria-expanded="false">
-                        <span class="model-card-main">
-                            <span class="model-card-title">Model {{ $model->model }}</span>
-                            <span class="model-card-meta">{{ $model->products->count() }} produk</span>
-                        </span>
-                        <span style="display:flex;align-items:center;gap:8px">
-                            <span class="model-card-total" data-card-total="{{ $model->id }}"></span>
-                            <span class="model-card-chevron">›</span>
-                        </span>
-                    </button>
-                @endforeach
-            </div>
-
-            <div class="editor-stack" id="editorStack">
-                @foreach($models as $model)
-                    <section class="model-editor" data-model-editor="{{ $model->id }}" hidden>
-                        <div class="model-editor-head">
-                            <strong>Model {{ $model->model }}</strong>
-                            <span data-editor-meta="{{ $model->id }}">{{ $model->products->count() }} produk</span>
-                        </div>
-                        <div class="qty-table-wrap">
-                            <table class="qty-table">
-                                <thead><tr><th>Produk</th>@foreach($ngCodes as $code)<th>{{ $code }}</th>@endforeach<th>Total</th></tr></thead>
-                                <tbody>
-                                    @foreach($model->products as $product)
-                                        <tr data-product-row="{{ $rowIndex }}" data-model-id="{{ $model->id }}" data-model-name="{{ $model->model }}" data-product-name="{{ $product->name }}">
+            <div class="qty-table-wrap">
+                <table class="qty-table all-model-table" aria-label="Input Jenis NG dan Qty">
+                    <colgroup><col style="width:48px"><col style="width:15%"><col style="width:22%"><col span="4" style="width:14%"></colgroup>
+                    <thead>
+                        <tr><th rowspan="2">NO</th><th rowspan="2">MODEL</th><th rowspan="2">PRODUK</th><th colspan="4">JENIS NG &amp; QTY</th></tr>
+                        <tr>@foreach($ngCodes as $code)<th>{{ $code }}</th>@endforeach</tr>
+                    </thead>
+                    <tbody>
+                        @foreach($models as $model)
+                            @if($model->products->count() > 0)
+                                @foreach($model->products as $product)
+                                    <tr data-product-row="{{ $rowIndex }}" data-model-id="{{ $model->id }}" data-model-name="{{ $model->model }}" data-product-name="{{ $product->name }}">
+                                        @if($loop->first)
+                                            <td rowspan="{{ $model->products->count() }}" class="merged-model">{{ $loop->parent->iteration }}</td>
+                                            <td rowspan="{{ $model->products->count() }}" class="merged-model"><strong>{{ $model->model }}</strong></td>
+                                        @endif
+                                        <td class="product-name">
+                                            {{ $product->name }}
+                                            <input type="hidden" name="items[{{ $rowIndex }}][master_model_id]" value="{{ $model->id }}">
+                                            <input type="hidden" name="items[{{ $rowIndex }}][product_id]" value="{{ $product->id }}">
+                                        </td>
+                                        @foreach($ngCodes as $code)
+                                            @php $ng = $ngMap[$code] ?? null; @endphp
                                             <td>
-                                                <span class="product-name">{{ $product->name }}</span>
-                                                <input type="hidden" name="items[{{ $rowIndex }}][master_model_id]" value="{{ $model->id }}">
-                                                <input type="hidden" name="items[{{ $rowIndex }}][product_id]" value="{{ $product->id }}">
+                                                @if($ng)
+                                                    <div class="qty-control">
+                                                        <button type="button" class="qty-step" data-step="-1" aria-label="Kurangi qty {{ $code }}">−</button>
+                                                        <input type="number" class="qty-input" min="0" step="1" inputmode="numeric" autocomplete="off"
+                                                            data-ng-code="{{ $code }}" data-model-id="{{ $model->id }}" data-row-index="{{ $rowIndex }}"
+                                                            name="items[{{ $rowIndex }}][qty][{{ $ng->id }}]"
+                                                            value="{{ old('items.'.$rowIndex.'.qty.'.$ng->id, '') }}">
+                                                        <button type="button" class="qty-step" data-step="1" aria-label="Tambah qty {{ $code }}">+</button>
+                                                    </div>
+                                                @endif
                                             </td>
-                                            @foreach($ngCodes as $code)
-                                                @php $ng=$ngMap[$code]??null; @endphp
-                                                <td>
-                                                    @if($ng)
-                                                        <div class="qty-control">
-                                                            <button type="button" class="qty-step" data-step="-1" aria-label="Kurangi qty {{ $code }}">−</button>
-                                                            <input type="number" class="qty-input" min="0" step="1" inputmode="numeric" autocomplete="off"
-                                                                data-ng-code="{{ $code }}" data-model-id="{{ $model->id }}" data-row-index="{{ $rowIndex }}"
-                                                                name="items[{{ $rowIndex }}][qty][{{ $ng->id }}]"
-                                                                value="{{ old('items.'.$rowIndex.'.qty.'.$ng->id, '') }}">
-                                                            <button type="button" class="qty-step" data-step="1" aria-label="Tambah qty {{ $code }}">+</button>
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                            @endforeach
-                                            <td class="total-cell" data-product-total="{{ $rowIndex }}"></td>
-                                        </tr>
-                                        @php $rowIndex++; @endphp
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td>Total Model {{ $model->model }}</td>
-                                        @foreach($ngCodes as $code)<td style="text-align:center" data-model-total-ng="{{ $model->id }}:{{ $code }}"></td>@endforeach
-                                        <td class="total-cell" data-model-grand="{{ $model->id }}"></td>
+                                        @endforeach
                                     </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </section>
-                @endforeach
-            </div>
-
-            <div class="review-box">
-                <div class="section-head"><div><h3>Ringkasan Order</h3><p>Hanya produk yang memiliki Qty NG yang ditampilkan.</p></div></div>
-                <div id="reviewEmpty" class="review-empty">Belum ada Qty NG yang diinput.</div>
-                <div class="qty-table-wrap" id="reviewTableWrap" hidden>
-                    <table class="review-table">
-                        <thead><tr><th colspan="2">Produk</th>@foreach($ngCodes as $code)<th>{{ $code }}</th>@endforeach<th>Total</th></tr></thead>
-                        <tbody id="reviewBody"></tbody>
-                        <tfoot>
-                            <tr class="review-grand"><td colspan="2">Total NG</td>@foreach($ngCodes as $code)<td style="text-align:center" data-order-total="{{ $code }}"></td>@endforeach<td></td></tr>
-                            <tr class="review-grand"><td colspan="6">Grand Total</td><td style="text-align:center" id="grandTotal"></td></tr>
-                        </tfoot>
-                    </table>
-                </div>
+                                    @php $rowIndex++; @endphp
+                                @endforeach
+                            @endif
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="subtotal-row"><td colspan="3">SUB TOTAL</td>@foreach($ngCodes as $code)<td data-order-total="{{ $code }}"></td>@endforeach</tr>
+                        <tr class="grand-row"><td colspan="3">GRAND TOTAL</td><td colspan="4" id="grandTotal"></td></tr>
+                    </tfoot>
+                </table>
             </div>
         @else
             <div class="review-empty">Belum ada Model &amp; Produk untuk Line Anda.</div>
         @endif
 
-        <div class="field"><label>Keterangan <span style="font-weight:400;color:#64748b">(opsional)</span></label><textarea name="description" placeholder="Tambahkan keterangan jika diperlukan...">{{ old('description') }}</textarea></div>
+        <div class="field">
+            <label for="orderDescription">Catatan Umum</label>
+            <textarea id="orderDescription" name="description" rows="3" maxlength="1000" placeholder="Catatan untuk seluruh order (opsional)">{{ old('description') }}</textarea>
+        </div>
+
         <div class="form-notice" id="formNotice">Masukkan minimal satu Quantity NG sebelum mengirim order.</div>
         <div class="actions">
             <button type="button" class="btn-reset" id="resetButton">Kosongkan Form</button>
@@ -150,34 +145,11 @@
 (function(){
     const codes=['P','H','C','S'];
     const form=document.getElementById('orderForm');
-    const editorStack=document.getElementById('editorStack');
     const submitButton=document.getElementById('submitButton');
     const notice=document.getElementById('formNotice');
-    const reviewBody=document.getElementById('reviewBody');
-    const reviewWrap=document.getElementById('reviewTableWrap');
-    const reviewEmpty=document.getElementById('reviewEmpty');
 
     function valueOf(input){const n=parseInt(input.value,10);return Number.isFinite(n)&&n>0?n:0}
     function display(el,n,suffix=''){if(el)el.textContent=n>0?`${n}${suffix}`:''}
-
-    function setEditor(modelId,open,bringToTop=true){
-        const card=document.querySelector(`[data-model-card="${modelId}"]`);
-        const editor=document.querySelector(`[data-model-editor="${modelId}"]`);
-        if(!card||!editor)return;
-        card.classList.toggle('is-open',open); card.setAttribute('aria-expanded',open?'true':'false'); editor.hidden=!open;
-        if(open&&bringToTop&&editorStack) editorStack.prepend(editor);
-    }
-
-    document.querySelectorAll('[data-model-card]').forEach(card=>{
-        card.addEventListener('click',()=>{
-            const id=card.dataset.modelCard;
-            const isOpen=card.getAttribute('aria-expanded')==='true';
-            document.querySelectorAll('[data-model-card]').forEach(other=>{
-                if(other.dataset.modelCard!==id)setEditor(other.dataset.modelCard,false,false);
-            });
-            setEditor(id,!isOpen,true);
-        });
-    });
 
     let holdTimer=null, repeatTimer=null;
     function stopHold(){clearTimeout(holdTimer);clearInterval(repeatTimer);holdTimer=null;repeatTimer=null}
@@ -193,40 +165,21 @@
     });
 
     function calculate(){
-        const orderTotals={P:0,H:0,C:0,S:0}; const modelTotals={}; const rows=[];
-        document.querySelectorAll('[data-product-row]').forEach(row=>{
-            const modelId=row.dataset.modelId, modelName=row.dataset.modelName, productName=row.dataset.productName;
-            const vals={P:0,H:0,C:0,S:0};
-            row.querySelectorAll('.qty-input').forEach(input=>{const code=input.dataset.ngCode;const n=valueOf(input);vals[code]=n;orderTotals[code]+=n;if(!modelTotals[modelId])modelTotals[modelId]={name:modelName,P:0,H:0,C:0,S:0,total:0,filled:0};modelTotals[modelId][code]+=n});
-            const total=codes.reduce((sum,c)=>sum+vals[c],0); display(document.querySelector(`[data-product-total="${row.dataset.productRow}"]`),total);
-            if(total>0){rows.push({modelId,modelName,productName,vals,total});modelTotals[modelId].filled++}
-            if(modelTotals[modelId]) modelTotals[modelId].total += total;
+        const orderTotals={P:0,H:0,C:0,S:0};
+        document.querySelectorAll('[data-product-row] .qty-input').forEach(input=>{
+            const code=input.dataset.ngCode;
+            if(Object.prototype.hasOwnProperty.call(orderTotals,code))orderTotals[code]+=valueOf(input);
         });
-        Object.keys(modelTotals).forEach(id=>{
-            const m=modelTotals[id]; codes.forEach(c=>display(document.querySelector(`[data-model-total-ng="${id}:${c}"]`),m[c])); display(document.querySelector(`[data-model-grand="${id}"]`),m.total); display(document.querySelector(`[data-card-total="${id}"]`),m.total,' NG');
-            const meta=document.querySelector(`[data-editor-meta="${id}"]`); if(meta)meta.textContent=m.filled>0?`${m.filled} produk terisi · ${m.total} NG`:`${document.querySelectorAll(`[data-product-row][data-model-id="${id}"]`).length} produk`;
-        });
-        document.querySelectorAll('[data-model-card]').forEach(card=>{if(!modelTotals[card.dataset.modelCard]){const t=card.querySelector('[data-card-total]');if(t)t.textContent=''}});
-        const grand=codes.reduce((sum,c)=>sum+orderTotals[c],0); codes.forEach(c=>display(document.querySelector(`[data-order-total="${c}"]`),orderTotals[c])); display(document.getElementById('grandTotal'),grand,' NG');
-        if(reviewBody){
-            reviewBody.innerHTML='';
-            const grouped={};
-            rows.forEach(r=>{if(!grouped[r.modelId])grouped[r.modelId]=[];grouped[r.modelId].push(r)});
-            Object.keys(grouped).forEach(modelId=>{
-                const group=grouped[modelId]; const m=modelTotals[modelId];
-                const head=document.createElement('tr'); head.className='review-model'; head.innerHTML=`<td colspan="7">Model ${escapeHtml(m.name)}</td>`; reviewBody.appendChild(head);
-                group.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td colspan="2">${escapeHtml(r.productName)}</td>${codes.map(c=>`<td style="text-align:center">${r.vals[c]>0?r.vals[c]:''}</td>`).join('')}<td style="text-align:center;font-weight:550">${r.total}</td>`;reviewBody.appendChild(tr)});
-                const totalRow=document.createElement('tr'); totalRow.className='review-model-total'; totalRow.innerHTML=`<td colspan="2">Total</td>${codes.map(c=>`<td style="text-align:center">${m[c]>0?m[c]:''}</td>`).join('')}<td style="text-align:center">${m.total>0?m.total:''}</td>`; reviewBody.appendChild(totalRow);
-            });
-        }
-        if(reviewWrap)reviewWrap.hidden=grand<=0;if(reviewEmpty)reviewEmpty.hidden=grand>0;if(submitButton){submitButton.disabled=grand<=0;submitButton.textContent=grand>0?`Kirim Order Repair · ${grand} NG`:'Kirim Order Repair'} if(grand>0&&notice)notice.classList.remove('show');
+        const grand=codes.reduce((sum,c)=>sum+orderTotals[c],0);
+        codes.forEach(code=>display(document.querySelector(`[data-order-total="${code}"]`),orderTotals[code]));
+        display(document.getElementById('grandTotal'),grand);
+        if(submitButton){submitButton.disabled=grand<=0;submitButton.textContent=grand>0?`Kirim Order Repair · ${grand} NG`:'Kirim Order Repair';}
+        if(grand>0&&notice)notice.classList.remove('show');
     }
-    function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch]))}
     document.querySelectorAll('.qty-input').forEach(input=>input.addEventListener('input',()=>{if(input.value!==''&&parseInt(input.value,10)<0)input.value='';calculate()}));
-    document.getElementById('resetButton')?.addEventListener('click',()=>{document.querySelectorAll('.qty-input').forEach(i=>i.value='');document.querySelectorAll('[data-model-card]').forEach(c=>setEditor(c.dataset.modelCard,false,false));calculate()});
+    document.getElementById('resetButton')?.addEventListener('click',()=>{document.querySelectorAll('.qty-input').forEach(i=>i.value='');document.getElementById('orderDescription').value='';calculate()});
     form?.addEventListener('submit',e=>{const total=Array.from(document.querySelectorAll('.qty-input')).reduce((s,i)=>s+valueOf(i),0);if(total<=0){e.preventDefault();notice?.classList.add('show')}});
     calculate();
-    const oldCard=Array.from(document.querySelectorAll('[data-model-card]')).find(card=>{const id=card.dataset.modelCard;return Array.from(document.querySelectorAll(`[data-product-row][data-model-id="${id}"] .qty-input`)).some(i=>valueOf(i)>0)});if(oldCard)setEditor(oldCard.dataset.modelCard,true,true);
 })();
 </script>
 @endsection

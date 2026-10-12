@@ -658,6 +658,7 @@
                             <i class="fa-solid fa-key profile-input-icon"></i>
 
                             <input id="new_password" type="password" name="password" placeholder="Minimal 8 karakter">
+                            <button type="button" class="omira-password-eye" data-for="new_password" aria-label="Tampilkan password" aria-pressed="false"><i class="fa-regular fa-eye" aria-hidden="true"></i></button>
 
                         </div>
 
@@ -683,6 +684,7 @@
 
                             <input id="password_confirmation" type="password" name="password_confirmation"
                                 placeholder="Ulangi password baru">
+                            <button type="button" class="omira-password-eye" data-for="password_confirmation" aria-label="Tampilkan password" aria-pressed="false"><i class="fa-regular fa-eye" aria-hidden="true"></i></button>
 
                         </div>
 
@@ -710,5 +712,14 @@
         </form>
 
     </div>
+
+
+<style>
+.profile-input-wrap:has(.omira-password-eye) input{padding-right:48px}
+.omira-password-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:transparent;color:#526559;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:15px}
+.omira-password-eye:hover,.omira-password-eye:focus-visible{background:#eaf4ed;outline-offset:2px}
+@media(pointer:coarse){.omira-password-eye{width:44px;height:44px}}
+</style>
+<script>document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.omira-password-eye').forEach(button=>button.addEventListener('click',()=>{const input=document.getElementById(button.dataset.for);if(!input)return;const show=input.type==='password';input.type=show?'text':'password';button.setAttribute('aria-pressed',String(show));button.setAttribute('aria-label',show?'Sembunyikan password':'Tampilkan password');button.querySelector('i').className=show?'fa-regular fa-eye-slash':'fa-regular fa-eye';}));});</script>
 
 @endsection

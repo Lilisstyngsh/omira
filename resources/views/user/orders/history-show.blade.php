@@ -5,6 +5,18 @@
 
 @section('content')
 <style>
+/* OMIRA tablet-first detail: predictable spacing and touch-size export actions. */
+.omira-detail-export-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.omira-detail-export-head h3{margin:0!important}
+.omira-detail-export-actions{display:flex;gap:8px;flex-wrap:wrap}
+.omira-detail-export-actions a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:8px 14px;border:1px solid;border-radius:9px;text-decoration:none!important;font-size:12px;font-weight:700;white-space:nowrap}
+.omira-detail-export-actions .pdf{background:#fff1f1;border-color:#f2cccc;color:#ad454d!important}
+.omira-detail-export-actions .excel{background:#edf8f0;border-color:#cbe9d1;color:#247447!important}
+.omira-detail-export-actions .pdf:hover{background:#ffe7e7}
+.omira-detail-export-actions .excel:hover{background:#dff2e5}
+.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:20px!important}
+@media(max-width:768px){.omira-detail-export-actions a{min-height:44px}.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px!important}}
+
 .omira-export-action{display:inline-flex;align-items:center;justify-content:center;padding:11px 16px;border:1px solid #b7d2bf;background:#eff7f1;border-radius:9px;color:#2b6046!important;font-size:12px;font-weight:700;text-decoration:none}.omira-export-action:hover{background:#dfefe4}
 
     .history-detail-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.history-detail-head h2{margin:0;font-size:20px;font-weight:700;color:#0f172a}.history-detail-head p{margin:3px 0 0;font-size:11px;color:#64748b}
@@ -27,8 +39,6 @@
 <div class="history-detail-head">
     <div><h2>{{ $order->order_number }}</h2><p>History</p></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <a href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'pdf']) }}" class="omira-export-action">PDF</a>
-    <a href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'excel']) }}" class="omira-export-action">Excel</a>
     <a href="{{ route('user.orders.history') }}" class="btn-history-back">← Kembali ke History</a>
     </div>
 </div>
@@ -91,7 +101,10 @@
 @include('partials.repair-order-information', ['order' => $order, 'context' => 'user-history'])
 
 <div class="history-card">
-    <h3>Detail Repair</h3>
+    <div class="omira-detail-export-head"><h3>Detail Repair</h3><div class="omira-detail-export-actions">
+    <a class="pdf" href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'pdf']) }}"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> PDF</a>
+    <a class="excel" href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'excel']) }}"><i class="fa-regular fa-file-excel" aria-hidden="true"></i> Excel</a>
+</div></div>
     @include('partials.repair-order-readonly-table', ['order' => $order, 'showAfter' => true, 'showProductNote' => true])
 </div>
 

@@ -80,17 +80,11 @@
                         @if($showProductNote)<td class="note-cell">{{ $productNote ?: '-' }}</td>@endif
                     </tr>
                 @endforeach
-                <tr class="model-total-row">
-                    <td colspan="2">Total</td>
-                    @foreach($ngCodes as $code)<td class="cell-center">{{ $modelBeforeTotals[$code] > 0 ? $modelBeforeTotals[$code] : '' }}</td>@endforeach
-                    @if($showAfter) @foreach($ngCodes as $code)<td class="cell-center">{{ $modelAfterTotals[$code] > 0 ? $modelAfterTotals[$code] : '' }}</td>@endforeach @endif
-                    @if($showProductNote)<td></td>@endif
-                </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="2">Total NG</td>
+                <td colspan="2">Sub Total</td>
                 @foreach($ngCodes as $code)<td class="cell-center">{{ $beforeTotals[$code] > 0 ? $beforeTotals[$code] : '' }}</td>@endforeach
                 @if($showAfter) @foreach($ngCodes as $code)<td class="cell-center">{{ $afterTotals[$code] > 0 ? $afterTotals[$code] : '' }}</td>@endforeach @endif
                 @if($showProductNote)<td></td>@endif

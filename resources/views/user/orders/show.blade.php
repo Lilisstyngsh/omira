@@ -16,6 +16,18 @@
     @endphp
 
     <style>
+/* OMIRA tablet-first detail: predictable spacing and touch-size export actions. */
+.omira-detail-export-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.omira-detail-export-head h3{margin:0!important}
+.omira-detail-export-actions{display:flex;gap:8px;flex-wrap:wrap}
+.omira-detail-export-actions a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:8px 14px;border:1px solid;border-radius:9px;text-decoration:none!important;font-size:12px;font-weight:700;white-space:nowrap}
+.omira-detail-export-actions .pdf{background:#fff1f1;border-color:#f2cccc;color:#ad454d!important}
+.omira-detail-export-actions .excel{background:#edf8f0;border-color:#cbe9d1;color:#247447!important}
+.omira-detail-export-actions .pdf:hover{background:#ffe7e7}
+.omira-detail-export-actions .excel:hover{background:#dff2e5}
+.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:20px!important}
+@media(max-width:768px){.omira-detail-export-actions a{min-height:44px}.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px!important}}
+
         .repair-head {
             display: flex;
             align-items: flex-start;
@@ -921,6 +933,12 @@
                     Hasil Repair &amp; Serah Terima
                 @endif
             </h3>
+            @if($order->status === 'confirmed')
+                <div class="omira-detail-export-head"><div class="omira-detail-export-actions">
+    <a class="pdf" href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'pdf']) }}"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> PDF</a>
+    <a class="excel" href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'excel']) }}"><i class="fa-regular fa-file-excel" aria-hidden="true"></i> Excel</a>
+</div></div>
+            @endif
             @include('partials.repair-order-readonly-table', [
                 'order' => $order,
                 'showAfter' => $showAfter,
@@ -952,6 +970,18 @@
             </button>
         </div>
 
+
+<style>
+#mismatchDialog{max-width:460px;width:calc(100% - 28px);border:1px solid #e2eae4;border-radius:16px;box-shadow:0 18px 48px rgba(18,42,28,.14)}
+#mismatchDialog .mismatch-dialog-body{padding:22px}
+#mismatchDialog .mismatch-field{border:0;padding:0;background:transparent}
+#mismatchDialog .mismatch-field textarea{border:1px solid #ceded2;min-height:108px;border-radius:10px;resize:vertical}
+#mismatchDialog .mismatch-field textarea:focus{border-color:#5f9278;box-shadow:0 0 0 3px rgba(95,146,120,.14)}
+#mismatchDialog .repair-dialog-head{margin-bottom:18px}
+#mismatchDialog .repair-dialog-actions{margin-top:20px}
+#mismatchDialog .repair-dialog-actions button{min-height:44px}
+@media(max-width:600px){#mismatchDialog .mismatch-dialog-body{padding:18px}}
+</style>
         <dialog id="mismatchDialog" class="repair-dialog">
             <form method="POST" action="{{ route('user.orders.requestRevision', $order) }}" class="repair-dialog-body mismatch-dialog-body" id="mismatchForm" novalidate>
                 @csrf
@@ -959,10 +989,9 @@
                     <h4>Barang Tidak Sesuai</h4>
                     <button type="button" class="repair-dialog-close" aria-label="Tutup" onclick="document.getElementById('mismatchDialog').close()">×</button>
                 </div>
-                <p>Jelaskan ketidaksesuaian barang yang diterima untuk Order <strong>{{ $order->order_number }}</strong>.</p>
                 <div class="mismatch-field" id="mismatchField">
                     <label for="mismatchReason">Alasan Ketidaksesuaian</label>
-                    <textarea id="mismatchReason" name="reason" maxlength="1000" placeholder="Contoh: Qty Handle fisik 8, di sistem tertulis 10.">{{ old('reason') }}</textarea>
+                    <textarea id="mismatchReason" name="reason" maxlength="1000" placeholder="Jelaskan ketidaksesuaian barang...">{{ old('reason') }}</textarea>
                     <div class="mismatch-error">Alasan ketidaksesuaian wajib diisi.</div>
                 </div>
                 <div class="repair-dialog-actions">

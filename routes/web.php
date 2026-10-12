@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OmdOrderController;
+use App\Http\Controllers\OmdHistoryExportController;
 use App\Http\Controllers\UserOrderController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\TpsRepairController;
@@ -399,6 +400,9 @@ Route::middleware('auth')->group(function () {
                 '/orders',
                 [OmdOrderController::class, 'index']
             )->name('orders.index');
+
+            Route::get('/orders/history/{order}/export/{format}', [OmdHistoryExportController::class, 'exportHistory'])
+                ->where('format', 'pdf|excel')->name('orders.history.export');
 
             Route::get(
                 '/orders/history/{order}',
