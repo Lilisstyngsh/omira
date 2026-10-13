@@ -393,10 +393,6 @@
                     Daftar Monitoring Repair Box
                 </h3>
 
-                <p>
-                    Pantau status order dari submit User hingga serah terima.
-                </p>
-
             </div>
         </div>
 

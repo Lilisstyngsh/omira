@@ -6,6 +6,7 @@ use App\Models\Line;
 use App\Models\MasterModel;
 use App\Models\NgType;
 use App\Models\RepairOrder;
+use App\Services\UserScrapLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -365,8 +366,11 @@ class UserOrderController extends Controller
             $line,
             $preparedItems,
             $totalQuantity,
+            $ngTypes,
             &$order
         ) {
+            // Scrap Limit is monitoring-only: orders may exceed the master limit.
+            // Confirmed Scrap still updates the per-user history in confirm().
 
             $year = now()->year;
 
@@ -550,20 +554,24 @@ class UserOrderController extends Controller
         );
 
 
-        $order->update([
-            'status' => 'confirmed',
-        ]);
-
-
-        $order->confirmation()->updateOrCreate(
-            [],
-            [
-                'confirmed_by_user_id' => $request->user()->id,
-
+        DB::transaction(function () use ($request, $order) {
+            $user = \App\Models\User::query()->lockForUpdate()->findOrFail($request->user()->id);
+            $order = RepairOrder::query()->lockForUpdate()->findOrFail($order->id);
+            abort_unless($order->status === 'completed', 422, 'Order belum selesai diproses.');
+            $order->update(['status' => 'confirmed']);
+            $order->confirmation()->updateOrCreate([], [
+                'confirmed_by_user_id' => $user->id,
                 'confirmed_at' => now(),
-            ]
-        );
-
+            ]);
+            $productIds = $order->items()->whereHas('ngType', fn ($q) => $q->where('code', 'S'))
+                ->where('after_qty', '>', 0)->get(['product_id', 'after_product_id'])
+                ->map(fn ($item) => (int) ($item->after_product_id ?: $item->product_id))
+                ->filter()->unique();
+            $limitService = app(UserScrapLimitService::class);
+            foreach ($productIds as $productId) {
+                $limitService->sync($user, $productId);
+            }
+        });
 
         return redirect()
             ->route('user.orders.index')

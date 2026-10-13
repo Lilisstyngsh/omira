@@ -52,12 +52,12 @@ class DashboardController extends Controller
 
         $monthlyMetrics = collect();
 
-        for ($calendarMonth = 1; $calendarMonth <= $month; $calendarMonth++) {
-            $metrics = $this->metricsForMonth(
-                $year,
-                $calendarMonth,
-                $lineId
-            );
+        for ($calendarMonth = 1; $calendarMonth <= 12; $calendarMonth++) {
+            // Selalu kirim Januari-Desember untuk visual; bulan depan belum memiliki realisasi.
+            $isFuture = $year > now()->year || ($year === now()->year && $calendarMonth > now()->month);
+            $metrics = $isFuture
+                ? ['order' => 0, 'ok' => 0, 'scrap' => 0]
+                : $this->metricsForMonth($year, $calendarMonth, $lineId);
 
             $monthlyMetrics->push([
                 'month' => $calendarMonth,
@@ -68,7 +68,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        $selectedMetrics = $monthlyMetrics->last() ?? [
+        $selectedMetrics = $monthlyMetrics->firstWhere('month', $month) ?? [
             'order' => 0,
             'ok' => 0,
             'scrap' => 0,
@@ -103,7 +103,7 @@ class DashboardController extends Controller
             ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
             ->where('year', $year)
             ->where('scope_key', $globalScopeKey)
-            ->whereBetween('month', [1, $month])
+            ->whereBetween('month', [1, 12])
             ->orderBy('month')
             ->get()
             ->keyBy(fn ($row) => (int) $row->month);

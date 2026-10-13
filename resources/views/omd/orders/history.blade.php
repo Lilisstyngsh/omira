@@ -1335,6 +1335,17 @@
         .omira-recap-btn-pdf{color:#b42318;background:#fff1f2;border-color:#fecdd3}
         .omira-recap-btn-excel{color:#166534;background:#ecfdf3;border-color:#bbf7d0}
 
+
+/* Calendar compact: narrower outer footprint without shrinking touch targets excessively. */
+.history-filter-field{min-width:0;width:160px;max-width:100%}
+.calendar-popup{width:min(292px,calc(100vw - 32px))!important;padding:12px!important;border-radius:15px!important}
+.calendar-header{margin-bottom:9px!important}
+.calendar-header strong{font-size:14px!important}
+.calendar-header button,.calendar-nav{width:38px!important;height:38px!important;font-size:16px!important}
+.calendar-week,.calendar-days{gap:2px!important}
+.calendar-week span{font-size:11px!important;padding:4px 0!important}
+.calendar-day{height:36px!important;min-height:36px!important;font-size:12px!important}
+@media(max-width:600px){.history-filter-field{width:100%;max-width:none}.calendar-popup{max-width:calc(100vw - 32px)!important}}
 </style>
 
     <div class="page-card">
@@ -1557,9 +1568,9 @@
             <a class="omira-recap-btn omira-recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
                 <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF
             </a>
-            <a class="omira-recap-btn omira-recap-btn-excel" href="{{ route('omd.recap.excel', $exportParams) }}">
+            <button type="button" class="omira-recap-btn omira-recap-btn-excel" data-export-form="omiraChartExport">
                 <i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel
-            </a>
+            </button>
         </div>
 
         <div class="history-toolbar">
@@ -2255,4 +2266,20 @@
 
 
 
+
+<form id="omiraChartExport" method="POST" action="{{ route('omd.recap.excel') }}" data-preview-url="{{ route('omd.recap.chart-preview') }}" style="display:none">
+  @csrf
+  @foreach ($exportParams as $key => $value)
+    @if (is_array($value))
+      @foreach ($value as $item)
+        <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+      @endforeach
+    @else
+      <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+    @endif
+  @endforeach
+  <input type="hidden" name="chart_image" value="">
+</form>
+<script src="{{ asset('vendor/html2canvas.min.js') }}"></script>
+<script src="{{ asset('js/omira-excel-capture.js') }}"></script>
 @endsection

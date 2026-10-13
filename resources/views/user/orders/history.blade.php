@@ -811,6 +811,17 @@
 .history-filter-btn-primary{background:#5f947a!important;color:#fff!important;border:1px solid #5f947a!important;box-shadow:none!important}
 .history-filter-btn-primary:hover{background:#4c8167!important;border-color:#4c8167!important}
 
+
+/* Calendar compact: narrower outer footprint without shrinking touch targets excessively. */
+.history-filter-field{min-width:0;width:160px;max-width:100%}
+.calendar-popup{width:min(292px,calc(100vw - 32px))!important;padding:12px!important;border-radius:15px!important}
+.calendar-header{margin-bottom:9px!important}
+.calendar-header strong{font-size:14px!important}
+.calendar-header button,.calendar-nav{width:38px!important;height:38px!important;font-size:16px!important}
+.calendar-week,.calendar-days{gap:2px!important}
+.calendar-week span{font-size:11px!important;padding:4px 0!important}
+.calendar-day{height:36px!important;min-height:36px!important;font-size:12px!important}
+@media(max-width:600px){.history-filter-field{width:100%;max-width:none}.calendar-popup{max-width:calc(100vw - 32px)!important}}
 </style>
 
 
@@ -922,17 +933,6 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
 
             <div class="history-toolbar-query">
-                <div class="history-line-filter history-line-filter-inline">
-                    <label for="history_line_id" class="sr-only">Filter Line</label>
-                    <select id="history_line_id" name="line_id" onchange="this.form.submit()">
-                        <option value="">Semua Line</option>
-                        @foreach ($lines as $line)
-                        <option value="{{ $line->id }}" @selected((string) request('line_id')===(string) $line->id)>
-                            {{ $line->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
 
                 <div class="history-search">
 
@@ -1146,7 +1146,6 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
                     '</div>' +
                     '<div class="calendar-days"></div>' +
                     '<div class="calendar-footer">' +
-                    '<button type="button" class="calendar-reset">Reset</button>' +
                     '</div>';
 
                 var days = popup.querySelector('.calendar-days');

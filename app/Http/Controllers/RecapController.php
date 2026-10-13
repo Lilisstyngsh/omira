@@ -10,17 +10,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Chart\Chart;
-use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
-use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
-use PhpOffice\PhpSpreadsheet\Chart\Legend;
-use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
-use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class RecapController extends Controller
 {
@@ -47,6 +42,84 @@ class RecapController extends Controller
             'lines',
             'selectedLineIds'
         ));
+    }
+
+    /** The dashboard controller is the single source of monitoring metrics. */
+    private function dashboardChartData(Carbon $endDate, array $lineIds): array
+    {
+        $dashboard = app(DashboardController::class);
+        $params = ['year' => $endDate->year, 'month' => $endDate->month];
+        $selectedLines = array_values(array_unique(array_map('intval', $lineIds)));
+        $base = $dashboard->index(Request::create('/dashboard', 'GET', $params))->getData();
+
+        // Dashboard supports one Line. For multiple Line selections, combine
+        // the respective dashboard series. Do not use global snapshots here.
+        if (count($selectedLines) > 1) {
+            $order = array_fill(0, $endDate->month, 0);
+            $ok = $order;
+            $scrap = $order;
+            foreach ($selectedLines as $id) {
+                $data = $dashboard->index(Request::create('/dashboard', 'GET', $params + ['line_id' => $id]))->getData();
+                if ((int) ($data['lineId'] ?? 0) !== $id) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['line_ids' => 'Line tidak aktif atau tidak valid.']);
+                }
+                foreach ($order as $i => $_) {
+                    $order[$i] += (int) ($data['orderSeries'][$i] ?? 0);
+                    $ok[$i] += (int) ($data['finishSeries'][$i] ?? 0);
+                    $scrap[$i] += (int) ($data['scrapSeries'][$i] ?? 0);
+                }
+            }
+            $base['orderSeries'] = collect($order);
+            $base['finishSeries'] = collect($ok);
+            $base['scrapSeries'] = collect($scrap);
+            $max = max(1, max($order), max($ok), max($scrap), (int) $base['target']);
+            $base['chartMax'] = $this->chartScaleMaximum((int) ceil($max * 1.15));
+        } elseif (count($selectedLines) === 1) {
+            $base = $dashboard->index(Request::create('/dashboard', 'GET', $params + ['line_id' => $selectedLines[0]]))->getData();
+            if ((int) ($base['lineId'] ?? 0) !== $selectedLines[0]) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['line_ids' => 'Line tidak aktif atau tidak valid.']);
+            }
+        }
+
+        return $base;
+    }
+
+    private function chartScaleMaximum(int $value): int
+    {
+        if ($value <= 10) return 10;
+        $step = match (true) {
+            $value <= 100 => 10,
+            $value <= 500 => 25,
+            $value <= 1000 => 50,
+            $value <= 5000 => 100,
+            $value <= 10000 => 250,
+            default => 500,
+        };
+        return (int) (ceil($value / $step) * $step);
+    }
+
+    private function chartRowsFromDashboard(array $data): Collection
+    {
+        $rows = collect();
+        foreach ($data['months'] as $index => $month) {
+            $rows->push([
+                'label' => (string) $month,
+                'order' => (int) ($data['orderSeries'][$index] ?? 0),
+                'ok' => (int) ($data['finishSeries'][$index] ?? 0),
+                'scrap' => (int) ($data['scrapSeries'][$index] ?? 0),
+                'target' => (int) $data['target'],
+            ]);
+        }
+        return $rows;
+    }
+
+    public function chartPreview(Request $request)
+    {
+        [, $end] = $this->resolvePeriod($request);
+        $ids = $this->resolveLineIds($request);
+        $data = $this->dashboardChartData($end, $ids);
+        // Render the EXACT Dashboard Blade and capture its existing chart-card.
+        return view('omd.dashboard.index', $data);
     }
 
     public function exportPdf(Request $request)
@@ -153,10 +226,13 @@ class RecapController extends Controller
         [$startDate, $endDate] = $this->resolvePeriod($request);
         $selectedLineIds = $this->resolveLineIds($request);
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
-        $chartRows = $this->monthlyChartData($startDate, $endDate, $selectedLineIds);
+        $chartData = $this->dashboardChartData($endDate, $selectedLineIds);
+        $chartRows = $this->chartRowsFromDashboard($chartData);
+        $chartImage = $this->validateChartImage($request);
 
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);
+        $temporaryChartPath = null;
 
         $cursor = $startDate->copy()->startOfMonth();
         $lastMonth = $endDate->copy()->startOfMonth();
@@ -178,6 +254,20 @@ class RecapController extends Controller
                 $selectedLineNames
             );
             $createdSheets++;
+
+            if ($createdSheets === 1) {
+                $monitoringSheet = $spreadsheet->createSheet();
+                $monitoringSheet->setTitle('Monitoring');
+                $temporaryChartPath = $this->buildMonitoringSheet(
+                    $monitoringSheet,
+                    $chartRows,
+                    $chartImage,
+                    $selectedLineNames,
+                    $startDate,
+                    $endDate
+                );
+            }
+
             $cursor->addMonth();
         }
 
@@ -191,9 +281,18 @@ class RecapController extends Controller
                 $endDate,
                 $selectedLineNames
             );
+            $monitoringSheet = $spreadsheet->createSheet();
+            $monitoringSheet->setTitle('Monitoring');
+            $temporaryChartPath = $this->buildMonitoringSheet(
+                $monitoringSheet,
+                $chartRows,
+                $chartImage,
+                $selectedLineNames,
+                $startDate,
+                $endDate
+            );
         }
 
-        $this->buildChartSheet($spreadsheet, $chartRows, $selectedLineNames);
         $spreadsheet->setActiveSheetIndex(0);
 
         $filename = sprintf(
@@ -207,8 +306,11 @@ class RecapController extends Controller
         @unlink($tempPath);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->setIncludeCharts(true);
-        $writer->save($xlsxPath);
+        try {
+            $writer->save($xlsxPath);
+        } finally {
+            if ($temporaryChartPath && is_file($temporaryChartPath)) @unlink($temporaryChartPath);
+        }
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
 
@@ -588,95 +690,88 @@ class RecapController extends Controller
         $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
     }
 
-    private function buildChartSheet(Spreadsheet $spreadsheet, Collection $chartRows, Collection $selectedLineNames): void
+    private function validateChartImage(Request $request): string
     {
-        $chartSheet = $spreadsheet->createSheet();
-        $chartSheet->setTitle('Monitoring');
-        $chartSheet->fromArray([
-            ['Bulan', 'Order', 'OK', 'Scrap', 'Target FY'],
-        ], null, 'A1');
+        $raw = $request->validate(['chart_image' => ['required', 'string', 'max:12000000']])['chart_image'];
+        if (!str_starts_with($raw, 'data:image/png;base64,')) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['chart_image' => 'Format gambar grafik tidak valid.']);
+        }
+        $bytes = base64_decode(substr($raw, strlen('data:image/png;base64,')), true);
+        if ($bytes === false || strlen($bytes) > 7500000 || substr($bytes, 0, 8) !== "\x89PNG\r\n\x1a\n") {
+            throw \Illuminate\Validation\ValidationException::withMessages(['chart_image' => 'Gambar grafik PNG tidak valid atau terlalu besar.']);
+        }
+        return $bytes;
+    }
 
-        $chartRow = 2;
-        foreach ($chartRows as $data) {
-            $chartSheet->fromArray([
-                $data['label'],
-                $data['order'] ?: null,
-                $data['ok'] ?: null,
-                $data['scrap'] ?: null,
-                $data['target'] ?: null,
-            ], null, 'A' . $chartRow);
-            $chartRow++;
+    private function buildMonitoringSheet($sheet, Collection $rows, string $image, Collection $selectedLineNames, Carbon $start, Carbon $end): string
+    {
+        $sheet->mergeCells('A1:Q1');
+        $sheet->setCellValue('A1', 'DATA MONITORING & GRAFIK REPAIR BOX ' . $end->year);
+        $sheet->mergeCells('A2:Q2');
+        $sheet->setCellValue('A2', 'Line: ' . $selectedLineNames->implode(', '));
+        $sheet->mergeCells('A3:Q3');
+        $sheet->setCellValue('A3', 'Visual Dashboard: Januari - ' . $end->locale('id')->translatedFormat('F Y'));
+        $sheet->mergeCells('A4:Q4');
+        $sheet->setCellValue('A4', 'Periode rekap detail: ' . $start->format('d/m/Y') . ' - ' . $end->format('d/m/Y'));
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(15);
+        $sheet->getStyle('A2:A4')->getFont()->setSize(10);
+
+        $sheet->fromArray(['Bulan', 'Order', 'OK', 'Scrap', 'Target FY'], null, 'A6');
+        $sheet->getStyle('A6:E6')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A6:E6')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF5F9278');
+
+        $rowIndex = 7;
+        foreach ($rows as $row) {
+            $sheet->fromArray([
+                (string) $row['label'],
+                (int) $row['order'],
+                (int) $row['ok'],
+                (int) $row['scrap'],
+                (int) $row['target'],
+            ], null, 'A' . $rowIndex);
+            $rowIndex++;
         }
 
-        $lastChartRow = max(2, $chartRow - 1);
-        $chartSheet->getStyle('A1:E1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $chartSheet->getStyle('A1:E1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF5E9378');
-        $chartSheet->getStyle("A1:E{$lastChartRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFE5E7EB');
-        foreach (['A' => 16, 'B' => 12, 'C' => 12, 'D' => 12, 'E' => 14] as $column => $width) {
-            $chartSheet->getColumnDimension($column)->setWidth($width);
+        $lastDataRow = max(6, $rowIndex - 1);
+        $sheet->getStyle('A6:E' . $lastDataRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFD8DEE8');
+        $sheet->getStyle('A6:E' . $lastDataRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A7:E' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A7:A' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        foreach (['A' => 18, 'B' => 14, 'C' => 14, 'D' => 14, 'E' => 16] as $column => $width) {
+            $sheet->getColumnDimension($column)->setWidth($width);
+        }
+        foreach (range('F', 'Q') as $column) {
+            $sheet->getColumnDimension($column)->setWidth(11);
         }
 
-        if ($chartRows->isEmpty()) {
-            $chartSheet->setCellValue('A3', 'Tidak ada data confirmed pada periode yang dipilih.');
-            return;
-        }
+        $chartTopRow = $lastDataRow + 3;
+        $sheet->mergeCells("A{$chartTopRow}:Q{$chartTopRow}");
+        $sheet->setCellValue("A{$chartTopRow}", 'Grafik Monitoring Dashboard');
+        $sheet->getStyle("A{$chartTopRow}")->getFont()->setBold(true)->setSize(12);
 
-        $categories = [
-            new DataSeriesValues('String', "'Monitoring'!\$A\$2:\$A\$$lastChartRow", null, $chartRows->count()),
-        ];
+        $path = tempnam(sys_get_temp_dir(), 'omira_graph_');
+        if ($path === false) throw new \RuntimeException('Tidak dapat membuat file grafik sementara.');
+        $pngPath = $path . '.png';
+        @unlink($path);
+        file_put_contents($pngPath, $image);
 
-        $barLabels = [
-            new DataSeriesValues('String', "'Monitoring'!\$B\$1", null, 1),
-            new DataSeriesValues('String', "'Monitoring'!\$C\$1", null, 1),
-            new DataSeriesValues('String', "'Monitoring'!\$D\$1", null, 1),
-        ];
-        $barValues = [
-            new DataSeriesValues('Number', "'Monitoring'!\$B\$2:\$B\$$lastChartRow", null, $chartRows->count()),
-            new DataSeriesValues('Number', "'Monitoring'!\$C\$2:\$C\$$lastChartRow", null, $chartRows->count()),
-            new DataSeriesValues('Number', "'Monitoring'!\$D\$2:\$D\$$lastChartRow", null, $chartRows->count()),
-        ];
+        $draw = new Drawing();
+        $draw->setName('Grafik Dashboard OMIRA');
+        $draw->setPath($pngPath);
+        $draw->setCoordinates('A' . ($chartTopRow + 1));
+        $draw->setOffsetX(8);
+        $draw->setOffsetY(6);
+        $draw->setWidth(1380);
+        $draw->setWorksheet($sheet);
 
-        foreach (['578EF5', '76C457', 'F0A44B'] as $index => $hex) {
-            $barValues[$index]->setFillColor($hex);
-        }
+        $sheet->freezePane('A7');
+        $sheet->setShowGridlines(false);
+        $sheet->getPageSetup()->setOrientation('landscape');
+        $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
+        $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A3);
+        $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
 
-        $barSeries = new DataSeries(
-            DataSeries::TYPE_BARCHART,
-            DataSeries::GROUPING_CLUSTERED,
-            range(0, count($barValues) - 1),
-            $barLabels,
-            $categories,
-            $barValues
-        );
-        $barSeries->setPlotDirection(DataSeries::DIRECTION_COL);
-
-        $targetValues = new DataSeriesValues('Number', "'Monitoring'!\$E\$2:\$E\$$lastChartRow", null, $chartRows->count());
-        $targetValues->setLineColorProperties('D75B62');
-        $targetValues->setLineWidth(28575);
-
-        $lineSeries = new DataSeries(
-            DataSeries::TYPE_LINECHART,
-            null,
-            [0],
-            [new DataSeriesValues('String', "'Monitoring'!\$E\$1", null, 1)],
-            $categories,
-            [$targetValues]
-        );
-
-        $plotArea = new PlotArea(null, [$barSeries, $lineSeries]);
-        $chart = new Chart(
-            'repair_box_chart',
-            new Title('Grafik Order Repair Box  Fiscal Year  — ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', '))),
-            new Legend(Legend::POSITION_BOTTOM, null, false),
-            $plotArea,
-            true,
-            DataSeries::EMPTY_AS_GAP,
-            new Title('Periode'),
-            new Title('Qty')
-        );
-        $chart->setTopLeftPosition('G2');
-        $chart->setBottomRightPosition('T22');
-        $chartSheet->addChart($chart);
+        return $pngPath;
     }
 
     private function extendSpan(?array $span, int $start, int $end, string $value): array

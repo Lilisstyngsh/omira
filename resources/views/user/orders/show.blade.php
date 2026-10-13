@@ -16,6 +16,13 @@
     @endphp
 
     <style>
+
+        .repair-head-actions .btn-back, .repair-head-actions .btn-back-strong {background:#2563eb!important;color:#fff!important;border:1px solid #2563eb!important;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:0 16px;text-decoration:none;font-weight:700;}
+        .repair-head-actions .btn-back:hover, .repair-head-actions .btn-back-strong:hover {background:#1d4ed8!important;border-color:#1d4ed8!important;}
+
+        .repair-head-actions .btn-back, .repair-head-actions .btn-back-strong {background:#2563eb!important;color:#fff!important;border:1px solid #2563eb!important;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:0 16px;text-decoration:none;font-weight:700;}
+        .repair-head-actions .btn-back:hover, .repair-head-actions .btn-back-strong:hover {background:#1d4ed8!important;border-color:#1d4ed8!important;}
+
 /* OMIRA tablet-first detail: predictable spacing and touch-size export actions. */
 .omira-detail-export-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .omira-detail-export-head h3{margin:0!important}
@@ -653,8 +660,8 @@
             font-size: 14px;
         }
 
-        .btn-back-strong{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:9px;background:#334155;color:#fff!important;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #334155}
-        .btn-back-strong:hover{background:#1e293b;border-color:#1e293b}
+        .btn-back-strong{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:9px;background:#2563eb;color:#fff!important;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #334155}
+        .btn-back-strong:hover{background:#1d4ed8;border-color:#1d4ed8}
         .handover-direct{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;flex-wrap:wrap}
         .handover-direct .btn{min-height:44px;padding:0 16px;border-radius:9px;font-weight:600;border:1px solid transparent;cursor:pointer}
         .handover-direct .btn-mismatch{background:#fff;color:#b91c1c;border-color:#ef4444}.handover-direct .btn-mismatch:hover{background:#fef2f2}
@@ -668,6 +675,15 @@
         .confirm-dialog-body{text-align:center;padding:24px 28px 22px}.confirm-dialog-icon{margin:0 auto 14px;color:#f97316;font-size:54px;line-height:1;display:flex;align-items:center;justify-content:center}.confirm-dialog-body h4{font-size:20px}.confirm-dialog-body p{max-width:330px;margin:8px auto 18px}.confirm-dialog-body .repair-dialog-actions{justify-content:center}
         .mismatch-dialog-body{padding:18px 20px 20px}.repair-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.repair-dialog-close{width:34px;height:34px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#475569;font-size:20px;line-height:1;cursor:pointer}.repair-dialog-close:hover{background:#f8fafc}.mismatch-field{padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}.mismatch-field label{display:block;margin-bottom:7px;font-size:11px;font-weight:600;color:#0f172a}.mismatch-error{display:none;margin-top:6px;font-size:10px;color:#b91c1c}.mismatch-field.has-error textarea{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.08)}.mismatch-field.has-error .mismatch-error{display:block}
         @media(max-width:600px){.handover-direct{display:grid;grid-template-columns:1fr}.handover-direct .btn{width:100%}.repair-dialog-actions{display:grid;grid-template-columns:1fr 1fr}.repair-dialog{border-radius:18px}.repair-dialog-body{padding:18px}}
+        .repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:20px!important;}
+        @media (max-width:768px) {.repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:16px!important;}}
+        .repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:20px!important;}
+        @media (max-width:768px) {.repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:16px!important;}}
+            /* Jarak antara Progress Order dan Informasi Order (tablet-friendly). */
+        .omira-order-info-spacing { margin-top: 20px; }
+        @media (max-width: 768px) {
+            .omira-order-info-spacing { margin-top: 16px; }
+        }
     </style>
 
     {{-- =====================================================
@@ -682,17 +698,13 @@
                 {{ $order->order_number }}
             </h2>
 
-            <p>
-                Order Repair Box
-            </p>
-
         </div>
 
 
         <div class="repair-head-actions">
 
             <a href="{{ route('user.orders.index') }}" class="btn btn-back-strong" title="Kembali ke daftar Order Repair Box">
-                ← Kembali ke Daftar Order
+                ← Kembali
             </a>
 
         </div>
@@ -909,7 +921,9 @@
 
     </div>
 
+    <div class="omira-order-info-spacing">
     @include('partials.repair-order-information', ['order' => $order, 'context' => 'user-show'])
+    </div>
 
     {{-- =====================================================
          DETAIL / HASIL REPAIR

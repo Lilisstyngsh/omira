@@ -12,6 +12,8 @@ use App\Http\Controllers\TpsRepairController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\ScrapLimitController;
+use App\Http\Controllers\UserScrapLimitController;
+use App\Http\Controllers\OmdScrapCycleController;
 use App\Http\Controllers\RecapController;
 use Illuminate\Support\Facades\Route;
 
@@ -140,6 +142,9 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/orders/create', [UserOrderController::class, 'create'])
                 ->name('orders.create');
+
+            Route::post('/scrap-limit/{cycle}/decision', [UserScrapLimitController::class, 'decide'])
+                ->name('scrap-limit.decision');
 
             Route::post('/orders', [UserOrderController::class, 'store'])
                 ->name('orders.store');
@@ -470,6 +475,11 @@ Route::middleware('auth')->group(function () {
             | Scrap Limit per Model
             |--------------------------------------------------------------------------
             */
+            Route::get('/scrap-limit-history', [OmdScrapCycleController::class, 'index'])
+                ->name('scrap-cycles.index');
+            Route::post('/scrap-limit-history/{cycle}/reset', [OmdScrapCycleController::class, 'reset'])
+                ->name('scrap-cycles.reset');
+
             Route::get('/scrap-limits', [ScrapLimitController::class, 'index'])
                 ->name('scrap-limits.index');
 
@@ -488,7 +498,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/recap/export/pdf', [RecapController::class, 'exportPdf'])
                 ->name('recap.pdf');
 
-            Route::get('/recap/export/excel', [RecapController::class, 'exportExcel'])
+            Route::get('/recap/chart-preview', [RecapController::class, 'chartPreview'])
+                ->name('recap.chart-preview');
+
+            Route::post('/recap/export/excel', [RecapController::class, 'exportExcel'])
                 ->name('recap.excel');
         });
 });

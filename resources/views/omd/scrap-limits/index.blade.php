@@ -107,6 +107,7 @@
         <div class="sl-head">
             <div>
                 <h2>Scrap Limit Produk</h2>
+                <a href="{{ route('omd.scrap-cycles.index') }}" style="margin-left:auto;color:#347554;font-weight:700;text-decoration:underline;font-size:12px">Riwayat Limit User &amp; Reset</a>
                 <div class="sl-count">{{ $models->count() }} model</div>
             </div>
         </div>

@@ -14,11 +14,15 @@ class RepairMonthlySnapshotSeeder extends Seeder
     public function run(): void
     {
         $rows = [
-            ['month' => 4, 'order' => 541,  'ok' => 531,  'scrap' => 16],
-            ['month' => 5, 'order' => 1399, 'ok' => 1373, 'scrap' => 21],
-            ['month' => 6, 'order' => 1865, 'ok' => 1810, 'scrap' => 49],
-            ['month' => 7, 'order' => 1559, 'ok' => 1395, 'scrap' => 35],
-            ['month' => 8, 'order' => 720,  'ok' => 704,  'scrap' => 14],
+            ['month' => 1, 'order' => 696,  'ok' => 651,  'scrap' => 48],
+            ['month' => 2, 'order' => 942,  'ok' => 854,  'scrap' => 83],
+            ['month' => 3, 'order' => 433,  'ok' => 411,  'scrap' => 18],
+            ['month' => 4, 'order' => 541,  'ok' => 531,  'scrap' => 10],
+            ['month' => 5, 'order' => 1399, 'ok' => 1373, 'scrap' => 26],
+            ['month' => 6, 'order' => 1865, 'ok' => 1810, 'scrap' => 55],
+            ['month' => 7, 'order' => 1459, 'ok' => 1395, 'scrap' => 64],
+            ['month' => 8, 'order' => 720,  'ok' => 704,  'scrap' => 16],
+            ['month' => 9, 'order' => 992,  'ok' => 953,  'scrap' => 39],
         ];
 
         foreach ($rows as $row) {

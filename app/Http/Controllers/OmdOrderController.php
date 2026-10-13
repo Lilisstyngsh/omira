@@ -230,6 +230,8 @@ class OmdOrderController extends Controller
                 $order,
                 $data
             ) {
+                // Lock the owner before editing any result, consistent with User submits.
+                $owner = \App\Models\User::query()->lockForUpdate()->findOrFail($order->user_id);
 
                 $productNotes =
                     $data['product_notes'] ?? [];
@@ -607,6 +609,9 @@ class OmdOrderController extends Controller
             | SIMPAN PETUGAS REPAIR
             |--------------------------------------------------------------------------
             */
+
+                // Scrap Limit is monitoring-only. OMD may record the actual
+                // Scrap quantity even if the master limit has been exceeded.
 
                 $orderQty = (int) $order->items()->sum('after_qty');
                 $scrapQty = (int) $order->items()

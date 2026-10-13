@@ -27,6 +27,14 @@
     @endphp
 
     <style>
+
+        .repair-head-actions .btn-back, .repair-head-actions .btn-back-strong {background:#2563eb!important;color:#fff!important;border:1px solid #2563eb!important;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:0 16px;text-decoration:none;font-weight:700;}
+        .repair-head-actions .btn-back:hover, .repair-head-actions .btn-back-strong:hover {background:#1d4ed8!important;border-color:#1d4ed8!important;}
+
+        .repair-head-actions .btn-back, .repair-head-actions .btn-back-strong {background:#2563eb!important;color:#fff!important;border:1px solid #2563eb!important;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:0 16px;text-decoration:none;font-weight:700;}
+        .repair-head-actions .btn-back:hover, .repair-head-actions .btn-back-strong:hover {background:#1d4ed8!important;border-color:#1d4ed8!important;}
+
+
 /* OMIRA tablet-first detail: predictable spacing and touch-size export actions. */
 .omira-detail-export-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .omira-detail-export-head h3{margin:0!important}
@@ -828,6 +836,15 @@
             color: #166534;
             font-size: 14px;
         }
+        .repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:20px!important;}
+        @media (max-width:768px) {.repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:16px!important;}}
+        .repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:20px!important;}
+        @media (max-width:768px) {.repair-card + .repair-info-card, .repair-info-card + .repair-card {margin-top:16px!important;}}
+            /* Jarak antara Progress Order dan Informasi Order (tablet-friendly). */
+        .omira-order-info-spacing { margin-top: 20px; }
+        @media (max-width: 768px) {
+            .omira-order-info-spacing { margin-top: 16px; }
+        }
     </style>
 
 
@@ -1045,7 +1062,9 @@
     </div>
 
 
+    <div class="omira-order-info-spacing">
     @include('partials.repair-order-information', ['order' => $order, 'context' => 'omd-show'])
+    </div>
 
     @if($order->status === 'revision_requested' && $order->openFeedback)
         <div style="margin-bottom:14px;border:1px solid #f59e0b;border-radius:10px;padding:11px 13px;background:#fff;color:#92400e;font-size:12px;line-height:1.5">

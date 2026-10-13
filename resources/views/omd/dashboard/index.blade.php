@@ -20,6 +20,9 @@
             12 => 'Desember',
         ];
 
+        // Pastikan 12 bulan selalu dirender dalam grafik tanpa menambah realisasi palsu.
+        $chartMonthLabels = collect(range(1, 12))->map(fn ($m) => \Illuminate\Support\Carbon::create($year, $m, 1)->locale('id')->translatedFormat('M'));
+
         $targetPercent = $chartMax > 0
             ? min(100, ($target / $chartMax) * 100)
             : 0;
@@ -393,6 +396,21 @@
             overflow: hidden;
         }
 
+        .chart-card { padding:24px 30px 28px; }
+        .axis-caption { text-align:center; font-size:12px; font-weight:600; color:#475569; padding:13px 0 2px; }
+        .fy-chart-shell { position:relative; padding-left:14px; padding-right:8px; }
+        .axis-y-label { position:absolute; left:0; top:50%; transform:translate(-50%,-50%) rotate(-90deg); font-size:11px; font-weight:600; color:#475569; white-space:nowrap; }
+        .ongoing-bubble { position:absolute; z-index:8; bottom:var(--ongoing-bottom, 64px); left:50%; transform:translateX(-50%); background:#8F6227; color:white; border-radius:999px; padding:5px 8px; white-space:nowrap; font-size:9px; font-weight:900; box-shadow:0 3px 9px #0002; pointer-events:none; }
+        .ongoing-bubble:after { content:''; position:absolute; top:100%; left:50%; margin-left:-5px; border:5px solid transparent; border-top-color:#8F6227; }
+        .month-group { position:relative; }
+        .month-group.is-future .chart-bar { height:7px; min-height:7px; background:#DDE2E9; opacity:.8; border-radius:3px 3px 1px 1px; }
+        .month-group.is-future .month-label { color:#94A3B8; }
+        .abnormality-summary { margin-top:18px; overflow-x:auto; }
+        .abnormality-summary table { width:100%; border-collapse:collapse; font-size:11px; }
+        .abnormality-summary th,.abnormality-summary td { padding:10px 12px; border:1px solid #e2e8f0; text-align:left; vertical-align:top; }
+        .abnormality-summary th { background:#f1f5f9; font-weight:800; }
+
+
         .card-head {
             display: flex;
             align-items: flex-start;
@@ -451,8 +469,8 @@
 
         .bar-chart {
             display: grid;
-            grid-template-columns: 58px minmax(650px, 1fr);
-            min-width: 710px;
+            grid-template-columns: 46px minmax(650px, 1fr);
+            min-width: 696px;
             height: 360px;
         }
 
@@ -953,17 +971,19 @@
             <div class="card-head">
                 <div>
                     <h3 class="card-title">Grafik Monitoring Repair Box {{ $year }}</h3>
-                    <p class="card-subtitle">Januari – {{ $monthNames[$month] }} {{ $year }}</p>
+                    <p class="card-subtitle">Januari – Desember {{ $year }}</p>
                 </div>
 
                 <div class="chart-legend">
                     <span class="legend-item"><i class="legend-color order"></i>Order</span>
                     <span class="legend-item"><i class="legend-color ok"></i>OK</span>
                     <span class="legend-item"><i class="legend-color scrap"></i>Scrap</span>
-                    <span class="legend-item"><i class="legend-color target"></i>Target FY {{ number_format($target) }}</span>
+                    <span class="legend-item"><i class="legend-color target"></i>Target FY {{ $year }}</span>
                 </div>
             </div>
 
+            <div class="fy-chart-shell">
+            <div class="axis-y-label">Jumlah Box</div>
             <div class="chart-scroll">
                 <div class="bar-chart">
                     <div class="chart-axis">
@@ -979,10 +999,10 @@
 
                         @if ($target > 0)
                             <div class="target-overlay"
-                                style="--target-height: {{ number_format($targetPercent, 2, '.', '') }}%; --month-count: {{ max($months->count(), 1) }};">
+                                style="--target-height: {{ number_format($targetPercent, 2, '.', '') }}%; --month-count: {{ 12 }};">
                                 <div class="target-line"></div>
                                 <div class="target-points">
-                                    @foreach ($months as $targetMonth)
+                                    @foreach ($chartMonthLabels as $targetMonth)
                                         <span class="target-point" aria-hidden="true">
                                             <i class="target-marker"></i>
                                             <span class="target-value">{{ number_format($target) }}</span>
@@ -992,8 +1012,8 @@
                             </div>
                         @endif
 
-                        <div class="chart-months" style="--month-count: {{ max($months->count(), 1) }};">
-                            @foreach ($months as $index => $monthLabel)
+                        <div class="chart-months" style="--month-count: {{ 12 }};">
+                            @foreach ($chartMonthLabels as $index => $monthLabel)
                                 @php
                                     $orderValue = (int) ($orderSeries[$index] ?? 0);
                                     $okValue = (int) ($finishSeries[$index] ?? 0);
@@ -1010,7 +1030,22 @@
                                     $monthAbnormality = $abnormalitiesByMonth->get($index + 1);
                                 @endphp
 
-                                <div class="month-group">
+                                @php
+                                    $futureMonth = $year > now()->year || ($year === now()->year && ($index + 1) > now()->month);
+                                    $ongoingMonth = $year === now()->year && ($index + 1) === now()->month;
+                                    // Align the badge with the tallest bar, but keep it clear of the FY target line.
+                                    $barTop = max($orderHeight, $okHeight, $scrapHeight);
+                                    $bubbleBottom = 27 + (int) round(min($barTop, 92) * 3.33) + 24;
+                                    $targetBottom = 27 + ($targetPercent * 3.33);
+                                    if (abs($bubbleBottom - $targetBottom) < 25) {
+                                        $bubbleBottom = max(47, $bubbleBottom - 36);
+                                    }
+                                    $bubbleBottom = min(331, max(47, $bubbleBottom));
+                                @endphp
+                                <div class="month-group {{ $futureMonth ? 'is-future' : '' }}">
+                                    @if ($ongoingMonth)
+                                        <span class="ongoing-bubble" style="--ongoing-bottom:{{ $bubbleBottom }}px">ON GOING</span>
+                                    @endif
                                     <div class="month-bars">
                                         <div class="chart-bar order {{ $monthAbnormality ? 'has-abnormality' : '' }}"
                                             style="--bar-height: {{ number_format($orderVisualHeight, 2, '.', '') }}%;"
@@ -1057,6 +1092,8 @@
                 </div>
             </div>
 
+            </div>
+            <div class="axis-caption">FY {{ $year }}</div>
             @if ($orderSeries->sum() === 0 && $finishSeries->sum() === 0 && $scrapSeries->sum() === 0)
                 <div class="empty-state" style="margin-top:12px;">
                     Grafik sudah aktif, tetapi belum ada order yang sudah dikonfirmasi User pada periode/filter ini.
@@ -1064,6 +1101,28 @@
                 </div>
             @endif
         </div>
+
+        <section class="monitor-card" style="padding:18px;">
+            <h3 class="card-title">Ringkasan Abnormality FY {{ $year }}</h3>
+            <div class="abnormality-summary">
+                <table>
+                    <thead><tr><th>Bulan</th><th>Order</th><th>Target FY</th><th>Selisih</th><th>Alasan</th></tr></thead>
+                    <tbody>
+                        @forelse ($abnormalitiesByMonth as $abMonth => $item)
+                            <tr>
+                                <td>{{ $monthNames[(int) $abMonth] ?? $abMonth }}</td>
+                                <td>{{ number_format((int) $item->actual_qty) }}</td>
+                                <td>{{ number_format((int) $item->threshold_qty) }}</td>
+                                <td>{{ number_format((int) $item->actual_qty - (int) $item->threshold_qty) }}</td>
+                                <td>{{ $item->reason ?: '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" style="text-align:center;color:#64748b;">Belum ada data abnormality tersimpan.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         <div class="chart-abnormality-popover" id="chartAbnormalityPopover" role="dialog" aria-hidden="true">
             <h4 class="chart-abnormality-title" id="chartAbnormalityTitle">Abnormality Global</h4>

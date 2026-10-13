@@ -61,26 +61,53 @@
         text-transform: uppercase;
     }
 
-    .dashboard-kpi-icon {
-        width: 34px;
-        height: 34px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        background: #F2F7F2;
-        color: #5F9278;
-        font-size: 13px;
-    }
-
     .dashboard-kpi.attention {
-        border-color: #ddd6fe;
-        box-shadow: 0 8px 26px rgba(95, 146, 120, .08);
+        border-color: #E4DFA0;
+        box-shadow: 0 8px 26px rgba(119, 105, 58, .07);
     }
 
-    .dashboard-kpi.attention .dashboard-kpi-icon {
-        background: #E7F1E9;
-        color: #376B52;
+    .dashboard-create-order.btn.btn-primary {
+        background: #347554;
+        border: 1px solid #347554;
+        color: #fff;
+        font-weight: 750;
+        box-shadow: 0 5px 14px rgba(38, 99, 68, .18);
+        min-height: 44px;
+        transition: background .18s ease, box-shadow .18s ease;
+    }
+
+    .dashboard-create-order.btn.btn-primary:hover,
+    .dashboard-create-order.btn.btn-primary:focus-visible {
+        background: #285E43;
+        border-color: #285E43;
+        color: #fff;
+        box-shadow: 0 7px 17px rgba(38, 99, 68, .24);
+    }
+
+    /* Soft pastel KPI backgrounds — warna saja, tanpa motif/pattern. */
+    .dashboard-kpis > .dashboard-kpi:nth-child(1) {
+        background: linear-gradient(110deg, #C9CAAC 0%, #E3E4D0 56%, #F6F6EC 100%);
+        border-color: #DFE0C9;
+    }
+
+    .dashboard-kpis > .dashboard-kpi:nth-child(2) {
+        background: radial-gradient(ellipse at 50% 48%, #FEFAF3 0%, #F8F2E8 62%, #F2EBDD 100%);
+        border-color: #EEE8DB;
+    }
+
+    .dashboard-kpis > .dashboard-kpi:nth-child(3) {
+        background: linear-gradient(245deg, #FFFFEC 0%, #FFFDD3 58%, #FFFBA7 100%);
+        border-color: #F1EFAE;
+    }
+
+    .dashboard-kpis > .dashboard-kpi:nth-child(4) {
+        background: radial-gradient(ellipse at 78% 24%, #FFFFFF 0%, #FBEFEF 58%, #F6E3E3 100%);
+        border-color: #F0E2E2;
+    }
+
+    .dashboard-kpis > .dashboard-kpi.attention {
+        border-color: #F1EFAE;
+        box-shadow: 0 8px 26px rgba(119, 105, 58, .07);
     }
 
     .dashboard-kpi-value {
@@ -116,9 +143,60 @@
         font-weight: 800;
     }
 
-    .action-list {
+    /* Operational priority: terlihat saat ada order, tetap tenang saat kosong. */
+    .dashboard-panel.action-panel.has-actions {
+        border-color: #E9DEAB;
+        background: #FFFEFA;
+    }
+
+    .action-panel.has-actions .dashboard-panel-head {
+        background: #fff;
+        border-bottom-color: #edf1f5;
+    }
+
+    .action-heading {
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .action-heading-icon {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 10px;
+        background: #FFF0BB;
+        color: #9B722F;
+        font-size: 14px;
+    }
+
+    .action-subtitle {
+        margin: 4px 0 0;
+        font-size: 10px;
+        color: #88794F;
+    }
+
+    .action-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 5px 11px;
+        background: #FFF0B8;
+        color: #84601F;
+        font-size: 10.5px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .action-list {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
     }
 
     .action-order {
@@ -126,12 +204,21 @@
         grid-template-columns: minmax(150px, 1fr) minmax(170px, 1.4fr) auto;
         align-items: center;
         gap: 14px;
-        padding: 14px 18px;
-        border-bottom: 1px solid #eef2f6;
+        padding: 13px 15px;
+        border: 1px solid #F1EAD8;
+        border-radius: 12px;
+        background: #FFFCF2;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition: background-color .18s ease, border-color .18s ease;
     }
 
-    .action-order:last-child {
-        border-bottom: 0;
+    .action-order:hover,
+    .action-order:focus-visible {
+        background: #FFF8E5;
+        border-color: #E5D8B5;
+        outline-offset: 2px;
     }
 
     .action-order-number {
@@ -158,8 +245,43 @@
     .action-order-message strong {
         display: block;
         margin-bottom: 2px;
-        color: #376B52;
+        color: #91652C;
         font-size: 10.5px;
+    }
+
+    .action-order-message strong::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: #D5A44D;
+        vertical-align: 1px;
+    }
+
+    .action-check-order {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 44px;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        color: #405B7D;
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        white-space: nowrap;
+    }
+
+    .action-order:hover .action-check-order,
+    .action-order:focus-visible .action-check-order {
+        color: #2F4B6F;
+        text-decoration-thickness: 2px;
     }
 
     .dashboard-empty {
@@ -177,35 +299,48 @@
         color: #16a34a;
     }
 
+    /* Tabel berdiri sebagai panel tersendiri di dalam card Order Terbaru. */
     .recent-table-wrap {
+        margin: 16px;
         overflow-x: auto;
+        border: 1px solid #dce5ef;
+        border-radius: 14px;
+        background: #fff;
     }
 
     .recent-table {
         width: 100%;
-        min-width: 820px;
-        border-collapse: collapse;
+        min-width: 660px;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
     .recent-table th {
         padding: 10px 13px;
         background: #fafbfc;
-        border-bottom: 1px solid #e8edf4;
+        border-right: 1px solid #dce5ef;
+        border-bottom: 1px solid #dce5ef;
         color: #64748b;
         font-size: 9px;
         font-weight: 800;
         letter-spacing: .025em;
-        text-align: left;
+        text-align: center;
         text-transform: uppercase;
         white-space: nowrap;
     }
 
     .recent-table td {
         padding: 12px 13px;
-        border-bottom: 1px solid #eef2f6;
+        border-right: 1px solid #e3eaf2;
+        border-bottom: 1px solid #e3eaf2;
         color: #334155;
         font-size: 10.5px;
         vertical-align: middle;
+    }
+
+    .recent-table th:last-child,
+    .recent-table td:last-child {
+        border-right: 0;
     }
 
     .recent-table tbody tr {
@@ -214,7 +349,32 @@
     }
 
     .recent-table tbody tr:hover {
-        background: #fafaff;
+        background: #f5f9f6;
+    }
+
+    .recent-table tbody tr:focus-visible {
+        outline: 2px solid #405B7D;
+        outline-offset: -2px;
+        background: #f5f9f6;
+    }
+
+    .recent-all-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        color: #405B7D;
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        border: 0;
+        background: transparent;
+        padding: 0;
+    }
+
+    .recent-all-link:hover,
+    .recent-all-link:focus-visible {
+        color: #2c4463;
     }
 
     .recent-table tbody tr:last-child td {
@@ -246,57 +406,24 @@
     .status-pill {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        min-height: 25px;
-        padding: 0 9px;
-        border-radius: 999px;
-        font-size: 9px;
-        font-weight: 800;
+        justify-content: center;
+        min-height: 29px;
+        padding: 5px 11px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        font-size: 10px;
+        font-weight: 600;
         white-space: nowrap;
     }
 
-    .status-pill.submitted {
-        background: #eff6ff;
-        color: #2563eb;
-    }
+    .status-pill.submitted { color: #2563eb; background: #eff6ff; border-color: #dbeafe; }
+    .status-pill.in-repair { color: #9a651e; background: #fff7e9; border-color: #f6e4be; }
+    .status-pill.completed { color: #b56817; background: #fff4e2; border-color: #f5d8a9; }
+    .status-pill.revision { color: #be123c; background: #fff1f2; border-color: #fecdd3; }
+    .status-pill.confirmed { color: #21804a; background: #ecfdf3; border-color: #bbf7d0; }
 
-    .status-pill.in-repair {
-        background: #fff7ed;
-        color: #c2410c;
-    }
-
-    .status-pill.completed {
-        background: #F2F7F2;
-        color: #376B52;
-    }
-
-    .status-pill.revision {
-        background: #fff1f2;
-        color: #be123c;
-    }
-
-    .status-pill.confirmed {
-        background: #ecfdf3;
-        color: #15803d;
-    }
-
-    .row-action {
-        width: 30px;
-        height: 30px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e2e8f0;
-        border-radius: 9px;
-        background: #f8fafc;
-        color: #475569;
-        text-decoration: none;
-    }
-
-    .row-action:hover {
-        border-color: #ddd6fe;
-        background: #F2F7F2;
-        color: #376B52;
+    @media (max-width: 760px) {
+        .recent-table-wrap { margin: 12px; }
     }
 
     @media (max-width: 1100px) {
@@ -341,10 +468,39 @@
             grid-row: auto;
         }
     }
+
+    .scrap-limit-panel { border:1px solid #f1d4d6; overflow:hidden; }
+    .scrap-limit-panel .dashboard-panel-title { display:flex; align-items:center; gap:8px; }
+    .scrap-limit-items { padding:14px; display:grid; gap:12px; }
+    .scrap-limit-alert { border:1px solid #eadba7; background:#fffbeb; border-radius:12px; padding:15px; }
+    .scrap-limit-alert.is-reached { border-color:#efb4b6; background:#fff4f4; }
+    .scrap-limit-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; color:#9a681e; font-size:13px; }
+    .scrap-limit-alert.is-reached .scrap-limit-top { color:#ad323a; }
+    .scrap-limit-top span { font-size:11px; font-weight:800; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
+    .scrap-limit-product { margin-top:9px; font-size:14px; font-weight:800; color:#263342; }
+    .scrap-limit-meta,.scrap-limit-notice { margin-top:5px; font-size:12px; color:#64748b; }
+    .scrap-limit-question { margin:12px 0 8px; font-weight:750; font-size:13px; }
+    .scrap-limit-actions,.scrap-modal-actions { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+    .scrap-btn { border:0; border-radius:9px; padding:10px 16px; font-size:12px; font-weight:800; cursor:pointer; }
+    .scrap-btn-order { background:#347554; color:#fff; }
+    .scrap-btn-no { background:#e5eaf0; color:#324255; }
+    .scrap-reason-modal[hidden],[data-scrap-submit][hidden] { display:none !important; }
+    .scrap-reason-modal { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1100; padding:18px; }
+    .scrap-reason-dialog { width:min(100%,440px); background:#fff; border-radius:16px; padding:22px; box-shadow:0 24px 60px rgba(15,23,42,.22); }
+    .scrap-reason-dialog h3 { font-size:16px; margin:0; }
+    .scrap-reason-dialog p { margin:5px 0 15px; color:#64748b; font-size:12px; }
+    .scrap-reason-dialog textarea { width:100%; box-sizing:border-box; min-height:110px; border:1px solid #cbd5e1; border-radius:9px; padding:10px; font:inherit; font-size:13px; resize:vertical; }
+    .scrap-modal-actions { justify-content:flex-end; margin-top:12px; }
 </style>
 
 <?php
-    $lineName = auth()->user()->line?->name ?? 'Line belum ditentukan';
+    $currentHour = now('Asia/Jakarta')->hour;
+    $greeting = match (true) {
+        $currentHour >= 4 && $currentHour < 10 => 'Pagi',
+        $currentHour >= 10 && $currentHour < 15 => 'Siang',
+        $currentHour >= 15 && $currentHour < 18 => 'Sore',
+        default => 'Malam',
+    };
 
     $statusMap = [
         'submitted' => ['label' => 'Menunggu Verifikasi', 'class' => 'submitted', 'icon' => 'fa-clock'],
@@ -358,21 +514,68 @@
 <div class="user-dashboard">
     <div class="dashboard-welcome">
         <div>
-            <h2>Selamat datang, <?php echo e(auth()->user()->name); ?></h2>
-            <p><?php echo e($lineName); ?></p>
+            <h2>Selamat <?php echo e(strtolower($greeting)); ?>, Mr. <?php echo e(auth()->user()->name); ?></h2>
         </div>
 
-        <a class="btn btn-primary" href="<?php echo e(route('user.orders.create')); ?>">
+        <a class="btn btn-primary dashboard-create-order" href="<?php echo e(route('user.orders.create')); ?>">
             <i class="fa-solid fa-plus"></i>
             Buat Order Repair
         </a>
     </div>
 
+    <?php if($scrapAlerts->isNotEmpty()): ?>
+    <section class="dashboard-panel scrap-limit-panel">
+        <div class="dashboard-panel-head">
+            <h3 class="dashboard-panel-title"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Monitoring Scrap Limit</h3>
+        </div>
+        <div class="scrap-limit-items">
+            <?php $__currentLoopData = $scrapAlerts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cycle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="scrap-limit-alert is-reached">
+                    <div class="scrap-limit-top">
+                        <strong>Danger — Scrap Limit Tercapai</strong>
+                        <span>Limit tercapai</span>
+                    </div>
+                    <div class="scrap-limit-product"><?php echo e($cycle->product?->masterModel?->model); ?> — <?php echo e($cycle->product?->name); ?></div>
+                    <div class="scrap-limit-meta"><?php echo e($cycle->product?->masterModel?->line?->name ?? $cycle->line?->name); ?> · Scrap <?php echo e($cycle->used_qty); ?> / <?php echo e($cycle->limit_qty); ?></div>
+                    <div class="scrap-limit-notice">Scrap Limit sebagai informasi monitoring. Order Repair Box dan Qty Scrap tetap dapat diproses.</div>
+                    <?php if(!$cycle->decision): ?>
+                        <p class="scrap-limit-question">Apakah ingin membuat Repair Order?</p>
+                        <div class="scrap-limit-actions">
+                            <form method="POST" action="<?php echo e(route('user.scrap-limit.decision', $cycle)); ?>">
+                                <?php echo csrf_field(); ?>
+                                <input type="hidden" name="decision" value="yes">
+                                <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
+                            </form>
+                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-<?php echo e($cycle->id); ?>">Tidak</button>
+                        </div>
+                        <div class="scrap-reason-modal" id="scrap-reason-<?php echo e($cycle->id); ?>" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-<?php echo e($cycle->id); ?>">
+                            <div class="scrap-reason-dialog">
+                                <h3 id="scrap-modal-title-<?php echo e($cycle->id); ?>">Alasan Tidak Membuat Order</h3>
+                                <p><?php echo e($cycle->product?->name); ?></p>
+                                <form method="POST" action="<?php echo e(route('user.scrap-limit.decision', $cycle)); ?>">
+                                    <?php echo csrf_field(); ?>
+                                    <input type="hidden" name="decision" value="no">
+                                    <textarea name="reason" maxlength="1000" rows="4" placeholder="Masukkan alasan..." required data-scrap-reason></textarea>
+                                    <div class="scrap-modal-actions">
+                                        <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
+                                        <button type="submit" class="scrap-btn scrap-btn-order" data-scrap-submit hidden>Simpan Alasan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    <?php elseif($cycle->decision): ?>
+                        <div class="scrap-limit-meta">Keputusan: <?php echo e($cycle->decision === 'yes' ? 'Order' : 'Tidak Order'); ?><?php echo e($cycle->decision_reason ? ' — '.$cycle->decision_reason : ''); ?></div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <div class="dashboard-kpis">
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Order Aktif</div>
-                <span class="dashboard-kpi-icon"><i class="fa-solid fa-box-open"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($orderActive); ?></div>
         </div>
@@ -380,7 +583,6 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Diproses OMD</div>
-                <span class="dashboard-kpi-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($processedOmd); ?></div>
         </div>
@@ -388,7 +590,6 @@
         <div class="dashboard-kpi <?php echo e($needConfirmation > 0 ? 'attention' : ''); ?>">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
-                <span class="dashboard-kpi-icon"><i class="fa-solid fa-circle-exclamation"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($needConfirmation); ?></div>
         </div>
@@ -396,50 +597,48 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
-                <span class="dashboard-kpi-icon"><i class="fa-solid fa-check-double"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($completedThisMonth); ?></div>
         </div>
     </div>
 
-    <section class="dashboard-panel">
+    <section class="dashboard-panel action-panel <?php echo e($actionOrders->isNotEmpty() ? 'has-actions' : ''); ?>">
         <div class="dashboard-panel-head">
-            <div>
-                <h3 class="dashboard-panel-title">Perlu Tindakan</h3>
+            <div class="action-heading">
+                <?php if($actionOrders->isNotEmpty()): ?>
+                    <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
+                <?php endif; ?>
+                <div>
+                    <h3 class="dashboard-panel-title">Perlu Tindakan</h3>
+                </div>
             </div>
+            <?php if($actionOrders->isNotEmpty()): ?>
+                <span class="action-count"><?php echo e($needConfirmation); ?> Order</span>
+            <?php endif; ?>
         </div>
 
         <?php if($actionOrders->isNotEmpty()): ?>
             <div class="action-list">
                 <?php $__currentLoopData = $actionOrders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php
-                        $firstItem = $order->items->first();
-                        $modelName = $firstItem?->masterModel?->model ?? $order->model ?? '-';
                         $qty = $order->after_qty_sum !== null
                             ? (int) $order->after_qty_sum
                             : (int) ($order->quantity ?? 0);
                         $isCorrection = (int) $order->feedbacks_count > 0;
                     ?>
 
-                    <div class="action-order">
+                    <a href="<?php echo e(route('user.orders.show', $order)); ?>" class="action-order" aria-label="Cek Order <?php echo e($order->order_number); ?>">
                         <div>
                             <div class="action-order-number"><?php echo e($order->order_number); ?></div>
-                            <div class="action-order-meta">
-                                <span><?php echo e($order->line?->name ?? '-'); ?></span>
-                                <span>Model <?php echo e($modelName); ?></span>
-                                <span><?php echo e($qty); ?> NG</span>
-                            </div>
+                            <div class="action-order-meta"><span><?php echo e($qty); ?> NG</span></div>
                         </div>
 
                         <div class="action-order-message">
                             <strong><?php echo e($isCorrection ? 'Hasil koreksi siap diperiksa' : 'Hasil repair siap diperiksa'); ?></strong>
                         </div>
 
-                        <a href="<?php echo e(route('user.orders.show', $order)); ?>" class="btn btn-primary">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            Cek Order
-                        </a>
-                    </div>
+                        <span class="action-check-order">Cek Order</span>
+                    </a>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         <?php else: ?>
@@ -456,7 +655,7 @@
                 <h3 class="dashboard-panel-title">Order Terbaru</h3>
             </div>
 
-            <a class="btn btn-secondary" href="<?php echo e(route('user.orders.index')); ?>">
+            <a class="recent-all-link" href="<?php echo e(route('user.orders.index')); ?>">
                 Lihat Semua Order
             </a>
         </div>
@@ -467,11 +666,9 @@
                     <tr>
                         <th>No Order</th>
                         <th>Tanggal</th>
-                        <th>Line</th>
                         <th>Model / Produk</th>
                         <th>Qty</th>
                         <th>Status</th>
-                        <th style="width:58px;text-align:center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -496,10 +693,15 @@
                             ];
                         ?>
 
-                        <tr onclick="window.location='<?php echo e(route('user.orders.show', $order)); ?>'" title="Lihat detail order">
+                        <tr onclick="window.location.href=this.dataset.href"
+                            onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location.href=this.dataset.href; }"
+                            data-href="<?php echo e(route('user.orders.show', $order)); ?>"
+                            tabindex="0"
+                            role="link"
+                            aria-label="Lihat detail order <?php echo e($order->order_number); ?>"
+                            title="Lihat detail order">
                             <td class="order-number"><?php echo e($order->order_number); ?></td>
                             <td><?php echo e($order->created_at?->format('d-m-Y H:i') ?? '-'); ?></td>
-                            <td><?php echo e($order->line?->name ?? '-'); ?></td>
                             <td>
                                 <div class="order-model-product">
                                     <strong><?php echo e($modelName); ?></strong>
@@ -515,24 +717,14 @@
                             <td><?php echo e($qty); ?> NG</td>
                             <td>
                                 <span class="status-pill <?php echo e($status['class']); ?>">
-                                    <i class="fa-solid <?php echo e($status['icon']); ?>"></i>
                                     <?php echo e($status['label']); ?>
 
                                 </span>
                             </td>
-                            <td style="text-align:center;">
-                                <a href="<?php echo e(route('user.orders.show', $order)); ?>"
-                                   class="row-action"
-                                   title="Lihat detail order"
-                                   aria-label="Lihat detail order"
-                                   onclick="event.stopPropagation();">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                            </td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="7">
+                            <td colspan="5">
                                 <div class="dashboard-empty">
                                     <i class="fa-solid fa-box-open"></i>
                                     Belum ada Order Repair Box.
@@ -545,6 +737,44 @@
         </div>
     </section>
 </div>
+
+<style>
+/* Unified operational status chips; numeric and status cells centered. */
+.recent-table th:nth-child(4), .recent-table th:nth-child(5),
+.recent-table td:nth-child(4), .recent-table td:nth-child(5) {text-align:center!important;}
+.recent-table .status-pill {display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border:0!important;border-radius:999px!important;padding:8px 13px!important;font-weight:800!important;white-space:nowrap;}
+.recent-table .status-pill::before {content:"";display:inline-block;width:7px;height:7px;min-width:7px;background:currentColor;border-radius:50%;}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-scrap-modal-open]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var modal = document.getElementById(button.dataset.scrapModalOpen);
+            if (!modal) return;
+            modal.hidden = false;
+            var input = modal.querySelector('[data-scrap-reason]');
+            if (input) input.focus();
+        });
+    });
+    document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) {
+        var reason = modal.querySelector('[data-scrap-reason]');
+        var submit = modal.querySelector('[data-scrap-submit]');
+        var update = function () { if (submit) submit.hidden = !reason || !reason.value.trim(); };
+        if (reason) reason.addEventListener('input', update);
+        update();
+        modal.querySelectorAll('[data-scrap-modal-close]').forEach(function (button) {
+            button.addEventListener('click', function () { modal.hidden = true; });
+        });
+        modal.addEventListener('click', function (event) { if (event.target === modal) modal.hidden = true; });
+        modal.querySelector('form')?.addEventListener('submit', function (event) {
+            if (!reason || !reason.value.trim()) { event.preventDefault(); update(); }
+        });
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) { modal.hidden = true; });
+    });
+});
+</script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\omira\resources\views/user/dashboard.blade.php ENDPATH**/ ?>

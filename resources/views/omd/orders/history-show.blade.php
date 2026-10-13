@@ -18,7 +18,7 @@
 @media(max-width:768px){.omira-detail-export-actions a{min-height:44px}.repair-card + .repair-info-card,.repair-info-card + .repair-card,.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px!important}}
 
     .history-detail-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.history-detail-head h2{margin:0;font-size:20px;font-weight:700;color:#0f172a}.history-detail-head p{margin:3px 0 0;font-size:11px;color:#64748b}
-    .btn-history-back{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:9px;background:#334155;color:#fff!important;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #334155}.btn-history-back:hover{background:#1e293b}
+    .btn-history-back{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:9px;background:#2563eb;color:#fff!important;text-decoration:none;font-size:12px;font-weight:700;border:1px solid #2563eb}.btn-history-back:hover{background:#1d4ed8}
     .history-card{background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-bottom:16px}.history-card + .repair-info-card,.repair-info-card + .history-card{margin-top:16px}.history-card h3{margin:0 0 12px;font-size:14px;font-weight:650;color:#0f172a}
 
     /* Progress Order dipertahankan seperti tampilan awal */
@@ -36,7 +36,7 @@
 
 <div class="history-detail-head">
     <div><h2>{{ $order->order_number }}</h2><p>History</p></div>
-    <a href="{{ route('omd.orders.history') }}" class="btn-history-back">← Kembali ke History</a>
+    <a href="{{ route('omd.orders.history') }}" class="btn-history-back">← Kembali</a>
 </div>
 
 <div class="history-card">
