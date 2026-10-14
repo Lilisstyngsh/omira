@@ -24,7 +24,10 @@
     <tbody>
 
         @forelse($lines as $line)
-            <tr>
+            <tr class="editable-line-row" data-line-id="{{ $line->id }}"
+                data-plant-id="{{ $line->plant_id }}" data-name="{{ $line->name }}"
+                data-update-url="{{ route('omd.master.line.update', $line) }}"
+                tabindex="0" aria-label="Edit nama Line {{ $line->name }}">
 
                 <td>
                     {{ $loop->iteration }}
@@ -32,26 +35,15 @@
 
                 <td>
 
-                    <strong>
-                        {{ $line->name }}
-                    </strong>
+                    <div class="inline-name" data-editor="line">
+                        <strong data-name-display>{{ $line->name }}</strong>
+                    </div>
 
                 </td>
 
                 <td>
 
                     <div class="action-group">
-
-                        <button type="button" class="btn btn-warning btn-sm action-icon-only"
-                            title="Edit Line" aria-label="Edit Line"
-                            onclick="editLine(
-                                {{ $line->id }},
-                                '{{ addslashes($line->name) }}',
-                                {{ $selectedPlant?->id ?? 'null' }}
-                            )">
-                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                        </button>
-
 
                         <form method="POST" action="{{ route('omd.master.line.destroy', $line->id) }}"
                             class="delete-line-form" style="display:inline">
@@ -60,8 +52,11 @@
 
                             @method('DELETE')
 
-                            <button type="submit" class="btn btn-danger btn-sm action-icon-only" title="Hapus Line" aria-label="Hapus Line">
-                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                            <button type="submit" class="master-delete" title="Hapus Line" aria-label="Hapus Line">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                                    <path d="m6 6 12 12M18 6 6 18" />
+                                </svg>
                             </button>
 
                         </form>

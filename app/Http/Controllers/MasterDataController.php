@@ -78,6 +78,12 @@ class MasterDataController extends Controller
 
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Plant berhasil diperbarui',
+                'plant' => $plant->only(['id', 'name']),
+            ]);
+        }
 
 
         return back()
@@ -222,6 +228,12 @@ class MasterDataController extends Controller
             'name' => $validated['name']
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Line berhasil diperbarui',
+                'line' => $line->only(['id', 'name', 'plant_id']),
+            ]);
+        }
         return redirect()
             ->route('omd.master.line', [
                 'plant' => $line->plant_id
@@ -269,7 +281,12 @@ class MasterDataController extends Controller
 
             'plant' => $plant->name,
 
-            'lines' => $lines
+            'lines' => $lines,
+
+            'html' => view('omd.master.partials.line_table', [
+                'lines' => $lines,
+                'selectedPlant' => $plant,
+            ])->render(),
 
         ]);
     }
