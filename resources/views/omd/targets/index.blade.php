@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Target Fiscal Year')
-@section('header', 'Target Fiscal Year')
+@section('title', 'Fiscal Year')
+@section('header', 'Fiscal Year')
 
 @section('content')
     <style>
@@ -368,7 +368,7 @@
             </div>
 
             <button type="button" class="fy-action" id="openTargetModal">
-                + Tambah / Update Target Fiscal Year
+                + Atur Target
             </button>
         </div>
 

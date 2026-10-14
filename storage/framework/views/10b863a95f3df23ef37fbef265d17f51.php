@@ -2610,7 +2610,7 @@
 
                                     <a href="<?php echo e(route('omd.targets.index')); ?>"
                                         class="<?php echo e(request()->routeIs('omd.targets.*') ? 'active' : ''); ?>">
-                                        <span>Target Fiscal Year</span>
+                                        <span>Fiscal Year</span>
                                     </a>
                                 </div>
                             </div>

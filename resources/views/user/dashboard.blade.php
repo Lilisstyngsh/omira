@@ -39,85 +39,50 @@
 
     .dashboard-kpi {
         position: relative;
-        min-height: 102px;
-        padding: 17px;
+        min-height: 118px;
+        padding: 20px 22px;
         overflow: hidden;
-        background: #fff;
-        border: 1px solid #e5eaf1;
-        border-radius: 16px;
-        box-shadow: 0 8px 25px rgba(15, 23, 42, .045);
+        background: #ffffff;
+        border: 1px solid #edf0f2;
+        border-radius: 22px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
     }
 
     .dashboard-kpi-head {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
-        gap: 10px;
+        gap: 12px;
     }
 
     .dashboard-kpi-label {
-        color: #64748b;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: .035em;
-        text-transform: uppercase;
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 600;
     }
 
-    .dashboard-kpi.attention {
-        border-color: #E4DFA0;
-        box-shadow: 0 8px 26px rgba(119, 105, 58, .07);
-    }
-
-    .dashboard-create-order.btn.btn-primary {
-        background: #347554;
-        border: 1px solid #347554;
-        color: #fff;
-        font-weight: 750;
-        box-shadow: 0 5px 14px rgba(38, 99, 68, .18);
-        min-height: 44px;
-        transition: background .18s ease, box-shadow .18s ease;
-    }
-
-    .dashboard-create-order.btn.btn-primary:hover,
-    .dashboard-create-order.btn.btn-primary:focus-visible {
-        background: #285E43;
-        border-color: #285E43;
-        color: #fff;
-        box-shadow: 0 7px 17px rgba(38, 99, 68, .24);
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(1) {
-        background: linear-gradient(110deg, #fcfbf5 0%, #E3E4D0 56%, #F6F6EC 100%);
-        border-color: #DFE0C9;
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(2) {
-        background: radial-gradient(ellipse at 50% 48%, #FEFAF3 0%, #F8F2E8 62%, #F2EBDD 100%);
-        border-color: #EEE8DB;
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(3) {
-        background: linear-gradient(245deg, #FFFFEC 0%, #FFFDD3 58%, #FFFBA7 100%);
-        border-color: #F1EFAE;
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(4) {
-        background: radial-gradient(ellipse at 78% 24%, #FFFFFF 0%, #FBEFEF 58%, #F6E3E3 100%);
-        border-color: #F0E2E2;
-    }
-
-    .dashboard-kpis > .dashboard-kpi.attention {
-        border-color: #F1EFAE;
-        box-shadow: 0 8px 26px rgba(119, 105, 58, .07);
+    .dashboard-kpi-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f1f5f4;
+        color: #347554;
+        font-size: 17px;
     }
 
     .dashboard-kpi-value {
-        margin-top: 10px;
-        color: #172033;
-        font-size: 27px;
-        font-weight: 850;
+        position: absolute;
+        left: 22px;
+        bottom: 18px;
+        color: #111827;
+        font-size: 30px;
+        font-weight: 800;
         line-height: 1;
     }
+
 
     .dashboard-panel {
         overflow: hidden;
@@ -304,9 +269,10 @@
     .recent-table-wrap {
         margin: 16px;
         overflow-x: auto;
-        border: 1px solid #dce5ef;
-        border-radius: 14px;
+        border: 1px solid #e8edf3;
+        border-radius: 18px;
         background: #fff;
+        box-shadow: 0 8px 22px rgba(15,23,42,.04);
     }
 
     .recent-table {
@@ -317,8 +283,8 @@
     }
 
     .recent-table th {
-        padding: 10px 13px;
-        background: #fafbfc;
+        padding: 12px 14px;
+        background: #f8fafc;
         border-right: 1px solid #dce5ef;
         border-bottom: 1px solid #dce5ef;
         color: #64748b;
@@ -331,7 +297,7 @@
     }
 
     .recent-table td {
-        padding: 12px 13px;
+        padding: 14px 14px;
         border-right: 1px solid #e3eaf2;
         border-bottom: 1px solid #e3eaf2;
         color: #334155;
@@ -478,7 +444,7 @@
     .scrap-limit-modal[hidden] { display:none !important; }
     .scrap-limit-modal { position:fixed; inset:0; background:rgba(15,23,42,.45); display:flex; align-items:center; justify-content:center; z-index:1200; padding:18px; }
     .scrap-limit-dialog { width:min(100%,430px); background:#fff; border-radius:16px; padding:22px; }
-    .scrap-modal-close { position:absolute; top:12px; right:14px; border:0; background:transparent; font-size:22px; color:#64748b; cursor:pointer; } .scrap-limit-dialog { position:relative; } .scrap-limit-product-row { padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px; }
+    .scrap-limit-product-row { padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px; }
     .scrap-limit-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; color:#9a681e; font-size:13px; }
     .scrap-limit-alert.is-reached .scrap-limit-top { color:#ad323a; }
     .scrap-limit-top span { font-size:11px; font-weight:800; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
@@ -541,7 +507,6 @@
 
     <div class="scrap-limit-modal" id="scrap-limit-detail-modal" hidden>
         <div class="scrap-limit-dialog">
-            <button type="button" class="scrap-modal-close" data-scrap-detail-close aria-label="Close">×</button>
             <h3>Scrap Limit Tercapai</h3>
             @foreach($scrapAlerts as $cycle)
                 <div class="scrap-limit-product-row">
@@ -550,12 +515,29 @@
                 </div>
             @endforeach
             <div class="scrap-modal-actions">
-                <form method="POST" action="{{ route('user.orders.create') }}">
+                <form method="POST" action="{{ route('user.scrap-limit.decision', $scrapAlerts->first()) }}">
                     @csrf
+                    <input type="hidden" name="decision" value="yes">
                     <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
                 </form>
-                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-detail-close>Tidak</button>
+                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-no-open>Tidak</button>
             </div>
+        </div>
+    </div>
+
+    <div class="scrap-reason-modal" id="scrap-limit-reason-modal" hidden>
+        <div class="scrap-reason-dialog">
+            <h3>Tidak Membuat Order</h3>
+            <p>Masukkan alasan tidak membuat Order Repair.</p>
+            <form method="POST" action="{{ route('user.scrap-limit.decision', $scrapAlerts->first()) }}">
+                @csrf
+                <input type="hidden" name="decision" value="no">
+                <textarea name="reason" data-scrap-reason placeholder="Tulis alasan..." required></textarea>
+                <div class="scrap-modal-actions">
+                    <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
+                    <button type="submit" class="scrap-btn scrap-btn-order" data-scrap-submit hidden>Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
     @endif
@@ -564,6 +546,7 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Order Aktif</div>
+                <div class="dashboard-kpi-icon"><i class="fa-solid fa-clipboard-list"></i></div>
             </div>
             <div class="dashboard-kpi-value">{{ $orderActive }}</div>
         </div>
@@ -571,13 +554,15 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Diproses OMD</div>
+                <div class="dashboard-kpi-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
             </div>
             <div class="dashboard-kpi-value">{{ $processedOmd }}</div>
         </div>
 
-        <div class="dashboard-kpi {{ $needConfirmation > 0 ? 'attention' : '' }}">
+        <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
+                <div class="dashboard-kpi-icon"><i class="fa-solid fa-bell"></i></div>
             </div>
             <div class="dashboard-kpi-value">{{ $needConfirmation }}</div>
         </div>
@@ -585,6 +570,7 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
+                <div class="dashboard-kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
             </div>
             <div class="dashboard-kpi-value">{{ $completedThisMonth }}</div>
         </div>
@@ -762,9 +748,39 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <script>
-    document.querySelector('[data-scrap-detail-open]')?.addEventListener('click',()=>document.getElementById('scrap-limit-detail-modal').removeAttribute('hidden'));
-    document.querySelector('[data-scrap-detail-close]')?.addEventListener('click',()=>document.getElementById('scrap-limit-detail-modal').setAttribute('hidden','hidden'));
-document.getElementById('scrap-limit-detail-modal')?.addEventListener('click',function(e){ if(e.target===this){ this.setAttribute('hidden','hidden'); }});
+    const scrapDetailModal = document.getElementById('scrap-limit-detail-modal');
+    const scrapReasonModal = document.getElementById('scrap-limit-reason-modal');
+
+    document.querySelector('[data-scrap-detail-open]')?.addEventListener('click',()=>{
+        scrapDetailModal?.removeAttribute('hidden');
+    });
+
+    document.querySelector('[data-scrap-detail-close]')?.addEventListener('click',()=>{
+        scrapDetailModal?.setAttribute('hidden','hidden');
+    });
+
+    document.querySelector('[data-scrap-no-open]')?.addEventListener('click',()=>{
+        scrapDetailModal?.setAttribute('hidden','hidden');
+        scrapReasonModal?.removeAttribute('hidden');
+    });
+
+    document.querySelectorAll('[data-scrap-modal-close]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            scrapReasonModal?.setAttribute('hidden','hidden');
+        });
+    });
+
+    scrapDetailModal?.addEventListener('click',(e)=>{
+        if(e.target===scrapDetailModal){
+            scrapDetailModal.setAttribute('hidden','hidden');
+        }
+    });
+
+    scrapReasonModal?.addEventListener('click',(e)=>{
+        if(e.target===scrapReasonModal){
+            scrapReasonModal.setAttribute('hidden','hidden');
+        }
+    });
 </script>
 
 @endsection

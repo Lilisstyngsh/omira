@@ -1102,19 +1102,20 @@
             @endif
         </div>
 
-        <section class="monitor-card" style="padding:18px;">
+        <section class="monitor-card abnormality-card" style="padding:18px;">
             <h3 class="card-title">Daftar Abnormality Fiscal Year {{ $year }}</h3>
-            <div class="abnormality-summary">
-                <table>
+            <div class="abnormality-summary modern-table-wrap">
+                <table class="modern-abnormality-table">
                     <thead><tr><th>Bulan</th><th>Order</th><th>Target FY</th><th>Selisih</th><th>Alasan</th></tr></thead>
                     <tbody>
                         @forelse ($abnormalitiesByMonth as $abMonth => $item)
+                            @php $diff=(int)$item->actual_qty-(int)$item->threshold_qty; @endphp
                             <tr>
-                                <td>{{ $monthNames[(int) $abMonth] ?? $abMonth }}</td>
+                                <td><strong>{{ $monthNames[(int) $abMonth] ?? $abMonth }}</strong></td>
                                 <td>{{ number_format((int) $item->actual_qty) }}</td>
                                 <td>{{ number_format((int) $item->threshold_qty) }}</td>
-                                <td>{{ number_format((int) $item->actual_qty - (int) $item->threshold_qty) }}</td>
-                                <td>{{ $item->reason ?: '-' }}</td>
+                                <td><span class="abnormality-diff {{ $diff > 0 ? 'danger' : 'safe' }}">{{ $diff > 0 ? '+' : '' }}{{ number_format($diff) }}</span></td>
+                                <td class="reason-cell">{{ $item->reason ?: '-' }}</td>
                             </tr>
                         @empty
                             <tr><td colspan="5" style="text-align:center;color:#64748b;">Belum ada data abnormality tersimpan.</td></tr>
@@ -1195,3 +1196,16 @@
         })();
     </script>
 @endsection
+
+<style>
+.modern-table-wrap{border:1px solid #e8edf0;border-radius:16px;overflow:hidden;background:#fff;}
+.modern-abnormality-table{width:100%;border-collapse:collapse;}
+.modern-abnormality-table thead{background:#f7f9fa;}
+.modern-abnormality-table th{padding:14px 16px;color:#64748b;font-size:12px;text-transform:uppercase;text-align:left;}
+.modern-abnormality-table td{padding:15px 16px;border-top:1px solid #eef2f3;color:#334155;}
+.modern-abnormality-table tbody tr:hover{background:#f8faf9;}
+.abnormality-diff{display:inline-flex;padding:5px 10px;border-radius:999px;font-weight:700;font-size:13px;}
+.abnormality-diff.danger{background:#feecec;color:#dc2626;}
+.abnormality-diff.safe{background:#eaf7ef;color:#15803d;}
+.reason-cell{max-width:420px;}
+</style>

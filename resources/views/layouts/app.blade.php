@@ -2618,7 +2618,7 @@
 
                                     <a href="{{ route('omd.targets.index') }}"
                                         class="{{ request()->routeIs('omd.targets.*') ? 'active' : '' }}">
-                                        <span>Target Fiscal Year</span>
+                                        <span>Fiscal Year</span>
                                     </a>
                                 </div>
                             </div>

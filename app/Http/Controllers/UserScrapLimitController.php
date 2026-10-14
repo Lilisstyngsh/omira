@@ -18,7 +18,14 @@ class UserScrapLimitController extends Controller
         }
         \Illuminate\Support\Facades\DB::transaction(function () use ($cycle, $data) {
             $record = UserScrapLimitCycle::query()->lockForUpdate()->findOrFail($cycle->id);
-            abort_if($record->decision || $record->reset_at, 422, 'Keputusan sudah tersimpan atau limit sudah direset.');
+            abort_if($record->reset_at, 422, 'Limit sudah direset oleh OMD.');
+
+            // Hindari error ketika user melakukan submit ulang dari modal.
+            // Decision hanya diperbarui jika belum ada, atau melengkapi alasan Tidak Order.
+            if ($record->decision && $record->decision === 'yes') {
+                abort(422, 'Keputusan Order sudah tersimpan.');
+            }
+
             $record->update([
                 'decision'=>$data['decision'],
                 'decision_reason'=>$data['decision'] === 'no' ? trim($data['reason']) : null,

@@ -467,6 +467,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/targets', [TargetController::class, 'index'])
                 ->name('targets.index');
 
+            Route::get('/targets/abnormality-archive', [TargetController::class, 'abnormalityArchive'])
+                ->name('targets.abnormality.archive');
+
             Route::post('/targets', [TargetController::class, 'store'])
                 ->name('targets.store');
 
