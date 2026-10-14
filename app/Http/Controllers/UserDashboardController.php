@@ -89,6 +89,17 @@ class UserDashboardController extends Controller
                 return $cycle;
             })->filter(fn ($cycle) => $cycle->used_qty >= $cycle->limit_qty);
 
+        $scrapLimitSummary = $scrapAlerts->map(function ($cycle) {
+            return [
+                'id' => $cycle->id,
+                'product_id' => $cycle->product_id,
+                'product' => $cycle->product?->name,
+                'model' => $cycle->product?->masterModel?->model,
+                'used_qty' => $cycle->used_qty,
+                'limit_qty' => $cycle->limit_qty,
+            ];
+        })->values();
+
         return view('user.dashboard', compact(
             'orderActive',
             'processedOmd',
@@ -96,7 +107,8 @@ class UserDashboardController extends Controller
             'completedThisMonth',
             'actionOrders',
             'recentOrders',
-            'scrapAlerts'
+            'scrapAlerts',
+            'scrapLimitSummary'
         ));
     }
 }

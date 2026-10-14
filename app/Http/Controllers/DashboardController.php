@@ -9,6 +9,7 @@ use App\Models\ProductScrapLimit;
 use App\Models\RepairOrder;
 use App\Models\RepairOrderItem;
 use App\Models\RepairMonthlySnapshot;
+use App\Models\UserScrapLimitCycle;
 use App\Models\RepairResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -369,9 +370,19 @@ class DashboardController extends Controller
             ->groupBy('product_id')
             ->map(fn ($rows) => $rows->first());
 
+        $resetProducts = UserScrapLimitCycle::query()
+            ->whereNotNull('reset_at')
+            ->pluck('product_id')
+            ->filter()
+            ->unique();
+
         return $items
             ->groupBy('product_id')
-            ->map(function (Collection $productItems, $productId) use ($limits) {
+            ->map(function (Collection $productItems, $productId) use ($limits, $resetProducts) {
+                if ($resetProducts->contains((int) $productId)) {
+                    return null;
+                }
+
                 $limit = $limits->get((int) $productId);
 
                 if (! $limit) {

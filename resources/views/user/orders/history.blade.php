@@ -837,16 +837,6 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
 <div class="page-card">
 
-    {{-- =====================================================
-             HEADER
-        ===================================================== --}}
-
-    <div class="page-head">
-        <h2>History Order Repair Box</h2>
-        <p>Riwayat seluruh order Repair Box yang sudah selesai.</p>
-    </div>
-
-
     <form action="{{ route('user.orders.history') }}" method="GET" id="historyForm">
 
         {{-- =====================================================
@@ -889,7 +879,7 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
                     <button type="submit" class="history-filter-btn history-filter-btn-primary">
                         <i class="fa-solid fa-filter"></i>
-                        Terapkan Filter
+                        Filter
                     </button>
 
                     @if (request('start_date') || request('end_date'))

@@ -780,7 +780,7 @@
         <div>
 
             <h2 class="account-page-title">
-                Manajemen Akun
+                Daftar Akun
             </h2>
 
         </div>

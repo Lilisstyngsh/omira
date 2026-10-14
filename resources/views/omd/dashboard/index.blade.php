@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Monitoring Repair Box')
-@section('header', 'Monitoring Repair Box')
+@section('title', 'Dashboard')
+@section('header', 'Dashboard')
 
 @section('content')
     @php
@@ -1103,7 +1103,7 @@
         </div>
 
         <section class="monitor-card" style="padding:18px;">
-            <h3 class="card-title">Ringkasan Abnormality FY {{ $year }}</h3>
+            <h3 class="card-title">Daftar Abnormality Fiscal Year {{ $year }}</h3>
             <div class="abnormality-summary">
                 <table>
                     <thead><tr><th>Bulan</th><th>Order</th><th>Target FY</th><th>Selisih</th><th>Alasan</th></tr></thead>

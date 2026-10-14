@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Monitoring Order Repair Box')
-@section('header', 'Monitoring Order Repair Box')
+@section('title', 'Repair Box')
+@section('header', 'Order Repair Box')
 
 @section('content')
 
@@ -390,7 +390,7 @@
             <div>
 
                 <h3>
-                    Daftar Monitoring Repair Box
+                    Daftar Order Repair Box
                 </h3>
 
             </div>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard User')
-@section('header', 'Dashboard User')
+@section('header', 'Dashboard')
 
 @section('content')
 <style>
@@ -86,9 +86,8 @@
         box-shadow: 0 7px 17px rgba(38, 99, 68, .24);
     }
 
-    /* Soft pastel KPI backgrounds — warna saja, tanpa motif/pattern. */
     .dashboard-kpis > .dashboard-kpi:nth-child(1) {
-        background: linear-gradient(110deg, #C9CAAC 0%, #E3E4D0 56%, #F6F6EC 100%);
+        background: linear-gradient(110deg, #fcfbf5 0%, #E3E4D0 56%, #F6F6EC 100%);
         border-color: #DFE0C9;
     }
 
@@ -471,11 +470,15 @@
         }
     }
 
-    .scrap-limit-panel { border:1px solid #f1d4d6; overflow:hidden; }
-    .scrap-limit-panel .dashboard-panel-title { display:flex; align-items:center; gap:8px; }
-    .scrap-limit-items { padding:14px; display:grid; gap:12px; }
-    .scrap-limit-alert { border:1px solid #eadba7; background:#fffbeb; border-radius:12px; padding:15px; }
-    .scrap-limit-alert.is-reached { border-color:#efb4b6; background:#fff4f4; }
+    .scrap-limit-panel { overflow:hidden; }
+    .scrap-limit-summary { cursor:pointer; border:1px solid #efb4b6; background:#fff5f5; border-radius:14px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .scrap-limit-summary:hover { background:#fff0f0; }
+    .scrap-limit-summary-title { display:flex; align-items:center; gap:10px; color:#b4232d; font-weight:800; }
+    .scrap-limit-summary-text { color:#475569; font-size:13px; margin-top:4px; }
+    .scrap-limit-modal[hidden] { display:none !important; }
+    .scrap-limit-modal { position:fixed; inset:0; background:rgba(15,23,42,.45); display:flex; align-items:center; justify-content:center; z-index:1200; padding:18px; }
+    .scrap-limit-dialog { width:min(100%,430px); background:#fff; border-radius:16px; padding:22px; }
+    .scrap-modal-close { position:absolute; top:12px; right:14px; border:0; background:transparent; font-size:22px; color:#64748b; cursor:pointer; } .scrap-limit-dialog { position:relative; } .scrap-limit-product-row { padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px; }
     .scrap-limit-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; color:#9a681e; font-size:13px; }
     .scrap-limit-alert.is-reached .scrap-limit-top { color:#ad323a; }
     .scrap-limit-top span { font-size:11px; font-weight:800; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
@@ -527,51 +530,34 @@
 
     @if($scrapAlerts->isNotEmpty())
     <section class="dashboard-panel scrap-limit-panel">
-        <div class="dashboard-panel-head">
-            <h3 class="dashboard-panel-title"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Monitoring Scrap Limit</h3>
-        </div>
-        <div class="scrap-limit-items">
-            @foreach($scrapAlerts as $cycle)
-                <div class="scrap-limit-alert is-reached">
-                    <div class="scrap-limit-top">
-                        <strong>Danger — Scrap Limit Tercapai</strong>
-                        <span>Limit tercapai</span>
-                    </div>
-                    <div class="scrap-limit-product">{{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}</div>
-                    <div class="scrap-limit-meta">{{ $cycle->product?->masterModel?->line?->name ?? $cycle->line?->name }} · Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</div>
-                    <div class="scrap-limit-notice">Scrap Limit sebagai informasi monitoring. Order Repair Box dan Qty Scrap tetap dapat diproses.</div>
-                    @if(!$cycle->decision)
-                        <p class="scrap-limit-question">Apakah ingin membuat Repair Order?</p>
-                        <div class="scrap-limit-actions">
-                            <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
-                                @csrf
-                                <input type="hidden" name="decision" value="yes">
-                                <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
-                            </form>
-                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
-                        </div>
-                        <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
-                            <div class="scrap-reason-dialog">
-                                <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Membuat Order</h3>
-                                <p>{{ $cycle->product?->name }}</p>
-                                <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
-                                    @csrf
-                                    <input type="hidden" name="decision" value="no">
-                                    <textarea name="reason" maxlength="1000" rows="4" placeholder="Masukkan alasan..." required data-scrap-reason></textarea>
-                                    <div class="scrap-modal-actions">
-                                        <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
-                                        <button type="submit" class="scrap-btn scrap-btn-order" data-scrap-submit hidden>Simpan Alasan</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    @elseif($cycle->decision)
-                        <div class="scrap-limit-meta">Keputusan: {{ $cycle->decision === 'yes' ? 'Order' : 'Tidak Order' }}{{ $cycle->decision_reason ? ' — '.$cycle->decision_reason : '' }}</div>
-                    @endif
-                </div>
-            @endforeach
+        <div class="scrap-limit-summary" data-scrap-detail-open>
+            <div>
+                <div class="scrap-limit-summary-title"><i class="fa-solid fa-circle-info"></i> Scrap Limit Tercapai</div>
+                <div class="scrap-limit-summary-text">{{ $scrapAlerts->count() }} produk mencapai/melewati Scrap Limit</div>
+            </div>
+            <i class="fa-solid fa-chevron-right"></i>
         </div>
     </section>
+
+    <div class="scrap-limit-modal" id="scrap-limit-detail-modal" hidden>
+        <div class="scrap-limit-dialog">
+            <button type="button" class="scrap-modal-close" data-scrap-detail-close aria-label="Close">×</button>
+            <h3>Scrap Limit Tercapai</h3>
+            @foreach($scrapAlerts as $cycle)
+                <div class="scrap-limit-product-row">
+                    <strong>{{ $cycle->product?->name }}</strong><br>
+                    Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}
+                </div>
+            @endforeach
+            <div class="scrap-modal-actions">
+                <form method="POST" action="{{ route('user.orders.create') }}">
+                    @csrf
+                    <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
+                </form>
+                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-detail-close>Tidak</button>
+            </div>
+        </div>
+    </div>
     @endif
 
     <div class="dashboard-kpis">
@@ -775,4 +761,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<script>
+    document.querySelector('[data-scrap-detail-open]')?.addEventListener('click',()=>document.getElementById('scrap-limit-detail-modal').removeAttribute('hidden'));
+    document.querySelector('[data-scrap-detail-close]')?.addEventListener('click',()=>document.getElementById('scrap-limit-detail-modal').setAttribute('hidden','hidden'));
+document.getElementById('scrap-limit-detail-modal')?.addEventListener('click',function(e){ if(e.target===this){ this.setAttribute('hidden','hidden'); }});
+</script>
+
 @endsection

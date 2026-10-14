@@ -663,7 +663,7 @@
                 <div>
 
                     <h4>
-                        Dashboard Plant & Line
+                        Plant
                     </h4>
 
                 </div>
