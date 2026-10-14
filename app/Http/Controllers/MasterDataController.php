@@ -134,7 +134,8 @@ class MasterDataController extends Controller
     {
 
 
-        $plants = Plant::withCount('lines')
+        $plants = Plant::with(['lines' => fn ($query) => $query->orderBy('name')])
+            ->withCount('lines')
             ->orderBy('name')
             ->get();
 
@@ -147,7 +148,7 @@ class MasterDataController extends Controller
         if ($request->plant) {
 
             $selectedPlant =
-                Plant::find($request->plant);
+                $plants->firstWhere('id', $request->plant);
         }
 
 

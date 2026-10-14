@@ -12,6 +12,26 @@ class MasterPlantLineTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_line_page_preloads_each_plant_table_and_keeps_the_requested_context(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'omd']));
+        $body = Plant::create(['name' => 'Body']);
+        $body->lines()->create(['name' => 'AS Body']);
+        $electric = Plant::create(['name' => 'Electric']);
+        $electric->lines()->create(['name' => 'Z Electric']);
+        $electric->lines()->create(['name' => 'A Electric']);
+
+        $this->get(route('omd.master.line', ['plant' => $electric->id]))
+            ->assertOk()
+            ->assertViewHas('plants', fn ($plants) => $plants->every(
+                fn ($plant) => $plant->relationLoaded('lines')
+            ))
+            ->assertViewHas('selectedPlant', fn ($plant) => $plant->id === $electric->id)
+            ->assertViewHas('lines', fn ($lines) => $lines->pluck('name')->all() === ['A Electric', 'Z Electric'])
+            ->assertSee('data-plant-lines="'.$body->id.'"', false)
+            ->assertSee('data-plant-lines="'.$electric->id.'"', false);
+    }
+
     public function test_json_line_rename_preserves_plant_and_related_models(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'omd']));

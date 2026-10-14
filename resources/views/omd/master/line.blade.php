@@ -242,6 +242,7 @@
             margin-top: 14px;
             padding-top: 12px;
             border-top: 1px solid #edf1f5;
+            min-height: 45px;
         }
 
         .plant-mini-btn {
@@ -284,16 +285,24 @@
 
         .plant-delete-form {
             margin: 0;
+            position: absolute;
+            top: 8px;
+            right: 8px;
         }
 
         .plant-details {
             flex: 1;
             min-width: 0;
+            padding-right: 22px;
         }
 
         .plant-name-edit,
         .editable-line-row {
             cursor: text;
+        }
+
+        .plant-name-edit {
+            overflow-wrap: anywhere;
         }
 
         .inline-name input {
@@ -405,17 +414,11 @@
 
         #lineTable th:nth-child(1),
         #lineTable td:nth-child(1) {
-            width: 80px;
-            text-align: center;
+            width: auto;
         }
 
         #lineTable th:nth-child(2),
         #lineTable td:nth-child(2) {
-            width: auto;
-        }
-
-        #lineTable th:nth-child(3),
-        #lineTable td:nth-child(3) {
             width: 220px;
         }
 
@@ -832,6 +835,16 @@
     MODAL TAMBAH PLANT
 ===================================================== --}}
 
+    {{-- Prepare each small Line table once so switching Plants needs no round trip. --}}
+    @foreach ($plants as $plant)
+        <template data-plant-lines="{{ $plant->id }}">
+            @include('omd.master.partials.line_table', [
+                'lines' => $plant->lines,
+                'selectedPlant' => $plant,
+            ])
+        </template>
+    @endforeach
+
     <div id="addPlantModal" class="modal-overlay">
 
         <div class="modal-box">
@@ -967,10 +980,10 @@
 
         const plantDashboard = document.querySelector('.plant-dashboard');
         const lineTable = document.getElementById('lineTable');
-        const plantLinesUrl = @json(route('omd.master.line.byPlant', ['plant' => '__PLANT__']));
+        const lineTemplates = new Map(Array.from(document.querySelectorAll('template[data-plant-lines]'),
+            template => [Number(template.dataset.plantLines), template]));
         const csrfToken = @json(csrf_token());
         let selectedPlantId = @json($selectedPlant?->id);
-        let plantLoadController = null;
         let activeEditor = null;
 
         function keepSelectedPlantInUrl() {
@@ -1012,7 +1025,7 @@
         }
 
         function beginInlineEdit(container) {
-            if (lineTable.getAttribute('aria-busy') === 'true' || activeEditor?.saving) return;
+            if (activeEditor?.saving) return;
             if (activeEditor?.container === container) {
                 activeEditor.input.focus();
                 return;
@@ -1095,6 +1108,9 @@
                     editor.owner.setAttribute('aria-label', 'Edit nama Line ' + saved.name);
                 }
                 closeInlineEditor(editor);
+                if (editor.kind === 'line') {
+                    lineTemplates.get(Number(saved.plant_id)).innerHTML = lineTable.innerHTML;
+                }
                 showMasterFeedback(data.message);
             } catch (error) {
                 // Preserve the original display/data and allow correction or Escape.
@@ -1107,36 +1123,23 @@
             }
         }
 
-        async function loadLine(id, element) {
+        function loadLine(id, element) {
             if (activeEditor?.saving) return;
             if (activeEditor) closeInlineEditor(activeEditor);
-            plantLoadController?.abort();
-            const controller = new AbortController();
-            plantLoadController = controller;
-            lineTable.setAttribute('aria-busy', 'true');
-            try {
-                const response = await fetch(plantLinesUrl.replace('__PLANT__', id), {
-                    headers: {'Accept': 'application/json'},
-                    signal: controller.signal,
-                });
-                const data = await readMasterResponse(response);
-                if (controller !== plantLoadController) return;
-                selectedPlantId = Number(id);
-                plantDashboard.querySelectorAll('.plant-card').forEach(card => {
-                    card.classList.toggle('active', card === element);
-                });
-                document.getElementById('addPlantId').value = id;
-                document.getElementById('plantTitle').textContent = element.dataset.name;
-                lineTable.innerHTML = data.html;
-                keepSelectedPlantInUrl();
-                bindDeleteLine();
-            } catch (error) {
-                if (error.name !== 'AbortError' && controller === plantLoadController) {
-                    showMasterFeedback(error.message, 'danger');
-                }
-            } finally {
-                if (controller === plantLoadController) lineTable.removeAttribute('aria-busy');
+            const template = lineTemplates.get(Number(id));
+            if (!template) {
+                showMasterFeedback('Data Plant tidak tersedia. Muat ulang halaman dan coba lagi.', 'danger');
+                return;
             }
+            selectedPlantId = Number(id);
+            plantDashboard.querySelectorAll('.plant-card').forEach(card => {
+                card.classList.toggle('active', card === element);
+            });
+            document.getElementById('addPlantId').value = id;
+            document.getElementById('plantTitle').textContent = element.dataset.name;
+            lineTable.replaceChildren(template.content.cloneNode(true));
+            keepSelectedPlantInUrl();
+            bindDeleteLine();
         }
 
         // Delegate once: new table rows inherit the same editing behavior.

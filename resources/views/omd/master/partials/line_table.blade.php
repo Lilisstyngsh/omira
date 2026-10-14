@@ -4,10 +4,6 @@
 
         <tr>
 
-            <th width="80">
-                No
-            </th>
-
             <th>
                 Line
             </th>
@@ -28,10 +24,6 @@
                 data-plant-id="{{ $line->plant_id }}" data-name="{{ $line->name }}"
                 data-update-url="{{ route('omd.master.line.update', $line) }}"
                 tabindex="0" aria-label="Edit nama Line {{ $line->name }}">
-
-                <td>
-                    {{ $loop->iteration }}
-                </td>
 
                 <td>
 
@@ -71,7 +63,7 @@
 
             <tr>
 
-                <td colspan="3" class="text-center">
+                <td colspan="2" class="text-center">
                     Belum ada Line
                 </td>
 
