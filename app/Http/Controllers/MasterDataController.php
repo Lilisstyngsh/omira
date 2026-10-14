@@ -502,6 +502,12 @@ class MasterDataController extends Controller
 
         $product->update($validated);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Produk berhasil diperbarui',
+                'product' => $product->only(['id', 'name', 'master_model_id']),
+            ]);
+        }
 
 
         return back()

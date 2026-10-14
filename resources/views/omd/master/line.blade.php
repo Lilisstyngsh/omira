@@ -686,6 +686,8 @@
         }
     </style>
 
+    @include('omd.master.partials.master_colors')
+
 
     {{-- =====================================================
     DASHBOARD PLANT
@@ -693,7 +695,7 @@
 
     <div id="masterFeedback" class="alert" role="status" aria-live="polite" hidden></div>
 
-    <div class="card plant-dashboard-card">
+    <div class="card plant-dashboard-card omd-master-accent">
 
         <div class="card-body">
 
@@ -795,7 +797,7 @@
     TABLE LINE
 ===================================================== --}}
 
-    <div class="card mt-4 line-table-card">
+    <div class="card mt-4 line-table-card omd-master-accent">
 
         <div class="card-body">
 

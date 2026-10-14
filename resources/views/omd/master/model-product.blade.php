@@ -613,6 +613,7 @@
             background: #f8fafc;
             border: 1px solid #edf0f3;
             border-radius: 10px;
+            cursor: text;
         }
 
         .popup-product-item:last-child {
@@ -621,12 +622,36 @@
 
         .popup-product-name {
             min-width: 0;
+            flex: 1;
             color: #334155;
             font-size: 12px;
             font-weight: 650;
             word-break: break-word;
         }
 
+        .popup-product-name input {
+            width: 100%;
+            min-width: 0;
+            font: inherit;
+        }
+
+        .popup-product-delete {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            color: #475569;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            cursor: pointer;
+        }
+
+        .popup-product-delete:hover {
+            color: #1e293b;
+        }
         .popup-product-actions {
             display: flex;
             align-items: center;
@@ -837,12 +862,12 @@
             }
 
             .popup-product-item {
-                align-items: flex-start;
-                flex-direction: column;
+                align-items: center;
+                flex-direction: row;
             }
 
             .popup-product-actions {
-                width: 100%;
+                width: auto;
             }
 
             .popup-action-btn {
@@ -870,12 +895,13 @@
 
 </style>
 
+    @include('omd.master.partials.master_colors')
 
     {{-- =====================================================
     LINE DASHBOARD
 ===================================================== --}}
 
-    <div class="card">
+    <div class="card omd-master-accent">
 
         <div class="card-body">
 
@@ -975,7 +1001,7 @@
     MODEL TABLE
 ===================================================== --}}
 
-    <div class="card mt-4">
+    <div class="card mt-4 omd-master-accent">
 
         <div class="card-body">
 
@@ -1123,23 +1149,17 @@
                             <template id="product-source-{{ $model->id }}">
 
                                 @forelse($model->products as $product)
-                                    <div class="popup-product-item">
+                                    <div class="popup-product-item" data-product-id="{{ $product->id }}"
+                                        data-model-id="{{ $product->master_model_id }}" data-name="{{ $product->name }}"
+                                        data-update-url="{{ route('omd.master.product.update', $product) }}"
+                                        tabindex="0" aria-label="Edit nama Produk {{ $product->name }}">
 
-                                        <span class="popup-product-name">
-                                            {{ $product->name }}
+                                        <span class="popup-product-name inline-name">
+                                            <span data-product-name-display>{{ $product->name }}</span>
                                         </span>
 
 
                                         <div class="popup-product-actions">
-
-                                            <button type="button"
-                                                class="popup-action-btn popup-action-edit edit-product-btn action-icon-only"
-                                                data-id="{{ $product->id }}"
-                                                data-model-id="{{ $product->master_model_id }}"
-                                                data-name="{{ $product->name }}" title="Edit Produk" aria-label="Edit Produk">
-                                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                            </button>
-
 
                                             <form method="POST"
                                                 action="{{ route('omd.master.product.destroy', $product->id) }}"
@@ -1148,8 +1168,11 @@
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button type="submit" class="popup-action-btn popup-action-delete action-icon-only" title="Hapus Produk" aria-label="Hapus Produk">
-                                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                                <button type="submit" class="popup-product-delete" title="Hapus Produk" aria-label="Hapus Produk">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                                                        <path d="m6 6 12 12M18 6 6 18" />
+                                                    </svg>
                                                 </button>
 
                                             </form>
@@ -1219,7 +1242,7 @@
 
     <div id="productListModal" class="modal-overlay">
 
-        <div class="product-list-box">
+        <div class="product-list-box omd-master-accent">
 
             <div class="product-list-header">
 
@@ -1228,6 +1251,8 @@
                     <h4 id="productListTitle">
                         Produk Model
                     </h4>
+
+                    <p>Klik baris produk untuk mengedit. Enter untuk menyimpan.</p>
 
                 </div>
 
@@ -1246,6 +1271,8 @@
 
             </div>
 
+
+            <div id="productListFeedback" class="alert" role="status" aria-live="polite" hidden></div>
 
             <div id="productListContent" class="product-list-content">
             </div>
@@ -1487,70 +1514,6 @@
     </div>
 
 
-    {{-- =====================================================
-    MODAL EDIT PRODUK
-===================================================== --}}
-
-    <div id="editProductModal" class="modal-overlay">
-
-        <div class="modal-box">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h4>
-                        Edit Produk
-                    </h4>
-
-                    <p>
-                        Perbarui data Produk.
-                    </p>
-
-                </div>
-
-                <button type="button" class="modal-close" onclick="closeEditProductModal()">
-                    ×
-                </button>
-
-            </div>
-
-
-            <form method="POST" id="editProductForm">
-
-                @csrf
-                @method('PUT')
-
-
-                <input type="hidden" name="master_model_id" id="editProductModelId">
-
-
-                <label for="editProductName" class="form-label">
-                    Nama Produk
-                </label>
-
-                <input type="text" name="name" id="editProductName" class="form-control" required>
-
-
-                <div class="modal-action">
-
-                    <button type="button" onclick="closeEditProductModal()" class="btn btn-secondary">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
@@ -1572,6 +1535,132 @@
 
         let activeProductModelName =
             '';
+
+
+        const productListContent = document.getElementById('productListContent');
+        const productListFeedback = document.getElementById('productListFeedback');
+        const productCsrfToken = @json(csrf_token());
+        let productEditor = null;
+
+        function showProductFeedback(message, type = 'success') {
+            productListFeedback.className = 'alert alert-' + type;
+            productListFeedback.textContent = message;
+            productListFeedback.hidden = false;
+        }
+
+        function cancelProductEditor(editor) {
+            if (productEditor !== editor) return;
+            productEditor = null;
+            editor.input.remove();
+            editor.display.hidden = false;
+        }
+
+        function beginProductEdit(item) {
+            if (productEditor?.saving) return;
+            if (productEditor?.item === item) {
+                productEditor.input.focus();
+                return;
+            }
+            if (productEditor) cancelProductEditor(productEditor);
+            const container = item.querySelector('.popup-product-name');
+            const display = container.querySelector('[data-product-name-display]');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.maxLength = 150;
+            input.value = item.dataset.name;
+            input.setAttribute('aria-label', 'Nama Produk');
+            const editor = {item, container, display, input, saving: false};
+            productEditor = editor;
+            display.hidden = true;
+            container.append(input);
+            input.focus();
+            input.select();
+            input.addEventListener('click', event => event.stopPropagation());
+            input.addEventListener('keydown', event => {
+                event.stopPropagation();
+                if (event.isComposing) return;
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    saveProductEditor(editor);
+                } else if (event.key === 'Escape' && !editor.saving) {
+                    event.preventDefault();
+                    cancelProductEditor(editor);
+                    item.focus();
+                }
+            });
+            input.addEventListener('blur', () => {
+                if (!editor.saving) cancelProductEditor(editor);
+            });
+        }
+
+        async function saveProductEditor(editor) {
+            if (productEditor !== editor || editor.saving) return;
+            const name = editor.input.value.trim();
+            if (name === editor.item.dataset.name) {
+                cancelProductEditor(editor);
+                return;
+            }
+            editor.saving = true;
+            editor.input.readOnly = true;
+            editor.input.setAttribute('aria-busy', 'true');
+            try {
+                const response = await fetch(editor.item.dataset.updateUrl, {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': productCsrfToken,
+                    },
+                    body: JSON.stringify({
+                        name,
+                        master_model_id: Number(editor.item.dataset.modelId),
+                    }),
+                });
+                if (!response.headers.get('content-type')?.includes('application/json')) {
+                    throw new Error('Respons server tidak valid. Muat ulang halaman dan coba lagi.');
+                }
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(response.status >= 500
+                        ? 'Produk gagal disimpan. Coba lagi.'
+                        : Object.values(data.errors || {}).flat()[0] || data.message || 'Produk gagal disimpan.');
+                }
+                const saved = data.product;
+                editor.item.dataset.name = saved.name;
+                editor.item.setAttribute('aria-label', 'Edit nama Produk ' + saved.name);
+                editor.display.textContent = saved.name;
+                cancelProductEditor(editor);
+
+                // Update the stored list so reopening this Model shows the saved name.
+                const source = document.getElementById('product-source-' + saved.master_model_id);
+                const cachedItem = source.content.querySelector(`[data-product-id="${saved.id}"]`);
+                cachedItem.dataset.name = saved.name;
+                cachedItem.setAttribute('aria-label', 'Edit nama Produk ' + saved.name);
+                cachedItem.querySelector('[data-product-name-display]').textContent = saved.name;
+                showProductFeedback(data.message);
+            } catch (error) {
+                showProductFeedback(error.message, 'danger');
+                editor.input.focus();
+            } finally {
+                editor.saving = false;
+                editor.input.readOnly = false;
+                editor.input.removeAttribute('aria-busy');
+            }
+        }
+
+        productListContent.addEventListener('click', event => {
+            if (event.target.closest('button, input, select, textarea, a, form')) return;
+            const item = event.target.closest('.popup-product-item');
+            if (item) beginProductEdit(item);
+        });
+        productListContent.addEventListener('keydown', event => {
+            if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.popup-product-item')) {
+                event.preventDefault();
+                beginProductEdit(event.target);
+            }
+        });
 
 
         /* =====================================================
@@ -1629,6 +1718,10 @@
                 ).innerText =
                 plantName;
 
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('line_id', selectedLineId);
+            window.history.replaceState(null, '', url);
 
             filterModels();
 
@@ -1918,6 +2011,10 @@
             modelName
         ) {
 
+            if (productEditor?.saving) return;
+            if (productEditor) cancelProductEditor(productEditor);
+            productListFeedback.hidden = true;
+
             activeProductModelId =
                 modelId;
 
@@ -2008,6 +2105,8 @@
 
 
         function closeProductListModal() {
+            if (productEditor?.saving) return;
+            if (productEditor) cancelProductEditor(productEditor);
 
             document.getElementById(
                     'productListModal'
@@ -2025,33 +2124,6 @@
 
             document
                 .querySelectorAll(
-                    '#productListContent .edit-product-btn'
-                )
-                .forEach(
-                    function(button) {
-
-                        button.addEventListener(
-                            'click',
-                            function(event) {
-
-                                event.stopPropagation();
-
-
-                                openEditProductModal(
-                                    this.dataset.id,
-                                    this.dataset.modelId,
-                                    this.dataset.name
-                                );
-
-                            }
-                        );
-
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
                     '#productListContent .delete-product-form'
                 )
                 .forEach(
@@ -2062,6 +2134,8 @@
                             function(event) {
 
                                 event.preventDefault();
+                                if (productEditor?.saving) return;
+                                if (productEditor) cancelProductEditor(productEditor);
 
 
                                 const targetForm =
@@ -2257,6 +2331,10 @@
             modelName
         ) {
 
+            if (productEditor?.saving) return;
+            if (productEditor) cancelProductEditor(productEditor);
+            productListFeedback.hidden = true;
+
             activeProductModelId =
                 modelId;
 
@@ -2295,53 +2373,6 @@
 
             document.getElementById(
                     'addProductModal'
-                ).style.display =
-                'none';
-
-        }
-
-
-        /* =====================================================
-           EDIT PRODUCT
-        ===================================================== */
-
-        function openEditProductModal(
-            id,
-            modelId,
-            name
-        ) {
-
-            document.getElementById(
-                    'editProductModal'
-                ).style.display =
-                'flex';
-
-
-            document.getElementById(
-                    'editProductModelId'
-                ).value =
-                modelId;
-
-
-            document.getElementById(
-                    'editProductName'
-                ).value =
-                name;
-
-
-            document.getElementById(
-                    'editProductForm'
-                ).action =
-                "{{ url('/omd/master/product') }}/" +
-                id;
-
-        }
-
-
-        function closeEditProductModal() {
-
-            document.getElementById(
-                    'editProductModal'
                 ).style.display =
                 'none';
 
@@ -2447,8 +2478,11 @@
                                 e.target === modal
                             ) {
 
-                                modal.style.display =
-                                    'none';
+                                if (modal.id === 'productListModal') {
+                                    closeProductListModal();
+                                } else {
+                                    modal.style.display = 'none';
+                                }
 
                             }
 
