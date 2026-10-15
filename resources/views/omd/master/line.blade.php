@@ -242,6 +242,7 @@
             margin-top: 14px;
             padding-top: 12px;
             border-top: 1px solid #edf1f5;
+            min-height: 45px;
         }
 
         .plant-mini-btn {
@@ -284,8 +285,50 @@
 
         .plant-delete-form {
             margin: 0;
+            position: absolute;
+            top: 8px;
+            right: 8px;
         }
 
+        .plant-details {
+            flex: 1;
+            min-width: 0;
+            padding-right: 22px;
+        }
+
+        .plant-name-edit,
+        .editable-line-row {
+            cursor: text;
+        }
+
+        .plant-name-edit {
+            overflow-wrap: anywhere;
+        }
+
+        .inline-name input {
+            width: 100%;
+            min-width: 0;
+            font: inherit;
+        }
+
+        .master-delete {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            color: #475569;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            cursor: pointer;
+        }
+
+        .master-delete:hover {
+            color: #1e293b;
+        }
 
         /* =====================================================
                                EMPTY PLANT
@@ -371,17 +414,11 @@
 
         #lineTable th:nth-child(1),
         #lineTable td:nth-child(1) {
-            width: 80px;
-            text-align: center;
+            width: auto;
         }
 
         #lineTable th:nth-child(2),
         #lineTable td:nth-child(2) {
-            width: auto;
-        }
-
-        #lineTable th:nth-child(3),
-        #lineTable td:nth-child(3) {
             width: 220px;
         }
 
@@ -649,12 +686,16 @@
         }
     </style>
 
+    @include('omd.master.partials.master_colors')
+
 
     {{-- =====================================================
     DASHBOARD PLANT
 ===================================================== --}}
 
-    <div class="card plant-dashboard-card">
+    <div id="masterFeedback" class="alert" role="status" aria-live="polite" hidden></div>
+
+    <div class="card plant-dashboard-card omd-master-accent">
 
         <div class="card-body">
 
@@ -680,7 +721,8 @@
                 @forelse ($plants as $plant)
                     <div class="plant-card {{ $selectedPlant && $selectedPlant->id == $plant->id ? 'active' : '' }}"
                         data-plant-id="{{ $plant->id }}" data-name="{{ $plant->name }}"
-                        onclick="loadLine({{ $plant->id }}, this)">
+                        data-update-url="{{ route('omd.master.plant.update', $plant) }}"
+                        tabindex="0" aria-label="Pilih Plant {{ $plant->name }}">
 
                         <div class="plant-header">
 
@@ -688,10 +730,12 @@
                                 <i class="fa-solid fa-industry" aria-hidden="true"></i>
                             </div>
 
-                            <div>
+                            <div class="plant-details">
 
-                                <h4>
-                                    {{ $plant->name }}
+                                <h4 class="plant-name-edit inline-name" data-editor="plant" role="button"
+                                    tabindex="0" title="Klik untuk mengedit nama Plant"
+                                    aria-label="Edit nama Plant {{ $plant->name }}">
+                                    <span data-name-display>{{ $plant->name }}</span>
                                 </h4>
 
                                 <p>
@@ -704,28 +748,19 @@
 
 
                         {{-- AKSI PLANT --}}
-                        <div class="plant-manage" onclick="event.stopPropagation()">
-
-                            <button type="button" class="plant-mini-btn plant-mini-edit"
-                                onclick="openEditPlantModal(
-        {{ $plant->id }},
-        this.closest('.plant-card').dataset.name
-    )"
-                                data-name="{{ $plant->name }}" title="Edit Plant">
-                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                            </button>
-
+                        <div class="plant-manage">
 
                             <form method="POST" action="{{ route('omd.master.plant.destroy', $plant->id) }}"
                                 class="plant-delete-form">
                                 @csrf
                                 @method('DELETE')
 
-                                <button type="submit" class="plant-mini-btn plant-mini-delete" title="Hapus Plant">
-                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                <button type="submit" class="master-delete" title="Hapus Plant" aria-label="Hapus Plant">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                                        <path d="m6 6 12 12M18 6 6 18" />
+                                    </svg>
                                 </button>
-                            </form>
-
                             </form>
 
                         </div>
@@ -762,7 +797,7 @@
     TABLE LINE
 ===================================================== --}}
 
-    <div class="card mt-4 line-table-card">
+    <div class="card mt-4 line-table-card omd-master-accent">
 
         <div class="card-body">
 
@@ -801,6 +836,16 @@
     {{-- =====================================================
     MODAL TAMBAH PLANT
 ===================================================== --}}
+
+    {{-- Prepare each small Line table once so switching Plants needs no round trip. --}}
+    @foreach ($plants as $plant)
+        <template data-plant-lines="{{ $plant->id }}">
+            @include('omd.master.partials.line_table', [
+                'lines' => $plant->lines,
+                'selectedPlant' => $plant,
+            ])
+        </template>
+    @endforeach
 
     <div id="addPlantModal" class="modal-overlay">
 
@@ -848,67 +893,6 @@
 
                     <button type="submit" class="btn btn-primary">
                         Simpan
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-    MODAL EDIT PLANT
-===================================================== --}}
-
-    <div id="editPlantModal" class="modal-overlay">
-
-        <div class="modal-box">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h4>
-                        Edit Plant
-                    </h4>
-
-                    <p>
-                        Perbarui data Plant.
-                    </p>
-
-                </div>
-
-                <button type="button" onclick="closeEditPlantModal()" class="modal-close">
-                    ×
-                </button>
-
-            </div>
-
-
-            <form method="POST" id="editPlantForm">
-
-                @csrf
-                @method('PUT')
-
-
-                <label for="editPlantName" class="form-label">
-                    Nama Plant
-                </label>
-
-                <input type="text" id="editPlantName" name="name" class="form-control" maxlength="100" required>
-
-
-                <div class="modal-action">
-
-                    <button type="button" onclick="closeEditPlantModal()" class="btn btn-secondary">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Simpan Perubahan
                     </button>
 
                 </div>
@@ -985,70 +969,6 @@
 
 
     {{-- =====================================================
-    MODAL EDIT LINE
-===================================================== --}}
-
-    <div id="editLineModal" class="modal-overlay">
-
-        <div class="modal-box">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h4>
-                        Edit Line
-                    </h4>
-
-                    <p>
-                        Perbarui data Line.
-                    </p>
-
-                </div>
-
-                <button type="button" onclick="closeEditLineModal()" class="modal-close">
-                    ×
-                </button>
-
-            </div>
-
-
-            <form method="POST" id="editForm">
-
-                @csrf
-                @method('PUT')
-
-
-                <input type="hidden" name="plant_id" id="editPlantId" value="{{ $selectedPlant?->id }}">
-
-
-                <label for="editName" class="form-label">
-                    Nama Line
-                </label>
-
-                <input type="text" name="name" id="editName" class="form-control" maxlength="100" required>
-
-
-                <div class="modal-action">
-
-                    <button type="button" onclick="closeEditLineModal()" class="btn btn-secondary">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Simpan Perubahan
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
     SWEETALERT2
 ===================================================== --}}
 
@@ -1060,189 +980,203 @@
                                LOAD LINE BY PLANT
                             ===================================================== */
 
-        function loadLine(id, element) {
+        const plantDashboard = document.querySelector('.plant-dashboard');
+        const lineTable = document.getElementById('lineTable');
+        const lineTemplates = new Map(Array.from(document.querySelectorAll('template[data-plant-lines]'),
+            template => [Number(template.dataset.plantLines), template]));
+        const csrfToken = @json(csrf_token());
+        let selectedPlantId = @json($selectedPlant?->id);
+        let activeEditor = null;
 
-            document
-                .querySelectorAll('.plant-card')
-                .forEach(function(card) {
-                    card.classList.remove('active');
-                });
+        function keepSelectedPlantInUrl() {
+            if (!selectedPlantId) return;
+            const url = new URL(window.location.href);
+            url.searchParams.set('plant', selectedPlantId);
+            window.history.replaceState(null, '', url);
+        }
 
+        // Persist even the initial default selection before a rename changes sort order.
+        keepSelectedPlantInUrl();
 
-            if (element) {
+        function showMasterFeedback(message, type = 'success') {
+            const feedback = document.getElementById('masterFeedback');
+            feedback.className = 'alert alert-' + type;
+            feedback.textContent = message;
+            feedback.hidden = false;
+        }
 
-                element.classList.add('active');
+        async function readMasterResponse(response) {
+            if (!response.headers.get('content-type')?.includes('application/json')) {
+                throw new Error('Respons server tidak valid. Muat ulang halaman dan coba lagi.');
+            }
+            const data = await response.json();
+            if (!response.ok) {
+                const validationMessage = Object.values(data.errors || {}).flat()[0];
+                throw new Error(response.status >= 500
+                    ? 'Perubahan gagal disimpan. Coba lagi.'
+                    : validationMessage || data.message || 'Permintaan gagal diproses.');
+            }
+            return data;
+        }
 
+        function closeInlineEditor(editor) {
+            if (activeEditor !== editor) return;
+            activeEditor = null;
+            editor.input.remove();
+            editor.display.hidden = false;
+        }
+
+        function beginInlineEdit(container) {
+            if (activeEditor?.saving) return;
+            if (activeEditor?.container === container) {
+                activeEditor.input.focus();
+                return;
+            }
+            if (activeEditor) closeInlineEditor(activeEditor);
+
+            const kind = container.dataset.editor;
+            const owner = container.closest(kind === 'plant' ? '.plant-card' : '.editable-line-row');
+            const display = container.querySelector('[data-name-display]');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.value = owner.dataset.name;
+            input.maxLength = 100;
+            input.setAttribute('aria-label', kind === 'plant' ? 'Nama Plant' : 'Nama Line');
+            const editor = {container, owner, display, input, kind, saving: false};
+            activeEditor = editor;
+            display.hidden = true;
+            container.append(input);
+            input.focus();
+            input.select();
+
+            input.addEventListener('click', event => event.stopPropagation());
+            input.addEventListener('keydown', event => {
+                event.stopPropagation();
+                if (event.isComposing) return;
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    saveInlineEditor(editor);
+                } else if (event.key === 'Escape' && !editor.saving) {
+                    event.preventDefault();
+                    closeInlineEditor(editor);
+                    container.focus();
+                }
+            });
+            // Only Enter saves; clicking away restores the last saved name.
+            input.addEventListener('blur', () => {
+                if (!editor.saving) closeInlineEditor(editor);
+            });
+        }
+
+        async function saveInlineEditor(editor) {
+            if (editor.saving || activeEditor !== editor) return;
+            const name = editor.input.value.trim();
+            if (name === editor.owner.dataset.name) {
+                closeInlineEditor(editor);
+                return;
+            }
+            editor.saving = true;
+            editor.input.readOnly = true;
+            editor.input.setAttribute('aria-busy', 'true');
+            const payload = {name};
+            if (editor.kind === 'line') {
+                // Use this Line's persisted parent, never a mutable global selection.
+                payload.plant_id = Number(editor.owner.dataset.plantId);
             }
 
-
-            /* SET PLANT AKTIF */
-
-            document.getElementById('addPlantId').value = id;
-
-            document.getElementById('editPlantId').value = id;
-
-
-            /* LOAD LINE */
-
-            fetch(
-                    "{{ url('/omd/master/line/by-plant') }}/" + id
-                )
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-
-                    document.getElementById(
-                        'plantTitle'
-                    ).innerHTML = data.plant;
-
-
-                    var html = `
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Line</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-
-                    if (data.lines.length === 0) {
-
-                        html += `
-                    <tr>
-                        <td
-                            colspan="3"
-                            style="text-align:center;padding:35px;"
-                        >
-
-                            <div class="empty-dashboard">
-
-                                <div class="empty-dashboard-icon">
-                                    <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
-                                </div>
-
-                                <strong>
-                                    Belum ada Line
-                                </strong>
-
-                                <span>
-                                    Plant ini belum memiliki Line.
-                                </span>
-
-                            </div>
-
-                        </td>
-                    </tr>
-                `;
-
-                    }
-
-
-                    data.lines.forEach(
-                        function(line, index) {
-
-                            var safeName =
-                                String(line.name)
-                                .replace(/\\/g, '\\\\')
-                                .replace(/'/g, "\\'");
-
-
-                            html += `
-                        <tr>
-
-                            <td>
-                                ${index + 1}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    ${line.name}
-                                </strong>
-                            </td>
-
-                            <td>
-
-                                <div class="action-group">
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-warning btn-sm action-icon-only"
-                                        title="Edit Line"
-                                        aria-label="Edit Line"
-                                        onclick="editLine(
-                                            ${line.id},
-                                            '${safeName}',
-                                            ${id}
-                                        )"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                    </button>
-
-
-                                    <form
-                                        class="delete-line-form"
-                                        method="POST"
-                                        action="/omd/master/line/${line.id}"
-                                    >
-
-                                        <input
-                                            type="hidden"
-                                            name="_token"
-                                            value="{{ csrf_token() }}"
-                                        >
-
-                                        <input
-                                            type="hidden"
-                                            name="_method"
-                                            value="DELETE"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-danger btn-sm action-icon-only"
-                                            title="Hapus Line"
-                                            aria-label="Hapus Line"
-                                        >
-                                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-                    `;
-
-                        }
-                    );
-
-
-                    html += `
-                    </tbody>
-                </table>
-            `;
-
-
-                    document.getElementById(
-                        'lineTable'
-                    ).innerHTML = html;
-
-
-                    bindDeleteLine();
-
-                })
-                .catch(function(error) {
-                    console.error(error);
+            try {
+                const response = await fetch(editor.owner.dataset.updateUrl, {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify(payload),
                 });
-
+                const data = await readMasterResponse(response);
+                const saved = data[editor.kind];
+                editor.owner.dataset.name = saved.name;
+                editor.display.textContent = saved.name;
+                if (editor.kind === 'plant') {
+                    editor.container.setAttribute('aria-label', 'Edit nama Plant ' + saved.name);
+                    editor.owner.setAttribute('aria-label', 'Pilih Plant ' + saved.name);
+                    if (String(selectedPlantId) === String(saved.id)) {
+                        document.getElementById('plantTitle').textContent = saved.name;
+                    }
+                } else {
+                    editor.owner.setAttribute('aria-label', 'Edit nama Line ' + saved.name);
+                }
+                closeInlineEditor(editor);
+                if (editor.kind === 'line') {
+                    lineTemplates.get(Number(saved.plant_id)).innerHTML = lineTable.innerHTML;
+                }
+                showMasterFeedback(data.message);
+            } catch (error) {
+                // Preserve the original display/data and allow correction or Escape.
+                showMasterFeedback(error.message, 'danger');
+                editor.input.focus();
+            } finally {
+                editor.saving = false;
+                editor.input.readOnly = false;
+                editor.input.removeAttribute('aria-busy');
+            }
         }
+
+        function loadLine(id, element) {
+            if (activeEditor?.saving) return;
+            if (activeEditor) closeInlineEditor(activeEditor);
+            const template = lineTemplates.get(Number(id));
+            if (!template) {
+                showMasterFeedback('Data Plant tidak tersedia. Muat ulang halaman dan coba lagi.', 'danger');
+                return;
+            }
+            selectedPlantId = Number(id);
+            plantDashboard.querySelectorAll('.plant-card').forEach(card => {
+                card.classList.toggle('active', card === element);
+            });
+            document.getElementById('addPlantId').value = id;
+            document.getElementById('plantTitle').textContent = element.dataset.name;
+            lineTable.replaceChildren(template.content.cloneNode(true));
+            keepSelectedPlantInUrl();
+            bindDeleteLine();
+        }
+
+        // Delegate once: new table rows inherit the same editing behavior.
+        plantDashboard.addEventListener('click', event => {
+            const name = event.target.closest('.plant-name-edit');
+            if (name) {
+                if (!event.target.closest('input')) beginInlineEdit(name);
+                return;
+            }
+            if (event.target.closest('button, input, select, textarea, a, form, [data-card-control]')) return;
+            const card = event.target.closest('.plant-card');
+            if (card) loadLine(card.dataset.plantId, card);
+        });
+        plantDashboard.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const target = event.target;
+            if (target.matches('.plant-name-edit')) {
+                event.preventDefault();
+                beginInlineEdit(target);
+            } else if (target.matches('.plant-card')) {
+                event.preventDefault();
+                loadLine(target.dataset.plantId, target);
+            }
+        });
+        lineTable.addEventListener('click', event => {
+            if (event.target.closest('button, input, select, textarea, a, form')) return;
+            const row = event.target.closest('.editable-line-row');
+            if (row) beginInlineEdit(row.querySelector('.inline-name'));
+        });
+        lineTable.addEventListener('keydown', event => {
+            if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.editable-line-row')) {
+                event.preventDefault();
+                beginInlineEdit(event.target.querySelector('.inline-name'));
+            }
+        });
 
 
         /* =====================================================
@@ -1267,39 +1201,6 @@
 
             document.getElementById(
                 'addPlantModal'
-            ).style.display = 'none';
-
-        }
-
-
-        /* =====================================================
-           PLANT - EDIT
-        ===================================================== */
-
-        function openEditPlantModal(id, name) {
-
-            document.getElementById(
-                'editPlantName'
-            ).value = name;
-
-
-            document.getElementById(
-                    'editPlantForm'
-                ).action =
-                "{{ url('/omd/master/plant') }}/" + id;
-
-
-            document.getElementById(
-                'editPlantModal'
-            ).style.display = 'flex';
-
-        }
-
-
-        function closeEditPlantModal() {
-
-            document.getElementById(
-                'editPlantModal'
             ).style.display = 'none';
 
         }
@@ -1362,82 +1263,6 @@
 
             document.getElementById(
                 'addLineModal'
-            ).style.display = 'none';
-
-        }
-
-
-        /* =====================================================
-           LINE - EDIT
-        ===================================================== */
-
-        function editLine(
-            id,
-            name,
-            plantId
-        ) {
-            if (!plantId) {
-
-                plantId =
-                    document.getElementById('addPlantId').value;
-
-            }
-
-
-            if (!plantId) {
-
-                Swal.fire({
-
-                    icon: 'warning',
-
-                    title: 'Plant Belum Dipilih',
-
-                    text: 'Pilih Plant terlebih dahulu.',
-
-                    width: 320,
-
-                    customClass: {
-
-                        popup: 'swal-plant-popup',
-
-                        title: 'swal-plant-title',
-
-                        htmlContainer: 'swal-plant-text'
-
-                    }
-
-                });
-
-                return;
-            }
-
-
-            document.getElementById(
-                'editLineModal'
-            ).style.display = 'flex';
-
-
-            document.getElementById(
-                'editName'
-            ).value = name;
-
-
-            document.getElementById(
-                'editPlantId'
-            ).value = plantId;
-
-
-            document.getElementById(
-                    'editForm'
-                ).action =
-                "{{ url('/omd/master/line') }}/" + id;
-        }
-
-
-        function closeEditLineModal() {
-
-            document.getElementById(
-                'editLineModal'
             ).style.display = 'none';
 
         }

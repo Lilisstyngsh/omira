@@ -78,6 +78,12 @@ class MasterDataController extends Controller
 
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Plant berhasil diperbarui',
+                'plant' => $plant->only(['id', 'name']),
+            ]);
+        }
 
 
         return back()
@@ -128,7 +134,8 @@ class MasterDataController extends Controller
     {
 
 
-        $plants = Plant::withCount('lines')
+        $plants = Plant::with(['lines' => fn ($query) => $query->orderBy('name')])
+            ->withCount('lines')
             ->orderBy('name')
             ->get();
 
@@ -141,7 +148,7 @@ class MasterDataController extends Controller
         if ($request->plant) {
 
             $selectedPlant =
-                Plant::find($request->plant);
+                $plants->firstWhere('id', $request->plant);
         }
 
 
@@ -222,6 +229,12 @@ class MasterDataController extends Controller
             'name' => $validated['name']
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Line berhasil diperbarui',
+                'line' => $line->only(['id', 'name', 'plant_id']),
+            ]);
+        }
         return redirect()
             ->route('omd.master.line', [
                 'plant' => $line->plant_id
@@ -269,7 +282,12 @@ class MasterDataController extends Controller
 
             'plant' => $plant->name,
 
-            'lines' => $lines
+            'lines' => $lines,
+
+            'html' => view('omd.master.partials.line_table', [
+                'lines' => $lines,
+                'selectedPlant' => $plant,
+            ])->render(),
 
         ]);
     }
@@ -484,6 +502,12 @@ class MasterDataController extends Controller
 
         $product->update($validated);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Produk berhasil diperbarui',
+                'product' => $product->only(['id', 'name', 'master_model_id']),
+            ]);
+        }
 
 
         return back()
