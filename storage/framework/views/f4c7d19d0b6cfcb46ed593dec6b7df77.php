@@ -32,38 +32,67 @@
     .dashboard-kpis {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
+        gap: 16px;
+        align-items: stretch;
     }
 
     .dashboard-kpi {
         position: relative;
-        min-height: 102px;
-        padding: 17px;
+        min-width: 0;
+        min-height: 112px;
+        padding: 18px 19px;
         overflow: hidden;
         background: #fff;
-        border: 1px solid #e5eaf1;
-        border-radius: 16px;
-        box-shadow: 0 8px 25px rgba(15, 23, 42, .045);
+        border: 1px solid #e5ece7;
+        border-radius: 17px;
+        box-shadow: 0 6px 20px rgba(34, 75, 53, .045);
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .dashboard-kpi:hover {
+        border-color: #cbded1;
+        box-shadow: 0 9px 24px rgba(34, 75, 53, .08);
+        transform: translateY(-1px);
     }
 
     .dashboard-kpi-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        gap: 12px;
     }
 
     .dashboard-kpi-label {
-        color: #64748b;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: .035em;
-        text-transform: uppercase;
+        min-width: 0;
+        color: #64766b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .01em;
+        line-height: 1.4;
+        text-transform: none;
+    }
+
+    .dashboard-kpi-icon {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        background: #edf5ef;
+        color: #347554;
+        font-size: 17px;
     }
 
     .dashboard-kpi.attention {
-        border-color: #E4DFA0;
-        box-shadow: 0 8px 26px rgba(119, 105, 58, .07);
+        border-color: #e6dcae;
+        box-shadow: 0 6px 20px rgba(119, 105, 58, .07);
+    }
+
+    .dashboard-kpi.attention .dashboard-kpi-icon {
+        background: #fbf4d9;
+        color: #96772b;
     }
 
     .dashboard-create-order.btn.btn-primary {
@@ -84,38 +113,15 @@
         box-shadow: 0 7px 17px rgba(38, 99, 68, .24);
     }
 
-    /* Soft pastel KPI backgrounds — warna saja, tanpa motif/pattern. */
-    .dashboard-kpis > .dashboard-kpi:nth-child(1) {
-        background: linear-gradient(110deg, #C9CAAC 0%, #E3E4D0 56%, #F6F6EC 100%);
-        border-color: #DFE0C9;
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(2) {
-        background: radial-gradient(ellipse at 50% 48%, #FEFAF3 0%, #F8F2E8 62%, #F2EBDD 100%);
-        border-color: #EEE8DB;
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(3) {
-        background: linear-gradient(245deg, #FFFFEC 0%, #FFFDD3 58%, #FFFBA7 100%);
-        border-color: #F1EFAE;
-    }
-
-    .dashboard-kpis > .dashboard-kpi:nth-child(4) {
-        background: radial-gradient(ellipse at 78% 24%, #FFFFFF 0%, #FBEFEF 58%, #F6E3E3 100%);
-        border-color: #F0E2E2;
-    }
-
-    .dashboard-kpis > .dashboard-kpi.attention {
-        border-color: #F1EFAE;
-        box-shadow: 0 8px 26px rgba(119, 105, 58, .07);
-    }
-
     .dashboard-kpi-value {
-        margin-top: 10px;
-        color: #172033;
-        font-size: 27px;
-        font-weight: 850;
-        line-height: 1;
+        margin-top: 13px;
+        color: #172b20;
+        font-size: clamp(25px, 2vw, 30px);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -.035em;
+        overflow-wrap: anywhere;
+        font-variant-numeric: tabular-nums;
     }
 
     .dashboard-panel {
@@ -456,7 +462,31 @@
 
     @media (max-width: 520px) {
         .dashboard-kpis {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .dashboard-kpi {
+            min-height: 104px;
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .dashboard-kpi-icon {
+            width: 35px;
+            height: 35px;
+            flex-basis: 35px;
+            border-radius: 11px;
+            font-size: 14px;
+        }
+
+        .dashboard-kpi-label {
+            font-size: 10px;
+        }
+
+        .dashboard-kpi-value {
+            margin-top: 11px;
+            font-size: 25px;
         }
 
         .action-order {
@@ -576,6 +606,7 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Order Aktif</div>
+                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($orderActive); ?></div>
         </div>
@@ -583,6 +614,7 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Diproses OMD</div>
+                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($processedOmd); ?></div>
         </div>
@@ -590,6 +622,7 @@
         <div class="dashboard-kpi <?php echo e($needConfirmation > 0 ? 'attention' : ''); ?>">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
+                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($needConfirmation); ?></div>
         </div>
@@ -597,6 +630,7 @@
         <div class="dashboard-kpi">
             <div class="dashboard-kpi-head">
                 <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
+                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
             </div>
             <div class="dashboard-kpi-value"><?php echo e($completedThisMonth); ?></div>
         </div>
