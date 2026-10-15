@@ -696,9 +696,13 @@ class UserOrderController extends Controller
             if (!isset($groups[$key])) {
                 $groups[$key] = [
                     'model' => $model, 'product' => $product,
+                    'mismatch_note' => trim((string) ($item->mismatch_note ?? '')),
                     'before' => ['P' => null, 'H' => null, 'C' => null, 'S' => null],
                     'after' => ['P' => null, 'H' => null, 'C' => null, 'S' => null],
                 ];
+            }
+            if (trim((string) ($item->mismatch_note ?? '')) !== '') {
+                $groups[$key]['mismatch_note'] = trim((string) $item->mismatch_note);
             }
             $ng = strtoupper((string) ($item->ngType?->code ?? ''));
             if (!in_array($ng, ['P', 'H', 'C', 'S'], true)) continue;

@@ -38,6 +38,9 @@
 
     .dashboard-kpi {
         position: relative;
+        display: flex;
+        align-items: center;
+        gap: 20px;
         min-width: 0;
         min-height: 112px;
         padding: 18px 19px;
@@ -57,32 +60,37 @@
 
     .dashboard-kpi-head {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
+        flex: 1 1 auto;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 7px;
+        min-width: 0;
+        order: 2;
     }
 
     .dashboard-kpi-label {
         min-width: 0;
         color: #64766b;
-        font-size: 11px;
-        font-weight: 700;
+        font-size: 13px;
+        font-weight: 600;
         letter-spacing: .01em;
-        line-height: 1.4;
+        line-height: 1.35;
         text-transform: none;
     }
 
     .dashboard-kpi-icon {
-        width: 42px;
-        height: 42px;
-        flex: 0 0 42px;
+        width: 64px;
+        height: 64px;
+        flex: 0 0 64px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 13px;
-        background: #edf5ef;
-        color: #347554;
-        font-size: 17px;
+        order: 1;
+        border-radius: 50%;
+        background: #edf4e8;
+        color: #63805d;
+        font-size: 25px;
     }
 
     .dashboard-kpi.attention {
@@ -93,6 +101,21 @@
     .dashboard-kpi.attention .dashboard-kpi-icon {
         background: #fbf4d9;
         color: #96772b;
+    }
+
+    .dashboard-kpi-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 7px;
+        flex: 1 1 auto;
+        min-width: 0;
+        order: 2;
+    }
+
+    .dashboard-kpi-content .dashboard-kpi-head {
+        display: contents;
     }
 
     .dashboard-create-order.btn.btn-primary {
@@ -114,7 +137,7 @@
     }
 
     .dashboard-kpi-value {
-        margin-top: 13px;
+        margin-top: 0;
         color: #172b20;
         font-size: clamp(25px, 2vw, 30px);
         font-weight: 800;
@@ -450,6 +473,26 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
+        .dashboard-kpi {
+            gap: 12px;
+            padding: 15px 13px;
+        }
+
+        .dashboard-kpi-icon {
+            width: 52px;
+            height: 52px;
+            flex-basis: 52px;
+            font-size: 21px;
+        }
+
+        .dashboard-kpi-label {
+            font-size: 11px;
+        }
+
+        .dashboard-kpi-value {
+            font-size: clamp(22px, 5vw, 27px);
+        }
+
         .action-order {
             grid-template-columns: 1fr auto;
         }
@@ -604,35 +647,35 @@
 
     <div class="dashboard-kpis">
         <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Order Aktif</div>
-                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+                <div class="dashboard-kpi-value"><?php echo e($orderActive); ?></div>
             </div>
-            <div class="dashboard-kpi-value"><?php echo e($orderActive); ?></div>
         </div>
 
         <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Diproses OMD</div>
-                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                <div class="dashboard-kpi-value"><?php echo e($processedOmd); ?></div>
             </div>
-            <div class="dashboard-kpi-value"><?php echo e($processedOmd); ?></div>
         </div>
 
         <div class="dashboard-kpi <?php echo e($needConfirmation > 0 ? 'attention' : ''); ?>">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
-                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
+                <div class="dashboard-kpi-value"><?php echo e($needConfirmation); ?></div>
             </div>
-            <div class="dashboard-kpi-value"><?php echo e($needConfirmation); ?></div>
         </div>
 
         <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
-                <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+                <div class="dashboard-kpi-value"><?php echo e($completedThisMonth); ?></div>
             </div>
-            <div class="dashboard-kpi-value"><?php echo e($completedThisMonth); ?></div>
         </div>
     </div>
 
