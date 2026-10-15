@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard User')
-@section('header', 'Dashboard')
+@section('header', 'Dashboard User')
 
 @section('content')
 <style>
@@ -34,55 +34,120 @@
     .dashboard-kpis {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
+        gap: 16px;
+        align-items: stretch;
     }
 
     .dashboard-kpi {
         position: relative;
-        min-height: 118px;
-        padding: 20px 22px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        min-width: 0;
+        min-height: 112px;
+        padding: 18px 19px;
         overflow: hidden;
-        background: #ffffff;
-        border: 1px solid #edf0f2;
-        border-radius: 22px;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+        background: #fff;
+        border: 1px solid #e5ece7;
+        border-radius: 17px;
+        box-shadow: 0 6px 20px rgba(34, 75, 53, .045);
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .dashboard-kpi:hover {
+        border-color: #cbded1;
+        box-shadow: 0 9px 24px rgba(34, 75, 53, .08);
+        transform: translateY(-1px);
     }
 
     .dashboard-kpi-head {
         display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
         align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
+        justify-content: center;
+        gap: 7px;
+        min-width: 0;
+        order: 2;
     }
 
     .dashboard-kpi-label {
-        color: #6b7280;
+        min-width: 0;
+        color: #64766b;
         font-size: 13px;
         font-weight: 600;
+        letter-spacing: .01em;
+        line-height: 1.35;
+        text-transform: none;
     }
 
     .dashboard-kpi-icon {
-        width: 42px;
-        height: 42px;
+        width: 64px;
+        height: 64px;
+        flex: 0 0 64px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        order: 1;
         border-radius: 50%;
-        background: #f1f5f4;
-        color: #347554;
-        font-size: 17px;
+        background: #edf4e8;
+        color: #63805d;
+        font-size: 25px;
+    }
+
+    .dashboard-kpi.attention {
+        border-color: #e6dcae;
+        box-shadow: 0 6px 20px rgba(119, 105, 58, .07);
+    }
+
+    .dashboard-kpi.attention .dashboard-kpi-icon {
+        background: #fbf4d9;
+        color: #96772b;
+    }
+
+    .dashboard-kpi-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 7px;
+        flex: 1 1 auto;
+        min-width: 0;
+        order: 2;
+    }
+
+    .dashboard-kpi-content .dashboard-kpi-head {
+        display: contents;
+    }
+
+    .dashboard-create-order.btn.btn-primary {
+        background: #347554;
+        border: 1px solid #347554;
+        color: #fff;
+        font-weight: 750;
+        box-shadow: 0 5px 14px rgba(38, 99, 68, .18);
+        min-height: 44px;
+        transition: background .18s ease, box-shadow .18s ease;
+    }
+
+    .dashboard-create-order.btn.btn-primary:hover,
+    .dashboard-create-order.btn.btn-primary:focus-visible {
+        background: #285E43;
+        border-color: #285E43;
+        color: #fff;
+        box-shadow: 0 7px 17px rgba(38, 99, 68, .24);
     }
 
     .dashboard-kpi-value {
-        position: absolute;
-        left: 22px;
-        bottom: 18px;
-        color: #111827;
-        font-size: 30px;
+        margin-top: 0;
+        color: #172b20;
+        font-size: clamp(25px, 2vw, 30px);
         font-weight: 800;
-        line-height: 1;
+        line-height: 1.05;
+        letter-spacing: -.035em;
+        overflow-wrap: anywhere;
+        font-variant-numeric: tabular-nums;
     }
-
 
     .dashboard-panel {
         overflow: hidden;
@@ -269,10 +334,9 @@
     .recent-table-wrap {
         margin: 16px;
         overflow-x: auto;
-        border: 1px solid #e8edf3;
-        border-radius: 18px;
+        border: 1px solid #dce5ef;
+        border-radius: 14px;
         background: #fff;
-        box-shadow: 0 8px 22px rgba(15,23,42,.04);
     }
 
     .recent-table {
@@ -283,8 +347,8 @@
     }
 
     .recent-table th {
-        padding: 12px 14px;
-        background: #f8fafc;
+        padding: 10px 13px;
+        background: #fafbfc;
         border-right: 1px solid #dce5ef;
         border-bottom: 1px solid #dce5ef;
         color: #64748b;
@@ -297,7 +361,7 @@
     }
 
     .recent-table td {
-        padding: 14px 14px;
+        padding: 12px 13px;
         border-right: 1px solid #e3eaf2;
         border-bottom: 1px solid #e3eaf2;
         color: #334155;
@@ -411,6 +475,26 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
+        .dashboard-kpi {
+            gap: 12px;
+            padding: 15px 13px;
+        }
+
+        .dashboard-kpi-icon {
+            width: 52px;
+            height: 52px;
+            flex-basis: 52px;
+            font-size: 21px;
+        }
+
+        .dashboard-kpi-label {
+            font-size: 11px;
+        }
+
+        .dashboard-kpi-value {
+            font-size: clamp(22px, 5vw, 27px);
+        }
+
         .action-order {
             grid-template-columns: 1fr auto;
         }
@@ -423,7 +507,34 @@
 
     @media (max-width: 520px) {
         .dashboard-kpis {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .dashboard-kpi {
+            min-height: 104px;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 14px;
+            align-items: center;
+        }
+
+        .dashboard-kpi-icon {
+            width: 52px;
+            height: 52px;
+            flex: 0 0 52px;
+            border-radius: 50%;
+            font-size: 20px;
+            align-self: center;
+        }
+
+        .dashboard-kpi-label {
+            font-size: 10px;
+        }
+
+        .dashboard-kpi-value {
+            margin-top: 11px;
+            font-size: 25px;
         }
 
         .action-order {
@@ -436,15 +547,11 @@
         }
     }
 
-    .scrap-limit-panel { overflow:hidden; }
-    .scrap-limit-summary { cursor:pointer; border:1px solid #efb4b6; background:#fff5f5; border-radius:14px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .scrap-limit-summary:hover { background:#fff0f0; }
-    .scrap-limit-summary-title { display:flex; align-items:center; gap:10px; color:#b4232d; font-weight:800; }
-    .scrap-limit-summary-text { color:#475569; font-size:13px; margin-top:4px; }
-    .scrap-limit-modal[hidden] { display:none !important; }
-    .scrap-limit-modal { position:fixed; inset:0; background:rgba(15,23,42,.45); display:flex; align-items:center; justify-content:center; z-index:1200; padding:18px; }
-    .scrap-limit-dialog { width:min(100%,430px); background:#fff; border-radius:16px; padding:22px; }
-    .scrap-limit-product-row { padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px; }
+    .scrap-limit-panel { border:1px solid #f1d4d6; overflow:hidden; }
+    .scrap-limit-panel .dashboard-panel-title { display:flex; align-items:center; gap:8px; }
+    .scrap-limit-items { padding:14px; display:grid; gap:12px; }
+    .scrap-limit-alert { border:1px solid #eadba7; background:#fffbeb; border-radius:12px; padding:15px; }
+    .scrap-limit-alert.is-reached { border-color:#efb4b6; background:#fff4f4; }
     .scrap-limit-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; color:#9a681e; font-size:13px; }
     .scrap-limit-alert.is-reached .scrap-limit-top { color:#ad323a; }
     .scrap-limit-top span { font-size:11px; font-weight:800; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
@@ -496,83 +603,84 @@
 
     @if($scrapAlerts->isNotEmpty())
     <section class="dashboard-panel scrap-limit-panel">
-        <div class="scrap-limit-summary" data-scrap-detail-open>
-            <div>
-                <div class="scrap-limit-summary-title"><i class="fa-solid fa-circle-info"></i> Scrap Limit Tercapai</div>
-                <div class="scrap-limit-summary-text">{{ $scrapAlerts->count() }} produk mencapai/melewati Scrap Limit</div>
-            </div>
-            <i class="fa-solid fa-chevron-right"></i>
+        <div class="dashboard-panel-head">
+            <h3 class="dashboard-panel-title"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Monitoring Scrap Limit</h3>
         </div>
-    </section>
-
-    <div class="scrap-limit-modal" id="scrap-limit-detail-modal" hidden>
-        <div class="scrap-limit-dialog">
-            <h3>Scrap Limit Tercapai</h3>
+        <div class="scrap-limit-items">
             @foreach($scrapAlerts as $cycle)
-                <div class="scrap-limit-product-row">
-                    <strong>{{ $cycle->product?->name }}</strong><br>
-                    Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}
+                <div class="scrap-limit-alert is-reached">
+                    <div class="scrap-limit-top">
+                        <strong>Danger — Scrap Limit Tercapai</strong>
+                        <span>Limit tercapai</span>
+                    </div>
+                    <div class="scrap-limit-product">{{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}</div>
+                    <div class="scrap-limit-meta">{{ $cycle->product?->masterModel?->line?->name ?? $cycle->line?->name }} · Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</div>
+                    <div class="scrap-limit-notice">Scrap Limit sebagai informasi monitoring. Order Repair Box dan Qty Scrap tetap dapat diproses.</div>
+                    @if(!$cycle->decision)
+                        <p class="scrap-limit-question">Apakah ingin membuat Repair Order?</p>
+                        <div class="scrap-limit-actions">
+                            <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
+                                @csrf
+                                <input type="hidden" name="decision" value="yes">
+                                <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
+                            </form>
+                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
+                        </div>
+                        <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
+                            <div class="scrap-reason-dialog">
+                                <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Membuat Order</h3>
+                                <p>{{ $cycle->product?->name }}</p>
+                                <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
+                                    @csrf
+                                    <input type="hidden" name="decision" value="no">
+                                    <textarea name="reason" maxlength="1000" rows="4" placeholder="Masukkan alasan..." required data-scrap-reason></textarea>
+                                    <div class="scrap-modal-actions">
+                                        <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
+                                        <button type="submit" class="scrap-btn scrap-btn-order" data-scrap-submit hidden>Simpan Alasan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @elseif($cycle->decision)
+                        <div class="scrap-limit-meta">Keputusan: {{ $cycle->decision === 'yes' ? 'Order' : 'Tidak Order' }}{{ $cycle->decision_reason ? ' — '.$cycle->decision_reason : '' }}</div>
+                    @endif
                 </div>
             @endforeach
-            <div class="scrap-modal-actions">
-                <form method="POST" action="{{ route('user.scrap-limit.decision', $scrapAlerts->first()) }}">
-                    @csrf
-                    <input type="hidden" name="decision" value="yes">
-                    <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
-                </form>
-                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-no-open>Tidak</button>
-            </div>
         </div>
-    </div>
-
-    <div class="scrap-reason-modal" id="scrap-limit-reason-modal" hidden>
-        <div class="scrap-reason-dialog">
-            <h3>Tidak Membuat Order</h3>
-            <p>Masukkan alasan tidak membuat Order Repair.</p>
-            <form method="POST" action="{{ route('user.scrap-limit.decision', $scrapAlerts->first()) }}">
-                @csrf
-                <input type="hidden" name="decision" value="no">
-                <textarea name="reason" data-scrap-reason placeholder="Tulis alasan..." required></textarea>
-                <div class="scrap-modal-actions">
-                    <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
-                    <button type="submit" class="scrap-btn scrap-btn-order" data-scrap-submit hidden>Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    </section>
     @endif
 
     <div class="dashboard-kpis">
         <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Order Aktif</div>
-                <div class="dashboard-kpi-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div class="dashboard-kpi-value">{{ $orderActive }}</div>
             </div>
-            <div class="dashboard-kpi-value">{{ $orderActive }}</div>
         </div>
 
         <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Diproses OMD</div>
-                <div class="dashboard-kpi-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                <div class="dashboard-kpi-value">{{ $processedOmd }}</div>
             </div>
-            <div class="dashboard-kpi-value">{{ $processedOmd }}</div>
         </div>
 
-        <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+        <div class="dashboard-kpi {{ $needConfirmation > 0 ? 'attention' : '' }}">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
-                <div class="dashboard-kpi-icon"><i class="fa-solid fa-bell"></i></div>
+                <div class="dashboard-kpi-value">{{ $needConfirmation }}</div>
             </div>
-            <div class="dashboard-kpi-value">{{ $needConfirmation }}</div>
         </div>
 
         <div class="dashboard-kpi">
-            <div class="dashboard-kpi-head">
+            <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+            <div class="dashboard-kpi-content">
                 <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
-                <div class="dashboard-kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="dashboard-kpi-value">{{ $completedThisMonth }}</div>
             </div>
-            <div class="dashboard-kpi-value">{{ $completedThisMonth }}</div>
         </div>
     </div>
 
@@ -747,40 +855,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-<script>
-    const scrapDetailModal = document.getElementById('scrap-limit-detail-modal');
-    const scrapReasonModal = document.getElementById('scrap-limit-reason-modal');
-
-    document.querySelector('[data-scrap-detail-open]')?.addEventListener('click',()=>{
-        scrapDetailModal?.removeAttribute('hidden');
-    });
-
-    document.querySelector('[data-scrap-detail-close]')?.addEventListener('click',()=>{
-        scrapDetailModal?.setAttribute('hidden','hidden');
-    });
-
-    document.querySelector('[data-scrap-no-open]')?.addEventListener('click',()=>{
-        scrapDetailModal?.setAttribute('hidden','hidden');
-        scrapReasonModal?.removeAttribute('hidden');
-    });
-
-    document.querySelectorAll('[data-scrap-modal-close]').forEach(btn=>{
-        btn.addEventListener('click',()=>{
-            scrapReasonModal?.setAttribute('hidden','hidden');
-        });
-    });
-
-    scrapDetailModal?.addEventListener('click',(e)=>{
-        if(e.target===scrapDetailModal){
-            scrapDetailModal.setAttribute('hidden','hidden');
-        }
-    });
-
-    scrapReasonModal?.addEventListener('click',(e)=>{
-        if(e.target===scrapReasonModal){
-            scrapReasonModal.setAttribute('hidden','hidden');
-        }
-    });
-</script>
-
 @endsection

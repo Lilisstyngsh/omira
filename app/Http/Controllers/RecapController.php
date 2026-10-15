@@ -324,7 +324,22 @@ class RecapController extends Controller
         $request->validate([
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'period_type' => ['nullable', 'in:monthly,yearly'],
+            'report_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'report_month' => ['nullable', 'integer', 'between:1,12'],
         ]);
+
+        $periodType = $request->input('period_type');
+        if ($periodType && $request->filled('report_year')) {
+            $year = (int) $request->input('report_year');
+            if ($periodType === 'yearly') {
+                return [Carbon::create($year, 1, 1)->startOfDay(), Carbon::create($year, 12, 31)->endOfDay()];
+            }
+            if ($request->filled('report_month')) {
+                $month = (int) $request->input('report_month');
+                return [Carbon::create($year, $month, 1)->startOfMonth()->startOfDay(), Carbon::create($year, $month, 1)->endOfMonth()->endOfDay()];
+            }
+        }
 
         $startDate = $request->filled('start_date')
             ? Carbon::parse($request->input('start_date'))->startOfDay()
@@ -386,7 +401,6 @@ class RecapController extends Controller
     {
         $query = DB::table('repair_order_items as roi')
             ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
-            ->join('repair_confirmations as rc', 'rc.repair_order_id', '=', 'ro.id')
             ->join('lines as l', 'l.id', '=', 'ro.line_id')
             ->join('plants as pl', 'pl.id', '=', 'l.plant_id')
             ->leftJoin('master_models as mm', 'mm.id', '=', 'roi.master_model_id')
@@ -400,18 +414,16 @@ class RecapController extends Controller
             ->leftJoin('lines as al', 'al.id', '=', 'amm.line_id')
             ->leftJoin('plants as apl', 'apl.id', '=', 'al.plant_id')
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
-            ->where('ro.status', 'confirmed')
-            ->whereNotNull('rc.confirmed_at')
-            ->whereBetween('rc.confirmed_at', [$startDate, $endDate])
-            ->where('roi.after_qty', '>', 0)
+            ->whereNotNull('ro.verified_at')
+            ->whereBetween('ro.verified_at', [$startDate, $endDate])
             ->selectRaw('COALESCE(apl.name, pl.name) as plant')
             ->selectRaw('COALESCE(al.name, l.name) as line')
             ->selectRaw('COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model) as model')
             ->selectRaw('COALESCE(ap.name, p.name, rop.name) as produk')
             ->addSelect('ng.code as jenis_ng')
             ->selectRaw('SUM(roi.after_qty) as total')
-            ->selectRaw('DATE(rc.confirmed_at) as tanggal')
-            ->groupByRaw('DATE(rc.confirmed_at), COALESCE(apl.name, pl.name), COALESCE(al.name, l.name), COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model), COALESCE(ap.name, p.name, rop.name), ng.code');
+            ->selectRaw('DATE(ro.verified_at) as tanggal')
+            ->groupByRaw('DATE(ro.verified_at), COALESCE(apl.name, pl.name), COALESCE(al.name, l.name), COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model), COALESCE(ap.name, p.name, rop.name), ng.code');
 
         return $this->applyLineFilter($query, $lineIds);
     }
@@ -420,11 +432,9 @@ class RecapController extends Controller
     {
         $query = DB::table('repair_order_items as roi')
             ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
-            ->join('repair_confirmations as rc', 'rc.repair_order_id', '=', 'ro.id')
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
-            ->where('ro.status', 'confirmed')
-            ->whereNotNull('rc.confirmed_at')
-            ->whereBetween('rc.confirmed_at', [$startDate, $endDate]);
+            ->whereNotNull('ro.verified_at')
+            ->whereBetween('ro.verified_at', [$startDate, $endDate]);
 
         $row = $this->applyLineFilter($query, $lineIds)
             ->selectRaw('COALESCE(SUM(roi.after_qty), 0) as order_qty')
@@ -445,17 +455,15 @@ class RecapController extends Controller
     {
         $query = DB::table('repair_order_items as roi')
             ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
-            ->join('repair_confirmations as rc', 'rc.repair_order_id', '=', 'ro.id')
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
-            ->where('ro.status', 'confirmed')
-            ->whereNotNull('rc.confirmed_at')
-            ->whereBetween('rc.confirmed_at', [$startDate, $endDate]);
+            ->whereNotNull('ro.verified_at')
+            ->whereBetween('ro.verified_at', [$startDate, $endDate]);
 
         $raw = $this->applyLineFilter($query, $lineIds)
-            ->selectRaw('YEAR(rc.confirmed_at) as y, MONTH(rc.confirmed_at) as m')
+            ->selectRaw('YEAR(ro.verified_at) as y, MONTH(ro.verified_at) as m')
             ->selectRaw('SUM(roi.after_qty) as order_qty')
             ->selectRaw("SUM(CASE WHEN ng.code = 'S' THEN roi.after_qty ELSE 0 END) as scrap_qty")
-            ->groupByRaw('YEAR(rc.confirmed_at), MONTH(rc.confirmed_at)')
+            ->groupByRaw('YEAR(ro.verified_at), MONTH(ro.verified_at)')
             ->get()
             ->keyBy(fn ($row) => sprintf('%04d-%02d', $row->y, $row->m));
 
@@ -629,7 +637,7 @@ class RecapController extends Controller
         $lastDataRow = max(7, $row - 1);
         if ($matrixRows->isEmpty()) {
             $sheet->mergeCells("A7:{$lastColumn}8");
-            $sheet->setCellValue('A7', 'Tidak ada data confirmed pada periode dan Line yang dipilih.');
+            $sheet->setCellValue('A7', 'Tidak ada order yang divalidasi OMD pada periode dan Line yang dipilih.');
             $sheet->getStyle('A7')->getFont()->setItalic(true)->getColor()->setARGB('FF64748B');
             $sheet->getStyle('A7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $lastDataRow = 8;

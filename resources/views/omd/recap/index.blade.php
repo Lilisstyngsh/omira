@@ -116,6 +116,7 @@
     .recap-line-select {
         position: relative;
         min-width: 220px;
+        width: 100%;
     }
 
     .recap-line-trigger {
@@ -147,10 +148,14 @@
         position: absolute;
         top: calc(100% + 8px);
         left: 0;
-        width: 290px;
-        max-height: 320px;
-        overflow: auto;
-        padding: 10px;
+        width: max(100%, 320px);
+        max-width: min(380px, calc(100vw - 32px));
+        max-height: min(56vh, 430px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        padding: 12px;
         border: 1px solid var(--border);
         border-radius: 14px;
         background: var(--surface, #fff);
@@ -162,40 +167,109 @@
         display: block;
     }
 
+    /* Checkbox rows: mengikuti referensi Settings checked */
     .recap-line-all,
     .recap-line-option {
-        min-height: 36px;
+        position: relative;
+        min-height: 48px;
+        width: 100%;
+        box-sizing: border-box;
         display: flex;
         align-items: center;
-        gap: 9px;
-        padding: 7px 9px;
-        border-radius: 9px;
-        color: var(--text);
-        font-size: 11px;
+        gap: 10px;
+        padding: 10px 42px 10px 12px;
+        margin: 0 0 6px;
+        border: 0;
+        border-radius: 24px;
+        background: #fff;
+        color: #171717;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.4;
         cursor: pointer;
+        transition: background-color .16s ease, box-shadow .16s ease;
     }
 
     .recap-line-all:hover,
     .recap-line-option:hover {
-        background: var(--surface-hover, #F4F8F5);
+        background: #f5faf5;
+    }
+
+    .recap-line-all:has(input:checked),
+    .recap-line-option:has(input:checked) {
+        background: #eaf6ec;
     }
 
     .recap-line-all {
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 6px;
-        padding-bottom: 10px;
-        font-weight: 800;
+        min-height: 48px;
+        margin-bottom: 7px;
+        border-bottom: 0;
+        font-weight: 650;
+    }
+
+    .recap-line-option span,
+    .recap-line-all span {
+        display: block;
+        min-width: 0;
+        flex: 1;
     }
 
     .recap-line-option small {
-        margin-left: auto;
-        color: var(--muted);
-        font-size: 9px;
+        display: block;
+        margin-left: 0;
+        color: #5e626a;
+        font-size: 10px;
+        font-weight: 400;
+        line-height: 1.35;
     }
 
     .recap-line-option input,
     .recap-line-all input {
-        accent-color: var(--primary);
+        appearance: none;
+        -webkit-appearance: none;
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        width: 22px !important;
+        min-width: 22px !important;
+        max-width: 22px !important;
+        height: 22px !important;
+        min-height: 22px !important;
+        max-height: 22px !important;
+        padding: 0 !important;
+        margin: 0;
+        flex: 0 0 22px;
+        box-sizing: border-box;
+        transform: translateY(-50%);
+        border: 2px solid #92959b;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        display: grid;
+        place-content: center;
+        transition: background-color .16s ease, border-color .16s ease;
+    }
+
+    .recap-line-option input:checked,
+    .recap-line-all input:checked {
+        background: #38834b;
+        border-color: #38834b;
+    }
+
+    .recap-line-option input:checked::after,
+    .recap-line-all input:checked::after {
+        content: '';
+        width: 6px;
+        height: 10px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    .recap-line-option input:focus-visible,
+    .recap-line-all input:focus-visible {
+        outline: 3px solid rgba(56, 131, 75, .22);
+        outline-offset: 3px;
     }
 
     .recap-actions {
@@ -421,22 +495,59 @@
         cursor: pointer;
     }
 
-    @media (max-width: 900px) {
+    /* Tablet-first: ruang filter lebih lega untuk perangkat operasional */
+    @media (min-width: 701px) and (max-width: 1100px) {
         .recap-filter {
-            align-items: stretch;
+            display: block;
+            padding: 18px;
         }
 
         .recap-fields {
-            flex: 1 1 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 14px;
+            align-items: end;
+        }
+
+        .recap-field {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .recap-line-select {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .recap-line-trigger,
+        .recap-date-input input,
+        .recap-btn {
+            min-height: 48px;
+            height: 48px;
+            font-size: 12px;
+        }
+
+        .recap-line-menu {
+            width: max(100%, 340px);
+            max-height: min(58vh, 460px);
+        }
+
+        .recap-actions {
+            margin-top: 14px;
         }
     }
 
     @media (max-width: 700px) {
-        .recap-filter,
+        .recap-filter {
+            display: block;
+            padding: 14px;
+        }
+
         .recap-fields,
         .recap-actions {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 12px;
         }
 
         .recap-field,
@@ -445,10 +556,21 @@
             width: 100%;
         }
 
-        .recap-line-menu,
-        .calendar-popup {
-            width: min(300px, calc(100vw - 42px));
+        .recap-line-trigger,
+        .recap-date-input input,
+        .recap-btn {
+            min-height: 46px;
+            height: 46px;
+            font-size: 12px;
         }
+
+        .recap-line-menu {
+            width: 100%;
+            max-width: calc(100vw - 60px);
+            max-height: 55vh;
+            padding: 9px;
+        }
+
     }
 </style>
 
@@ -494,7 +616,6 @@
                                 <input type="checkbox" name="line_ids[]" value="{{ $line->id }}"
                                     {{ in_array((int) $line->id, $selectedLineIds, true) ? 'checked' : '' }}>
                                 <span>{{ $line->name }}</span>
-                                <small>{{ $line->plant }}</small>
                             </label>
                         @endforeach
                     </div>
