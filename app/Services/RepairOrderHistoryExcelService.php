@@ -17,6 +17,123 @@ class RepairOrderHistoryExcelService
 {
     public function download(RepairOrder $order, array $entries, string $filename, bool $isClosed, ?string $userApproval, ?string $omdApproval, ?string $approvedAt)
     {
+        $book = $this->buildSpreadsheet($order, $entries, $isClosed, $userApproval, $omdApproval, $approvedAt);
+        $temporary = tempnam(sys_get_temp_dir(), 'omira_form_');
+        (new Xlsx($book))->save($temporary);
+        $book->disconnectWorksheets();
+
+        return response()->download($temporary, $filename.'.xlsx')->deleteFileAfterSend(true);
+    }
+
+    /** Convert the exact approved Excel workbook to PDF so both exports share one layout. */
+    public function downloadPdf(RepairOrder $order, array $entries, string $filename, bool $isClosed, ?string $userApproval, ?string $omdApproval, ?string $approvedAt)
+    {
+        $book = $this->buildSpreadsheet($order, $entries, $isClosed, $userApproval, $omdApproval, $approvedAt);
+        $workDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'omira_pdf_'.bin2hex(random_bytes(8));
+        if (!mkdir($workDir, 0700, true) && !is_dir($workDir)) {
+            $book->disconnectWorksheets();
+            abort(500, 'Tidak dapat membuat direktori sementara untuk konversi PDF.');
+        }
+
+        $xlsxPath = $workDir.DIRECTORY_SEPARATOR.$filename.'.xlsx';
+        $pdfPath = $workDir.DIRECTORY_SEPARATOR.$filename.'.pdf';
+        (new Xlsx($book))->save($xlsxPath);
+        $book->disconnectWorksheets();
+
+        $binary = $this->resolveLibreOfficeBinary();
+        if ($binary === null) {
+            $this->removeTemporaryDirectory($workDir);
+            abort(500, 'LibreOffice tidak ditemukan. Instal LibreOffice, lalu isi OMIRA_LIBREOFFICE_PATH di file .env dengan path lengkap ke soffice.exe, contoh: C:\\Program Files\\LibreOffice\\program\\soffice.exe.');
+        }
+
+        $command = [$binary, '--headless', '-env:UserInstallation=file://'.$workDir.'/lo-profile', '--convert-to', 'pdf', '--outdir', $workDir, $xlsxPath];
+        $process = proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $workDir);
+        if (!is_resource($process)) {
+            $this->removeTemporaryDirectory($workDir);
+            abort(500, 'Gagal menjalankan konversi Excel ke PDF. Pastikan LibreOffice tersedia dan OMIRA_LIBREOFFICE_PATH sudah benar.');
+        }
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($process);
+
+        if ($exitCode !== 0 || !is_file($pdfPath) || filesize($pdfPath) === 0) {
+            $this->removeTemporaryDirectory($workDir);
+            report(new \RuntimeException('Konversi Excel ke PDF gagal: '.trim((string) $stderr.' '.(string) $stdout)));
+            abort(500, 'Konversi Excel ke PDF gagal. Periksa instalasi LibreOffice dan konfigurasi OMIRA.');
+        }
+
+        @unlink($xlsxPath);
+        register_shutdown_function(function () use ($workDir): void {
+            $this->removeTemporaryDirectory($workDir);
+        });
+
+        return response()->download($pdfPath, $filename.'.pdf', ['Content-Type' => 'application/pdf'])
+            ->deleteFileAfterSend(true);
+    }
+
+
+    /** Locate LibreOffice without attempting to launch a missing executable on Windows. */
+    private function resolveLibreOfficeBinary(): ?string
+    {
+        $configured = trim((string) env('OMIRA_LIBREOFFICE_PATH', ''));
+        $configured = trim($configured, " \t\n\r\0\x0B\"");
+        $candidates = [];
+
+        if ($configured !== '') {
+            $candidates[] = $configured;
+        }
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $candidates = array_merge($candidates, [
+                'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+                'C:\\Program Files\\LibreOffice\\program\\soffice.com',
+                'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe',
+                'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.com',
+            ]);
+            $names = ['soffice.exe', 'soffice.com'];
+        } else {
+            $candidates = array_merge($candidates, ['/usr/bin/libreoffice', '/usr/bin/soffice', '/usr/local/bin/libreoffice', '/usr/local/bin/soffice']);
+            $names = ['libreoffice', 'soffice'];
+        }
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        $pathValue = (string) getenv('PATH');
+        foreach (explode(PATH_SEPARATOR, $pathValue) as $directory) {
+            $directory = trim($directory, " \t\"");
+            if ($directory === '') {
+                continue;
+            }
+            foreach ($names as $name) {
+                $candidate = rtrim($directory, DIRECTORY_SEPARATOR.'\\').DIRECTORY_SEPARATOR.$name;
+                if (is_file($candidate)) {
+                    return $candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function removeTemporaryDirectory(string $directory): void
+    {
+        if (!is_dir($directory)) return;
+        foreach (glob($directory.DIRECTORY_SEPARATOR.'*') ?: [] as $file) {
+            if (is_dir($file)) $this->removeTemporaryDirectory($file);
+            else @unlink($file);
+        }
+        @rmdir($directory);
+    }
+
+    private function buildSpreadsheet(RepairOrder $order, array $entries, bool $isClosed, ?string $userApproval, ?string $omdApproval, ?string $approvedAt): Spreadsheet
+    {
         $book = new Spreadsheet();
         $sheet = $book->getActiveSheet();
         $sheet->setTitle('Form Repair Box NG');
@@ -266,9 +383,6 @@ class RepairOrderHistoryExcelService
         $sheet->getPageSetup()->setHorizontalCentered(true);
         $sheet->getSheetView()->setZoomScale(90);
 
-        $temporary = tempnam(sys_get_temp_dir(), 'omira_form_');
-        (new Xlsx($book))->save($temporary);
-        $book->disconnectWorksheets();
-        return response()->download($temporary, $filename.'.xlsx')->deleteFileAfterSend(true);
+        return $book;
     }
 }
