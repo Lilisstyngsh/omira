@@ -29,6 +29,11 @@ class RecapController extends Controller
             $perPage = 25;
         }
 
+        $periodType = $request->input('period_type', 'monthly');
+        $annualSummary = $periodType === 'yearly'
+            ? $this->annualSummary((int) $request->input('report_year', $startDate->year), $selectedLineIds)
+            : [];
+
         $rows = $this->tableQuery($startDate, $endDate, $selectedLineIds)
             ->orderByDesc('tanggal')
             ->orderBy('line')
@@ -44,7 +49,8 @@ class RecapController extends Controller
             'rows',
             'lines',
             'selectedLineIds',
-            'perPage'
+            'perPage',
+            'annualSummary'
         ));
     }
 
@@ -331,16 +337,29 @@ class RecapController extends Controller
         $request->validate([
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'period_type' => ['nullable', 'in:monthly,yearly'],
+            'period_type' => ['nullable', 'in:monthly,yearly,custom'],
             'report_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
             'report_month' => ['nullable', 'integer', 'between:1,12'],
         ]);
 
         $periodType = $request->input('period_type');
+
+        // Rentang tanggal menggunakan tanggal pilihan pengguna, bukan periode fiscal year.
+        if ($periodType === 'custom') {
+            $startDate = $request->filled('start_date')
+                ? Carbon::parse($request->input('start_date'))->startOfDay()
+                : now()->startOfMonth()->startOfDay();
+            $endDate = $request->filled('end_date')
+                ? Carbon::parse($request->input('end_date'))->endOfDay()
+                : $startDate->copy()->endOfDay();
+
+            return [$startDate, $endDate];
+        }
+
         if ($periodType && $request->filled('report_year')) {
             $year = (int) $request->input('report_year');
             if ($periodType === 'yearly') {
-                return [Carbon::create($year, 1, 1)->startOfDay(), Carbon::create($year, 12, 31)->endOfDay()];
+                return [Carbon::create($year, 4, 1)->startOfDay(), Carbon::create($year + 1, 3, 31)->endOfDay()];
             }
             if ($request->filled('report_month')) {
                 $month = (int) $request->input('report_month');
@@ -356,6 +375,63 @@ class RecapController extends Controller
             : now()->endOfDay();
 
         return [$startDate, $endDate];
+    }
+
+    /** Annual summary follows the fiscal year: April through March. */
+    private function annualSummary(int $fiscalYear, array $lineIds = []): array
+    {
+        $start = Carbon::create($fiscalYear, 4, 1)->startOfDay();
+        $end = Carbon::create($fiscalYear + 1, 3, 31)->endOfDay();
+
+        $actualQuery = DB::table('repair_order_items as roi')
+            ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
+            ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
+            ->where('roi.before_qty', '>', 0)
+            ->where('ro.status', 'confirmed')
+            ->whereNotNull('ro.verified_by')
+            ->whereNotNull('ro.verified_at')
+            ->whereBetween('ro.created_at', [$start, $end]);
+
+        $actualRows = $this->applyLineFilter($actualQuery, $lineIds)
+            ->selectRaw('YEAR(ro.created_at) as calendar_year')
+            ->selectRaw('MONTH(ro.created_at) as calendar_month')
+            ->selectRaw('SUM(roi.after_qty) as order_qty')
+            ->selectRaw("SUM(CASE WHEN UPPER(ng.code) = 'S' THEN roi.after_qty ELSE 0 END) as scrap_qty")
+            ->groupByRaw('YEAR(ro.created_at), MONTH(ro.created_at)')
+            ->get()
+            ->keyBy(fn ($row) => sprintf('%04d-%02d', $row->calendar_year, $row->calendar_month));
+
+        if (empty($lineIds)) {
+            $target = (int) FiscalYearTarget::query()
+                ->where('year', $fiscalYear)
+                ->where('scope_key', FiscalYearTarget::scopeKey(null))
+                ->value('target_qty');
+        } else {
+            $target = (int) FiscalYearTarget::query()
+                ->where('year', $fiscalYear)
+                ->whereIn('line_id', $lineIds)
+                ->sum('target_qty');
+        }
+
+        $months = [];
+        $cursor = $start->copy();
+        while ($cursor->lte($end)) {
+            $key = $cursor->format('Y-m');
+            $actual = $actualRows->get($key);
+            $order = $actual ? (int) $actual->order_qty : null;
+            $scrap = $actual ? (int) $actual->scrap_qty : null;
+
+            $months[] = [
+                'label' => $cursor->locale('id')->translatedFormat('M'),
+                'target' => $target,
+                'order' => $order,
+                'finish' => $actual ? max($order - $scrap, 0) : null,
+                'scrap' => $scrap,
+            ];
+            $cursor->addMonth();
+        }
+
+        return $months;
     }
 
     private function resolveLineIds(Request $request): array

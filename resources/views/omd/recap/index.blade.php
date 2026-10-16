@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Report Repair Order')
-@section('header', 'Report Repair Order')
+@section('title', 'Report')
+@section('header', 'Report')
 
 @section('content')
     @php
@@ -122,6 +122,11 @@
             outline: none;
             cursor: pointer;
             transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        .recap-date-input input::placeholder {
+            font-weight: 400;
+            opacity: 1;
         }
 
         .recap-date-input input:focus,
@@ -498,19 +503,16 @@
         .recap-continued {
             display: inline-flex;
             align-items: center;
-            color: #92959b;
+            justify-content: center;
+            color: #96999d;
             line-height: 1;
+            vertical-align: middle;
         }
 
         .recap-continued svg {
             display: block;
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            stroke-width: 2.5;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            width: 16px;
+            height: 16px;
         }
 
         @media (max-width: 700px) {
@@ -530,6 +532,19 @@
             }
         }
 
+        .annual-summary-table {
+            min-width: 900px;
+        }
+
+        .annual-summary-table tbody th {
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
         .recap-table-toolbar {
             display: flex;
             align-items: center;
@@ -546,30 +561,40 @@
         }
 
         .recap-per-page-form select {
-            width: 72px;
-            min-width: 72px;
+            width: 66px;
+            min-width: 66px;
             height: 34px;
-            padding: 0 24px 0 10px;
-            border: 1px solid #dbe2ea;
+            padding: 0 8px;
+            border: 1px solid #d5ded8;
             border-radius: 8px;
-            background: #fff;
-            color: #334155;
-            font-family: inherit;
-            font-size: 10px;
-            font-weight: 800;
+            background: var(--surface, #fff);
+            color: var(--text, #334155);
+            font: inherit;
+            font-size: 11px;
+            font-weight: 700;
             outline: none;
-            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .recap-year-input {
+            display: block;
+            width: 100%;
+            height: 38px;
             box-sizing: border-box;
-            transition: border-color .18s ease, box-shadow .18s ease;
+            padding: 0 12px;
+            border: 1px solid var(--input-border, #dbe2ea);
+            border-radius: 10px;
+            background: var(--input-bg, #fff);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            outline: none;
         }
 
-        .recap-per-page-form select:hover {
-            border-color: #cbd5e1;
-        }
-
-        .recap-per-page-form select:focus {
-            border-color: #818cf8;
-            box-shadow: 0 0 0 3px rgba(129, 140, 248, .10);
+        .recap-year-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(95, 146, 120, .12);
         }
 
         .recap-ng-list {
@@ -612,19 +637,16 @@
         .recap-continued {
             display: inline-flex;
             align-items: center;
-            color: #92959b;
+            justify-content: center;
+            color: #96999d;
             line-height: 1;
+            vertical-align: middle;
         }
 
         .recap-continued svg {
             display: block;
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            stroke-width: 2.5;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            width: 16px;
+            height: 16px;
         }
 
         .recap-order-number {
@@ -873,8 +895,7 @@
 
     <div class="recap-page">
         <div class="recap-head">
-            <h2>Report Repair Order</h2>
-            <p style="margin:6px 0 0;color:#64748b;font-size:12px">Rekap seluruh order yang telah divalidasi oleh OMD.</p>
+            <h2>Report</h2>
         </div>
 
         <form method="GET" action="{{ route('omd.recap') }}" class="recap-filter" id="recapFilterForm">
@@ -892,13 +913,8 @@
 
                 <div class="recap-field" id="reportYearField">
                     <label for="report_year">Tahun</label>
-                    <select id="report_year" name="report_year" class="recap-period-select">
-                        @for ($year = now()->year; $year >= now()->year - 10; $year--)
-                            <option value="{{ $year }}"
-                                {{ (int) request('report_year', $startDate->year) === $year ? 'selected' : '' }}>
-                                {{ $year }}</option>
-                        @endfor
-                    </select>
+                    <input type="number" id="report_year" name="report_year" class="recap-year-input"
+                        min="2000" max="2100" step="1" value="{{ (int) request('report_year', $startDate->year) }}">
                 </div>
 
                 <div class="recap-field" id="reportMonthField">
@@ -918,8 +934,8 @@
                     <label for="start_date">Dari Tanggal</label>
                     <div class="recap-date-input" data-recap-datepicker="start">
                         <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-                        <input type="text" id="start_date" name="start_date" value="{{ $startDate->toDateString() }}"
-                            readonly autocomplete="off">
+                        <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}"
+                            placeholder="Pilih tanggal" readonly autocomplete="off">
                         <div class="calendar-popup"></div>
                     </div>
                 </div>
@@ -929,8 +945,8 @@
                     <label for="end_date">Sampai Tanggal</label>
                     <div class="recap-date-input" data-recap-datepicker="end">
                         <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-                        <input type="text" id="end_date" name="end_date" value="{{ $endDate->toDateString() }}"
-                            readonly autocomplete="off">
+                        <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}"
+                            placeholder="Pilih tanggal" readonly autocomplete="off">
                         <div class="calendar-popup"></div>
                     </div>
                 </div>
@@ -976,6 +992,32 @@
             </div>
         </form>
 
+        @if (request('period_type', 'monthly') === 'yearly')
+            <div class="recap-table-wrap" style="overflow-x:auto">
+                <table class="recap-table annual-summary-table">
+                    <thead>
+                        <tr>
+                            <th>Indikator</th>
+                            @foreach ($annualSummary as $month)
+                                <th>{{ $month['label'] }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ([['key' => 'target', 'label' => 'Target'], ['key' => 'order', 'label' => 'Order'], ['key' => 'finish', 'label' => 'Finish'], ['key' => 'scrap', 'label' => 'Scrap']] as $metric)
+                            <tr>
+                                <th scope="row">{{ $metric['label'] }}</th>
+                                @foreach ($annualSummary as $month)
+                                    <td style="text-align:right">{{ $month[$metric['key']] === null ? '' : number_format($month[$metric['key']], 0, ',', '.') }}</td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+        @if (request('period_type', 'monthly') !== 'yearly')
         <div class="recap-card">
             <div class="recap-table-toolbar">
                 <form method="GET" action="{{ route('omd.recap') }}" class="recap-per-page-form">
@@ -1029,9 +1071,7 @@
                                 <td>{{ $sameOrder ? '' : $row->line }}</td>
                                 <td>
                                     @if ($sameOrder)
-                                        <span class="recap-continued" aria-label="Lanjutan nomor order" title="Lanjutan nomor order">
-                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
-                                        </span>
+                                        <span class="recap-continued" aria-label="Lanjutan nomor order"><svg viewBox="0 0 64 64" width="16" height="16" aria-hidden="true" focusable="false"><path d="M16 12v19a8 8 0 0 0 8 8h25M38 24l12 15-12 13" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
                                     @else
                                         <span class="recap-order-number">{{ $row->order_number }}</span>
                                     @endif
@@ -1112,6 +1152,7 @@
                 </div>
             @endif
         </div>
+        @endif
     </div>
 
     <script>
