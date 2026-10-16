@@ -5,9 +5,16 @@
 
 @section('content')
     <style>
-        /* OMIRA tablet-first detail: predictable spacing and touch-size export actions. */
-        .omira-history-info-spacing { margin-top:20px; }
-        @media(max-width:768px) { .omira-history-info-spacing { margin-top:16px; } }
+        .omira-history-info-spacing {
+            margin-top: 20px;
+        }
+
+        @media(max-width:768px) {
+            .omira-history-info-spacing {
+                margin-top: 16px;
+            }
+        }
+
         .omira-detail-export-head {
             display: flex;
             align-items: center;
@@ -338,9 +345,11 @@
         <div class="omira-detail-export-head">
             <h3>Detail Repair</h3>
             <div class="omira-detail-export-actions">
-                <a class="pdf" href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'pdf']) }}"><i
+                <a class="pdf"
+                    href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'pdf']) }}"><i
                         class="fa-regular fa-file-pdf" aria-hidden="true"></i> PDF</a>
-                <a class="excel" href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'excel']) }}"><i
+                <a class="excel"
+                    href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'excel']) }}"><i
                         class="fa-regular fa-file-excel" aria-hidden="true"></i> Excel</a>
             </div>
         </div>

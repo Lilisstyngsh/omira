@@ -22,8 +22,11 @@ class UserDashboardController extends Controller
             ->where('status', '!=', 'confirmed')
             ->count();
 
+        // Hanya hitung order yang sudah diverifikasi OMD dan sedang ditangani.
+        // Status submitted belum diverifikasi, sedangkan completed sudah masuk
+        // kartu Perlu Konfirmasi.
         $processedOmd = (clone $base)
-            ->whereIn('status', ['submitted', 'in_repair', 'revision_requested'])
+            ->whereIn('status', ['in_repair', 'revision_requested'])
             ->count();
 
         $needConfirmation = (clone $base)

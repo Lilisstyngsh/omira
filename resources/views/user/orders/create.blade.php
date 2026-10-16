@@ -453,7 +453,6 @@
             }
         }
 
-        /* Unified Create User table — no model-picker cards or per-model subtotals. */
         .all-model-table {
             min-width: 980px;
             table-layout: fixed
@@ -638,7 +637,8 @@
                                                 <td rowspan="{{ $model->products->count() }}" class="merged-model">
                                                     {{ $loop->parent->iteration }}</td>
                                                 <td rowspan="{{ $model->products->count() }}" class="merged-model">
-                                                    <strong>{{ $model->model }}</strong></td>
+                                                    <strong>{{ $model->model }}</strong>
+                                                </td>
                                             @endif
                                             <td class="product-name">
                                                 {{ $product->name }}
@@ -753,7 +753,7 @@
                     }, 500)
                 });
                 ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => btn.addEventListener(ev,
-                stopHold));
+                    stopHold));
                 btn.addEventListener('contextmenu', e => e.preventDefault());
             });
 

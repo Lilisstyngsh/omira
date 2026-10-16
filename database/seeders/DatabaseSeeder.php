@@ -133,21 +133,7 @@ class DatabaseSeeder extends Seeder
             $lines[$data['name']] = $line;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | MASTER MODEL & PRODUCT
-        |--------------------------------------------------------------------------
-        |
-        | Master yang terkait Scrap Limit menggunakan satu source of truth:
-        | ScrapLimitSeedData. Plant/Line mengikuti naming OMIRA, sedangkan
-        | Model/Product mengikuti penulisan file Excel terbaru.
-        |
-        */
-
         $this->call(ScrapLimitMasterDataSeeder::class);
-
-        // Initial Scrap Limit per Product berdasarkan DATA QTY LIMIT BOX SCRAP.
-        // Idempotent: tidak menimpa limit terbaru yang dibuat OMD.
         $this->call(ProductScrapLimitSeeder::class);
 
         foreach (
@@ -198,7 +184,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Dwi Haryanto',
                 'password' => Hash::make(self::DEFAULT_OMD_PASSWORD),
                 'role' => 'omd',
-                'line_id' => null
+                'line_id' => '',
             ]
         );
 
