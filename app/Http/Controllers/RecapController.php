@@ -215,7 +215,10 @@ class RecapController extends Controller
         );
 
         return Pdf::loadView('omd.recap.pdf', compact(
-            'startDate', 'endDate', 'monthlyReports', 'selectedLineNames'
+            'startDate',
+            'endDate',
+            'monthlyReports',
+            'selectedLineNames'
         ))
             ->setPaper('a3', 'landscape')
             ->download($filename);
@@ -359,8 +362,8 @@ class RecapController extends Controller
         ]);
 
         return collect($request->input('line_ids', []))
-            ->map(fn ($id) => (int) $id)
-            ->filter(fn ($id) => $id > 0)
+            ->map(fn($id) => (int) $id)
+            ->filter(fn($id) => $id > 0)
             ->unique()
             ->values()
             ->all();
@@ -414,6 +417,9 @@ class RecapController extends Controller
             ->leftJoin('lines as al', 'al.id', '=', 'amm.line_id')
             ->leftJoin('plants as apl', 'apl.id', '=', 'al.plant_id')
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
+            // Hanya tampilkan jenis NG yang benar-benar dipesan user dan telah diverifikasi OMD.
+            ->where('roi.before_qty', '>', 0)
+            ->whereNotNull('ro.verified_by')
             ->whereNotNull('ro.verified_at')
             ->whereBetween('ro.verified_at', [$startDate, $endDate])
             ->selectRaw('COALESCE(apl.name, pl.name) as plant')
@@ -465,7 +471,7 @@ class RecapController extends Controller
             ->selectRaw("SUM(CASE WHEN ng.code = 'S' THEN roi.after_qty ELSE 0 END) as scrap_qty")
             ->groupByRaw('YEAR(ro.verified_at), MONTH(ro.verified_at)')
             ->get()
-            ->keyBy(fn ($row) => sprintf('%04d-%02d', $row->y, $row->m));
+            ->keyBy(fn($row) => sprintf('%04d-%02d', $row->y, $row->m));
 
         $years = range($startDate->year, $endDate->year);
         $scopeKey = FiscalYearTarget::scopeKey(null);
@@ -509,7 +515,7 @@ class RecapController extends Controller
             ->get();
 
         return $rows
-            ->groupBy(fn ($row) => implode('|', [
+            ->groupBy(fn($row) => implode('|', [
                 $row->plant,
                 $row->line,
                 $row->model ?? '-',
@@ -540,7 +546,7 @@ class RecapController extends Controller
                     'daily' => $daily,
                 ];
             })
-            ->sortBy(fn ($row) => implode('|', [$row['plant'], $row['line'], $row['model'], $row['produk']]))
+            ->sortBy(fn($row) => implode('|', [$row['plant'], $row['line'], $row['model'], $row['produk']]))
             ->values();
     }
 
@@ -630,9 +636,15 @@ class RecapController extends Controller
             }
             $row += 3;
         }
-        foreach ($plantSpans as $span) { $this->mergeGroupedCell($sheet, 'A', $span); }
-        foreach ($lineSpans as $span) { $this->mergeGroupedCell($sheet, 'B', $span); }
-        foreach ($modelSpans as $span) { $this->mergeGroupedCell($sheet, 'C', $span); }
+        foreach ($plantSpans as $span) {
+            $this->mergeGroupedCell($sheet, 'A', $span);
+        }
+        foreach ($lineSpans as $span) {
+            $this->mergeGroupedCell($sheet, 'B', $span);
+        }
+        foreach ($modelSpans as $span) {
+            $this->mergeGroupedCell($sheet, 'C', $span);
+        }
 
         $lastDataRow = max(7, $row - 1);
         if ($matrixRows->isEmpty()) {
