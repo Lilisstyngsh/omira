@@ -2451,6 +2451,138 @@
         html[data-theme="dark"] .sidebar .nav-dropdown-menu a:hover { background: #21352A !important; color: #F1F8F3 !important; }
         html[data-theme="dark"] .sidebar .nav-dropdown-toggle.active,
         html[data-theme="dark"] .sidebar .nav-dropdown-menu a.active { background: #294736 !important; color: #E5F5EA !important; font-weight: 700 !important; }
+
+
+        /* =========================================================
+           RESPONSIVE SIDEBAR — mobile and tablet drawer
+        ========================================================== */
+        .mobile-sidebar-toggle,
+        .sidebar-backdrop {
+            display: none;
+        }
+
+        .mobile-sidebar-toggle {
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 40px;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #DCE8DF;
+            border-radius: 11px;
+            background: #FFFFFF;
+            color: #376B52;
+            cursor: pointer;
+        }
+
+        .mobile-sidebar-toggle svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-sidebar-toggle {
+                display: inline-flex;
+            }
+
+            .topbar {
+                justify-content: flex-start;
+                gap: 12px;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .topbar-title {
+                min-width: 0;
+                flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .topbar-right {
+                flex: 0 0 auto;
+            }
+
+            .sidebar {
+                display: flex !important;
+                width: min(285px, 86vw);
+                max-width: 86vw;
+                transform: translateX(-105%);
+                transition: transform .25s ease;
+                z-index: 1200;
+                padding-top: max(18px, env(safe-area-inset-top));
+                padding-bottom: max(18px, env(safe-area-inset-bottom));
+                box-shadow: 12px 0 35px rgba(20, 50, 32, .18);
+            }
+
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 1190;
+                background: rgba(17, 24, 20, .42);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity .2s ease, visibility .2s ease;
+            }
+
+            .sidebar-backdrop.is-visible {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            body.sidebar-open {
+                overflow: hidden;
+                touch-action: none;
+            }
+
+            .main {
+                margin-left: 0 !important;
+                width: 100%;
+                min-width: 0;
+            }
+
+            .content {
+                min-width: 0;
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .topbar {
+                height: 60px;
+                gap: 9px;
+            }
+
+            .mobile-sidebar-toggle {
+                width: 38px;
+                height: 38px;
+                flex-basis: 38px;
+            }
+
+            .topbar-title {
+                font-size: 15px;
+            }
+
+            .topbar-right .profile {
+                padding: 4px;
+            }
+
+            .content {
+                padding: 14px 12px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar,
+            .sidebar-backdrop {
+                transition: none !important;
+            }
+        }
     </style>
 
 </head>
@@ -2471,7 +2603,9 @@
 
             
 
-            <aside class="sidebar">
+            <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+            <aside class="sidebar" id="appSidebar">
 
                 
                 <div class="brand">
@@ -2692,6 +2826,12 @@
 
                 
                 <header class="topbar">
+
+                    <button type="button" class="mobile-sidebar-toggle" id="mobileSidebarToggle" aria-label="Buka menu navigasi" aria-controls="appSidebar" aria-expanded="false">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
 
                     <div class="topbar-title">
                         <?php echo $__env->yieldContent('header', 'Dashboard'); ?>
@@ -3092,6 +3232,56 @@
             );
         </script>
     <?php endif; ?>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('appSidebar');
+            const toggle = document.getElementById('mobileSidebarToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (!sidebar || !toggle || !backdrop) return;
+
+            const mobileQuery = window.matchMedia('(max-width: 1024px)');
+
+            function closeSidebar() {
+                sidebar.classList.remove('is-open');
+                backdrop.classList.remove('is-visible');
+                document.body.classList.remove('sidebar-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'Buka menu navigasi');
+            }
+
+            function openSidebar() {
+                sidebar.classList.add('is-open');
+                backdrop.classList.add('is-visible');
+                document.body.classList.add('sidebar-open');
+                toggle.setAttribute('aria-expanded', 'true');
+                toggle.setAttribute('aria-label', 'Tutup menu navigasi');
+            }
+
+            toggle.addEventListener('click', function () {
+                if (sidebar.classList.contains('is-open')) closeSidebar();
+                else openSidebar();
+            });
+
+            backdrop.addEventListener('click', closeSidebar);
+
+            sidebar.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (mobileQuery.matches) closeSidebar();
+                });
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closeSidebar();
+            });
+
+            mobileQuery.addEventListener('change', function (event) {
+                if (!event.matches) closeSidebar();
+            });
+        });
+    </script>
 
 
 </body>
