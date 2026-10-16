@@ -24,15 +24,18 @@ class RecapController extends Controller
         [$startDate, $endDate] = $this->resolvePeriod($request);
         $selectedLineIds = $this->resolveLineIds($request);
         $lines = $this->availableLines();
+        $perPage = (int) $request->input('per_page', $request->input('perPage', 25));
+        if (! in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 25;
+        }
 
-        $rows = $this->detailQuery($startDate, $endDate, $selectedLineIds)
+        $rows = $this->tableQuery($startDate, $endDate, $selectedLineIds)
             ->orderByDesc('tanggal')
-            ->orderBy('plant')
             ->orderBy('line')
+            ->orderBy('order_number')
             ->orderBy('model')
             ->orderBy('produk')
-            ->orderBy('jenis_ng')
-            ->paginate(25)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('omd.recap.index', compact(
@@ -40,7 +43,8 @@ class RecapController extends Controller
             'endDate',
             'rows',
             'lines',
-            'selectedLineIds'
+            'selectedLineIds',
+            'perPage'
         ));
     }
 
@@ -400,6 +404,48 @@ class RecapController extends Controller
         return $query;
     }
 
+    /**
+     * One row per order/product for the on-screen recap table.
+     * Keep detailQuery() separate because PDF/Excel use its NG-type rows.
+     */
+    private function tableQuery(Carbon $startDate, Carbon $endDate, array $lineIds = []): Builder
+    {
+        $query = DB::table('repair_order_items as roi')
+            ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
+            ->join('lines as l', 'l.id', '=', 'ro.line_id')
+            ->join('plants as pl', 'pl.id', '=', 'l.plant_id')
+            ->leftJoin('master_models as mm', 'mm.id', '=', 'roi.master_model_id')
+            ->leftJoin('products as p', 'p.id', '=', 'roi.product_id')
+            ->leftJoin('master_models as pmm', 'pmm.id', '=', 'p.master_model_id')
+            ->leftJoin('products as ap', 'ap.id', '=', 'roi.after_product_id')
+            ->leftJoin('master_models as amm', 'amm.id', '=', 'ap.master_model_id')
+            ->leftJoin('master_models as romm', 'romm.id', '=', 'ro.master_model_id')
+            ->leftJoin('products as rop', 'rop.id', '=', 'ro.product_id')
+            ->leftJoin('master_models as ropmm', 'ropmm.id', '=', 'rop.master_model_id')
+            ->leftJoin('lines as al', 'al.id', '=', 'amm.line_id')
+            ->leftJoin('plants as apl', 'apl.id', '=', 'al.plant_id')
+            ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
+            ->where('roi.before_qty', '>', 0)
+            ->where('ro.status', 'confirmed')
+            ->whereNotNull('ro.verified_by')
+            ->whereNotNull('ro.verified_at')
+            ->whereBetween('ro.created_at', [$startDate, $endDate])
+            ->selectRaw('DATE(ro.created_at) as tanggal')
+            ->addSelect('ro.order_number as order_number')
+            ->selectRaw('COALESCE(apl.name, pl.name) as plant')
+            ->selectRaw('COALESCE(al.name, l.name) as line')
+            ->selectRaw('COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model) as model')
+            ->selectRaw('COALESCE(ap.name, p.name, rop.name) as produk')
+            ->selectRaw("COALESCE(SUM(CASE WHEN UPPER(ng.code) = 'P' THEN roi.after_qty ELSE 0 END), 0) as qty_p")
+            ->selectRaw("COALESCE(SUM(CASE WHEN UPPER(ng.code) = 'H' THEN roi.after_qty ELSE 0 END), 0) as qty_h")
+            ->selectRaw("COALESCE(SUM(CASE WHEN UPPER(ng.code) = 'C' THEN roi.after_qty ELSE 0 END), 0) as qty_c")
+            ->selectRaw("COALESCE(SUM(CASE WHEN UPPER(ng.code) = 'S' THEN roi.after_qty ELSE 0 END), 0) as qty_s")
+            ->selectRaw('COALESCE(SUM(roi.after_qty), 0) as total')
+            ->groupByRaw('DATE(ro.created_at), ro.order_number, COALESCE(apl.name, pl.name), COALESCE(al.name, l.name), COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model), COALESCE(ap.name, p.name, rop.name)');
+
+        return $this->applyLineFilter($query, $lineIds);
+    }
+
     private function detailQuery(Carbon $startDate, Carbon $endDate, array $lineIds = []): Builder
     {
         $query = DB::table('repair_order_items as roi')
@@ -419,17 +465,19 @@ class RecapController extends Controller
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
             // Hanya tampilkan jenis NG yang benar-benar dipesan user dan telah diverifikasi OMD.
             ->where('roi.before_qty', '>', 0)
+            ->where('ro.status', 'confirmed')
             ->whereNotNull('ro.verified_by')
             ->whereNotNull('ro.verified_at')
-            ->whereBetween('ro.verified_at', [$startDate, $endDate])
+            ->whereBetween('ro.created_at', [$startDate, $endDate])
             ->selectRaw('COALESCE(apl.name, pl.name) as plant')
             ->selectRaw('COALESCE(al.name, l.name) as line')
             ->selectRaw('COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model) as model')
             ->selectRaw('COALESCE(ap.name, p.name, rop.name) as produk')
             ->addSelect('ng.code as jenis_ng')
             ->selectRaw('SUM(roi.after_qty) as total')
-            ->selectRaw('DATE(ro.verified_at) as tanggal')
-            ->groupByRaw('DATE(ro.verified_at), COALESCE(apl.name, pl.name), COALESCE(al.name, l.name), COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model), COALESCE(ap.name, p.name, rop.name), ng.code');
+            ->selectRaw('DATE(ro.created_at) as tanggal')
+            ->addSelect('ro.order_number as order_number')
+            ->groupByRaw('DATE(ro.created_at), ro.order_number, COALESCE(apl.name, pl.name), COALESCE(al.name, l.name), COALESCE(amm.model, mm.model, pmm.model, romm.model, ropmm.model), COALESCE(ap.name, p.name, rop.name), ng.code');
 
         return $this->applyLineFilter($query, $lineIds);
     }
@@ -439,8 +487,10 @@ class RecapController extends Controller
         $query = DB::table('repair_order_items as roi')
             ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
+            ->where('ro.status', 'confirmed')
+            ->whereNotNull('ro.verified_by')
             ->whereNotNull('ro.verified_at')
-            ->whereBetween('ro.verified_at', [$startDate, $endDate]);
+            ->whereBetween('ro.created_at', [$startDate, $endDate]);
 
         $row = $this->applyLineFilter($query, $lineIds)
             ->selectRaw('COALESCE(SUM(roi.after_qty), 0) as order_qty')
@@ -462,14 +512,16 @@ class RecapController extends Controller
         $query = DB::table('repair_order_items as roi')
             ->join('repair_orders as ro', 'ro.id', '=', 'roi.repair_order_id')
             ->join('ng_types as ng', 'ng.id', '=', 'roi.ng_type_id')
+            ->where('ro.status', 'confirmed')
+            ->whereNotNull('ro.verified_by')
             ->whereNotNull('ro.verified_at')
-            ->whereBetween('ro.verified_at', [$startDate, $endDate]);
+            ->whereBetween('ro.created_at', [$startDate, $endDate]);
 
         $raw = $this->applyLineFilter($query, $lineIds)
-            ->selectRaw('YEAR(ro.verified_at) as y, MONTH(ro.verified_at) as m')
+            ->selectRaw('YEAR(ro.created_at) as y, MONTH(ro.created_at) as m')
             ->selectRaw('SUM(roi.after_qty) as order_qty')
             ->selectRaw("SUM(CASE WHEN ng.code = 'S' THEN roi.after_qty ELSE 0 END) as scrap_qty")
-            ->groupByRaw('YEAR(ro.verified_at), MONTH(ro.verified_at)')
+            ->groupByRaw('YEAR(ro.created_at), MONTH(ro.created_at)')
             ->get()
             ->keyBy(fn($row) => sprintf('%04d-%02d', $row->y, $row->m));
 
@@ -529,7 +581,7 @@ class RecapController extends Controller
                     $day = Carbon::parse($item->tanggal)->day;
                     $daily[$day] ??= ['order' => 0, 'scrap' => 0];
                     $daily[$day]['order'] += (int) $item->total;
-                    if (strtoupper((string) $item->jenis_ng) === 'S') {
+                    if (strtoupper((string) ($item->jenis_ng ?? '')) === 'S') {
                         $daily[$day]['scrap'] += (int) $item->total;
                     }
                 }
