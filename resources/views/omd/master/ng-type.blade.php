@@ -79,24 +79,66 @@ Jenis NG
 
 
     /* =====================================================
-       FORM TAMBAH
+       MODAL TAMBAH (konsisten dengan Plant & Line / Model Box)
     ===================================================== */
 
-    .ng-form-row {
+    .ng-add-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .45);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .ng-add-modal .modal-box {
+        background: #fff;
+        width: 100%;
+        max-width: 420px;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, .15);
+    }
+
+    .ng-add-modal .modal-header {
         display: flex;
-        align-items: flex-end;
-        gap: 12px;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 20px;
     }
 
-    .ng-form-group {
-        flex: 1;
+    .ng-add-modal .modal-header h4 {
+        margin: 0 0 5px;
+        font-size: 17px;
+        font-weight: 800;
+        color: #172033;
     }
 
-    .ng-form-group.code {
-        max-width: 140px;
+    .ng-add-modal .modal-header p {
+        margin: 0;
+        font-size: 11px;
+        color: #64748b;
     }
 
-    .ng-form-group label {
+    .ng-add-modal .modal-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 8px;
+        font-size: 18px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .ng-add-modal .form-label {
         display: block;
         margin-bottom: 7px;
         font-size: 11px;
@@ -104,31 +146,38 @@ Jenis NG
         color: #334155;
     }
 
-    .ng-form-group input {
+    .ng-add-modal input {
         width: 100%;
-        height: 40px;
-        padding: 0 11px;
-        border: 1px solid #dfe6e2;
+        height: 42px;
+        padding: 0 13px;
+        border: 1px solid #dce3ec;
         border-radius: 10px;
         outline: none;
-        box-sizing: border-box;
-        font-size: 12px;
+        font-size: 13px;
         color: #334155;
-        background: #ffffff;
+        box-sizing: border-box;
+        background: #fff;
     }
 
-    .ng-form-group input:focus {
-        border-color: #78a88c;
-        box-shadow: 0 0 0 3px rgba(111, 159, 132, .10);
+    .ng-add-modal input:focus {
+        border-color: #5F9278;
+        box-shadow: 0 0 0 3px rgba(95, 146, 120, .12);
     }
 
-    .ng-save-btn {
-        height: 40px;
-        padding: 0 20px;
-        border-radius: 10px;
+    .ng-add-modal .modal-action {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .ng-add-button {
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 9px 14px;
         white-space: nowrap;
     }
-
 
     /* =====================================================
        TABLE HEADER
@@ -493,19 +542,6 @@ Jenis NG
 
     @media (max-width: 700px) {
 
-        .ng-form-row {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .ng-form-group.code {
-            max-width: none;
-        }
-
-        .ng-save-btn {
-            width: 100%;
-        }
-
         .ng-table-heading {
             align-items: flex-start;
         }
@@ -516,76 +552,6 @@ Jenis NG
 
     }
 </style>
-
-
-{{-- =====================================================
-    FORM TAMBAH
-===================================================== --}}
-
-<div class="card ng-card">
-
-    <div class="card-body">
-
-        <div class="ng-page-heading">
-
-            <h4>
-                Tambah Jenis NG
-            </h4>
-
-        </div>
-
-
-        <form method="POST"
-            action="{{ route('omd.master.ng-type.store') }}">
-
-            @csrf
-
-            <div class="ng-form-row">
-
-                <div class="ng-form-group code">
-
-                    <label>
-                        Kode
-                    </label>
-
-                    <input type="text"
-                        name="code"
-                        maxlength="5"
-                        placeholder="Contoh: P"
-                        required>
-
-                </div>
-
-
-                <div class="ng-form-group">
-
-                    <label>
-                        Nama Jenis NG
-                    </label>
-
-                    <input type="text"
-                        name="name"
-                        maxlength="100"
-                        placeholder="Contoh: NG Part"
-                        required>
-
-                </div>
-
-
-                <button type="submit"
-                    class="btn btn-primary ng-save-btn">
-
-                    Simpan
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
 
 
 {{-- =====================================================
@@ -602,9 +568,15 @@ Jenis NG
                 Daftar Jenis NG
             </h4>
 
-            <span class="ng-table-count">
-                {{ $ngTypes->count() }} Jenis NG
-            </span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="ng-table-count">
+                    {{ $ngTypes->count() }} Jenis NG
+                </span>
+
+                <button type="button" class="btn btn-primary ng-add-button" onclick="openAddNgModal()">
+                    <i class="fa-solid fa-plus me-1" aria-hidden="true"></i> Tambah
+                </button>
+            </div>
 
         </div>
 
@@ -741,6 +713,41 @@ Jenis NG
 
 
 {{-- =====================================================
+    MODAL TAMBAH JENIS NG
+===================================================== --}}
+
+<div id="addNgModal" class="ng-add-modal" role="dialog" aria-modal="true" aria-labelledby="addNgTitle">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <h4 id="addNgTitle">Tambah Jenis NG</h4>
+                <p>Tambahkan jenis NG baru ke dalam sistem.</p>
+            </div>
+            <button type="button" onclick="closeAddNgModal()" class="modal-close" aria-label="Tutup">×</button>
+        </div>
+
+        <form method="POST" action="{{ route('omd.master.ng-type.store') }}">
+            @csrf
+
+            <div class="mb-3">
+                <label for="addNgCode" class="form-label">Kode</label>
+                <input type="text" id="addNgCode" name="code" maxlength="5" placeholder="Contoh: P" required>
+            </div>
+
+            <div>
+                <label for="addNgName" class="form-label">Nama Jenis NG</label>
+                <input type="text" id="addNgName" name="name" maxlength="100" placeholder="Contoh: NG Part" required>
+            </div>
+
+            <div class="modal-action">
+                <button type="button" onclick="closeAddNgModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- =====================================================
     MODAL EDIT
 ===================================================== --}}
 
@@ -834,6 +841,31 @@ Jenis NG
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    /* =====================================================
+       TAMBAH JENIS NG
+    ===================================================== */
+
+    const addNgModal = document.getElementById('addNgModal');
+
+    function openAddNgModal() {
+        addNgModal.style.display = 'flex';
+        document.getElementById('addNgCode').focus();
+    }
+
+    function closeAddNgModal() {
+        addNgModal.style.display = 'none';
+    }
+
+    addNgModal.addEventListener('click', function(e) {
+        if (e.target === addNgModal) closeAddNgModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && addNgModal.style.display === 'flex') {
+            closeAddNgModal();
+        }
+    });
+
     /* =====================================================
        EDIT
     ===================================================== */
