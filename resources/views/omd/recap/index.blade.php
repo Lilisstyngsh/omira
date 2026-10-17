@@ -13,6 +13,13 @@
             $exportParams['line_ids'] = $selectedLineIds;
         }
 
+        $hasAppliedDateFilter = request('period_type') === 'custom'
+            && (request()->filled('start_date') || request()->filled('end_date'));
+        $resetParams = ['period_type' => 'custom', 'per_page' => $perPage];
+        if (!empty($selectedLineIds)) {
+            $resetParams['line_ids'] = $selectedLineIds;
+        }
+
         $selectedLineCount = count($selectedLineIds);
         $lineLabel =
             $selectedLineCount === 0
@@ -305,6 +312,22 @@
             flex-wrap: wrap;
         }
 
+        .recap-filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recap-btn-reset {
+            color: var(--text);
+            background: var(--surface-soft, #f1f5f9);
+            border-color: var(--border);
+        }
+
+        .recap-filter-actions [hidden] {
+            display: none !important;
+        }
+
         .recap-btn {
             min-height: 38px;
             display: inline-flex;
@@ -356,12 +379,12 @@
             border-collapse: separate;
             border-spacing: 0;
             min-width: 680px;
-            background: #f8fafc;
+            background: #FFFFFF;
         }
 
         .recap-table th,
         .recap-table td {
-            padding: 14px 16px;
+            padding: 13px 14px;
             border-right: 1px solid #e5eaf0;
             border-bottom: 1px solid #e5eaf0;
             text-align: left;
@@ -379,7 +402,8 @@
         }
 
         .recap-table th {
-            background: #f1f5f9;
+            padding: 12px 14px;
+            background: #F9FAFB;
             color: #64748b;
             font-size: 11px;
             font-weight: 700;
@@ -388,7 +412,7 @@
         }
 
         .recap-table td {
-            background: #f8fafc;
+            background: #FFFFFF;
             color: #111827;
             font-size: 12px;
             font-weight: 400;
@@ -548,9 +572,19 @@
         .recap-table-toolbar {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
             padding: 14px 16px;
             background: var(--surface, #fff);
+        }
+
+        .recap-table-toolbar .recap-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-left: auto;
+            margin-top: 0;
+            gap: 8px;
         }
 
         .recap-per-page-form {
@@ -656,10 +690,10 @@
 
         .recap-total-qty {
             display: inline-flex;
-            min-width: 62px;
+            min-width: 54px;
             justify-content: center;
-            padding: 9px 12px;
-            border-radius: 10px;
+            padding: 7px 10px;
+            border-radius: 9px;
             color: #07834f;
             background: #eaf8f1;
             font-weight: 800;
@@ -667,11 +701,6 @@
 
         @media (max-width: 700px) {
             .recap-table-toolbar {
-                padding: 12px;
-            }
-
-            .recap-table th,
-            .recap-table td {
                 padding: 12px;
             }
 
@@ -861,8 +890,7 @@
                 padding: 14px;
             }
 
-            .recap-fields,
-            .recap-actions {
+            .recap-fields {
                 display: grid;
                 grid-template-columns: minmax(0, 1fr);
                 gap: 12px;
@@ -974,46 +1002,58 @@
                     </div>
                 </div>
 
-                <button type="submit" class="recap-btn recap-btn-primary">
-                    <i class="fa-solid fa-filter" aria-hidden="true"></i>
-                    Tampilkan
-                </button>
-            </div>
-
-            <div class="recap-actions">
-                <a class="recap-btn recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
-                    <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
-                    PDF
-                </a>
-                <button type="button" class="recap-btn recap-btn-excel" data-export-form="omiraChartExport">
-                    <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
-                    Excel
-                </button>
+                <div class="recap-filter-actions">
+                    <button type="submit" class="recap-btn recap-btn-primary">
+                        <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                        Filter
+                    </button>
+                    @if ($hasAppliedDateFilter)
+                        <a id="recapResetDates" class="recap-btn recap-btn-reset"
+                            href="{{ route('omd.recap', $resetParams) }}">
+                            <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                            Reset
+                        </a>
+                    @endif
+                </div>
             </div>
         </form>
 
         @if (request('period_type', 'monthly') === 'yearly')
-            <div class="recap-table-wrap" style="overflow-x:auto">
-                <table class="recap-table annual-summary-table">
-                    <thead>
-                        <tr>
-                            <th>Indikator</th>
-                            @foreach ($annualSummary as $month)
-                                <th>{{ $month['label'] }}</th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ([['key' => 'target', 'label' => 'Target'], ['key' => 'order', 'label' => 'Order'], ['key' => 'finish', 'label' => 'Finish'], ['key' => 'scrap', 'label' => 'Scrap']] as $metric)
+            <div class="recap-card">
+                <div class="recap-table-toolbar">
+                    <div class="recap-actions">
+                        <a class="recap-btn recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
+                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                            PDF
+                        </a>
+                        <button type="button" class="recap-btn recap-btn-excel" data-export-form="omiraChartExport">
+                            <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
+                            Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="recap-table-wrap" style="overflow-x:auto">
+                    <table class="recap-table annual-summary-table">
+                        <thead>
                             <tr>
-                                <th scope="row">{{ $metric['label'] }}</th>
+                                <th>Indikator</th>
                                 @foreach ($annualSummary as $month)
-                                    <td style="text-align:right">{{ $month[$metric['key']] === null ? '' : number_format($month[$metric['key']], 0, ',', '.') }}</td>
+                                    <th>{{ $month['label'] }}</th>
                                 @endforeach
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ([['key' => 'target', 'label' => 'Target'], ['key' => 'order', 'label' => 'Order'], ['key' => 'finish', 'label' => 'Finish'], ['key' => 'scrap', 'label' => 'Scrap']] as $metric)
+                                <tr>
+                                    <th scope="row">{{ $metric['label'] }}</th>
+                                    @foreach ($annualSummary as $month)
+                                        <td style="text-align:right">{{ $month[$metric['key']] === null ? '' : number_format($month[$metric['key']], 0, ',', '.') }}</td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         @endif
 
@@ -1039,6 +1079,16 @@
                         @endforeach
                     </select>
                 </form>
+                <div class="recap-actions">
+                    <a class="recap-btn recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
+                        <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                    <button type="button" class="recap-btn recap-btn-excel" data-export-form="omiraChartExport">
+                        <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
+                        Excel
+                    </button>
+                </div>
             </div>
             <div class="recap-table-wrap">
                 <table class="recap-table">
@@ -1161,9 +1211,11 @@
             const yearField = document.getElementById('reportYearField');
             const monthField = document.getElementById('reportMonthField');
             const customDates = document.querySelectorAll('.recap-custom-date');
+            const resetDates = document.getElementById('recapResetDates');
 
             function syncPeriodFields() {
                 const value = type.value;
+                if (resetDates) resetDates.hidden = value !== 'custom';
                 yearField.style.display = value === 'custom' ? 'none' : '';
                 monthField.style.display = value === 'yearly' || value === 'custom' ? 'none' : '';
                 customDates.forEach(field => {

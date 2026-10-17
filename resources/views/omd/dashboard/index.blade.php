@@ -20,8 +20,8 @@
             12 => 'Desember',
         ];
 
-        // Pastikan 12 bulan selalu dirender dalam grafik tanpa menambah realisasi palsu.
-        $chartMonthLabels = collect(range(1, 12))->map(fn ($m) => \Illuminate\Support\Carbon::create($year, $m, 1)->locale('id')->translatedFormat('M'));
+        // Label grafik mengikuti Fiscal Year April–Maret.
+        $chartMonthLabels = collect($fiscalMonths)->map(fn ($item) => \Illuminate\Support\Carbon::create($item['year'], $item['month'], 1)->locale('id')->translatedFormat('M'));
 
         $targetPercent = $chartMax > 0
             ? min(100, ($target / $chartMax) * 100)
@@ -91,11 +91,26 @@
         }
 
         .monitor-filter {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
+            display: flex;
+            flex-wrap: wrap;
             gap: 12px;
-            align-items: end;
+            align-items: flex-end;
             padding: 16px;
+        }
+
+        .monitor-filter .monitor-field {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .monitor-filter input[name="year"] {
+            width: 94px;
+            max-width: 100%;
+        }
+
+        .monitor-filter select[name="line_id"] {
+            width: var(--line-filter-width, 165px);
+            max-width: 100%;
         }
 
         /* Soft-green abstract cloud pattern, decorative only. */
@@ -155,8 +170,8 @@
             display: block;
             margin-bottom: 6px;
             color: #64748b;
-            font-size: 10px;
-            font-weight: 900;
+            font-size: 9px;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: .04em;
         }
@@ -165,10 +180,12 @@
         .monitor-field input,
         .abnormality-form textarea {
             width: 100%;
-            min-height: 44px;
+            height: 38px;
+            min-height: 38px;
+            box-sizing: border-box;
             padding: 0 12px;
-            border: 1px solid #dbe3ee;
-            border-radius: 11px;
+            border: 1px solid #dbe2ea;
+            border-radius: 9px;
             background: #fff;
             color: #172033;
             font-size: 12px;
@@ -182,9 +199,33 @@
             box-shadow: 0 0 0 3px rgba(95, 146, 120, .10);
         }
 
+        .monitor-filter .monitor-filter-action {
+            flex: 0 0 auto;
+        }
+
         .monitor-filter .btn {
-            min-height: 44px;
+            height: 38px;
+            min-height: 38px;
             justify-content: center;
+        }
+
+        .monitor-filter .dashboard-filter-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 18px;
+            border: 1px solid #5f967e;
+            border-radius: 9px;
+            background: #5f967e;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: none;
+        }
+        .monitor-filter .dashboard-filter-button:hover,
+        .monitor-filter .dashboard-filter-button:focus-visible {
+            background: #4f856d;
+            color: #fff;
         }
 
         .monitor-kpis {
@@ -355,12 +396,16 @@
             padding: 12px 13px;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            background: #fff;
+            background: #FEFAF3;
             box-shadow: 0 14px 34px rgba(15, 23, 42, .16);
             opacity: 0;
             visibility: hidden;
             transform: translateY(4px);
             transition: opacity .14s ease, transform .14s ease, visibility .14s ease;
+        }
+
+        #chartAbnormalityPopover {
+            background: #FEFAF3 !important;
         }
 
         .chart-abnormality-popover.show {
@@ -369,23 +414,17 @@
             transform: translateY(0);
         }
 
-        .chart-abnormality-title {
+        #chartAbnormalityTitle {
             margin: 0;
-            color: #172033;
+            color: #172033 !important;
             font-size: 11px;
-            font-weight: 900;
-        }
-
-        .chart-abnormality-meta {
-            margin-top: 4px;
-            color: #64748b;
-            font-size: 9px;
             font-weight: 700;
         }
 
-        .chart-abnormality-reason {
+        #chartAbnormalityReason {
             margin-top: 8px;
-            color: #334155;
+            background: transparent !important;
+            color: #334155 !important;
             font-size: 10px;
             line-height: 1.55;
             overflow-wrap: anywhere;
@@ -397,14 +436,15 @@
         }
 
         .chart-card { padding:24px 30px 28px; }
-        .axis-caption { text-align:center; font-size:12px; font-weight:600; color:#475569; padding:13px 0 2px; }
+        .axis-caption { text-align:center; font-size:11px; font-weight:600; color:#000000; padding:13px 0 2px; }
         .fy-chart-shell { position:relative; padding-left:14px; padding-right:8px; }
-        .axis-y-label { position:absolute; left:0; top:50%; transform:translate(-50%,-50%) rotate(-90deg); font-size:11px; font-weight:600; color:#475569; white-space:nowrap; }
-        .ongoing-bubble { position:absolute; z-index:8; bottom:var(--ongoing-bottom, 64px); left:50%; transform:translateX(-50%); background:#8F6227; color:white; border-radius:999px; padding:5px 8px; white-space:nowrap; font-size:9px; font-weight:900; box-shadow:0 3px 9px #0002; pointer-events:none; }
-        .ongoing-bubble:after { content:''; position:absolute; top:100%; left:50%; margin-left:-5px; border:5px solid transparent; border-top-color:#8F6227; }
+        .axis-y-label { position:absolute; left:0; top:50%; transform:translate(-50%,-50%) rotate(-90deg); font-size:11px; font-weight:600; color:#000000; white-space:nowrap; }
+        .ongoing-bubble { position:absolute; z-index:8; bottom:var(--ongoing-bottom, 64px); left:50%; transform:translateX(-50%); background:#FFF449; color:#000000; border-radius:999px; padding:6px 10px; white-space:nowrap; font-size:11px; font-weight:800; box-shadow:0 3px 9px #0002; pointer-events:none; }
+        .ongoing-bubble:after { content:''; position:absolute; top:100%; left:50%; margin-left:-5px; border:5px solid transparent; border-top-color:#FFF449; }
         .month-group { position:relative; }
-        .month-group.is-future .chart-bar { height:7px; min-height:7px; background:#DDE2E9; opacity:.8; border-radius:3px 3px 1px 1px; }
-        .month-group.is-future .month-label { color:#94A3B8; }
+        .month-group.is-future .chart-bar,
+        .chart-bar.is-empty { height:0; min-height:0; visibility:hidden; pointer-events:none; }
+        .month-group.is-future .month-label { color:#94a3b8; }
         .abnormality-summary { margin-top:18px; overflow-x:auto; }
         .abnormality-summary table { width:100%; border-collapse:collapse; font-size:11px; }
         .abnormality-summary th,.abnormality-summary td { padding:10px 12px; border:1px solid #e2e8f0; text-align:left; vertical-align:top; }
@@ -428,8 +468,9 @@
 
         .card-subtitle {
             margin: 5px 0 0;
-            color: #94a3b8;
+            color: #000000;
             font-size: 10px;
+            font-weight: 600;
             line-height: 1.5;
         }
 
@@ -475,11 +516,11 @@
         }
 
         .chart-axis {
+            color: #000000;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 0 10px 27px 0;
-            color: #94a3b8;
             font-size: 9px;
             text-align: right;
         }
@@ -569,6 +610,9 @@
         }
 
         .target-value {
+            color: #000000;
+            font-size: 9px;
+            font-weight: 600;
             position: absolute;
             left: 50%;
             top: -23px;
@@ -576,9 +620,9 @@
             padding: 1px 4px;
             border-radius: 5px;
             background: rgba(255, 255, 255, .92);
-            color: #B84650;
-            font-size: 8px;
-            font-weight: 900;
+            color: #000000;
+            font-size: 9px;
+            font-weight: 600;
             line-height: 1.3;
             white-space: nowrap;
         }
@@ -611,7 +655,7 @@
             position: relative;
             z-index: 3;
             width: min(18px, 28%);
-            min-height: 2px;
+            min-height: 0;
             height: var(--bar-height);
             display: flex;
             align-items: flex-start;
@@ -627,9 +671,9 @@
             top: -18px;
             z-index: 5;
             transform: translateX(-50%);
-            color: #334155;
-            font-size: 8px;
-            font-weight: 900;
+            color: #000000;
+            font-size: 11px;
+            font-weight: 600;
             line-height: 1;
             white-space: nowrap;
             pointer-events: none;
@@ -657,12 +701,12 @@
         .chart-bar.scrap { background: #D39A53; }
 
         .month-label {
+            color: #000000;
             display: flex;
             align-items: end;
             justify-content: center;
             padding-bottom: 2px;
-            color: #64748b;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 800;
         }
 
@@ -762,8 +806,8 @@
         .scrap-status {
             padding: 3px 7px;
             border-radius: 999px;
-            font-size: 8px;
-            font-weight: 900;
+            font-size: 10px;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
@@ -820,14 +864,6 @@
                 justify-content: flex-start;
             }
 
-            .monitor-filter {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .monitor-filter .btn {
-                grid-column: 1 / -1;
-            }
-
             .chart-card,
             .table-card,
             .scrap-card {
@@ -836,10 +872,6 @@
         }
 
         @media (max-width: 560px) {
-            .monitor-filter {
-                grid-template-columns: 1fr;
-            }
-
             .monitor-kpis {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 10px;
@@ -884,26 +916,23 @@
                     {{ $selectedLine?->name ?? 'Semua Line' }}
                 </span>
                 <span class="monitor-pill">
-                    {{ $monthNames[$month] }} {{ $year }}
+                    FY {{ $year }} (Apr {{ $year }} – Mar {{ $year + 1 }})
                 </span>
             </div>
         </div>
 
         <form class="monitor-card monitor-filter" method="GET" action="{{ route('dashboard') }}">
             <div class="monitor-field">
-                <label>Bulan</label>
-                <select name="month">
-                    @foreach ($monthNames as $number => $name)
-                        <option value="{{ $number }}" @selected($month === $number)>
-                            {{ $name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="monitor-field">
-                <label>Tahun</label>
-                <input type="number" name="year" value="{{ $year }}" min="2020" max="2100">
+                <label for="dashboard-year">Tahun</label>
+                <input
+                    id="dashboard-year"
+                    type="number"
+                    name="year"
+                    min="2020"
+                    max="2100"
+                    value="{{ $year }}"
+                    required
+                >
             </div>
 
             <div class="monitor-field">
@@ -918,7 +947,10 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary">Tampilkan</button>
+            <div class="monitor-field monitor-filter-action">
+                <label aria-hidden="true">&nbsp;</label>
+                <button type="submit" class="btn btn-primary dashboard-filter-button"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Filter</span></button>
+            </div>
         </form>
 
 
@@ -938,7 +970,7 @@
 
                 <form class="abnormality-form" method="POST" action="{{ route('omd.dashboard.abnormality.store') }}">
                     @csrf
-                    <input type="hidden" name="year" value="{{ $year }}">
+                    <input type="hidden" name="year" value="{{ now()->year }}">
                     <input type="hidden" name="month" value="{{ $month }}">
                     @if ($lineId)
                         <input type="hidden" name="line_id" value="{{ $lineId }}">
@@ -958,20 +990,20 @@
         @endif
 
         @if ($productScrapAlerts->isNotEmpty())
-            <div class="monitor-card alert-card scrap-alert">
+            <a href="{{ route('scrap-cycles.index') }}" class="monitor-card alert-card scrap-alert" style="text-decoration:none;color:inherit;cursor:pointer;">
                 <div class="alert-icon">!</div>
                 <div style="flex:1;min-width:0;">
                     <h3 class="alert-title">Peringatan Scrap Limit Produk</h3>
                     <p class="alert-copy">{{ $productScrapAlerts->count() }} produk mencapai/melewati Scrap Limit.</p>
                 </div>
-            </div>
+            </a>
         @endif
 
         <div class="monitor-card chart-card">
             <div class="card-head">
                 <div>
-                    <h3 class="card-title">Grafik Monitoring Repair Box {{ $year }}</h3>
-                    <p class="card-subtitle">Januari – Desember {{ $year }}</p>
+                    <h3 class="card-title">Grafik Monitoring Repair Box FY {{ $year }}</h3>
+                    <p class="card-subtitle">April {{ $year }} – Maret {{ $year + 1 }}</p>
                 </div>
 
                 <div class="chart-legend">
@@ -1027,12 +1059,14 @@
                                     $orderVisualHeight = $orderValue > 0 ? max($orderHeight, 2) : 0;
                                     $okVisualHeight = $okValue > 0 ? max($okHeight, 2) : 0;
                                     $scrapVisualHeight = $scrapValue > 0 ? max($scrapHeight, 2) : 0;
-                                    $monthAbnormality = $abnormalitiesByMonth->get($index + 1);
+                                    $monthAbnormality = $abnormalitiesByMonth->get($fiscalMonths[$index]['year'] . '-' . str_pad((string) $fiscalMonths[$index]['month'], 2, '0', STR_PAD_LEFT));
                                 @endphp
 
                                 @php
-                                    $futureMonth = $year > now()->year || ($year === now()->year && ($index + 1) > now()->month);
-                                    $ongoingMonth = $year === now()->year && ($index + 1) === now()->month;
+                                    $chartCalendarYear = (int) $fiscalMonths[$index]['year'];
+                                    $chartCalendarMonth = (int) $fiscalMonths[$index]['month'];
+                                    $futureMonth = \Illuminate\Support\Carbon::create($chartCalendarYear, $chartCalendarMonth, 1)->gt(now()->startOfMonth());
+                                    $ongoingMonth = $chartCalendarYear === now()->year && $chartCalendarMonth === now()->month;
                                     // Align the badge with the tallest bar, but keep it clear of the FY target line.
                                     $barTop = max($orderHeight, $okHeight, $scrapHeight);
                                     $bubbleBottom = 27 + (int) round(min($barTop, 92) * 3.33) + 24;
@@ -1047,36 +1081,36 @@
                                         <span class="ongoing-bubble" style="--ongoing-bottom:{{ $bubbleBottom }}px">ON GOING</span>
                                     @endif
                                     <div class="month-bars">
-                                        <div class="chart-bar order {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                        <div class="chart-bar order {{ $orderValue <= 0 ? 'is-empty' : '' }} {{ $monthAbnormality ? 'has-abnormality' : '' }}"
                                             style="--bar-height: {{ number_format($orderVisualHeight, 2, '.', '') }}%;"
                                             @if ($monthAbnormality)
                                                 role="button" tabindex="0"
-                                                data-abnormality-month="{{ $monthNames[$index + 1] ?? $monthLabel }}"
-                                                data-abnormality-year="{{ $year }}"
+                                                data-abnormality-month="{{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }}"
+                                                data-abnormality-year="{{ $fiscalMonths[$index]['year'] }}"
                                                 data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
                                                 data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
                                                 data-abnormality-reason="{{ $monthAbnormality->reason }}"
                                             @endif>
                                             @if ($orderValue > 0)<span class="chart-bar-value">{{ number_format($orderValue) }}</span>@endif
                                         </div>
-                                        <div class="chart-bar ok {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                        <div class="chart-bar ok {{ $okValue <= 0 ? 'is-empty' : '' }} {{ $monthAbnormality ? 'has-abnormality' : '' }}"
                                             style="--bar-height: {{ number_format($okVisualHeight, 2, '.', '') }}%;"
                                             @if ($monthAbnormality)
                                                 role="button" tabindex="0"
-                                                data-abnormality-month="{{ $monthNames[$index + 1] ?? $monthLabel }}"
-                                                data-abnormality-year="{{ $year }}"
+                                                data-abnormality-month="{{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }}"
+                                                data-abnormality-year="{{ $fiscalMonths[$index]['year'] }}"
                                                 data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
                                                 data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
                                                 data-abnormality-reason="{{ $monthAbnormality->reason }}"
                                             @endif>
                                             @if ($okValue > 0)<span class="chart-bar-value">{{ number_format($okValue) }}</span>@endif
                                         </div>
-                                        <div class="chart-bar scrap {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                        <div class="chart-bar scrap {{ $scrapValue <= 0 ? 'is-empty' : '' }} {{ $monthAbnormality ? 'has-abnormality' : '' }}"
                                             style="--bar-height: {{ number_format($scrapVisualHeight, 2, '.', '') }}%;"
                                             @if ($monthAbnormality)
                                                 role="button" tabindex="0"
-                                                data-abnormality-month="{{ $monthNames[$index + 1] ?? $monthLabel }}"
-                                                data-abnormality-year="{{ $year }}"
+                                                data-abnormality-month="{{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }}"
+                                                data-abnormality-year="{{ $fiscalMonths[$index]['year'] }}"
                                                 data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
                                                 data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
                                                 data-abnormality-reason="{{ $monthAbnormality->reason }}"
@@ -1094,12 +1128,6 @@
 
             </div>
             <div class="axis-caption">FY {{ $year }}</div>
-            @if ($orderSeries->sum() === 0 && $finishSeries->sum() === 0 && $scrapSeries->sum() === 0)
-                <div class="empty-state" style="margin-top:12px;">
-                    Grafik sudah aktif, tetapi belum ada order yang sudah dikonfirmasi User pada periode/filter ini.
-                    Batang akan muncul otomatis setelah User mengonfirmasi barang sesuai.
-                </div>
-            @endif
         </div>
 
         <section class="monitor-card abnormality-card" style="padding:18px;">
@@ -1111,7 +1139,7 @@
                         @forelse ($abnormalitiesByMonth as $abMonth => $item)
                             @php $diff=(int)$item->actual_qty-(int)$item->threshold_qty; @endphp
                             <tr>
-                                <td><strong>{{ $monthNames[(int) $abMonth] ?? $abMonth }}</strong></td>
+                                <td><strong>{{ ($monthNames[(int) $item->month] ?? $item->month) . ' ' . $item->year }}</strong></td>
                                 <td>{{ number_format((int) $item->actual_qty) }}</td>
                                 <td>{{ number_format((int) $item->threshold_qty) }}</td>
                                 <td><span class="abnormality-diff {{ $diff > 0 ? 'danger' : 'safe' }}">{{ $diff > 0 ? '+' : '' }}{{ number_format($diff) }}</span></td>
@@ -1126,8 +1154,7 @@
         </section>
 
         <div class="chart-abnormality-popover" id="chartAbnormalityPopover" role="dialog" aria-hidden="true">
-            <h4 class="chart-abnormality-title" id="chartAbnormalityTitle">Abnormality Global</h4>
-            <div class="chart-abnormality-meta" id="chartAbnormalityMeta"></div>
+            <h4 class="chart-abnormality-title" id="chartAbnormalityTitle">Abnormality</h4>
             <div class="chart-abnormality-reason" id="chartAbnormalityReason"></div>
         </div>
 
@@ -1135,15 +1162,37 @@
 
     <script>
         (() => {
+            const lineSelect = document.querySelector('.monitor-filter select[name="line_id"]');
+            if (!lineSelect) return;
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            if (!context) return;
+
+            const fitLineFilter = () => {
+                const style = window.getComputedStyle(lineSelect);
+                context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+                const text = lineSelect.selectedOptions[0]?.textContent.trim() || 'Semua Line';
+                const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+                const borders = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+                const width = Math.ceil(context.measureText(text).width + padding + borders + 40);
+                lineSelect.style.setProperty('--line-filter-width', `${Math.max(100, width)}px`);
+            };
+
+            lineSelect.addEventListener('change', fitLineFilter);
+            window.addEventListener('resize', fitLineFilter);
+            fitLineFilter();
+            if (document.fonts?.ready) document.fonts.ready.then(fitLineFilter);
+        })();
+    </script>
+
+    <script>
+        (() => {
             const popover = document.getElementById('chartAbnormalityPopover');
             const title = document.getElementById('chartAbnormalityTitle');
-            const meta = document.getElementById('chartAbnormalityMeta');
             const reason = document.getElementById('chartAbnormalityReason');
             const bars = document.querySelectorAll('.chart-bar.has-abnormality');
 
             if (!popover || bars.length === 0) return;
-
-            const formatNumber = value => new Intl.NumberFormat('id-ID').format(Number(value || 0));
 
             const closePopover = () => {
                 popover.classList.remove('show');
@@ -1151,12 +1200,7 @@
             };
 
             const openPopover = bar => {
-                const actual = Number(bar.dataset.abnormalityActual || 0);
-                const target = Number(bar.dataset.abnormalityTarget || 0);
-                const difference = Math.max(actual - target, 0);
-
-                title.textContent = `Abnormality Global · ${bar.dataset.abnormalityMonth} ${bar.dataset.abnormalityYear}`;
-                meta.textContent = `Order ${formatNumber(actual)} · Target ${formatNumber(target)} · Selisih +${formatNumber(difference)}`;
+                title.textContent = 'Abnormality';
                 reason.textContent = bar.dataset.abnormalityReason || '-';
 
                 popover.classList.add('show');
@@ -1202,9 +1246,10 @@
 .modern-abnormality-table{width:100%;border-collapse:collapse;}
 .modern-abnormality-table thead{background:#f7f9fa;}
 .modern-abnormality-table th{padding:14px 16px;color:#64748b;font-size:12px;text-transform:uppercase;text-align:left;}
-.modern-abnormality-table td{padding:15px 16px;border-top:1px solid #eef2f3;color:#334155;}
+.modern-abnormality-table td{padding:15px 16px;border-top:1px solid #eef2f3;color:#334155;font-family:inherit;font-size:12px;}
+.modern-abnormality-table td strong,.modern-abnormality-table td .abnormality-diff{font-family:inherit;font-size:inherit;}
 .modern-abnormality-table tbody tr:hover{background:#f8faf9;}
-.abnormality-diff{display:inline-flex;padding:5px 10px;border-radius:999px;font-weight:700;font-size:13px;}
+.abnormality-diff{display:inline-flex;padding:5px 10px;border-radius:999px;font-weight:700;font-size:inherit;}
 .abnormality-diff.danger{background:#feecec;color:#dc2626;}
 .abnormality-diff.safe{background:#eaf7ef;color:#15803d;}
 .reason-cell{max-width:420px;}

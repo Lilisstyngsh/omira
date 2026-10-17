@@ -1575,7 +1575,7 @@
             display.hidden = true;
             container.append(input);
             input.focus();
-            input.select();
+            input.setSelectionRange(input.value.length, input.value.length);
             input.addEventListener('click', event => event.stopPropagation());
             input.addEventListener('keydown', event => {
                 event.stopPropagation();

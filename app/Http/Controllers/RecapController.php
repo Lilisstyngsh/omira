@@ -351,7 +351,9 @@ class RecapController extends Controller
                 : now()->startOfMonth()->startOfDay();
             $endDate = $request->filled('end_date')
                 ? Carbon::parse($request->input('end_date'))->endOfDay()
-                : $startDate->copy()->endOfDay();
+                : ($request->filled('start_date')
+                    ? $startDate->copy()->endOfDay()
+                    : now()->endOfDay());
 
             return [$startDate, $endDate];
         }

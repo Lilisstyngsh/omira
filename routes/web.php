@@ -8,7 +8,6 @@ use App\Http\Controllers\OmdOrderController;
 use App\Http\Controllers\OmdHistoryExportController;
 use App\Http\Controllers\UserOrderController;
 use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\TpsRepairController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\ScrapLimitController;
@@ -97,28 +96,6 @@ Route::middleware('auth')->group(function () {
         ->prefix('user')
         ->name('user.')
         ->group(function () {
-
-            /*
-            |--------------------------------------------------------------------------
-            | TPS Tool - User
-            |--------------------------------------------------------------------------
-            */
-
-            Route::get('/tps', [TpsRepairController::class, 'userIndex'])
-                ->name('tps.index');
-
-            Route::get('/tps/create', [TpsRepairController::class, 'create'])
-                ->name('tps.create');
-
-            Route::post('/tps', [TpsRepairController::class, 'store'])
-                ->name('tps.store');
-
-            Route::get('/tps/{order}', [TpsRepairController::class, 'userShow'])
-                ->name('tps.show');
-
-            Route::post('/tps/{order}/confirm', [TpsRepairController::class, 'confirm'])
-                ->name('tps.confirm');
-
 
             /*
             |--------------------------------------------------------------------------
@@ -356,43 +333,6 @@ Route::middleware('auth')->group(function () {
                         [MasterDataController::class, 'destroyNgType']
                     )->name('ng-type.destroy');
                 });
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | TPS Tool - OMD
-            |--------------------------------------------------------------------------
-            */
-
-            Route::get(
-                '/tps',
-                [TpsRepairController::class, 'omdIndex']
-            )->name('tps.index');
-
-            Route::get(
-                '/tps/{order}',
-                [TpsRepairController::class, 'omdShow']
-            )->name('tps.show');
-
-            Route::post(
-                '/tps/{order}/leader-check',
-                [TpsRepairController::class, 'leaderCheck']
-            )->name('tps.leader-check');
-
-            Route::post(
-                '/tps/{order}/verify',
-                [TpsRepairController::class, 'verify']
-            )->name('tps.verify');
-
-            Route::post(
-                '/tps/{order}/schedule',
-                [TpsRepairController::class, 'schedule']
-            )->name('tps.schedule');
-
-            Route::post(
-                '/tps/{order}/complete',
-                [TpsRepairController::class, 'complete']
-            )->name('tps.complete');
 
 
             /*

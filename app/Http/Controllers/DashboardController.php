@@ -22,19 +22,14 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $month = $request->integer('month') ?: now()->month;
-        $year = $request->integer('year') ?: now()->year;
-        $lineId = $request->filled('line_id')
-            ? (int) $request->input('line_id')
-            : null;
-
-        if ($month < 1 || $month > 12) {
-            $month = now()->month;
-        }
-
-        if ($year < 2020 || $year > 2100) {
-            $year = now()->year;
-        }
+        // Fiscal Year default mengikuti periode aktif April–Maret, tetapi tetap bisa dipilih melalui filter Tahun.
+        $today = now();
+        $activeFiscalYear = (int) ($today->month >= 4 ? $today->year : $today->year - 1);
+        $year = $request->filled('year')
+            ? max(2020, min(2100, (int) $request->input('year')))
+            : $activeFiscalYear;
+        $month = (int) $today->month;
+        $lineId = $request->filled('line_id') ? (int) $request->input('line_id') : null;
 
         $lines = Line::query()
             ->where('is_active', true)
@@ -52,24 +47,26 @@ class DashboardController extends Controller
             : null;
 
         $monthlyMetrics = collect();
-
-        for ($calendarMonth = 1; $calendarMonth <= 12; $calendarMonth++) {
-            // Selalu kirim Januari-Desember untuk visual; bulan depan belum memiliki realisasi.
-            $isFuture = $year > now()->year || ($year === now()->year && $calendarMonth > now()->month);
+        $fiscalMonths = [];
+        for ($offset = 0; $offset < 12; $offset++) {
+            $date = Carbon::create($year, 4, 1)->addMonths($offset);
+            $calendarYear = (int) $date->year;
+            $calendarMonth = (int) $date->month;
+            $isFuture = $date->startOfMonth()->gt(now()->startOfMonth());
             $metrics = $isFuture
                 ? ['order' => 0, 'ok' => 0, 'scrap' => 0]
-                : $this->metricsForMonth($year, $calendarMonth, $lineId);
-
+                : $this->metricsForMonth($calendarYear, $calendarMonth, $lineId);
             $monthlyMetrics->push([
                 'month' => $calendarMonth,
-                'label' => Carbon::create($year, $calendarMonth, 1)
-                    ->locale('id')
-                    ->translatedFormat('M'),
+                'year' => $calendarYear,
+                'key' => $calendarYear . '-' . str_pad((string) $calendarMonth, 2, '0', STR_PAD_LEFT),
+                'label' => $date->locale('id')->translatedFormat('M'),
                 ...$metrics,
             ]);
+            $fiscalMonths[] = ['year' => $calendarYear, 'month' => $calendarMonth];
         }
 
-        $selectedMetrics = $monthlyMetrics->firstWhere('month', $month) ?? [
+        $selectedMetrics = $monthlyMetrics->first(fn ($row) => (int) $row['month'] === $month && (int) $row['year'] === (int) $today->year) ?? [
             'order' => 0,
             'ok' => 0,
             'scrap' => 0,
@@ -90,7 +87,7 @@ class DashboardController extends Controller
             ? 'Seluruh Plant & Line'
             : 'Target belum diatur';
 
-        $globalMetrics = $this->metricsForMonth($year, $month, null);
+        $globalMetrics = $this->metricsForMonth((int) $today->year, $month, null);
         $globalOrder = (int) $globalMetrics['order'];
         $targetExceeded = $target > 0 && $globalOrder > $target;
         $targetDifference = $targetExceeded
@@ -99,26 +96,29 @@ class DashboardController extends Controller
 
         $globalScopeKey = FiscalYearTarget::scopeKey(null);
 
-        $abnormalitiesByMonth = MonitoringAbnormality::query()
+        $abnormalityQuery = MonitoringAbnormality::query()
             ->with(['creator', 'updater'])
             ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
-            ->where('year', $year)
             ->where('scope_key', $globalScopeKey)
-            ->whereBetween('month', [1, 12])
-            ->orderBy('month')
-            ->get()
-            ->keyBy(fn ($row) => (int) $row->month);
+            ->where(function ($query) use ($year) {
+                $query->where(function ($q) use ($year) {
+                    $q->where('year', $year)->whereBetween('month', [4, 12]);
+                })->orWhere(function ($q) use ($year) {
+                    $q->where('year', $year + 1)->whereBetween('month', [1, 3]);
+                });
+            });
+        $abnormalityRows = $abnormalityQuery->get()->sortBy(fn ($row) => (((int) $row->month) >= 4 ? (int) $row->month - 4 : (int) $row->month + 8));
+        $abnormalitiesByMonth = $abnormalityRows->keyBy(fn ($row) => $row->year . '-' . str_pad((string) $row->month, 2, '0', STR_PAD_LEFT));
+        $abnormality = $abnormalitiesByMonth->get($today->year . '-' . str_pad((string) $month, 2, '0', STR_PAD_LEFT));
 
-        $abnormality = $abnormalitiesByMonth->get($month);
+        $periodEnd = Carbon::create((int) $today->year, $month, 1)->endOfMonth();
 
-        $periodEnd = Carbon::create($year, $month, 1)->endOfMonth();
-
-        if ($year === now()->year && $month === now()->month) {
+        if ($month === now()->month) {
             $periodEnd = now();
         }
 
         $productScrapAlerts = $this->productScrapAlerts(
-            $year,
+            (int) $today->year,
             $month,
             $lineId,
             $periodEnd->toDateTimeString()
@@ -161,6 +161,7 @@ class DashboardController extends Controller
             'abnormalitiesByMonth',
             'productScrapAlerts',
             'months',
+            'fiscalMonths',
             'orderSeries',
             'finishSeries',
             'scrapSeries',
@@ -183,8 +184,9 @@ class DashboardController extends Controller
             'reason' => ['required', 'string', 'min:5', 'max:2000'],
         ]);
 
-        $year = (int) $data['year'];
+        $year = (int) $data['year']; // Tahun kalender untuk record abnormality
         $month = (int) $data['month'];
+        $fiscalYear = $month >= 4 ? $year : $year - 1;
         $returnLineId = isset($data['line_id'])
             ? (int) $data['line_id']
             : null;
@@ -211,7 +213,7 @@ class DashboardController extends Controller
         }
 
         $metrics = $this->metricsForMonth($year, $month, null);
-        $targetRecord = $this->resolveTarget($year);
+        $targetRecord = $this->resolveTarget($fiscalYear);
         $target = (int) ($targetRecord?->target_qty ?? 0);
 
         if ($target <= 0 || $metrics['order'] <= $target) {
