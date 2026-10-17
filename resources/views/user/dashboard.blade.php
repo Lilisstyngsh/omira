@@ -171,19 +171,49 @@
         margin: 0;
         color: #172033;
         font-size: 14px;
-        font-weight: 800;
+        font-weight: 600;
     }
 
-    /* Operational priority: terlihat saat ada order, tetap tenang saat kosong. */
+    /* Header Perlu Tindakan memakai pola dropdown Scrap Limit dengan tema oranye. */
     .dashboard-panel.action-panel.has-actions {
-        border-color: #E9DEAB;
-        background: #FFFEFA;
+        border-color: #F1EAD8;
+        background: #ffffff;
+        overflow: hidden;
     }
 
-    .action-panel.has-actions .dashboard-panel-head {
-        background: #fff;
-        border-bottom-color: #edf1f5;
+    .action-panel .action-panel-toggle {
+        width: 100%;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 18px;
+        border: 0;
+        border-bottom: 1px solid #F1EAD8;
+        background: #FFFCF2;
+        color: #263342;
+        text-align: left;
+        cursor: pointer;
     }
+
+    .action-panel .action-panel-toggle:focus-visible {
+        outline: 2px solid #d97706;
+        outline-offset: -2px;
+    }
+
+    .action-panel .action-panel-chevron {
+        flex: 0 0 auto;
+        color: #9a681e;
+        transition: transform .18s ease;
+    }
+
+    .action-panel .action-panel-toggle[aria-expanded="true"] .action-panel-chevron {
+        transform: rotate(180deg);
+    }
+
+    .action-panel .action-panel-content[hidden] { display: none !important; }
+    .action-panel .action-panel-content { background: #ffffff; }
 
     .action-heading {
         display: flex;
@@ -192,16 +222,17 @@
     }
 
     .action-heading-icon {
-        width: 32px;
-        height: 32px;
+        width: auto;
+        height: auto;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        border-radius: 10px;
-        background: #FFF0BB;
-        color: #9B722F;
-        font-size: 14px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: #d97706;
+        font-size: 16px;
     }
 
     .action-subtitle {
@@ -214,28 +245,31 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 28px;
+        min-width: 26px;
+        height: 26px;
+        padding: 0 8px;
+        border: 1px solid #f3d6a3;
         border-radius: 999px;
-        padding: 5px 11px;
-        background: #FFF0B8;
-        color: #84601F;
-        font-size: 10.5px;
+        background: #fff0cf;
+        color: #9a5b12;
+        font-size: 12px;
         font-weight: 800;
         white-space: nowrap;
     }
 
     .action-list {
         display: grid;
-        gap: 10px;
-        padding: 12px;
+        gap: 6px;
+        padding: 8px 10px;
+        background: #ffffff;
     }
 
     .action-order {
         display: grid;
         grid-template-columns: minmax(150px, 1fr) minmax(170px, 1.4fr) auto;
         align-items: center;
-        gap: 14px;
-        padding: 13px 15px;
+        gap: 10px;
+        padding: 7px 10px;
         border: 1px solid #F1EAD8;
         border-radius: 12px;
         background: #FFFCF2;
@@ -255,7 +289,7 @@
     .action-order-number {
         color: #172033;
         font-size: 11px;
-        font-weight: 800;
+        font-weight: 500;
     }
 
     .action-order-meta {
@@ -295,15 +329,15 @@
         display: inline-flex;
         align-items: center;
         justify-content: flex-end;
-        min-height: 44px;
+        min-height: 30px;
         padding: 0;
         border: 0;
         border-radius: 0;
         background: transparent;
         box-shadow: none;
         color: #405B7D;
-        font-size: 11px;
-        font-weight: 800;
+        font-size: 12px;
+        font-weight: 600;
         text-decoration: underline;
         text-underline-offset: 3px;
         white-space: nowrap;
@@ -394,8 +428,8 @@
         align-items: center;
         min-height: 44px;
         color: #405B7D;
-        font-size: 11px;
-        font-weight: 800;
+        font-size: 12px;
+        font-weight: 600;
         text-decoration: underline;
         text-underline-offset: 3px;
         border: 0;
@@ -549,24 +583,35 @@
 
     .scrap-limit-panel { border:1px solid #f1d4d6; overflow:hidden; }
     .scrap-limit-panel .dashboard-panel-title { display:flex; align-items:center; gap:8px; }
-    .scrap-limit-items { padding:14px; display:grid; gap:12px; }
+    .scrap-limit-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; border:0; background:#fffafa; color:#263342; text-align:left; cursor:pointer; }
+    .scrap-limit-toggle-main { display:flex; align-items:center; gap:10px; min-width:0; }
+    .scrap-limit-toggle-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; color:#ad323a; background:transparent; border:0; border-radius:0; width:auto; height:auto; font-size:16px; }
+    .scrap-limit-toggle-title { display:block; font-size:12px; font-weight:900; line-height:1.5; }
+    .action-panel .dashboard-panel-title { font-size:12px; font-weight:900; line-height:1.5; }
+    .recent-orders-panel .dashboard-panel-title { font-size:12px; font-weight:600; line-height:1.5; }
+    .scrap-limit-count { display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; padding:0 8px; border-radius:999px; background:#fff449; color:#263342; font-size:12px; font-weight:800; }
+    .scrap-limit-chevron { transition:transform .18s ease; color:#64748b; }
+    .scrap-limit-toggle[aria-expanded="true"] .scrap-limit-chevron { transform:rotate(180deg); }
+    .scrap-limit-items { padding:14px; display:grid; gap:12px; border-top:1px solid #f1d4d6; }
+    .scrap-limit-items[hidden] { display:none !important; }
     .scrap-limit-alert { border:1px solid #eadba7; background:#fffbeb; border-radius:12px; padding:15px; }
     .scrap-limit-alert.is-reached { border-color:#efb4b6; background:#fff4f4; }
     .scrap-limit-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; color:#9a681e; font-size:13px; }
     .scrap-limit-alert.is-reached .scrap-limit-top { color:#ad323a; }
-    .scrap-limit-top span { font-size:11px; font-weight:800; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
-    .scrap-limit-product { margin-top:9px; font-size:14px; font-weight:800; color:#263342; }
-    .scrap-limit-meta,.scrap-limit-notice { margin-top:5px; font-size:12px; color:#64748b; }
-    .scrap-limit-question { margin:12px 0 8px; font-weight:750; font-size:13px; }
+    .scrap-limit-top span { font-size:12px; font-weight:600; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
+    .scrap-limit-product { margin-top:9px; font-size:14px; font-weight:600; color:#263342; }
+    .scrap-limit-meta,.scrap-limit-notice { margin-top:5px; font-size:12px; font-weight:400; color:#64748b; }
+    .scrap-limit-question { margin:12px 0 8px; font-weight:600; font-size:13px; }
     .scrap-limit-actions,.scrap-modal-actions { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
-    .scrap-btn { border:0; border-radius:9px; padding:10px 16px; font-size:12px; font-weight:800; cursor:pointer; }
+    .scrap-btn { border:0; border-radius:9px; padding:10px 16px; font-size:12px; font-weight:600; cursor:pointer; }
     .scrap-btn-order { background:#347554; color:#fff; }
     .scrap-btn-no { background:#e5eaf0; color:#324255; }
-    .scrap-reason-modal[hidden],[data-scrap-submit][hidden] { display:none !important; }
+    .scrap-btn-submit-disabled { background:#e5e7eb !important; color:#9ca3af !important; cursor:not-allowed !important; }
+    .scrap-reason-modal[hidden] { display:none !important; }
     .scrap-reason-modal { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1100; padding:18px; }
     .scrap-reason-dialog { width:min(100%,440px); background:#fff; border-radius:16px; padding:22px; box-shadow:0 24px 60px rgba(15,23,42,.22); }
-    .scrap-reason-dialog h3 { font-size:16px; margin:0; }
-    .scrap-reason-dialog p { margin:5px 0 15px; color:#64748b; font-size:12px; }
+    .scrap-reason-dialog h3 { font-size:16px; font-weight:600; margin:0; }
+    .scrap-reason-dialog p { margin:5px 0 15px; color:#64748b; font-size:12px; font-weight:400; }
     .scrap-reason-dialog textarea { width:100%; box-sizing:border-box; min-height:110px; border:1px solid #cbd5e1; border-radius:9px; padding:10px; font:inherit; font-size:13px; resize:vertical; }
     .scrap-modal-actions { justify-content:flex-end; margin-top:12px; }
 </style>
@@ -603,10 +648,19 @@
 
     @if($scrapAlerts->isNotEmpty())
     <section class="dashboard-panel scrap-limit-panel">
-        <div class="dashboard-panel-head">
-            <h3 class="dashboard-panel-title"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Monitoring Scrap Limit</h3>
-        </div>
-        <div class="scrap-limit-items">
+        <button type="button" class="scrap-limit-toggle" id="scrap-limit-toggle" aria-expanded="false" aria-controls="scrap-limit-items">
+            <span class="scrap-limit-toggle-main">
+                <span class="scrap-limit-toggle-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
+                <span>
+                    <span class="scrap-limit-toggle-title">Peringatan Scrap Limit Produk</span>
+                </span>
+            </span>
+            <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                <span class="scrap-limit-count">{{ $scrapAlerts->count() }}</span>
+                <i class="fa-solid fa-chevron-down scrap-limit-chevron" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="scrap-limit-items" id="scrap-limit-items" hidden>
             @foreach($scrapAlerts as $cycle)
                 <div class="scrap-limit-alert is-reached">
                     <div class="scrap-limit-top">
@@ -636,7 +690,7 @@
                                     <textarea name="reason" maxlength="1000" rows="4" placeholder="Masukkan alasan..." required data-scrap-reason></textarea>
                                     <div class="scrap-modal-actions">
                                         <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
-                                        <button type="submit" class="scrap-btn scrap-btn-order" data-scrap-submit hidden>Simpan Alasan</button>
+                                        <button type="submit" class="scrap-btn scrap-btn-order scrap-btn-submit-disabled" data-scrap-submit disabled>Simpan Alasan</button>
                                     </div>
                                 </form>
                             </div>
@@ -649,6 +703,58 @@
         </div>
     </section>
     @endif
+
+    <section class="dashboard-panel action-panel {{ $actionOrders->isNotEmpty() ? 'has-actions' : '' }}">
+        @if ($actionOrders->isNotEmpty())
+            <button type="button" class="action-panel-toggle" id="action-panel-toggle" aria-expanded="false" aria-controls="action-panel-content">
+                <span class="action-heading">
+                    <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
+                    <span class="dashboard-panel-title">Perlu Tindakan</span>
+                </span>
+                <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                    <span class="action-count">{{ $needConfirmation }} Order</span>
+                    <i class="fa-solid fa-chevron-down action-panel-chevron" aria-hidden="true"></i>
+                </span>
+            </button>
+            <div class="action-panel-content" id="action-panel-content" hidden>
+                    <div class="action-list">
+                    @foreach ($actionOrders as $order)
+                        @php
+                            $qty = $order->after_qty_sum !== null
+                                ? (int) $order->after_qty_sum
+                                : (int) ($order->quantity ?? 0);
+                            $isCorrection = (int) $order->feedbacks_count > 0;
+                        @endphp
+
+                        <a href="{{ route('user.orders.show', $order) }}" class="action-order" aria-label="Cek Order {{ $order->order_number }}">
+                            <div>
+                                <div class="action-order-number">{{ $order->order_number }}</div>
+                                <div class="action-order-meta"><span>{{ $qty }} NG</span></div>
+                            </div>
+
+                            <div class="action-order-message">
+                                <strong>{{ $isCorrection ? 'Hasil koreksi siap diperiksa' : 'Hasil repair siap diperiksa' }}</strong>
+                            </div>
+
+                            <span class="action-check-order">Cek Order</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @else
+            <div class="dashboard-panel-head">
+                <div class="action-heading">
+                    <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
+                    <h3 class="dashboard-panel-title">Perlu Tindakan</h3>
+                </div>
+            </div>
+            <div class="dashboard-empty">
+                <i class="fa-solid fa-circle-check"></i>
+                Tidak ada order yang perlu dikonfirmasi.
+            </div>
+        @endif
+    </section>
+
 
     <div class="dashboard-kpis">
         <div class="dashboard-kpi">
@@ -684,54 +790,7 @@
         </div>
     </div>
 
-    <section class="dashboard-panel action-panel {{ $actionOrders->isNotEmpty() ? 'has-actions' : '' }}">
-        <div class="dashboard-panel-head">
-            <div class="action-heading">
-                @if ($actionOrders->isNotEmpty())
-                    <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
-                @endif
-                <div>
-                    <h3 class="dashboard-panel-title">Perlu Tindakan</h3>
-                </div>
-            </div>
-            @if ($actionOrders->isNotEmpty())
-                <span class="action-count">{{ $needConfirmation }} Order</span>
-            @endif
-        </div>
-
-        @if ($actionOrders->isNotEmpty())
-            <div class="action-list">
-                @foreach ($actionOrders as $order)
-                    @php
-                        $qty = $order->after_qty_sum !== null
-                            ? (int) $order->after_qty_sum
-                            : (int) ($order->quantity ?? 0);
-                        $isCorrection = (int) $order->feedbacks_count > 0;
-                    @endphp
-
-                    <a href="{{ route('user.orders.show', $order) }}" class="action-order" aria-label="Cek Order {{ $order->order_number }}">
-                        <div>
-                            <div class="action-order-number">{{ $order->order_number }}</div>
-                            <div class="action-order-meta"><span>{{ $qty }} NG</span></div>
-                        </div>
-
-                        <div class="action-order-message">
-                            <strong>{{ $isCorrection ? 'Hasil koreksi siap diperiksa' : 'Hasil repair siap diperiksa' }}</strong>
-                        </div>
-
-                        <span class="action-check-order">Cek Order</span>
-                    </a>
-                @endforeach
-            </div>
-        @else
-            <div class="dashboard-empty">
-                <i class="fa-solid fa-circle-check"></i>
-                Tidak ada order yang perlu dikonfirmasi.
-            </div>
-        @endif
-    </section>
-
-    <section class="dashboard-panel">
+    <section class="dashboard-panel recent-orders-panel">
         <div class="dashboard-panel-head">
             <div>
                 <h3 class="dashboard-panel-title">Order Terbaru</h3>
@@ -827,6 +886,26 @@
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    var actionToggle = document.getElementById('action-panel-toggle');
+    var actionContent = document.getElementById('action-panel-content');
+    if (actionToggle && actionContent) {
+        actionToggle.addEventListener('click', function () {
+            var expanded = actionToggle.getAttribute('aria-expanded') === 'true';
+            actionToggle.setAttribute('aria-expanded', String(!expanded));
+            actionContent.hidden = expanded;
+        });
+    }
+
+    var scrapToggle = document.getElementById('scrap-limit-toggle');
+    var scrapItems = document.getElementById('scrap-limit-items');
+    if (scrapToggle && scrapItems) {
+        scrapToggle.addEventListener('click', function () {
+            var expanded = scrapToggle.getAttribute('aria-expanded') === 'true';
+            scrapToggle.setAttribute('aria-expanded', String(!expanded));
+            scrapItems.hidden = expanded;
+        });
+    }
+
     document.querySelectorAll('[data-scrap-modal-open]').forEach(function (button) {
         button.addEventListener('click', function () {
             var modal = document.getElementById(button.dataset.scrapModalOpen);
@@ -839,7 +918,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) {
         var reason = modal.querySelector('[data-scrap-reason]');
         var submit = modal.querySelector('[data-scrap-submit]');
-        var update = function () { if (submit) submit.hidden = !reason || !reason.value.trim(); };
+        var update = function () {
+            var valid = !!(reason && reason.value.trim());
+            if (submit) {
+                submit.disabled = !valid;
+                submit.classList.toggle('scrap-btn-submit-disabled', !valid);
+            }
+        };
         if (reason) reason.addEventListener('input', update);
         update();
         modal.querySelectorAll('[data-scrap-modal-close]').forEach(function (button) {
