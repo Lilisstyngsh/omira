@@ -916,7 +916,7 @@
                     {{ $selectedLine?->name ?? 'Semua Line' }}
                 </span>
                 <span class="monitor-pill">
-                    FY {{ $year }} (Apr {{ $year }} – Mar {{ $year + 1 }})
+                    FY {{ $year }}
                 </span>
             </div>
         </div>

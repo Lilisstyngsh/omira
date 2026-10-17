@@ -569,9 +569,6 @@ Jenis NG
             </h4>
 
             <div class="d-flex align-items-center gap-2">
-                <span class="ng-table-count">
-                    {{ $ngTypes->count() }} Jenis NG
-                </span>
 
                 <button type="button" class="btn btn-primary ng-add-button" onclick="openAddNgModal()">
                     <i class="fa-solid fa-plus me-1" aria-hidden="true"></i> Tambah
