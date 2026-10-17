@@ -916,7 +916,7 @@
                     {{ $selectedLine?->name ?? 'Semua Line' }}
                 </span>
                 <span class="monitor-pill">
-                    FY {{ $year }}
+                    FY {{ $year }} (Apr {{ $year }} – Mar {{ $year + 1 }})
                 </span>
             </div>
         </div>
@@ -990,7 +990,7 @@
         @endif
 
         @if ($productScrapAlerts->isNotEmpty())
-            <a href="{{ route('scrap-cycles.index') }}" class="monitor-card alert-card scrap-alert" style="text-decoration:none;color:inherit;cursor:pointer;">
+            <a href="{{ route('omd.scrap-cycles.index') }}" class="monitor-card alert-card scrap-alert" style="text-decoration:none;color:inherit;cursor:pointer;">
                 <div class="alert-icon">!</div>
                 <div style="flex:1;min-width:0;">
                     <h3 class="alert-title">Peringatan Scrap Limit Produk</h3>
