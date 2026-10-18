@@ -128,6 +128,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/additional-box', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'index'])->name('additional-box.index');
             Route::post('/additional-box', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'store'])->name('additional-box.store');
             Route::get('/additional-box/{document}', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'show'])->name('additional-box.show');
+            Route::get('/additional-box/{document}/preview', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'preview'])->name('additional-box.preview');
             Route::get('/additional-box/{document}/export/{format}', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'export'])->where('format', 'pdf|excel')->name('additional-box.export');
 
             Route::post('/scrap-limit/{cycle}/decision', [UserScrapLimitController::class, 'decide'])

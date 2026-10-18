@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\AdditionalBoxRequest;
@@ -15,8 +16,10 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdditionalBoxExportService
 {
-    /** Render only real, non-empty request items; maximum five items per form page. */
-    private function pages(AdditionalBoxRequest $document): array
+    /** Restore the reference PDF: real rows only, at most five per page.
+     * Excel continues using its existing page/row layout unchanged.
+     */
+    private function pdfPages(AdditionalBoxRequest $document): array
     {
         $items = $document->items->filter(static function ($item): bool {
             return (int) $item->quantity > 0
@@ -32,121 +35,195 @@ class AdditionalBoxExportService
         return $pages ?: [[]];
     }
 
-    public function pdf(AdditionalBoxRequest $document)
+    /** Preview and download share the exact same PDF template and data. */
+    private function renderPdf(AdditionalBoxRequest $document)
     {
         $logo = public_path('images/aisin-form-logo.jpg');
         $logoData = is_file($logo) ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logo)) : null;
-        $pages = $this->pages($document);
+        $pages = $this->pdfPages($document);
         return Pdf::loadView('user.additional-box.pdf', compact('document', 'logoData', 'pages'))
-            ->setPaper('a4', 'portrait')->download($document->document_number . '.pdf');
+            ->setPaper('a4', 'portrait');
     }
 
+    public function pdf(AdditionalBoxRequest $document)
+    {
+        return $this->renderPdf($document)->download($document->document_number . '.pdf');
+    }
+
+    public function previewPdf(AdditionalBoxRequest $document)
+    {
+        return $this->renderPdf($document)->stream($document->document_number . '.pdf');
+    }
+
+    /** Excel uses real request items only; its layout is independent of PDF pagination. */
     public function excel(AdditionalBoxRequest $document)
     {
         $book = new Spreadsheet();
-        $book->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
-        foreach ($this->pages($document) as $page => $rows) {
+        $book->getDefaultStyle()->getFont()->setName('Arial')->setSize(9);
+
+        foreach ($this->pdfPages($document) as $page => $rows) {
             $sheet = $page === 0 ? $book->getActiveSheet() : $book->createSheet();
             $sheet->setTitle('Form ' . ($page + 1));
             $sheet->setShowGridlines(false);
             $sheet->setPrintGridlines(false);
             $sheet->getSheetView()->setView('normal');
-            $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4)
+            $sheet->getPageSetup()
+                ->setPaperSize(PageSetup::PAPERSIZE_A4)
                 ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
-                ->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(1);
-            $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.3)->setRight(0.3);
+                ->setFitToPage(true)
+                ->setFitToWidth(1)
+                ->setFitToHeight(1);
+            $sheet->getPageMargins()->setTop(0.28)->setBottom(0.28)->setLeft(0.28)->setRight(0.28);
             $sheet->getHeaderFooter()->setOddHeader('')->setOddFooter('');
-            $sheet->getColumnDimension('A')->setWidth(9);
-            $sheet->getColumnDimension('B')->setWidth(21);
-            foreach (range(3,16) as $col) $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($col))->setWidth(6.2);
+
+            $sheet->getColumnDimension('A')->setWidth(6.5); // NO
+            $sheet->getColumnDimension('B')->setWidth(29);  // TYPE BOX
+            for ($col = 3; $col <= 16; $col++) {
+                $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($col))->setWidth(5.8);
+            }
             $sheet->getDefaultRowDimension()->setRowHeight(15);
-            $sheet->getStyle('A1:P45')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)
-                ->setHorizontal(Alignment::HORIZONTAL_LEFT)->setWrapText(true);
-            $box = function (string $range, string $text = '', ?string $fill = null, int $size = 10, bool $bold = false, string $alignment = Alignment::HORIZONTAL_LEFT) use ($sheet) {
-                if (str_contains($range, ':') && explode(':', $range)[0] !== explode(':', $range)[1]) $sheet->mergeCells($range);
-                $cell = explode(':', $range)[0];
-                // User/master data is always text, never an Excel formula.
+            $sheet->getStyle('A1:P45')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+            $box = function (
+                string $range,
+                string $text = '',
+                ?string $fill = null,
+                int $size = 9,
+                bool $bold = false,
+                string $alignment = Alignment::HORIZONTAL_CENTER,
+                bool $wrap = false
+            ) use ($sheet): void {
+                if (str_contains($range, ':')) {
+                    [$first, $last] = explode(':', $range, 2);
+                    if ($first !== $last) $sheet->mergeCells($range);
+                }
+                $cell = explode(':', $range, 2)[0];
+                // Master/product text must never be interpreted as a formula.
                 $sheet->setCellValueExplicit($cell, $text, DataType::TYPE_STRING);
                 $style = $sheet->getStyle($range);
-                $style->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FF000000');
-                $style->getAlignment()->setHorizontal($alignment);
-                $style->getFont()->setSize($size)->setBold($bold);
-                if ($fill) $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF' . $fill);
-                if ($fill === '195F7B') $style->getFont()->getColor()->setARGB('FFFFFFFF');
+                $style->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN)
+                    ->getColor()->setARGB('FF000000');
+                $style->getAlignment()->setHorizontal($alignment)->setWrapText($wrap);
+                $style->getFont()->setName('Arial')->setSize($size)->setBold($bold);
+                if ($fill !== null) {
+                    $style->getFill()->setFillType(Fill::FILL_SOLID)
+                        ->getStartColor()->setARGB('FF' . $fill);
+                    if ($fill === '195F7B') $style->getFont()->getColor()->setARGB('FFFFFFFF');
+                }
             };
-            $box('A1:B5', '', null, 10, false, Alignment::HORIZONTAL_CENTER);
-            $box('C1:L5', "FORM REQUEST ADDITIONAL\nBOX", null, 23, true, Alignment::HORIZONTAL_CENTER);
-            $box('M1:P5', "OPERATION\nMANAGEMENT\nDEVELOPMENT DEPT.", null, 11, true, Alignment::HORIZONTAL_CENTER);
+
+            // Header: match the restored PDF reference, without oversized merged rows.
+            $box('A1:B4');
+            $box('C1:L4', "FORM REQUEST ADDITIONAL\nBOX", null, 16, true);
+            $box('M1:P4', "PSD - OMD", null, 14, true, Alignment::HORIZONTAL_CENTER, true);
             $logo = public_path('images/aisin-form-logo.jpg');
             if (is_file($logo)) {
                 $drawing = new Drawing();
-                $drawing->setName('AISIN')->setPath($logo)->setHeight(40)->setCoordinates('A2')->setOffsetX(16)->setOffsetY(4)->setWorksheet($sheet);
-            } else $sheet->setCellValueExplicit('A1', 'AISIN', DataType::TYPE_STRING);
-            $box('L7:P7', 'Date : ' . $document->created_at->format('d-m-Y'));
-            $sheet->getStyle('L7:P7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            foreach (['A9'=>'NO','B9'=>'TYPE BOX','C9:F9'=>'MARKING','G9:M9'=>'PURPOSE','N9:P9'=>'QTY'] as $range=>$title) {
-                $box($range, $title, '195F7B', 11, true, Alignment::HORIZONTAL_CENTER);
+                $drawing->setName('AISIN')->setPath($logo)->setHeight(36)
+                    ->setCoordinates('A2')->setOffsetX(5)->setOffsetY(0)->setWorksheet($sheet);
+            } else {
+                $sheet->setCellValueExplicit('A1', 'AISIN', DataType::TYPE_STRING);
             }
-            $sheet->getRowDimension(9)->setRowHeight(22);
-            $row = 10;
+
+            $date = $document->created_at->copy()->locale('id')->translatedFormat('d F Y');
+            $box('L6:P6', 'Date : ' . $date, null, 9, false, Alignment::HORIZONTAL_LEFT);
+            $sheet->getRowDimension(7)->setRowHeight(8);
+            foreach (
+                [
+                    'A8' => 'NO',
+                    'B8' => 'TYPE BOX',
+                    'C8:F8' => 'MARKING',
+                    'G8:M8' => 'PURPOSE',
+                    'N8:P8' => 'QTY'
+                ] as $range => $title
+            ) {
+                $box($range, $title, '195F7B', 10, true);
+            }
+            $sheet->getRowDimension(8)->setRowHeight(22);
+
+            $row = 9;
             foreach ($rows as $line) {
                 $entry = $line['item'];
-                $typeBox = trim((string) $entry->model_name . ' — ' . (string) $entry->product_name, ' —');
-                // Standard Excel height for ordinary items; only expand genuinely wrapped names.
-                $lines = max(1, (int) ceil(mb_strwidth($typeBox) / 19));
+                $typeBox = trim((string) $entry->model_name . ' - ' . (string) $entry->product_name, ' -');
+                $purpose = (string) $document->purpose;
+                $lines = max(
+                    1,
+                    (int) ceil(mb_strwidth($typeBox) / 28),
+                    (int) ceil(mb_strwidth($purpose) / 39)
+                );
                 $sheet->getRowDimension($row)->setRowHeight(max(15, $lines * 14));
-                $box('A'.$row);
-                $sheet->setCellValue('A'.$row, $line['number']);
-                $box('B'.$row, $typeBox, null, 9);
-                $box('C'.$row.':F'.$row);
-                $box('G'.$row.':M'.$row, (string) $document->purpose);
-                $box('N'.$row.':P'.$row);
-                $sheet->setCellValue('N'.$row, (int) $entry->quantity);
+                $box('A' . $row);
+                $sheet->setCellValueExplicit('A' . $row, (int) $line['number'], DataType::TYPE_NUMERIC);
+                $box('B' . $row, $typeBox, null, 9, false, Alignment::HORIZONTAL_LEFT, true);
+                $box('C' . $row . ':F' . $row);
+                $box('G' . $row . ':M' . $row, $purpose, null, 9, false, Alignment::HORIZONTAL_LEFT, true);
+                $box('N' . $row . ':P' . $row);
+                $sheet->setCellValueExplicit('N' . $row, (int) $entry->quantity, DataType::TYPE_NUMERIC);
                 $row++;
             }
 
-            // Move all following sections up so no unused item-table rows remain.
+            // No blank item rows: all subsequent sections follow the final actual item.
             $approvalHeader = $row + 1;
             $approvalStart = $approvalHeader + 1;
-            $approvalEnd = $approvalHeader + 4;
+            $approvalEnd = $approvalHeader + 3;
             $approvalLabel = $approvalEnd + 1;
-            foreach (['H:J'=>['APPROVED','GM'],'K:M'=>['CHECKED','Ka. Dept'],'N:P'=>['PREPARED','Ka. Sie']] as $columns=>$labels) {
-                [$left,$right] = explode(':',$columns);
-                $box($left.$approvalHeader.':'.$right.$approvalHeader, $labels[0], null, 10, false, Alignment::HORIZONTAL_CENTER);
-                $box($left.$approvalStart.':'.$right.$approvalEnd);
-                $box($left.$approvalLabel.':'.$right.$approvalLabel, $labels[1], null, 10, false, Alignment::HORIZONTAL_CENTER);
+            foreach (
+                [
+                    'H:J' => ['APPROVED', 'GM'],
+                    'K:M' => ['CHECKED', 'Ka. Dept'],
+                    'N:P' => ['PREPARED', 'Ka. Sie']
+                ] as $columns => $labels
+            ) {
+                [$left, $right] = explode(':', $columns);
+                $box($left . $approvalHeader . ':' . $right . $approvalHeader, $labels[0]);
+                $box($left . $approvalStart . ':' . $right . $approvalEnd);
+                $box($left . $approvalLabel . ':' . $right . $approvalLabel, $labels[1]);
             }
+
             $scheduleTitle = $approvalLabel + 2;
             $scheduleHeader = $scheduleTitle + 1;
             $weekHeader = $scheduleTitle + 2;
-            $activityStart = $scheduleTitle + 3;
-            $activityEnd = $activityStart + 4;
-            $noteStart = $activityEnd + 3;
-            $noteEnd = $noteStart + 3;
-            $box('A'.$scheduleTitle.':P'.$scheduleTitle, 'SCHEDULE ADDITIONAL BOX', '195F7B', 15, true, Alignment::HORIZONTAL_CENTER);
-            $sheet->getRowDimension($scheduleTitle)->setRowHeight(22);
-            $box('A'.$scheduleHeader.':B'.$weekHeader, 'ACTIVITY', 'C0C0C0', 12, true, Alignment::HORIZONTAL_CENTER);
-            $box('C'.$scheduleHeader.':P'.$scheduleHeader, 'LEAD TIME (IN WEEK)', 'C0C0C0', 13, true, Alignment::HORIZONTAL_CENTER);
-            $sheet->getRowDimension($scheduleHeader)->setRowHeight(21);
-            for ($week=1; $week<=14; $week++) {
-                $col = Coordinate::stringFromColumnIndex($week+2);
-                $box($col.$weekHeader, (string) $week, null, 10, false, Alignment::HORIZONTAL_CENTER);
-                foreach (range($activityStart, $activityEnd) as $activityRow) $box($col.$activityRow);
+            $activityRow = $scheduleTitle + 3;
+            $sheet->getRowDimension($scheduleTitle)->setRowHeight(23);
+            $sheet->getRowDimension($scheduleHeader)->setRowHeight(20);
+            $box('A' . $scheduleTitle . ':P' . $scheduleTitle, 'SCHEDULE ADDITIONAL BOX', '195F7B', 13, true);
+            $box('A' . $scheduleHeader . ':B' . $weekHeader, 'ACTIVITY', 'C0C0C0', 10, true);
+            $box('C' . $scheduleHeader . ':P' . $scheduleHeader, 'LEAD TIME (IN WEEK)', 'C0C0C0', 11, true);
+            $box('A' . $activityRow . ':B' . $activityRow); // One blank row for manual entry.
+            for ($week = 1; $week <= 14; $week++) {
+                $col = Coordinate::stringFromColumnIndex($week + 2);
+                $box($col . $weekHeader, (string) $week);
+                $sheet->setCellValueExplicit($col . $weekHeader, $week, DataType::TYPE_NUMERIC);
+                $box($col . $activityRow);
             }
-            foreach (range($activityStart, $activityEnd) as $activityRow) $box('A'.$activityRow.':B'.$activityRow);
-            $box('A'.$noteStart.':F'.$noteEnd, "Note:\nLEAD TIME TERHITUNG SETELAH PENGAJUAN DISETUJUI", '98DDF1', 12, true);
-            $box('K'.$noteStart.':P'.$noteStart, 'CONFIRMED', null, 10, false, Alignment::HORIZONTAL_CENTER);
-            $box('K'.($noteStart+1).':M'.($noteEnd+2));
-            $box('N'.($noteStart+1).':P'.($noteEnd+2));
-            $lastRow = $noteEnd + 3;
-            $box('K'.$lastRow.':M'.$lastRow, 'Ka. Dept OMC', null, 10, false, Alignment::HORIZONTAL_CENTER);
-            $box('N'.$lastRow.':P'.$lastRow, 'Ka. Sie OMC', null, 10, false, Alignment::HORIZONTAL_CENTER);
-            $sheet->getPageSetup()->setPrintArea('A1:P'.$lastRow);
+
+            $noteStart = $activityRow + 2;
+            $noteEnd = $noteStart + 3;
+            $box(
+                'A' . $noteStart . ':F' . $noteEnd,
+                "Note:\nLEAD TIME TERHITUNG SETELAH PENGAJUAN DISETUJUI",
+                '98DDF1',
+                9,
+                true,
+                Alignment::HORIZONTAL_LEFT,
+                true
+            );
+            $box('K' . $noteStart . ':P' . $noteStart, 'CONFIRMED');
+            $box('K' . ($noteStart + 1) . ':M' . ($noteEnd - 1));
+            $box('N' . ($noteStart + 1) . ':P' . ($noteEnd - 1));
+            $box('K' . $noteEnd . ':M' . $noteEnd, 'PSD - OMD', null, 9);
+            $box('N' . $noteEnd . ':P' . $noteEnd, 'PSD - OMD', null, 9);
+
+            $sheet->getPageSetup()->setPrintArea('A1:P' . $noteEnd);
         }
+
         $book->setActiveSheetIndex(0);
         return response()->streamDownload(function () use ($book) {
-            try { (new Xlsx($book))->save('php://output'); }
-            finally { $book->disconnectWorksheets(); }
+            try {
+                (new Xlsx($book))->save('php://output');
+            } finally {
+                $book->disconnectWorksheets();
+            }
         }, $document->document_number . '.xlsx', [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);

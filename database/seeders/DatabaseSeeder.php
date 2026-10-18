@@ -184,7 +184,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Dwi Haryanto',
                 'password' => Hash::make(self::DEFAULT_OMD_PASSWORD),
                 'role' => 'omd',
-                'line_id' => '',
+                'line_id' => null,
             ]
         );
 
@@ -204,8 +204,8 @@ class DatabaseSeeder extends Seeder
             ],
 
             [
-                'name' => 'Marcellino',
-                'email' => 'marcellino.reyhan@aiia.co.id',
+                'name' => 'Marcel',
+                'email' => 'marcellino@aiia.co.id',
                 'plant' => 'Body',
                 'line' => 'PT',
             ],

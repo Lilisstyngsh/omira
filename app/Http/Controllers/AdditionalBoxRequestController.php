@@ -124,6 +124,15 @@ class AdditionalBoxRequestController extends Controller
         return view('user.additional-box.show', compact('document'));
     }
 
+    public function preview(Request $request, AdditionalBoxRequest $document, AdditionalBoxExportService $service)
+    {
+        abort_unless((int) $document->user_id === (int) $request->user()->id, 403);
+        $document->load('items');
+        abort_if($document->items->isEmpty(), 404, 'Tidak ada produk Order untuk dipreview.');
+
+        return $service->previewPdf($document);
+    }
+
     public function export(Request $request, AdditionalBoxRequest $document, string $format, AdditionalBoxExportService $service)
     {
         abort_unless((int) $document->user_id === (int) $request->user()->id, 403);
