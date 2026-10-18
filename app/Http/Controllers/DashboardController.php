@@ -125,6 +125,16 @@ class DashboardController extends Controller
         );
 
         $orderSeries = $monthlyMetrics->pluck('order')->map(fn ($value) => (int) $value)->values();
+        // Target FY bersifat global meskipun grafik sedang difilter menurut Line.
+        // Snapshot historis dari seeder ikut dibaca oleh metricsForMonth(..., null).
+        $globalOrderSeries = $lineId === null
+            ? $orderSeries
+            : $monthlyMetrics->map(function ($row) {
+                $date = Carbon::create((int) $row['year'], (int) $row['month'], 1);
+                return $date->gt(now()->startOfMonth())
+                    ? 0
+                    : (int) $this->metricsForMonth((int) $row['year'], (int) $row['month'], null)['order'];
+            })->values();
         $finishSeries = $monthlyMetrics->pluck('ok')->map(fn ($value) => (int) $value)->values();
         $scrapSeries = $monthlyMetrics->pluck('scrap')->map(fn ($value) => (int) $value)->values();
         $months = $monthlyMetrics->pluck('label')->values();
@@ -163,6 +173,7 @@ class DashboardController extends Controller
             'months',
             'fiscalMonths',
             'orderSeries',
+            'globalOrderSeries',
             'finishSeries',
             'scrapSeries',
             'chartMax'
@@ -200,16 +211,22 @@ class DashboardController extends Controller
             ->where('scope_key', $scopeKey)
             ->first();
 
+        $redirectParams = array_filter([
+            'year' => $fiscalYear,
+            'line_id' => $returnLineId,
+        ], fn ($value) => $value !== null && $value !== '');
+
+        // Data bulan yang sudah tercatat boleh diedit kapan pun, tanpa
+        // bergantung pada perubahan Target FY atau total order sesudahnya.
         if ($existing) {
+            $existing->update([
+                'reason' => trim($data['reason']),
+                'updated_by' => $request->user()->id,
+            ]);
+
             return redirect()
-                ->route('dashboard', array_filter([
-                    'month' => $month,
-                    'year' => $year,
-                    'line_id' => $returnLineId,
-                ], fn ($value) => $value !== null && $value !== ''))
-                ->withErrors([
-                    'reason' => 'Alasan abnormality untuk bulan ini sudah pernah disimpan dan tidak dapat diinput ulang.',
-                ]);
+                ->route('dashboard', $redirectParams)
+                ->with('success', 'Alasan abnormality berhasil diperbarui.');
         }
 
         $metrics = $this->metricsForMonth($year, $month, null);
@@ -218,11 +235,7 @@ class DashboardController extends Controller
 
         if ($target <= 0 || $metrics['order'] <= $target) {
             return redirect()
-                ->route('dashboard', array_filter([
-                    'month' => $month,
-                    'year' => $year,
-                    'line_id' => $returnLineId,
-                ], fn ($value) => $value !== null && $value !== ''))
+                ->route('dashboard', $redirectParams)
                 ->withErrors([
                     'reason' => 'Alasan abnormality hanya dapat disimpan ketika total Order seluruh Line melewati Target FY.',
                 ]);
@@ -243,11 +256,7 @@ class DashboardController extends Controller
         ]);
 
         return redirect()
-            ->route('dashboard', array_filter([
-                'month' => $month,
-                'year' => $year,
-                'line_id' => $returnLineId,
-            ], fn ($value) => $value !== null && $value !== ''))
+            ->route('dashboard', $redirectParams)
             ->with('success', 'Alasan abnormality bulan ini berhasil disimpan.');
     }
 

@@ -22,21 +22,21 @@ class RepairOrderHistoryExcelService
         (new Xlsx($book))->save($temporary);
         $book->disconnectWorksheets();
 
-        return response()->download($temporary, $filename.'.xlsx')->deleteFileAfterSend(true);
+        return response()->download($temporary, $filename . '.xlsx')->deleteFileAfterSend(true);
     }
 
     /** Convert the exact approved Excel workbook to PDF so both exports share one layout. */
     public function downloadPdf(RepairOrder $order, array $entries, string $filename, bool $isClosed, ?string $userApproval, ?string $omdApproval, ?string $approvedAt)
     {
         $book = $this->buildSpreadsheet($order, $entries, $isClosed, $userApproval, $omdApproval, $approvedAt);
-        $workDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'omira_pdf_'.bin2hex(random_bytes(8));
+        $workDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'omira_pdf_' . bin2hex(random_bytes(8));
         if (!mkdir($workDir, 0700, true) && !is_dir($workDir)) {
             $book->disconnectWorksheets();
             abort(500, 'Tidak dapat membuat direktori sementara untuk konversi PDF.');
         }
 
-        $xlsxPath = $workDir.DIRECTORY_SEPARATOR.$filename.'.xlsx';
-        $pdfPath = $workDir.DIRECTORY_SEPARATOR.$filename.'.pdf';
+        $xlsxPath = $workDir . DIRECTORY_SEPARATOR . $filename . '.xlsx';
+        $pdfPath = $workDir . DIRECTORY_SEPARATOR . $filename . '.pdf';
         (new Xlsx($book))->save($xlsxPath);
         $book->disconnectWorksheets();
 
@@ -46,7 +46,7 @@ class RepairOrderHistoryExcelService
             abort(500, 'LibreOffice tidak ditemukan. Instal LibreOffice, lalu isi OMIRA_LIBREOFFICE_PATH di file .env dengan path lengkap ke soffice.exe, contoh: C:\\Program Files\\LibreOffice\\program\\soffice.exe.');
         }
 
-        $command = [$binary, '--headless', '-env:UserInstallation=file://'.$workDir.'/lo-profile', '--convert-to', 'pdf', '--outdir', $workDir, $xlsxPath];
+        $command = [$binary, '--headless', '-env:UserInstallation=file://' . $workDir . '/lo-profile', '--convert-to', 'pdf', '--outdir', $workDir, $xlsxPath];
         $process = proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $workDir);
         if (!is_resource($process)) {
             $this->removeTemporaryDirectory($workDir);
@@ -61,7 +61,7 @@ class RepairOrderHistoryExcelService
 
         if ($exitCode !== 0 || !is_file($pdfPath) || filesize($pdfPath) === 0) {
             $this->removeTemporaryDirectory($workDir);
-            report(new \RuntimeException('Konversi Excel ke PDF gagal: '.trim((string) $stderr.' '.(string) $stdout)));
+            report(new \RuntimeException('Konversi Excel ke PDF gagal: ' . trim((string) $stderr . ' ' . (string) $stdout)));
             abort(500, 'Konversi Excel ke PDF gagal. Periksa instalasi LibreOffice dan konfigurasi OMIRA.');
         }
 
@@ -70,7 +70,7 @@ class RepairOrderHistoryExcelService
             $this->removeTemporaryDirectory($workDir);
         });
 
-        return response()->download($pdfPath, $filename.'.pdf', ['Content-Type' => 'application/pdf'])
+        return response()->download($pdfPath, $filename . '.pdf', ['Content-Type' => 'application/pdf'])
             ->deleteFileAfterSend(true);
     }
 
@@ -112,7 +112,7 @@ class RepairOrderHistoryExcelService
                 continue;
             }
             foreach ($names as $name) {
-                $candidate = rtrim($directory, DIRECTORY_SEPARATOR.'\\').DIRECTORY_SEPARATOR.$name;
+                $candidate = rtrim($directory, DIRECTORY_SEPARATOR . '\\') . DIRECTORY_SEPARATOR . $name;
                 if (is_file($candidate)) {
                     return $candidate;
                 }
@@ -125,7 +125,7 @@ class RepairOrderHistoryExcelService
     private function removeTemporaryDirectory(string $directory): void
     {
         if (!is_dir($directory)) return;
-        foreach (glob($directory.DIRECTORY_SEPARATOR.'*') ?: [] as $file) {
+        foreach (glob($directory . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
             if (is_dir($file)) $this->removeTemporaryDirectory($file);
             else @unlink($file);
         }
@@ -143,12 +143,27 @@ class RepairOrderHistoryExcelService
         $greenGrey = 'FFF3F5F7';
 
         // Six columns per table, one narrow gutter between tables.
-        foreach (['A'=>14,'B'=>20,'C'=>6,'D'=>6,'E'=>6,'F'=>6,'G'=>2.5,
-                  'H'=>14,'I'=>20,'J'=>6,'K'=>6,'L'=>6,'M'=>6] as $col => $width) {
+        foreach (
+            [
+                'A' => 14,
+                'B' => 20,
+                'C' => 6,
+                'D' => 6,
+                'E' => 6,
+                'F' => 6,
+                'G' => 2.5,
+                'H' => 14,
+                'I' => 20,
+                'J' => 6,
+                'K' => 6,
+                'L' => 6,
+                'M' => 6
+            ] as $col => $width
+        ) {
             $sheet->getColumnDimension($col)->setWidth($width);
         }
         $sheet->getDefaultRowDimension()->setRowHeight(12);
-        foreach ([1=>18,2=>9,3=>13] as $r=>$h) $sheet->getRowDimension($r)->setRowHeight($h);
+        foreach ([1 => 18, 2 => 9, 3 => 13] as $r => $h) $sheet->getRowDimension($r)->setRowHeight($h);
 
         // Header: logo / form title / PSD-OMD order block.
         $sheet->mergeCells('A1:C3');
@@ -179,14 +194,14 @@ class RepairOrderHistoryExcelService
         $sheet->getStyle('K1')->getFont()->setBold(true)->setSize(10);
         $sheet->getStyle('K3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle('K3')->getFont()->setSize(8);
-        foreach (['A1:C3','D1:J3','K1:M2','K3:M3'] as $range) {
+        foreach (['A1:C3', 'D1:J3', 'K1:M2', 'K3:M3'] as $range) {
             $sheet->getStyle($range)->getBorders()->getOutline()->setBorderStyle($thin);
         }
 
         $sheet->mergeCells('A5:M5');
         $sheet->mergeCells('A6:M6');
-        $sheet->setCellValue('A5', 'Nama User : '.($order->user?->name ?? '-').' / '.($order->line?->name ?? '-'));
-        $sheet->setCellValue('A6', 'Hari/Tanggal Order : '.($order->created_at?->locale('id')->translatedFormat('l, d F Y') ?? '-'));
+        $sheet->setCellValue('A5', 'Nama User : ' . ($order->user?->name ?? '-') . ' / ' . ($order->line?->name ?? '-'));
+        $sheet->setCellValue('A6', 'Hari/Tanggal Order : ' . ($order->created_at?->locale('id')->translatedFormat('l, d F Y') ?? '-'));
         $sheet->getStyle('A5:A6')->getFont()->setBold(true)->setSize(8);
         $sheet->getRowDimension(5)->setRowHeight(13);
         $sheet->getRowDimension(6)->setRowHeight(13);
@@ -196,15 +211,23 @@ class RepairOrderHistoryExcelService
         $sheet->setCellValue('A9', 'DI ISI OLEH USER (SEBELUM REPAIR)');
         $sheet->mergeCells('H9:M9');
         $sheet->setCellValue('H9', 'DI ISI OLEH OMD (SETELAH REPAIR)');
-        foreach (['A10:A11'=>'MODEL','B10:B11'=>'PRODUK','C10:F10'=>'JENIS NG & QTY',
-                  'H10:H11'=>'MODEL','I10:I11'=>'PRODUK','J10:M10'=>'JENIS NG & QTY'] as $range=>$label) {
+        foreach (
+            [
+                'A10:A11' => 'MODEL',
+                'B10:B11' => 'PRODUK',
+                'C10:F10' => 'JENIS NG & QTY',
+                'H10:H11' => 'MODEL',
+                'I10:I11' => 'PRODUK',
+                'J10:M10' => 'JENIS NG & QTY'
+            ] as $range => $label
+        ) {
             $sheet->mergeCells($range);
             $sheet->setCellValue(explode(':', $range)[0], $label);
         }
-        foreach (['C'=>'P','D'=>'H','E'=>'C','F'=>'S','J'=>'P','K'=>'H','L'=>'C','M'=>'S'] as $col=>$code) {
-            $sheet->setCellValue($col.'11', $code);
+        foreach (['C' => 'P', 'D' => 'H', 'E' => 'C', 'F' => 'S', 'J' => 'P', 'K' => 'H', 'L' => 'C', 'M' => 'S'] as $col => $code) {
+            $sheet->setCellValue($col . '11', $code);
         }
-        foreach (['A9:F11','H9:M11'] as $range) {
+        foreach (['A9:F11', 'H9:M11'] as $range) {
             $sheet->getStyle($range)->getBorders()->getAllBorders()->setBorderStyle($thin);
             $sheet->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
         }
@@ -215,21 +238,21 @@ class RepairOrderHistoryExcelService
 
         $firstRow = 12;
         $row = $firstRow;
-        $sumsLeft = array_fill_keys(['P','H','C','S'], 0);
-        $sumsRight = array_fill_keys(['P','H','C','S'], 0);
+        $sumsLeft = array_fill_keys(['P', 'H', 'C', 'S'], 0);
+        $sumsRight = array_fill_keys(['P', 'H', 'C', 'S'], 0);
         $modelStarts = [];
-        foreach ($entries as $idx=>$entry) {
-            foreach (['A','H'] as $col) $sheet->setCellValueExplicit($col.$row, (string) $entry['model'], DataType::TYPE_STRING);
-            foreach (['B','I'] as $col) $sheet->setCellValueExplicit($col.$row, (string) $entry['product'], DataType::TYPE_STRING);
-            foreach (['P','H','C','S'] as $i=>$ng) {
+        foreach ($entries as $idx => $entry) {
+            foreach (['A', 'H'] as $col) $sheet->setCellValueExplicit($col . $row, (string) $entry['model'], DataType::TYPE_STRING);
+            foreach (['B', 'I'] as $col) $sheet->setCellValueExplicit($col . $row, (string) $entry['product'], DataType::TYPE_STRING);
+            foreach (['P', 'H', 'C', 'S'] as $i => $ng) {
                 $before = (int) ($entry['before'][$ng] ?? 0);
                 $after = (int) ($entry['after'][$ng] ?? 0);
                 $sumsLeft[$ng] += $before;
                 $sumsRight[$ng] += $after;
-                if ($before !== 0) $sheet->setCellValue(chr(ord('C')+$i).$row, $before);
-                if ($after !== 0) $sheet->setCellValue(chr(ord('J')+$i).$row, $after);
+                if ($before !== 0) $sheet->setCellValue(chr(ord('C') + $i) . $row, $before);
+                if ($after !== 0) $sheet->setCellValue(chr(ord('J') + $i) . $row, $after);
             }
-            if ($idx === 0 || ($entries[$idx-1]['model'] ?? null) !== $entry['model']) $modelStarts[] = $row;
+            if ($idx === 0 || ($entries[$idx - 1]['model'] ?? null) !== $entry['model']) $modelStarts[] = $row;
             $sheet->getStyle("A{$row}:F{$row}")->getBorders()->getAllBorders()->setBorderStyle($thin);
             $sheet->getStyle("H{$row}:M{$row}")->getBorders()->getAllBorders()->setBorderStyle($thin);
             $sheet->getStyle("A{$row}:M{$row}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
@@ -251,10 +274,11 @@ class RepairOrderHistoryExcelService
             $row++;
         } else {
             $modelStarts[] = $row;
-            for ($i=0; $i<count($modelStarts)-1; $i++) {
-                $a=$modelStarts[$i]; $b=$modelStarts[$i+1]-1;
-                if ($b>$a) {
-                    foreach (['A','H'] as $col) {
+            for ($i = 0; $i < count($modelStarts) - 1; $i++) {
+                $a = $modelStarts[$i];
+                $b = $modelStarts[$i + 1] - 1;
+                if ($b > $a) {
+                    foreach (['A', 'H'] as $col) {
                         $sheet->mergeCells("{$col}{$a}:{$col}{$b}");
                         $sheet->getStyle("{$col}{$a}:{$col}{$b}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     }
@@ -262,15 +286,15 @@ class RepairOrderHistoryExcelService
             }
         }
 
-        foreach ([['SUB TOTAL',$sumsLeft,$sumsRight], ['GRAND TOTAL',['total'=>array_sum($sumsLeft)],['total'=>array_sum($sumsRight)]]] as [$label,$before,$after]) {
+        foreach ([['SUB TOTAL', $sumsLeft, $sumsRight], ['GRAND TOTAL', ['total' => array_sum($sumsLeft)], ['total' => array_sum($sumsRight)]]] as [$label, $before, $after]) {
             $sheet->mergeCells("A{$row}:B{$row}");
             $sheet->mergeCells("H{$row}:I{$row}");
             $sheet->setCellValue("A{$row}", $label);
             $sheet->setCellValue("H{$row}", $label);
             if ($label === 'SUB TOTAL') {
-                foreach (['P','H','C','S'] as $i=>$ng) {
-                    $sheet->setCellValue(chr(ord('C')+$i).$row, $before[$ng] ?: '');
-                    $sheet->setCellValue(chr(ord('J')+$i).$row, $after[$ng] ?: '');
+                foreach (['P', 'H', 'C', 'S'] as $i => $ng) {
+                    $sheet->setCellValue(chr(ord('C') + $i) . $row, $before[$ng] ?: '');
+                    $sheet->setCellValue(chr(ord('J') + $i) . $row, $after[$ng] ?: '');
                 }
             } else {
                 $sheet->mergeCells("C{$row}:F{$row}");
@@ -296,10 +320,13 @@ class RepairOrderHistoryExcelService
         $sheet->getStyle("A{$legendHeader}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle("A{$legendHeader}:C{$legendHeader}")->getFont()->setBold(true)->setSize(8);
         $legendRows = [
-            ['P','NG Partisi'], ['H','NG Holder Kanban'], ['C','NG Cover'], ['S','Box Scrap/Pecah'],
+            ['P', 'NG Partisi'],
+            ['H', 'NG Holder Kanban'],
+            ['C', 'NG Cover'],
+            ['S', 'Box Scrap/Pecah'],
         ];
         $lr = $legendHeader;
-        foreach ($legendRows as [$code,$desc]) {
+        foreach ($legendRows as [$code, $desc]) {
             $lr++;
             $sheet->setCellValue("A{$lr}", $code);
             $sheet->mergeCells("B{$lr}:C{$lr}");
@@ -319,7 +346,7 @@ class RepairOrderHistoryExcelService
         $sheet->getStyle("H{$notesHeader}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getRowDimension($notesHeader)->setRowHeight(15);
         $noteBodyEnd = $notesHeader + 5;
-        $sheet->mergeCells("H".($notesHeader+1).":M{$noteBodyEnd}");
+        $sheet->mergeCells("H" . ($notesHeader + 1) . ":M{$noteBodyEnd}");
         // Use OMD's per-product mismatch_note only. Do not include user feedback.
         // Notes are stored on repair_order_items, while $entries contains only aggregated quantities.
         $mismatchLines = [];
@@ -338,36 +365,36 @@ class RepairOrderHistoryExcelService
                 $mismatchLines[] = $line;
             }
         }
-        $sheet->setCellValue("H".($notesHeader+1), implode("\n", $mismatchLines));
-        $sheet->getStyle("H".($notesHeader+1).":M{$noteBodyEnd}")->getBorders()->getOutline()->setBorderStyle($thin);
-        $sheet->getStyle("H".($notesHeader+1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setWrapText(true);
-        for ($r=$notesHeader+1; $r<=$noteBodyEnd; $r++) $sheet->getRowDimension($r)->setRowHeight(12);
+        $sheet->setCellValue("H" . ($notesHeader + 1), implode("\n", $mismatchLines));
+        $sheet->getStyle("H" . ($notesHeader + 1) . ":M{$noteBodyEnd}")->getBorders()->getOutline()->setBorderStyle($thin);
+        $sheet->getStyle("H" . ($notesHeader + 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setWrapText(true);
+        for ($r = $notesHeader + 1; $r <= $noteBodyEnd; $r++) $sheet->getRowDimension($r)->setRowHeight(12);
 
         $sign = max($lr, $noteBodyEnd) + 3;
         $signatureBlocks = [
-            ['A','B','Diserahkan oleh:','PPIC',$order->user?->name],
-            ['C','F','Diterima oleh:','OMD',$omdApproval],
-            ['H','I','Diserahkan oleh:','OMD',$omdApproval],
-            ['J','M','Diterima oleh:','PPIC',$userApproval],
+            ['A', 'B', 'Diserahkan oleh:', $order->line?->name ?? '-', $order->user?->name],
+            ['C', 'F', 'Diterima oleh:', 'OMD', $omdApproval],
+            ['H', 'I', 'Diserahkan oleh:', 'OMD', $omdApproval],
+            ['J', 'M', 'Diterima oleh:', $order->line?->name ?? '-', $userApproval],
         ];
-        foreach ($signatureBlocks as [$from,$to,$head,$role,$name]) {
+        foreach ($signatureBlocks as [$from, $to, $head, $role, $name]) {
             $sheet->mergeCells("{$from}{$sign}:{$to}{$sign}");
             $sheet->setCellValue("{$from}{$sign}", $head);
-            $sheet->mergeCells("{$from}".($sign+1).":{$to}".($sign+4));
-            if ($isClosed && $name) $sheet->setCellValue("{$from}".($sign+1), "DIKONFIRMASI ELEKTRONIK\n".$name.($approvedAt ? "\n".$approvedAt : ''));
-            $sheet->mergeCells("{$from}".($sign+5).":{$to}".($sign+5));
-            $sheet->setCellValue("{$from}".($sign+5), $role);
-            $range = "{$from}{$sign}:{$to}".($sign+5);
+            $sheet->mergeCells("{$from}" . ($sign + 1) . ":{$to}" . ($sign + 4));
+            if ($isClosed && $name) $sheet->setCellValue("{$from}" . ($sign + 1), "DIKONFIRMASI ELEKTRONIK\n" . $name . ($approvedAt ? "\n" . $approvedAt : ''));
+            $sheet->mergeCells("{$from}" . ($sign + 5) . ":{$to}" . ($sign + 5));
+            $sheet->setCellValue("{$from}" . ($sign + 5), $role);
+            $range = "{$from}{$sign}:{$to}" . ($sign + 5);
             $sheet->getStyle($range)->getBorders()->getOutline()->setBorderStyle($thin);
             $sheet->getStyle("{$from}{$sign}:{$to}{$sign}")->getBorders()->getBottom()->setBorderStyle($thin);
-            $sheet->getStyle("{$from}".($sign+5).":{$to}".($sign+5))->getBorders()->getTop()->setBorderStyle($thin);
+            $sheet->getStyle("{$from}" . ($sign + 5) . ":{$to}" . ($sign + 5))->getBorders()->getTop()->setBorderStyle($thin);
             $sheet->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
             $sheet->getStyle("{$from}{$sign}")->getFont()->setBold(true)->setSize(7);
-            $sheet->getStyle("{$from}".($sign+5))->getFont()->setBold(true)->setSize(7);
+            $sheet->getStyle("{$from}" . ($sign + 5))->getFont()->setBold(true)->setSize(7);
         }
-        for ($r=$sign+1; $r<=$sign+4; $r++) $sheet->getRowDimension($r)->setRowHeight(13);
+        for ($r = $sign + 1; $r <= $sign + 4; $r++) $sheet->getRowDimension($r)->setRowHeight(13);
         $sheet->getRowDimension($sign)->setRowHeight(15);
-        $sheet->getRowDimension($sign+5)->setRowHeight(14);
+        $sheet->getRowDimension($sign + 5)->setRowHeight(14);
 
         $formRow = $sign + 8;
         $sheet->mergeCells("A{$formRow}:C{$formRow}");
@@ -379,7 +406,7 @@ class RepairOrderHistoryExcelService
         $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
             ->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(1);
         $sheet->getPageMargins()->setTop(.25)->setBottom(.25)->setLeft(.25)->setRight(.25);
-        $sheet->getPageSetup()->setPrintArea('A1:M'.$formRow);
+        $sheet->getPageSetup()->setPrintArea('A1:M' . $formRow);
         $sheet->getPageSetup()->setHorizontalCentered(true);
         $sheet->getSheetView()->setZoomScale(90);
 

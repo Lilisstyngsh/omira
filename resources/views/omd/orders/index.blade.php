@@ -5,695 +5,759 @@
 
 @section('content')
 
-    <style>
-        .order-page-head {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 22px;
-        }
+<style>
+    .order-page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
 
-        .order-page-title {
-            margin: 0 0 6px;
-            font-size: 22px;
-            font-weight: 500;
-            color: #172033;
-        }
+    .order-page-title {
+        margin: 0 0 6px;
+        font-size: 22px;
+        font-weight: 500;
+        color: #172033;
+    }
 
-        .order-page-desc {
-            margin: 0;
-            color: #64748b;
-            font-size: 13px;
-        }
+    .order-page-desc {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
 
-        .order-table-card {
-            overflow: hidden;
-            background: #fff;
-            border: 1px solid #e8edf4;
-            border-radius: 18px;
-            box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
-        }
+    .order-table-card {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 18px;
+        box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
+    }
 
-        .order-table-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            padding: 20px 22px;
-            border-bottom: 1px solid #edf1f5;
-            background: linear-gradient(135deg, #F4F8F5 0%, #fff 75%);
-        }
+    .order-table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 20px 22px;
+        border-bottom: 1px solid #edf1f5;
+        background: linear-gradient(135deg, #F4F8F5 0%, #fff 75%);
+    }
 
-        .order-table-header h3 {
-            margin: 0 0 5px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #172033;
-        }
+    .order-table-header h3 {
+        margin: 0 0 5px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #172033;
+    }
 
-        .order-table-header p {
-            margin: 0;
-            font-size: 12px;
-            color: #64748b;
-        }
+    .order-table-header p {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
 
-        .order-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 32px;
-            padding: 0 12px;
-            border-radius: 10px;
-            background: #EAF3EC;
-            color: #6557dc;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
+    .order-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 10px;
+        background: #EAF3EC;
+        color: #6557dc;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
 
+    .order-table-wrap {
+        padding: 12px;
+        overflow-x: hidden;
+    }
+
+    .order-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid #dfe6ef;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .order-table th {
+        padding: 10px 7px;
+        text-align: center;
+        background: #fafbfc;
+        border-right: 1px solid #dfe6ef;
+        border-bottom: 1px solid #dfe6ef;
+        color: #64748b;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .025em;
+        white-space: normal;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .order-table th:last-child,
+    .order-table td:last-child {
+        border-right: 0;
+    }
+
+    .order-table thead tr:first-child th {
+        background: #f6f7fb;
+        border-bottom: 1px solid #dfe6ef;
+        text-align: center;
+    }
+
+    .order-table thead tr:first-child th[rowspan="2"] {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .order-table thead tr:nth-child(2) th {
+        text-align: center;
+        font-size: 8.5px;
+        padding: 9px 5px;
+    }
+
+    .order-table th:nth-child(6),
+    .order-table td:nth-child(6) {
+        border-left: 1px solid #dfe6ef;
+    }
+
+    .order-table td {
+        padding: 11px 7px;
+        border-right: 1px solid #dfe6ef;
+        border-bottom: 1px solid #dfe6ef;
+        color: #334155;
+        font-size: 11px;
+        vertical-align: middle;
+        overflow-wrap: anywhere;
+    }
+
+    .order-table tbody tr {
+        transition: .18s ease;
+        cursor: pointer;
+    }
+
+    .order-table tbody tr:hover {
+        background: #fafaff;
+        transform: translateY(-1px);
+    }
+
+    .order-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .order-date {
+        text-align: center;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .order-date strong {
+        display: block;
+        color: #334155;
+        font-size: 10.5px;
+        font-weight: 600;
+    }
+
+    .order-date span {
+        display: block;
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 400;
+    }
+
+    .order-no {
+        width: 55px;
+        color: #94a3b8 !important;
+        font-weight: 400;
+        text-align: center;
+    }
+
+    .order-number {
+        color: #172033;
+        font-weight: 600;
+        white-space: normal;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .order-user {
+        color: #475569;
+    }
+
+    .order-line-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #3478c5;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .order-type-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: #F2F7F2;
+        color: #6659df;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .order-qty {
+        font-size: 13px;
+        font-weight: 500;
+        color: #172033;
+        text-align: center;
+    }
+
+    .process-cell {
+        text-align: center !important;
+        padding: 9px 4px !important;
+    }
+
+    .process-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .process-done {
+        background: #dcfce7;
+        color: #16a34a;
+        box-shadow: inset 0 0 0 1px #bbf7d0;
+    }
+
+    .process-progress {
+        background: #fef3c7;
+        color: #d97706;
+        box-shadow: inset 0 0 0 1px #fde68a;
+    }
+
+    .process-pending {
+        background: #fee2e2;
+        color: #dc2626;
+        box-shadow: inset 0 0 0 1px #fecaca;
+    }
+
+    .order-empty {
+        padding: 55px 20px !important;
+        text-align: center !important;
+        color: #94a3b8 !important;
+    }
+
+    .order-empty-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: #F2F7F2;
+        color: #5F9278;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .order-empty-title {
+        margin-bottom: 3px;
+        color: #475569;
+        font-weight: 750;
+    }
+
+    .order-empty-text {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    @media (max-width: 900px) {
         .order-table-wrap {
-            padding: 12px;
-            overflow-x: hidden;
+            overflow-x: auto;
         }
 
         .order-table {
-            width: 100%;
-            min-width: 0;
-            table-layout: fixed;
-            border-collapse: separate;
-            border-spacing: 0;
-            border: 1px solid #dfe6ef;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #fff;
+            min-width: 760px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .order-page-head {
+            align-items: flex-start;
+            flex-direction: column;
         }
 
-        .order-table th {
-            padding: 10px 7px;
-            text-align: center;
-            background: #fafbfc;
-            border-right: 1px solid #dfe6ef;
-            border-bottom: 1px solid #dfe6ef;
-            color: #64748b;
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .025em;
-            white-space: normal;
-            line-height: 1.25;
-            overflow-wrap: anywhere;
+        .order-table-header {
+            align-items: flex-start;
+            flex-direction: column;
         }
-
-        .order-table th:last-child,
-        .order-table td:last-child {
-            border-right: 0;
-        }
-
-        .order-table thead tr:first-child th {
-            background: #f6f7fb;
-            border-bottom: 1px solid #dfe6ef;
-            text-align: center;
-        }
-
-        .order-table thead tr:first-child th[rowspan="2"] {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .order-table thead tr:nth-child(2) th {
-            text-align: center;
-            font-size: 8.5px;
-            padding: 9px 5px;
-        }
-
-        .order-table th:nth-child(6),
-        .order-table td:nth-child(6) {
-            border-left: 1px solid #dfe6ef;
-        }
-
-        .order-table td {
-            padding: 11px 7px;
-            border-right: 1px solid #dfe6ef;
-            border-bottom: 1px solid #dfe6ef;
-            color: #334155;
-            font-size: 11px;
-            vertical-align: middle;
-            overflow-wrap: anywhere;
-        }
-
-        .order-table tbody tr {
-            transition: .18s ease;
-            cursor: pointer;
-        }
-
-        .order-table tbody tr:hover {
-            background: #fafaff;
-            transform: translateY(-1px);
-        }
-
-        .order-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .order-date {
-            text-align: center;
-            line-height: 1.2;
-            white-space: nowrap;
-        }
-
-        .order-date strong {
-            display: block;
-            color: #334155;
-            font-size: 10.5px;
-            font-weight: 600;
-        }
-
-        .order-date span {
-            display: block;
-            margin-top: 2px;
-            color: #94a3b8;
-            font-size: 9px;
-            font-weight: 400;
-        }
-
-        .order-no {
-            width: 55px;
-            color: #94a3b8 !important;
-            font-weight: 400;
-            text-align: center;
-        }
-
-        .order-number {
-            color: #172033;
-            font-weight: 600;
-            white-space: normal;
-            line-height: 1.3;
-            word-break: break-word;
-        }
-
-        .order-user {
-            color: #475569;
-        }
-
-        .order-line-badge {
-            display: inline-flex;
-            align-items: center;
-            min-height: 28px;
-            padding: 0 10px;
-            border-radius: 8px;
-            background: #eff6ff;
-            color: #3478c5;
-            font-size: 10px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .order-type-badge {
-            display: inline-flex;
-            align-items: center;
-            min-height: 28px;
-            padding: 0 10px;
-            border-radius: 8px;
-            background: #F2F7F2;
-            color: #6659df;
-            font-size: 10px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .order-qty {
-            font-size: 13px;
-            font-weight: 500;
-            color: #172033;
-            text-align: center;
-        }
-
-        .process-cell {
-            text-align: center !important;
-            padding: 9px 4px !important;
-        }
-
-        .process-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 13px;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .process-done {
-            background: #dcfce7;
-            color: #16a34a;
-            box-shadow: inset 0 0 0 1px #bbf7d0;
-        }
-
-        .process-progress {
-            background: #fef3c7;
-            color: #d97706;
-            box-shadow: inset 0 0 0 1px #fde68a;
-        }
-
-        .process-pending {
-            background: #fee2e2;
-            color: #dc2626;
-            box-shadow: inset 0 0 0 1px #fecaca;
-        }
-
-        .order-empty {
-            padding: 55px 20px !important;
-            text-align: center !important;
-            color: #94a3b8 !important;
-        }
-
-        .order-empty-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 14px;
-            background: #F2F7F2;
-            color: #5F9278;
-            font-size: 19px;
-            font-weight: 800;
-        }
-
-        .order-empty-title {
-            margin-bottom: 3px;
-            color: #475569;
-            font-weight: 750;
-        }
-
-        .order-empty-text {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        @media (max-width: 900px) {
-            .order-table-wrap {
-                overflow-x: auto;
-            }
-
-            .order-table {
-                min-width: 760px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .order-page-head {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .order-table-header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-        }
-
-        .order-alert {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            margin-bottom: 18px;
-            padding: 15px 18px;
-            border: 1px solid #bbf7d0;
-            border-radius: 14px;
-            background: #f0fdf4;
-        }
-
-        .order-alert-icon {
-            width: 34px;
-            height: 34px;
-            flex: 0 0 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: #dcfce7;
-            color: #16a34a;
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .order-alert strong {
-            display: block;
-            margin-bottom: 3px;
-            color: #166534;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .order-alert span {
-            color: #4d7a5c;
-            font-size: 10px;
-        }
-
-        .feedback-flag{display:inline-flex;align-items:center;margin-left:6px;vertical-align:middle}
-        .feedback-flag-btn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #fed7aa;background:#fff7ed;color:#ea580c;font-size:11px;line-height:1;cursor:pointer;padding:0;border-radius:7px;transition:background .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease}
-        .feedback-flag-btn:hover{background:#ffedd5;border-color:#fdba74;color:#c2410c;box-shadow:0 3px 8px rgba(234,88,12,.12)}
-        .feedback-flag-btn:focus-visible{outline:2px solid rgba(234,88,12,.22);outline-offset:2px}
-        .feedback-popover{position:fixed;z-index:10050;width:min(300px,calc(100vw - 24px));padding:12px 13px;border:1px solid #fed7aa;border-radius:12px;background:#fffdf9;color:#7c2d12;box-shadow:0 18px 44px rgba(15,23,42,.18);font-size:11px;line-height:1.5;text-align:left}
-        .feedback-popover strong{display:flex;align-items:center;gap:7px;margin-bottom:6px;color:#9a3412;font-size:11px;font-weight:750}
-        .feedback-popover .feedback-popover-reason{white-space:pre-wrap;word-break:break-word;color:#7c2d12}
-        .feedback-popover small{display:block;margin-top:7px;color:#a16207}
-    </style>
-
-    @if ($completedCount > 0)
-        <div class="order-alert">
-            <div class="order-alert-icon">
-                ✓
-            </div>
-
-            <div>
-                <strong>
-                    Order Repair Box Selesai
-                </strong>
-
-                <span>
-                    {{ $completedCount }} order selesai diproses dan menunggu konfirmasi dari User.
-                </span>
-            </div>
-        </div>
-    @endif
-
-    <div class="order-table-card">
-
-        <div class="order-table-header">
-
-            <div>
-
-                <h3>
-                    Daftar Order Repair Box
-                </h3>
-
-            </div>
-        </div>
-
-        <div class="order-table-wrap">
-
-            <table class="order-table">
-
-                <colgroup>
-                    <col style="width:5%;">
-                    <col style="width:11%;">
-                    <col style="width:17%;">
-                    <col style="width:14%;">
-                    <col style="width:7%;">
-                    <col style="width:11.5%;">
-                    <col style="width:11.5%;">
-                    <col style="width:11.5%;">
-                    <col style="width:11.5%;">
-                </colgroup>
-
-                <thead>
-
-                    <tr>
-
-                        <th rowspan="2" style="text-align:center;">
-                            No
-                        </th>
-
-                        <th rowspan="2">
-                            Tanggal
-                        </th>
-
-                        <th rowspan="2">
-                            No Order
-                        </th>
-
-                        <th rowspan="2">
-                            Line
-                        </th>
-
-                        <th rowspan="2">
-                            Qty
-                        </th>
-
-                        <th colspan="4" style="text-align:center;">
-                            Status Proses
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <th class="process-cell">
-                            User Submit
-                        </th>
-
-                        <th class="process-cell">
-                            Verifikasi OMD
-                        </th>
-
-                        <th class="process-cell">
-                            Repair OMD
-                        </th>
-
-                        <th class="process-cell">
-                            Serah Terima
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    @forelse($orders as $order)
-                        <tr onclick="window.location='{{ route('omd.orders.show', $order) }}'"
-                            title="Klik untuk melihat detail order">
-
-                            <td class="order-no">
-                                {{ ($orders->currentPage() - 1) * $orders->perPage() + $loop->iteration }}
-                            </td>
-
-                            <td class="order-date">
-                                @if ($order->created_at)
-                                    <strong>{{ $order->created_at->format('d-m-Y') }}</strong>
-                                    <span>{{ $order->created_at->format('H:i') }}</span>
-                                @else
-                                    -
-                                @endif
-                            </td>
-
-                            <td class="order-number">
-                                {{ $order->order_number }}
-                                @if($order->openFeedback)
-                                    <span class="feedback-flag">
-                                        <button type="button"
-                                            class="feedback-flag-btn"
-                                            title="Lihat feedback User"
-                                            aria-label="Lihat feedback User"
-                                            aria-expanded="false"
-                                            data-feedback-id="{{ $order->id }}"
-                                            data-feedback-reason="{{ $order->openFeedback->reason }}"
-                                            data-feedback-time="{{ $order->openFeedback->created_at?->format('d-m-Y H:i') }}"
-                                            onclick="toggleFeedbackPopover(event, this)">
-                                            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-                                        </button>
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td>
-                                <span class="order-line-badge">
-                                    {{ $order->line?->name ?? ($order->area ? $order->area->name : '-') }}
-                                </span>
-                            </td>
-
-                            <td class="order-qty">
-                                {{ in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}
-                            </td>
-
-                            {{-- USER SUBMIT --}}
-                            <td class="process-cell">
-                                <span class="process-icon process-done" title="User sudah submit order">
-                                    ✓
-                                </span>
-                            </td>
-
-                            {{-- VERIFIED OMD --}}
-                            <td class="process-cell">
-
-                                @if (in_array($order->status, ['in_repair', 'completed', 'revision_requested', 'confirmed']))
-                                    <span class="process-icon process-done" title="Order sudah diverifikasi OMD">
-                                        ✓
-                                    </span>
-                                @else
-                                    <span class="process-icon process-pending" title="Belum diverifikasi OMD">
-                                        ✕
-                                    </span>
-                                @endif
-
-                            </td>
-
-                            {{-- REPAIR OMD --}}
-                            <td class="process-cell">
-
-                                @if (in_array($order->status, ['completed', 'revision_requested', 'confirmed']))
-                                    <span class="process-icon process-done" title="Repair OMD sudah selesai">
-                                        ✓
-                                    </span>
-                                @elseif ($order->status === 'in_repair')
-                                    <span class="process-icon process-progress" title="Repair OMD sedang diproses">
-                                        △
-                                    </span>
-                                @else
-                                    <span class="process-icon process-pending" title="Repair OMD belum dimulai">
-                                        ✕
-                                    </span>
-                                @endif
-
-                            </td>
-
-                            {{-- SERAH TERIMA --}}
-                            <td class="process-cell">
-
-                                @if ($order->status === 'confirmed')
-                                    <span class="process-icon process-done" title="Serah terima sudah selesai">
-                                        ✓
-                                    </span>
-                                @elseif ($order->status === 'revision_requested')
-                                    <span class="process-icon process-progress"
-                                        title="User meminta koreksi hasil repair dari OMD">
-                                        △
-                                    </span>
-                                @elseif ($order->status === 'completed')
-                                    <span class="process-icon process-progress"
-                                        title="Menunggu serah terima / konfirmasi User">
-                                        △
-                                    </span>
-                                @else
-                                    <span class="process-icon process-pending" title="Belum masuk tahap serah terima">
-                                        ✕
-                                    </span>
-                                @endif
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-
-                            <td colspan="10" class="order-empty">
-
-                                <div class="order-empty-text">
-                                    Belum ada Order Repair Box
-                                </div>
-
-                            </td>
-
-                        </tr>
-                    @endforelse
-
-                </tbody>
-
-            </table>
+    }
+
+    .order-alert {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 18px;
+        padding: 15px 18px;
+        border: 1px solid #bbf7d0;
+        border-radius: 14px;
+        background: #f0fdf4;
+    }
+
+    .order-alert-icon {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #dcfce7;
+        color: #16a34a;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .order-alert strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #166534;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .order-alert span {
+        color: #4d7a5c;
+        font-size: 10px;
+    }
+
+    .feedback-flag {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 6px;
+        vertical-align: middle
+    }
+
+    .feedback-flag-btn {
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #fed7aa;
+        background: #fff7ed;
+        color: #ea580c;
+        font-size: 11px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        border-radius: 7px;
+        transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease
+    }
+
+    .feedback-flag-btn:hover {
+        background: #ffedd5;
+        border-color: #fdba74;
+        color: #c2410c;
+        box-shadow: 0 3px 8px rgba(234, 88, 12, .12)
+    }
+
+    .feedback-flag-btn:focus-visible {
+        outline: 2px solid rgba(234, 88, 12, .22);
+        outline-offset: 2px
+    }
+
+    .feedback-popover {
+        position: fixed;
+        z-index: 10050;
+        width: min(300px, calc(100vw - 24px));
+        padding: 12px 13px;
+        border: 1px solid #fed7aa;
+        border-radius: 12px;
+        background: #fffdf9;
+        color: #7c2d12;
+        box-shadow: 0 18px 44px rgba(15, 23, 42, .18);
+        font-size: 11px;
+        line-height: 1.5;
+        text-align: left
+    }
+
+    .feedback-popover strong {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 6px;
+        color: #9a3412;
+        font-size: 11px;
+        font-weight: 750
+    }
+
+    .feedback-popover .feedback-popover-reason {
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #7c2d12
+    }
+
+    .feedback-popover small {
+        display: block;
+        margin-top: 7px;
+        color: #a16207
+    }
+</style>
+
+@if ($completedCount > 0)
+<div class="order-alert">
+    <div class="order-alert-icon">
+        ✓
+    </div>
+
+    <div>
+        <strong>
+            Order Repair Box Selesai
+        </strong>
+
+        <span>
+            {{ $completedCount }} order selesai diproses dan menunggu konfirmasi dari User.
+        </span>
+    </div>
+</div>
+@endif
+
+<div class="order-table-card">
+
+    <div class="order-table-header">
+
+        <div>
+
+            <h3>
+                Daftar Order Repair Box
+            </h3>
 
         </div>
+    </div>
+
+    <div class="order-table-wrap">
+
+        <table class="order-table">
+
+            <colgroup>
+                <col style="width:5%;">
+                <col style="width:11%;">
+                <col style="width:17%;">
+                <col style="width:14%;">
+                <col style="width:7%;">
+                <col style="width:11.5%;">
+                <col style="width:11.5%;">
+                <col style="width:11.5%;">
+                <col style="width:11.5%;">
+            </colgroup>
+
+            <thead>
+
+                <tr>
+
+                    <th rowspan="2" style="text-align:center;">
+                        No
+                    </th>
+
+                    <th rowspan="2">
+                        Tanggal
+                    </th>
+
+                    <th rowspan="2">
+                        No Order
+                    </th>
+
+                    <th rowspan="2">
+                        Line
+                    </th>
+
+                    <th rowspan="2">
+                        Qty
+                    </th>
+
+                    <th colspan="4" style="text-align:center;">
+                        Status Proses
+                    </th>
+
+                </tr>
+
+                <tr>
+
+                    <th class="process-cell">
+                        User Submit
+                    </th>
+
+                    <th class="process-cell">
+                        Verifikasi OMD
+                    </th>
+
+                    <th class="process-cell">
+                        Repair OMD
+                    </th>
+
+                    <th class="process-cell">
+                        Serah Terima
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @forelse($orders as $order)
+                <tr onclick="window.location='{{ route('omd.orders.show', $order) }}'"
+                    title="Klik untuk melihat detail order">
+
+                    <td class="order-no">
+                        {{ ($orders->currentPage() - 1) * $orders->perPage() + $loop->iteration }}
+                    </td>
+
+                    <td class="order-date">
+                        @if ($order->created_at)
+                        <strong>{{ $order->created_at->format('d-m-Y') }}</strong>
+                        <span>{{ $order->created_at->format('H:i') }}</span>
+                        @else
+                        -
+                        @endif
+                    </td>
+
+                    <td class="order-number">
+                        {{ $order->order_number }}
+                        @if($order->openFeedback)
+                        <span class="feedback-flag">
+                            <button type="button"
+                                class="feedback-flag-btn"
+                                title="Lihat feedback User"
+                                aria-label="Lihat feedback User"
+                                aria-expanded="false"
+                                data-feedback-id="{{ $order->id }}"
+                                data-feedback-reason="{{ $order->openFeedback->reason }}"
+                                data-feedback-time="{{ $order->openFeedback->created_at?->format('d-m-Y H:i') }}"
+                                onclick="toggleFeedbackPopover(event, this)">
+                                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                        @endif
+                    </td>
+
+                    <td>
+                        <span class="order-line-badge">
+                            {{ $order->line?->name ?? ($order->area ? $order->area->name : '-') }}
+                        </span>
+                    </td>
+
+                    <td class="order-qty">
+                        {{ in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}
+                    </td>
+
+                    {{-- USER SUBMIT --}}
+                    <td class="process-cell">
+                        <span class="process-icon process-done" title="User sudah submit order">
+                            ✓
+                        </span>
+                    </td>
+
+                    {{-- VERIFIED OMD --}}
+                    <td class="process-cell">
+
+                        @if (in_array($order->status, ['in_repair', 'completed', 'revision_requested', 'confirmed']))
+                        <span class="process-icon process-done" title="Order sudah diverifikasi OMD">
+                            ✓
+                        </span>
+                        @else
+                        <span class="process-icon process-pending" title="Belum diverifikasi OMD">
+                            ✕
+                        </span>
+                        @endif
+
+                    </td>
+
+                    {{-- REPAIR OMD --}}
+                    <td class="process-cell">
+
+                        @if (in_array($order->status, ['completed', 'revision_requested', 'confirmed']))
+                        <span class="process-icon process-done" title="Repair OMD sudah selesai">
+                            ✓
+                        </span>
+                        @elseif ($order->status === 'in_repair')
+                        <span class="process-icon process-progress" title="Repair OMD sedang diproses">
+                            △
+                        </span>
+                        @else
+                        <span class="process-icon process-pending" title="Repair OMD belum dimulai">
+                            ✕
+                        </span>
+                        @endif
+
+                    </td>
+
+                    {{-- SERAH TERIMA --}}
+                    <td class="process-cell">
+
+                        @if ($order->status === 'confirmed')
+                        <span class="process-icon process-done" title="Serah terima sudah selesai">
+                            ✓
+                        </span>
+                        @elseif ($order->status === 'revision_requested')
+                        <span class="process-icon process-progress"
+                            title="User meminta koreksi hasil repair dari OMD">
+                            △
+                        </span>
+                        @elseif ($order->status === 'completed')
+                        <span class="process-icon process-progress"
+                            title="Menunggu serah terima / konfirmasi User">
+                            △
+                        </span>
+                        @else
+                        <span class="process-icon process-pending" title="Belum masuk tahap serah terima">
+                            ✕
+                        </span>
+                        @endif
+
+                    </td>
+
+                </tr>
+
+                @empty
+
+                <tr>
+
+                    <td colspan="10" class="order-empty">
+
+                        <div class="order-empty-text">
+                            Belum ada Order Repair Box
+                        </div>
+
+                    </td>
+
+                </tr>
+                @endforelse
+
+            </tbody>
+
+        </table>
 
     </div>
 
-    <div style="margin-top:18px;">
-        {{ $orders->links() }}
-    </div>
+</div>
+
+<div style="margin-top:18px;">
+    {{ $orders->links() }}
+</div>
 
 
-    <div id="feedbackFloatingPopover" class="feedback-popover" hidden onclick="event.stopPropagation()">
-        <strong><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> Feedback User</strong>
-        <div class="feedback-popover-reason" id="feedbackPopoverReason"></div>
-        <small id="feedbackPopoverTime"></small>
-    </div>
+<div id="feedbackFloatingPopover" class="feedback-popover" hidden onclick="event.stopPropagation()">
+    <strong><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> Feedback User</strong>
+    <div class="feedback-popover-reason" id="feedbackPopoverReason"></div>
+    <small id="feedbackPopoverTime"></small>
+</div>
 
-    <script>
-        const feedbackPopover = document.getElementById('feedbackFloatingPopover');
-        const feedbackReason = document.getElementById('feedbackPopoverReason');
-        const feedbackTime = document.getElementById('feedbackPopoverTime');
-        let activeFeedbackButton = null;
+<script>
+    const feedbackPopover = document.getElementById('feedbackFloatingPopover');
+    const feedbackReason = document.getElementById('feedbackPopoverReason');
+    const feedbackTime = document.getElementById('feedbackPopoverTime');
+    let activeFeedbackButton = null;
 
-        function closeFeedbackPopover() {
-            if (!feedbackPopover) return;
-            feedbackPopover.hidden = true;
-            feedbackPopover.style.left = '';
-            feedbackPopover.style.top = '';
-            feedbackPopover.dataset.owner = '';
-            if (activeFeedbackButton) {
-                activeFeedbackButton.setAttribute('aria-expanded', 'false');
-            }
-            activeFeedbackButton = null;
+    function closeFeedbackPopover() {
+        if (!feedbackPopover) return;
+        feedbackPopover.hidden = true;
+        feedbackPopover.style.left = '';
+        feedbackPopover.style.top = '';
+        feedbackPopover.dataset.owner = '';
+        if (activeFeedbackButton) {
+            activeFeedbackButton.setAttribute('aria-expanded', 'false');
         }
+        activeFeedbackButton = null;
+    }
 
-        function positionFeedbackPopover(button) {
-            if (!feedbackPopover) return;
-            const buttonRect = button.getBoundingClientRect();
-            const popoverRect = feedbackPopover.getBoundingClientRect();
-            const gap = 10;
-            const edge = 12;
+    function positionFeedbackPopover(button) {
+        if (!feedbackPopover) return;
+        const buttonRect = button.getBoundingClientRect();
+        const popoverRect = feedbackPopover.getBoundingClientRect();
+        const gap = 10;
+        const edge = 12;
 
-            // Prioritas kanan-atas icon. Jika ruang tidak cukup, otomatis bergeser tanpa masuk area scroll tabel.
-            let left = buttonRect.right + gap;
-            let top = buttonRect.top - popoverRect.height + 8;
+        // Prioritas kanan-atas icon. Jika ruang tidak cukup, otomatis bergeser tanpa masuk area scroll tabel.
+        let left = buttonRect.right + gap;
+        let top = buttonRect.top - popoverRect.height + 8;
 
-            if (left + popoverRect.width > window.innerWidth - edge) {
-                left = buttonRect.left - popoverRect.width - gap;
-            }
-            left = Math.max(edge, Math.min(left, window.innerWidth - popoverRect.width - edge));
-
-            if (top < edge) {
-                top = buttonRect.bottom + gap;
-            }
-            top = Math.max(edge, Math.min(top, window.innerHeight - popoverRect.height - edge));
-
-            feedbackPopover.style.left = Math.round(left) + 'px';
-            feedbackPopover.style.top = Math.round(top) + 'px';
+        if (left + popoverRect.width > window.innerWidth - edge) {
+            left = buttonRect.left - popoverRect.width - gap;
         }
+        left = Math.max(edge, Math.min(left, window.innerWidth - popoverRect.width - edge));
 
-        function toggleFeedbackPopover(event, button) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (!feedbackPopover) return;
-
-            const feedbackId = button.dataset.feedbackId || '';
-            const isSameOpen = !feedbackPopover.hidden && feedbackPopover.dataset.owner === feedbackId;
-            if (isSameOpen) {
-                closeFeedbackPopover();
-                return;
-            }
-
-            if (activeFeedbackButton && activeFeedbackButton !== button) {
-                activeFeedbackButton.setAttribute('aria-expanded', 'false');
-            }
-
-            feedbackReason.textContent = button.dataset.feedbackReason || '-';
-            feedbackTime.textContent = button.dataset.feedbackTime || '';
-            feedbackPopover.dataset.owner = feedbackId;
-            feedbackPopover.hidden = false;
-            activeFeedbackButton = button;
-            button.setAttribute('aria-expanded', 'true');
-
-            requestAnimationFrame(function () {
-                positionFeedbackPopover(button);
-            });
+        if (top < edge) {
+            top = buttonRect.bottom + gap;
         }
+        top = Math.max(edge, Math.min(top, window.innerHeight - popoverRect.height - edge));
 
-        document.addEventListener('click', function (event) {
-            if (!feedbackPopover || feedbackPopover.hidden) return;
-            if (feedbackPopover.contains(event.target)) return;
-            if (event.target.closest('.feedback-flag-btn')) return;
+        feedbackPopover.style.left = Math.round(left) + 'px';
+        feedbackPopover.style.top = Math.round(top) + 'px';
+    }
+
+    function toggleFeedbackPopover(event, button) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!feedbackPopover) return;
+
+        const feedbackId = button.dataset.feedbackId || '';
+        const isSameOpen = !feedbackPopover.hidden && feedbackPopover.dataset.owner === feedbackId;
+        if (isSameOpen) {
             closeFeedbackPopover();
-        });
+            return;
+        }
 
-        window.addEventListener('resize', closeFeedbackPopover);
-        window.addEventListener('scroll', closeFeedbackPopover, true);
-    </script>
+        if (activeFeedbackButton && activeFeedbackButton !== button) {
+            activeFeedbackButton.setAttribute('aria-expanded', 'false');
+        }
+
+        feedbackReason.textContent = button.dataset.feedbackReason || '-';
+        feedbackTime.textContent = button.dataset.feedbackTime || '';
+        feedbackPopover.dataset.owner = feedbackId;
+        feedbackPopover.hidden = false;
+        activeFeedbackButton = button;
+        button.setAttribute('aria-expanded', 'true');
+
+        requestAnimationFrame(function() {
+            positionFeedbackPopover(button);
+        });
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!feedbackPopover || feedbackPopover.hidden) return;
+        if (feedbackPopover.contains(event.target)) return;
+        if (event.target.closest('.feedback-flag-btn')) return;
+        closeFeedbackPopover();
+    });
+
+    window.addEventListener('resize', closeFeedbackPopover);
+    window.addEventListener('scroll', closeFeedbackPopover, true);
+</script>
 
 @endsection

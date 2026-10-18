@@ -392,7 +392,7 @@
         .chart-abnormality-popover {
             position: fixed;
             z-index: 1400;
-            width: min(280px, calc(100vw - 28px));
+            width: min(340px, calc(100vw - 28px));
             padding: 12px 13px;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
@@ -428,6 +428,57 @@
             font-size: 10px;
             line-height: 1.55;
             overflow-wrap: anywhere;
+        }
+
+        .chart-abnormality-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .chart-abnormality-actions button {
+            font-size: 11px;
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .chart-abnormality-actions .edit-button,
+        .chart-abnormality-actions .save-button {
+            border: 1px solid #147d77;
+            background: #147d77;
+            color: #fff;
+        }
+        .chart-abnormality-actions .cancel-button {
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #334155;
+        }
+        .chart-abnormality-actions .save-button:disabled {
+            cursor: not-allowed;
+            border-color: #cbd5e1;
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        #chartAbnormalityEditForm[hidden],
+        #chartAbnormalityDisplay[hidden] { display: none !important; }
+        #chartAbnormalityEditForm textarea {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 100px;
+            margin-top: 9px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            padding: 9px 10px;
+            color: #334155;
+            font: inherit;
+            font-size: 12px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        #chartAbnormalityEditForm textarea:focus {
+            outline: 2px solid #147d77;
+            outline-offset: 1px;
         }
 
         .chart-card {
@@ -1060,6 +1111,8 @@
                                     $okVisualHeight = $okValue > 0 ? max($okHeight, 2) : 0;
                                     $scrapVisualHeight = $scrapValue > 0 ? max($scrapHeight, 2) : 0;
                                     $monthAbnormality = $abnormalitiesByMonth->get($fiscalMonths[$index]['year'] . '-' . str_pad((string) $fiscalMonths[$index]['month'], 2, '0', STR_PAD_LEFT));
+                                    $globalMonthOrder = (int) ($globalOrderSeries[$index] ?? 0);
+                                    $canExplainOrder = $orderValue > 0 && ($monthAbnormality || ($target > 0 && $globalMonthOrder > $target));
                                 @endphp
 
                                 @php
@@ -1081,15 +1134,18 @@
                                         <span class="ongoing-bubble" style="--ongoing-bottom:{{ $bubbleBottom }}px">ON GOING</span>
                                     @endif
                                     <div class="month-bars">
-                                        <div class="chart-bar order {{ $orderValue <= 0 ? 'is-empty' : '' }} {{ $monthAbnormality ? 'has-abnormality' : '' }}"
+                                        <div class="chart-bar order {{ $orderValue <= 0 ? 'is-empty' : '' }} {{ $canExplainOrder ? 'has-abnormality' : '' }}"
                                             style="--bar-height: {{ number_format($orderVisualHeight, 2, '.', '') }}%;"
-                                            @if ($monthAbnormality)
+                                            @if ($canExplainOrder)
                                                 role="button" tabindex="0"
+                                                aria-label="{{ $monthAbnormality ? 'Lihat atau edit' : 'Tambah' }} alasan abnormality {{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }} {{ $fiscalMonths[$index]['year'] }}"
                                                 data-abnormality-month="{{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }}"
                                                 data-abnormality-year="{{ $fiscalMonths[$index]['year'] }}"
-                                                data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
-                                                data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
-                                                data-abnormality-reason="{{ $monthAbnormality->reason }}"
+                                                data-abnormality-month-number="{{ $fiscalMonths[$index]['month'] }}"
+                                                data-abnormality-actual="{{ (int) ($monthAbnormality?->actual_qty ?? $globalMonthOrder) }}"
+                                                data-abnormality-target="{{ (int) ($monthAbnormality?->threshold_qty ?? $target) }}"
+                                                data-abnormality-reason="{{ $monthAbnormality?->reason ?? '' }}"
+                                                data-abnormality-existing="{{ $monthAbnormality ? '1' : '0' }}"
                                             @endif>
                                             @if ($orderValue > 0)<span class="chart-bar-value">{{ number_format($orderValue) }}</span>@endif
                                         </div>
@@ -1099,6 +1155,7 @@
                                                 role="button" tabindex="0"
                                                 data-abnormality-month="{{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }}"
                                                 data-abnormality-year="{{ $fiscalMonths[$index]['year'] }}"
+                                                data-abnormality-month-number="{{ $fiscalMonths[$index]['month'] }}"
                                                 data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
                                                 data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
                                                 data-abnormality-reason="{{ $monthAbnormality->reason }}"
@@ -1111,6 +1168,7 @@
                                                 role="button" tabindex="0"
                                                 data-abnormality-month="{{ $monthNames[$fiscalMonths[$index]['month']] ?? $monthLabel }}"
                                                 data-abnormality-year="{{ $fiscalMonths[$index]['year'] }}"
+                                                data-abnormality-month-number="{{ $fiscalMonths[$index]['month'] }}"
                                                 data-abnormality-actual="{{ (int) $monthAbnormality->actual_qty }}"
                                                 data-abnormality-target="{{ (int) $monthAbnormality->threshold_qty }}"
                                                 data-abnormality-reason="{{ $monthAbnormality->reason }}"
@@ -1153,9 +1211,27 @@
             </div>
         </section>
 
-        <div class="chart-abnormality-popover" id="chartAbnormalityPopover" role="dialog" aria-hidden="true">
+        <div class="chart-abnormality-popover" id="chartAbnormalityPopover" role="dialog" aria-modal="false" aria-labelledby="chartAbnormalityTitle" aria-hidden="true">
             <h4 class="chart-abnormality-title" id="chartAbnormalityTitle">Abnormality</h4>
-            <div class="chart-abnormality-reason" id="chartAbnormalityReason"></div>
+            <div id="chartAbnormalityDisplay">
+                <div class="chart-abnormality-reason" id="chartAbnormalityReason"></div>
+                <div class="chart-abnormality-actions">
+                    <button type="button" class="edit-button" id="chartAbnormalityEditButton">Edit</button>
+                </div>
+            </div>
+            <form id="chartAbnormalityEditForm" method="POST" action="{{ route('omd.dashboard.abnormality.store') }}" hidden>
+                @csrf
+                <input type="hidden" name="year" id="chartAbnormalityYear">
+                <input type="hidden" name="month" id="chartAbnormalityMonth">
+                @if ($lineId)
+                    <input type="hidden" name="line_id" value="{{ $lineId }}">
+                @endif
+                <textarea id="chartAbnormalityReasonInput" name="reason" required minlength="5" maxlength="2000" aria-label="Alasan abnormality"></textarea>
+                <div class="chart-abnormality-actions">
+                    <button type="button" class="cancel-button" id="chartAbnormalityCancelButton">Batal</button>
+                    <button type="submit" class="save-button" id="chartAbnormalitySaveButton">Simpan</button>
+                </div>
+            </form>
         </div>
 
     </div>
@@ -1190,33 +1266,63 @@
             const popover = document.getElementById('chartAbnormalityPopover');
             const title = document.getElementById('chartAbnormalityTitle');
             const reason = document.getElementById('chartAbnormalityReason');
+            const display = document.getElementById('chartAbnormalityDisplay');
+            const form = document.getElementById('chartAbnormalityEditForm');
+            const editButton = document.getElementById('chartAbnormalityEditButton');
+            const cancelButton = document.getElementById('chartAbnormalityCancelButton');
+            const input = document.getElementById('chartAbnormalityReasonInput');
+            const saveButton = document.getElementById('chartAbnormalitySaveButton');
+            const yearInput = document.getElementById('chartAbnormalityYear');
+            const monthInput = document.getElementById('chartAbnormalityMonth');
             const bars = document.querySelectorAll('.chart-bar.has-abnormality');
-
             if (!popover || bars.length === 0) return;
+
+            let activeBar = null;
+
+            const positionPopover = () => {
+                if (!activeBar) return;
+                const rect = activeBar.getBoundingClientRect();
+                const popupRect = popover.getBoundingClientRect();
+                const gap = 10;
+                let left = rect.left + rect.width / 2 - popupRect.width / 2;
+                let top = rect.top - popupRect.height - gap;
+                left = Math.max(12, Math.min(left, window.innerWidth - popupRect.width - 12));
+                if (top < 12) top = Math.min(window.innerHeight - popupRect.height - 12, rect.bottom + gap);
+                popover.style.left = `${left}px`;
+                popover.style.top = `${Math.max(12, top)}px`;
+            };
+
+            const setEditMode = editing => {
+                display.hidden = editing;
+                form.hidden = !editing;
+                if (editing) {
+                    input.value = activeBar?.dataset.abnormalityReason || '';
+                    yearInput.value = activeBar?.dataset.abnormalityYear || '';
+                    monthInput.value = activeBar?.dataset.abnormalityMonthNumber || '';
+                    saveButton.disabled = input.value.trim().length < 5;
+                }
+                positionPopover();
+                if (editing) input.focus();
+            };
 
             const closePopover = () => {
                 popover.classList.remove('show');
                 popover.setAttribute('aria-hidden', 'true');
+                activeBar = null;
+                form.hidden = true;
+                display.hidden = false;
             };
 
             const openPopover = bar => {
-                title.textContent = 'Abnormality';
+                activeBar = bar;
+                const existing = bar.dataset.abnormalityExisting !== '0';
+                title.textContent = `${existing ? 'Abnormality' : 'Tambah Alasan'} – ${bar.dataset.abnormalityMonth || ''} ${bar.dataset.abnormalityYear || ''}`;
                 reason.textContent = bar.dataset.abnormalityReason || '-';
-
                 popover.classList.add('show');
                 popover.setAttribute('aria-hidden', 'false');
-
-                const rect = bar.getBoundingClientRect();
-                const popupRect = popover.getBoundingClientRect();
-                const gap = 10;
-                let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
-                let top = rect.top - popupRect.height - gap;
-
-                left = Math.max(12, Math.min(left, window.innerWidth - popupRect.width - 12));
-                if (top < 12) top = Math.min(window.innerHeight - popupRect.height - 12, rect.bottom + gap);
-
-                popover.style.left = `${left}px`;
-                popover.style.top = `${Math.max(12, top)}px`;
+                // Bulan di atas target tanpa record langsung membuka form input.
+                // Bulan yang sudah memiliki alasan tetap menampilkan tombol Edit.
+                setEditMode(!existing);
             };
 
             bars.forEach(bar => {
@@ -1231,12 +1337,34 @@
                     }
                 });
             });
-
+            editButton.addEventListener('click', () => setEditMode(true));
+            cancelButton.addEventListener('click', () => {
+                if (activeBar?.dataset.abnormalityExisting === '0') {
+                    closePopover();
+                } else {
+                    setEditMode(false);
+                }
+            });
+            input.addEventListener('input', () => {
+                saveButton.disabled = input.value.trim().length < 5;
+            });
+            form.addEventListener('submit', event => {
+                if (input.value.trim().length < 5) {
+                    event.preventDefault();
+                    return;
+                }
+                saveButton.disabled = true;
+            });
             document.addEventListener('click', event => {
                 if (!popover.contains(event.target)) closePopover();
             });
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && popover.classList.contains('show')) closePopover();
+            });
             window.addEventListener('resize', closePopover);
-            window.addEventListener('scroll', closePopover, true);
+            window.addEventListener('scroll', event => {
+                if (!popover.contains(event.target)) closePopover();
+            }, true);
         })();
     </script>
 @endsection

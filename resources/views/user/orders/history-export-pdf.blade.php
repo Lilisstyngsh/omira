@@ -230,7 +230,7 @@
             table-layout: fixed;
         }
 
-        .signature-pair > tbody > tr > td {
+        .signature-pair>tbody>tr>td {
             border: 0;
             padding: 0;
             vertical-align: top;
@@ -285,9 +285,9 @@
                     <tr>
                         <td class="logo-side" rowspan="2">
                             @if ($logoData)
-                                <img class="logo" src="{{ $logoData }}">
+                            <img class="logo" src="{{ $logoData }}">
                             @else
-                                <b>AISIN</b>
+                            <b>AISIN</b>
                             @endif
                         </td>
                         <td class="title" rowspan="2">FORM ORDER REPAIR BOX NG</td>
@@ -299,22 +299,23 @@
                 </table>
                 <div class="form-frame">
                     <div class="metadata"><b>Diserahkan oleh:</b> {{ $handedBy }}<br><b>Hari, tanggal:</b>
-                        {{ $date }}</div>
+                        {{ $date }}
+                    </div>
                     @php
-                        $categories = ['P', 'H', 'C', 'S'];
-                        $grandBefore = array_fill_keys($categories, 0);
-                        $grandAfter = array_fill_keys($categories, 0);
-                        $byModel = collect($entries)->groupBy('model');
-                        $notes = collect($entries)->map(function ($entry) {
-                            $note = trim((string) ($entry['mismatch_note'] ?? ''));
-                            if ($note === '') {
-                                return null;
-                            }
-                            $model = trim((string) ($entry['model'] ?? ''));
-                            $product = trim((string) ($entry['product'] ?? ''));
-                            $label = trim($model . ($product !== '' ? ' - ' . $product : ''), ' -');
-                            return ($label !== '' ? $label . ': ' : '') . $note;
-                        })->filter()->unique()->values()->implode("\n");
+                    $categories = ['P', 'H', 'C', 'S'];
+                    $grandBefore = array_fill_keys($categories, 0);
+                    $grandAfter = array_fill_keys($categories, 0);
+                    $byModel = collect($entries)->groupBy('model');
+                    $notes = collect($entries)->map(function ($entry) {
+                    $note = trim((string) ($entry['mismatch_note'] ?? ''));
+                    if ($note === '') {
+                    return null;
+                    }
+                    $model = trim((string) ($entry['model'] ?? ''));
+                    $product = trim((string) ($entry['product'] ?? ''));
+                    $label = trim($model . ($product !== '' ? ' - ' . $product : ''), ' -');
+                    return ($label !== '' ? $label . ': ' : '') . $note;
+                    })->filter()->unique()->values()->implode("\n");
                     @endphp
                     <table class="grid">
                         <colgroup>
@@ -348,64 +349,68 @@
                             </tr>
                             <tr>
                                 @foreach ($categories as $ng)
-                                    <th>{{ $ng }}</th>
-                                    @endforeach @foreach ($categories as $ng)
-                                        <th>{{ $ng }}</th>
-                                    @endforeach
+                                <th>{{ $ng }}</th>
+                                @endforeach @foreach ($categories as $ng)
+                                <th>{{ $ng }}</th>
+                                @endforeach
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($byModel as $model => $modelEntries)
-                                @php  @endphp
-                                @foreach ($modelEntries as $entryIndex => $entry)
-                                    <tr>
-                                        @if ($entryIndex === 0)
-                                            <td class="model" rowspan="{{ count($modelEntries) }}">
-                                                {{ $entry['model'] }}</td>
-                                        @endif
-                                        <td class="product">
-                                            {{ $entry['product'] }}</td>
-                                        @foreach ($categories as $ng)
-                                            @php
-                                                $n = (int) ($entry['before'][$ng] ?? 0);
-                                                $grandBefore[$ng] += $n;
-                                            @endphp
-                                            <td class="num">{{ $n ?: '' }}</td>
-                                        @endforeach
-                                        <td class="sep"></td>
-                                        @if ($entryIndex === 0)
-                                            <td class="model" rowspan="{{ count($modelEntries) }}">
-                                                {{ $entry['model'] }}</td>
-                                        @endif
-                                        <td class="product">
-                                            {{ $entry['product'] }}</td>
-                                        @foreach ($categories as $ng)
-                                            @php
-                                                $n = (int) ($entry['after'][$ng] ?? 0);
-                                                $grandAfter[$ng] += $n;
-                                            @endphp
-                                            <td class="num">{{ $n ?: '' }}</td>
-                                        @endforeach
-                                    </tr>
+                            @php @endphp
+                            @foreach ($modelEntries as $entryIndex => $entry)
+                            <tr>
+                                @if ($entryIndex === 0)
+                                <td class="model" rowspan="{{ count($modelEntries) }}">
+                                    {{ $entry['model'] }}
+                                </td>
+                                @endif
+                                <td class="product">
+                                    {{ $entry['product'] }}
+                                </td>
+                                @foreach ($categories as $ng)
+                                @php
+                                $n = (int) ($entry['before'][$ng] ?? 0);
+                                $grandBefore[$ng] += $n;
+                                @endphp
+                                <td class="num">{{ $n ?: '' }}</td>
                                 @endforeach
+                                <td class="sep"></td>
+                                @if ($entryIndex === 0)
+                                <td class="model" rowspan="{{ count($modelEntries) }}">
+                                    {{ $entry['model'] }}
+                                </td>
+                                @endif
+                                <td class="product">
+                                    {{ $entry['product'] }}
+                                </td>
+                                @foreach ($categories as $ng)
+                                @php
+                                $n = (int) ($entry['after'][$ng] ?? 0);
+                                $grandAfter[$ng] += $n;
+                                @endphp
+                                <td class="num">{{ $n ?: '' }}</td>
+                                @endforeach
+                            </tr>
+                            @endforeach
 
                             @empty
-                                <tr>
-                                    <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
-                                    <td class="sep"></td>
-                                    <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
-                                </tr>
+                            <tr>
+                                <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
+                                <td class="sep"></td>
+                                <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
+                            </tr>
                             @endforelse
                             <tr class="summary">
                                 <td colspan="2">SUB TOTAL</td>
                                 @foreach ($categories as $ng)
-                                    <td class="num">{{ $grandBefore[$ng] ?: '' }}</td>
+                                <td class="num">{{ $grandBefore[$ng] ?: '' }}</td>
                                 @endforeach
                                 <td class="sep">
                                 </td>
                                 <td colspan="2">SUB TOTAL</td>
                                 @foreach ($categories as $ng)
-                                    <td class="num">{{ $grandAfter[$ng] ?: '' }}</td>
+                                <td class="num">{{ $grandAfter[$ng] ?: '' }}</td>
                                 @endforeach
                             </tr>
                             <tr class="summary grand">
@@ -422,64 +427,102 @@
                     <tr>
                         <td class="legend-wrap">
                             <table class="legend-table">
-                                <tr><td colspan="2" class="legend-title">LEGEND :</td></tr>
-                                <tr><td class="legend-code">P</td><td class="legend-description">NG Partisi</td></tr>
-                                <tr><td class="legend-code">H</td><td class="legend-description">NG Holder Kanban</td></tr>
-                                <tr><td class="legend-code">C</td><td class="legend-description">NG Cover</td></tr>
-                                <tr><td class="legend-code">S</td><td class="legend-description">Box Scrap/Pecah</td></tr>
+                                <tr>
+                                    <td colspan="2" class="legend-title">LEGEND :</td>
+                                </tr>
+                                <tr>
+                                    <td class="legend-code">P</td>
+                                    <td class="legend-description">NG Partisi</td>
+                                </tr>
+                                <tr>
+                                    <td class="legend-code">H</td>
+                                    <td class="legend-description">NG Holder Kanban</td>
+                                </tr>
+                                <tr>
+                                    <td class="legend-code">C</td>
+                                    <td class="legend-description">NG Cover</td>
+                                </tr>
+                                <tr>
+                                    <td class="legend-code">S</td>
+                                    <td class="legend-description">Box Scrap/Pecah</td>
+                                </tr>
                             </table>
                         </td>
                         <td class="gap"></td>
                         <td class="notes-wrap">
                             <table class="notes-table">
-                                <tr><td class="notes-title">Catatan Ketidaksesuaian</td></tr>
-                                <tr><td class="notes-content">{{ $notes }}</td></tr>
+                                <tr>
+                                    <td class="notes-title">Catatan Ketidaksesuaian</td>
+                                </tr>
+                                <tr>
+                                    <td class="notes-content">{{ $notes }}</td>
+                                </tr>
                             </table>
                         </td>
                     </tr>
                 </table>
                 <table class="signature-pair">
                     <colgroup>
-                        <col style="width:49%"><col style="width:2%"><col style="width:49%">
+                        <col style="width:49%">
+                        <col style="width:2%">
+                        <col style="width:49%">
                     </colgroup>
                     <tr>
                         <td>
                             <table class="signature">
-                                <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
-                                <tr><td>Diserahkan oleh:</td><td>Diterima oleh:</td></tr>
+                                <colgroup>
+                                    <col style="width:50%">
+                                    <col style="width:50%">
+                                </colgroup>
+                                <tr>
+                                    <td>Diserahkan oleh:</td>
+                                    <td>Diterima oleh:</td>
+                                </tr>
                                 <tr>
                                     <td class="blank">
                                         @if ($isClosed)
-                                            <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
+                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                     <td class="blank">
                                         @if ($isClosed && $omdApproval)
-                                            <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
+                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                 </tr>
-                                <tr><td><b>PPIC</b></td><td><b>OMD</b></td></tr>
+                                <tr>
+                                    <td><b>{{ $order->line?->name ?? '-' }}</b></td>
+                                    <td><b>OMD</b></td>
+                                </tr>
                             </table>
                         </td>
                         <td class="signature-gap"></td>
                         <td>
                             <table class="signature">
-                                <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
-                                <tr><td>Diserahkan oleh:</td><td>Diterima oleh:</td></tr>
+                                <colgroup>
+                                    <col style="width:50%">
+                                    <col style="width:50%">
+                                </colgroup>
+                                <tr>
+                                    <td>Diserahkan oleh:</td>
+                                    <td>Diterima oleh:</td>
+                                </tr>
                                 <tr>
                                     <td class="blank">
                                         @if ($isClosed && $omdApproval)
-                                            <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
+                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                     <td class="blank">
                                         @if ($isClosed)
-                                            <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
+                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                 </tr>
-                                <tr><td><b>OMD</b></td><td><b>PPIC</b></td></tr>
+                                <tr>
+                                    <td><b>OMD</b></td>
+                                    <td><b>{{ $order->line?->name ?? '-' }}</b></td>
+                                </tr>
                             </table>
                         </td>
                     </tr>
@@ -488,7 +531,9 @@
         </tr>
     </table>
     <table class="form-number">
-        <tr><td>FRM-PSD-P3-057-00</td></tr>
+        <tr>
+            <td>FRM-PSD-P3-057-00</td>
+        </tr>
     </table>
 </body>
 
