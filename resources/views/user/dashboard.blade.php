@@ -601,14 +601,32 @@
     .scrap-limit-count { display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; padding:0 8px; border-radius:999px; background:#fff449; color:#263342; font-size:12px; font-weight:800; }
     .scrap-limit-chevron { transition:transform .18s ease; color:#64748b; }
     .scrap-limit-toggle[aria-expanded="true"] .scrap-limit-chevron { transform:rotate(180deg); }
-    .scrap-limit-items { padding:14px; display:grid; gap:12px; border-top:1px solid #f1d4d6; }
+    .scrap-limit-items { padding:12px; border-top:1px solid #f1d4d6; }
+    #additional-box-form { display:grid; gap:8px; }
+    .scrap-limit-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:4px; }
+    .scrap-limit-progress { font-size:11px; color:#64748b; }
+    .scrap-limit-footer .scrap-btn { min-width:110px; }
+    .scrap-limit-actions .scrap-btn.is-selected { box-shadow:0 0 0 2px currentColor inset; }
+    .scrap-limit-actions .scrap-btn-order.is-selected {
+        width:35px; height:35px; min-width:35px; padding:0;
+        border-radius:50%; display:inline-flex; justify-content:center; align-items:center;
+        background:#24563d; color:#fff; font-size:15px;
+        box-shadow:0 0 0 2px #b8dfc3;
+    }
+    .scrap-limit-actions .scrap-btn-order:focus-visible { outline:2px solid #24563d; outline-offset:3px; }
+    .scrap-limit-alert:has([data-scrap-order].is-selected) { border-color:#90c49f; background:#f1faf2; }
+    .scrap-limit-alert:has([data-scrap-no].is-selected) { border-color:#c3d2e5; background:#f6f9fd; }
+    .scrap-limit-actions .scrap-btn-no.is-selected { background:#d6e1f1; color:#1d3e6d; }
+    .scrap-limit-product .scrap-limit-quantity { display:block; margin-top:3px; }
+    .scrap-limit-alert { padding:10px 12px !important; }
+    @media(max-width:500px) { .scrap-limit-footer { align-items:stretch; } .scrap-limit-footer .scrap-btn { min-width:92px; } }
     .scrap-limit-items[hidden] { display:none !important; }
     .scrap-limit-alert { border:1px solid #eadba7; background:#fffbeb; border-radius:12px; padding:15px; }
     .scrap-limit-alert.is-reached { border-color:#efb4b6; background:#fff4f4; }
-    .scrap-limit-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:12px; }
+    .scrap-limit-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px; }
     .scrap-limit-product { min-width:0; font-size:12px; font-weight:600; color:#263342; overflow-wrap:anywhere; }
     .scrap-limit-quantity { font-size:12px; font-weight:400; color:#64748b; white-space:nowrap; }
-    .scrap-limit-row .scrap-limit-actions { justify-content:flex-end; flex-wrap:nowrap; }
+    .scrap-limit-row .scrap-limit-actions { justify-content:flex-end; flex-wrap:wrap; }
     .scrap-limit-actions form { margin:0; }
     .scrap-limit-decision { justify-self:end; font-size:12px; font-weight:600; color:#64748b; white-space:nowrap; }
     @media(max-width:680px) {
@@ -620,7 +638,11 @@
     .scrap-btn { border:0; border-radius:9px; padding:10px 16px; font-size:12px; font-weight:600; cursor:pointer; }
     .scrap-btn-order { background:#347554; color:#fff; }
     .scrap-btn-no { background:#e5eaf0; color:#324255; }
-    .scrap-btn-submit-disabled { background:#e5e7eb !important; color:#9ca3af !important; cursor:not-allowed !important; }
+    #additional-box-submit:disabled,
+    .scrap-reason-dialog [data-scrap-reason-save]:disabled {
+        background:#e5e7eb !important; color:#9ca3af !important;
+        box-shadow:none !important; cursor:not-allowed !important; opacity:1;
+    }
     .scrap-reason-modal[hidden] { display:none !important; }
     .scrap-reason-modal { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1100; padding:18px; }
     .scrap-reason-dialog { width:min(100%,440px); background:#fff; border-radius:16px; padding:22px; box-shadow:0 24px 60px rgba(15,23,42,.22); }
@@ -628,6 +650,7 @@
     .scrap-reason-dialog p { margin:5px 0 15px; color:#64748b; font-size:12px; font-weight:400; }
     .scrap-reason-dialog textarea { width:100%; box-sizing:border-box; min-height:110px; border:1px solid #cbd5e1; border-radius:9px; padding:10px; font:inherit; font-size:13px; resize:vertical; }
     .scrap-modal-actions { justify-content:flex-end; margin-top:12px; }
+    .scrap-save-error { color:#b91c1c !important; margin:7px 0 0 !important; }
 </style>
 
 @php
@@ -679,37 +702,42 @@
             <form id="additional-box-form" method="POST" action="{{ route('user.additional-box.store') }}">
                 @csrf
                 <input type="hidden" name="submission_token" value="{{ old('submission_token', (string) \Illuminate\Support\Str::uuid()) }}">
-            </form>
-            @foreach($scrapAlerts as $cycle)
-                <div class="scrap-limit-alert is-reached">
-                    <div class="scrap-limit-row">
-                        <div class="scrap-limit-product">{{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}</div>
-                        <div class="scrap-limit-quantity">Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</div>
-                        <div class="scrap-limit-actions">
-                            <button type="button" class="scrap-btn scrap-btn-order" data-box-select="{{ $cycle->id }}" aria-pressed="false">Order</button>
-                            <label>Qty <input form="additional-box-form" type="number" name="items[{{ $cycle->id }}][quantity]" data-box-qty="{{ $cycle->id }}" min="1" max="1000000" step="1" style="width:95px;padding:8px" disabled required></label>
-                            <input form="additional-box-form" type="hidden" name="items[{{ $cycle->id }}][cycle_id]" value="{{ $cycle->id }}" data-box-id="{{ $cycle->id }}" disabled>
-                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
-                        </div>
-                    </div>
-                        <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
-                            <div class="scrap-reason-dialog">
-                                <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Membuat Order</h3>
-                                <p>{{ $cycle->product?->name }}</p>
-                                <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
-                                    @csrf
-                                    <input type="hidden" name="decision" value="no">
-                                    <textarea name="reason" maxlength="1000" rows="4" placeholder="Masukkan alasan..." required data-scrap-reason></textarea>
-                                    <div class="scrap-modal-actions">
-                                        <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
-                                        <button type="submit" class="scrap-btn scrap-btn-order scrap-btn-submit-disabled" data-scrap-submit disabled>Simpan Alasan</button>
-                                    </div>
-                                </form>
+                @foreach($scrapAlerts as $cycle)
+                    <div class="scrap-limit-alert is-reached" data-scrap-choice-row="{{ $cycle->id }}">
+                        <input type="hidden" name="decisions[{{ $cycle->id }}][cycle_id]" value="{{ $cycle->id }}">
+                        <input type="hidden" name="decisions[{{ $cycle->id }}][decision]" value="" data-scrap-decision="{{ $cycle->id }}">
+                        <input type="hidden" name="decisions[{{ $cycle->id }}][reason]" value="" data-scrap-saved-reason="{{ $cycle->id }}">
+                        <div class="scrap-limit-row">
+                            <div class="scrap-limit-product">
+                                {{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}
+                                <span class="scrap-limit-quantity">Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</span>
+                            </div>
+                            <div class="scrap-limit-actions">
+                                <button type="button" class="scrap-btn scrap-btn-order" data-scrap-order="{{ $cycle->id }}" aria-pressed="false">Order</button>
+                                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-no="{{ $cycle->id }}" aria-pressed="false">Tidak</button>
                             </div>
                         </div>
+                    </div>
+                @endforeach
+                <div class="scrap-limit-footer">
+                    <span class="scrap-limit-progress" id="scrap-limit-progress" aria-live="polite"></span>
+                    <button type="submit" id="additional-box-submit" class="scrap-btn scrap-btn-order" disabled>Submit</button>
+                </div>
+            </form>
+            @foreach($scrapAlerts as $cycle)
+                <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" data-decision-url="{{ route('user.scrap-limit.decision', $cycle) }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
+                    <div class="scrap-reason-dialog">
+                        <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Order</h3>
+                        <p>{{ $cycle->product?->name }}</p>
+                        <textarea maxlength="1000" rows="3" placeholder="Tulis alasan..." data-scrap-reason="{{ $cycle->id }}" required></textarea>
+                        <p class="scrap-save-error" data-scrap-save-error role="alert" hidden></p>
+                        <div class="scrap-modal-actions">
+                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
+                            <button type="button" class="scrap-btn scrap-btn-order" data-scrap-reason-save="{{ $cycle->id }}" disabled>Simpan</button>
+                        </div>
+                    </div>
                 </div>
             @endforeach
-            <button form="additional-box-form" type="submit" id="additional-box-submit" class="scrap-btn scrap-btn-order" disabled>Submit Request Additional Box</button>
         </div>
     </section>
     @endif
@@ -719,7 +747,7 @@
             <button type="button" class="action-panel-toggle" id="action-panel-toggle" aria-expanded="false" aria-controls="action-panel-content">
                 <span class="action-heading">
                     <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
-                    <span class="dashboard-panel-title">Perlu Tindakan</span>
+                    <span class="dashboard-panel-title">Perlu Konfirmasi</span>
                 </span>
                 <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
                     <span class="action-count">{{ $needConfirmation }} Order</span>
@@ -746,7 +774,7 @@
                                 <strong>{{ $isCorrection ? 'Hasil koreksi siap diperiksa' : 'Hasil repair siap diperiksa' }}</strong>
                             </div>
 
-                            <span class="action-check-order">Cek Order</span>
+                            <span class="action-check-order">Buka <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
                         </a>
                     @endforeach
                 </div>
@@ -884,89 +912,161 @@
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    var actionToggle = document.getElementById('action-panel-toggle');
-    var actionContent = document.getElementById('action-panel-content');
-    if (actionToggle && actionContent) {
-        actionToggle.addEventListener('click', function () {
-            var expanded = actionToggle.getAttribute('aria-expanded') === 'true';
-            actionToggle.setAttribute('aria-expanded', String(!expanded));
-            actionContent.hidden = expanded;
-        });
-    }
-
-    var scrapToggle = document.getElementById('scrap-limit-toggle');
-    var scrapItems = document.getElementById('scrap-limit-items');
-    if (scrapToggle && scrapItems) {
-        scrapToggle.addEventListener('click', function () {
-            var expanded = scrapToggle.getAttribute('aria-expanded') === 'true';
-            scrapToggle.setAttribute('aria-expanded', String(!expanded));
-            scrapItems.hidden = expanded;
-        });
-    }
-
-    document.querySelectorAll('[data-scrap-modal-open]').forEach(function (button) {
+    function setupChevron(buttonId, contentId) {
+        const button = document.getElementById(buttonId);
+        const content = document.getElementById(contentId);
+        if (!button || !content) return;
         button.addEventListener('click', function () {
-            var modal = document.getElementById(button.dataset.scrapModalOpen);
-            if (!modal) return;
-            modal.hidden = false;
-            var input = modal.querySelector('[data-scrap-reason]');
-            if (input) input.focus();
+            const wasOpen = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', String(!wasOpen));
+            content.hidden = wasOpen;
         });
-    });
-    document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) {
-        var reason = modal.querySelector('[data-scrap-reason]');
-        var submit = modal.querySelector('[data-scrap-submit]');
-        var update = function () {
-            var valid = !!(reason && reason.value.trim());
-            if (submit) {
-                submit.disabled = !valid;
-                submit.classList.toggle('scrap-btn-submit-disabled', !valid);
-            }
-        };
-        if (reason) reason.addEventListener('input', update);
-        update();
-        modal.querySelectorAll('[data-scrap-modal-close]').forEach(function (button) {
-            button.addEventListener('click', function () { modal.hidden = true; });
-        });
-        modal.addEventListener('click', function (event) { if (event.target === modal) modal.hidden = true; });
-        modal.querySelector('form')?.addEventListener('submit', function (event) {
-            if (!reason || !reason.value.trim()) { event.preventDefault(); update(); }
-        });
-    });
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) { modal.hidden = true; });
-    });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+    }
+    setupChevron('action-panel-toggle', 'action-panel-content');
+    setupChevron('scrap-limit-toggle', 'scrap-limit-items');
+
     const form = document.getElementById('additional-box-form');
     if (!form) return;
     const submit = document.getElementById('additional-box-submit');
-    const refresh = () => { submit.disabled = !document.querySelector('[data-box-select][aria-pressed="true"]'); };
-    document.querySelectorAll('[data-box-select]').forEach(button => {
-        button.addEventListener('click', () => {
-            const id = button.dataset.boxSelect;
-            const selected = button.getAttribute('aria-pressed') !== 'true';
-            button.setAttribute('aria-pressed', String(selected));
-            button.textContent = selected ? 'Batal Pilih' : 'Order';
-            const qty = document.querySelector('[data-box-qty="' + id + '"]');
-            qty.disabled = !selected;
-            document.querySelector('[data-box-id="' + id + '"]').disabled = !selected;
-            if (selected) qty.focus();
-            refresh();
+    const progress = document.getElementById('scrap-limit-progress');
+    let rows = Array.from(form.querySelectorAll('[data-scrap-choice-row]'));
+    const notifyEdited = function (input) { input.dispatchEvent(new Event('change', { bubbles: true })); };
+
+    function updateButtons() {
+        let selected = 0;
+        let hasInvalidChoice = false;
+        rows.forEach(function (row) {
+            const decision = row.querySelector('[data-scrap-decision]').value;
+            const reason = row.querySelector('[data-scrap-saved-reason]').value.trim();
+            const isValid = decision === 'yes' || (decision === 'no' && reason.length > 0);
+            // Only chosen products go to Laravel. An undecided product keeps its limit warning.
+            row.querySelectorAll('input[type="hidden"]').forEach(function (input) {
+                input.disabled = !isValid;
+            });
+            if (decision === 'no' && !reason) hasInvalidChoice = true;
+            const orderButton = row.querySelector('[data-scrap-order]');
+            orderButton.classList.toggle('is-selected', decision === 'yes');
+            orderButton.setAttribute('aria-pressed', String(decision === 'yes'));
+            orderButton.textContent = decision === 'yes' ? '✓' : 'Order';
+            orderButton.setAttribute('aria-label', decision === 'yes' ? 'Batalkan pilihan Order' : 'Pilih Order');
+            orderButton.title = decision === 'yes' ? 'Batalkan Order' : 'Order';
+            row.querySelector('[data-scrap-no]').classList.toggle('is-selected', decision === 'no');
+            row.querySelector('[data-scrap-no]').setAttribute('aria-pressed', String(decision === 'no'));
+            if (isValid) selected++;
+        });
+        submit.disabled = selected === 0 || hasInvalidChoice;
+        progress.textContent = selected ? selected + ' dipilih' : '';
+    }
+    function choose(row, choice) {
+        const input = row.querySelector('[data-scrap-decision]');
+        input.value = choice;
+        notifyEdited(input); // Also protects unsaved choices from the existing auto-refresh.
+        updateButtons();
+    }
+    function closeModal(modal) { modal.hidden = true; }
+
+    rows.forEach(function (row) {
+        const id = row.dataset.scrapChoiceRow;
+        const reasonInput = row.querySelector('[data-scrap-saved-reason]');
+        const modal = document.getElementById('scrap-reason-' + id);
+        const textarea = modal.querySelector('[data-scrap-reason]');
+        const saveReason = modal.querySelector('[data-scrap-reason-save]');
+        const saveError = modal.querySelector('[data-scrap-save-error]');
+        let saving = false;
+        function updateReasonSave() { saveReason.disabled = saving || textarea.value.trim().length === 0; }
+        function setSaveError(message) {
+            saveError.textContent = message;
+            saveError.hidden = !message;
+        }
+        row.querySelector('[data-scrap-order]').addEventListener('click', function () {
+            const isAlreadyOrder = row.querySelector('[data-scrap-decision]').value === 'yes';
+            choose(row, isAlreadyOrder ? '' : 'yes');
+        });
+        row.querySelector('[data-scrap-no]').addEventListener('click', function () {
+            textarea.value = '';
+            setSaveError('');
+            updateReasonSave();
+            modal.hidden = false;
+            textarea.focus();
+        });
+        saveReason.addEventListener('click', async function () {
+            const reason = textarea.value.trim();
+            if (saving || !reason) return;
+            saving = true;
+            setSaveError('');
+            updateReasonSave();
+            const cancel = modal.querySelector('[data-scrap-modal-close]');
+            cancel.disabled = true;
+            try {
+                const response = await fetch(modal.dataset.decisionUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    },
+                    body: JSON.stringify({ decision: 'no', reason: reason }),
+                });
+                const data = await response.json();
+                if (!response.ok || data.success !== true) {
+                    const validation = data.errors && Object.values(data.errors).flat()[0];
+                    throw new Error(validation || data.message || 'Gagal menyimpan keputusan.');
+                }
+                // The server already recorded the No decision and reset this product's cycle.
+                // Leave other checked Order products untouched until their own Submit.
+                row.remove();
+                modal.remove();
+                rows = rows.filter(function (item) { return item !== row; });
+                const count = document.querySelector('.scrap-limit-count');
+                if (count) count.textContent = String(rows.length);
+                if (!rows.length) document.querySelector('.scrap-limit-panel').remove();
+                else updateButtons();
+            } catch (error) {
+                setSaveError(error.message || 'Koneksi gagal. Coba lagi.');
+                saving = false;
+                cancel.disabled = false;
+                updateReasonSave();
+            }
+        });
+        textarea.addEventListener('input', function () {
+            textarea.setCustomValidity('');
+            setSaveError('');
+            updateReasonSave();
+        });
+        modal.querySelector('[data-scrap-modal-close]').addEventListener('click', function () {
+            if (!saving) closeModal(modal);
+        });
+        modal.addEventListener('click', function (event) {
+            if (!saving && event.target === modal) closeModal(modal);
         });
     });
-    const oldItems = @json(old('items', []));
-    Object.values(oldItems).forEach(item => {
-        const button = document.querySelector('[data-box-select="' + Number(item.cycle_id) + '"]');
-        if (button) {
-            button.click();
-            document.querySelector('[data-box-qty="' + Number(item.cycle_id) + '"]').value = item.quantity;
-        }
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) {
+            if (modal.querySelector('[data-scrap-modal-close]')?.disabled !== true) closeModal(modal);
+        });
     });
-    form.addEventListener('submit', () => { submit.disabled = true; submit.textContent = 'Menyimpan...'; });
-    window.addEventListener('pageshow', refresh);
+
+    // Restore the submitted choices when Laravel returns validation errors.
+    const oldDecisions = @json(old('decisions', []));
+    Object.values(oldDecisions).forEach(function (item) {
+        const row = form.querySelector('[data-scrap-choice-row="' + Number(item.cycle_id) + '"]');
+        if (!row || !['yes', 'no'].includes(item.decision)) return;
+        row.querySelector('[data-scrap-saved-reason]').value = item.reason || '';
+        row.querySelector('[data-scrap-decision]').value = item.decision;
+    });
+    updateButtons();
+    if (Object.keys(oldDecisions).length && document.getElementById('scrap-limit-toggle')) {
+        document.getElementById('scrap-limit-toggle').setAttribute('aria-expanded', 'true');
+        document.getElementById('scrap-limit-items').hidden = false;
+    }
+    form.addEventListener('submit', function (event) {
+        updateButtons();
+        if (submit.disabled) { event.preventDefault(); return; }
+        submit.disabled = true;
+        submit.textContent = 'Menyimpan...';
+    });
+    window.addEventListener('pageshow', updateButtons);
 });
 </script>
 @endsection
