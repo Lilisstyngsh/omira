@@ -481,7 +481,16 @@ class UserOrderController extends Controller
             compact('order')
         );
     }
-    public function requestRevision(
+    public function requestRevision(Request $request, RepairOrder $order)
+    {
+        abort_unless((int) $order->user_id === (int) $request->user()->id, 403);
+        return DB::transaction(function () use ($request, $order) {
+            \App\Models\User::query()->lockForUpdate()->findOrFail($order->user_id);
+            return $this->requestRevisionLocked($request, RepairOrder::query()->lockForUpdate()->findOrFail($order->id));
+        }, 3);
+    }
+
+    private function requestRevisionLocked(
         Request $request,
         RepairOrder $order
     ) {
@@ -533,44 +542,24 @@ class UserOrderController extends Controller
     }
 
 
-    public function confirm(
-        Request $request,
-        RepairOrder $order
-    ) {
-        abort_unless(
-            $order->user_id === $request->user()->id,
-            403
-        );
-
-
-        abort_unless(
-            $order->status === 'completed',
-            422,
-            'Order belum selesai diproses.'
-        );
-
-
-        $order->update([
-            'status' => 'confirmed',
-        ]);
-
-
-        $order->confirmation()->updateOrCreate(
-            [],
-            [
+    public function confirm(Request $request, RepairOrder $order)
+    {
+        abort_unless((int) $order->user_id === (int) $request->user()->id, 403);
+        DB::transaction(function () use ($request, $order) {
+            \App\Models\User::query()->lockForUpdate()->findOrFail($order->user_id);
+            $locked = RepairOrder::query()->lockForUpdate()->findOrFail($order->id);
+            if ($locked->status === 'confirmed' && $locked->confirmation()->exists()) {
+                return; // Repeated Submit preserves the original confirmation time.
+            }
+            abort_unless($locked->status === 'completed' && $locked->result()->exists(), 422, 'Order belum selesai diproses.');
+            $locked->confirmation()->updateOrCreate([], [
                 'confirmed_by_user_id' => $request->user()->id,
-
                 'confirmed_at' => now(),
-            ]
-        );
-
-
-        return redirect()
-            ->route('user.orders.index')
-            ->with(
-                'success',
-                'Barang sudah dikonfirmasi sesuai. Order selesai dan tersimpan di History.'
-            );
+            ]);
+            $locked->update(['status' => 'confirmed']);
+        }, 3);
+        return redirect()->route('user.orders.index')
+            ->with('success', 'Barang sudah dikonfirmasi sesuai. Order selesai dan tersimpan di History.');
     }
 
 

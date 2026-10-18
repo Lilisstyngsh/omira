@@ -660,6 +660,8 @@
         </a>
     </div>
 
+    <p><a href="{{ route('user.additional-box.index') }}">Riwayat Request Additional Box / Download PDF &amp; Excel</a></p>
+    @if($errors->any())<div role="alert" style="padding:12px;background:#fff1f2;color:#991b1b">{{ $errors->first() }}</div>@endif
     @if($scrapAlerts->isNotEmpty())
     <section class="dashboard-panel scrap-limit-panel">
         <button type="button" class="scrap-limit-toggle" id="scrap-limit-toggle" aria-expanded="false" aria-controls="scrap-limit-items">
@@ -675,25 +677,23 @@
             </span>
         </button>
         <div class="scrap-limit-items" id="scrap-limit-items" hidden>
+            <form id="additional-box-form" method="POST" action="{{ route('user.additional-box.store') }}">
+                @csrf
+                <input type="hidden" name="submission_token" value="{{ old('submission_token', (string) \Illuminate\Support\Str::uuid()) }}">
+            </form>
+            <p>Pilih Order pada produk yang diminta, isi Qty, lalu Submit. Scrap limit hanya sebagai peringatan.</p>
             @foreach($scrapAlerts as $cycle)
                 <div class="scrap-limit-alert is-reached">
                     <div class="scrap-limit-row">
                         <div class="scrap-limit-product">{{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}</div>
                         <div class="scrap-limit-quantity">Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</div>
-                        @if(!$cycle->decision)
-                            <div class="scrap-limit-actions">
-                                <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
-                                    @csrf
-                                    <input type="hidden" name="decision" value="yes">
-                                    <button type="submit" class="scrap-btn scrap-btn-order">Order</button>
-                                </form>
-                                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
-                            </div>
-                        @else
-                            <span class="scrap-limit-decision" title="{{ $cycle->decision_reason ?: '' }}">{{ $cycle->decision === 'yes' ? 'Order' : 'Tidak Order' }}</span>
-                        @endif
+                        <div class="scrap-limit-actions">
+                            <button type="button" class="scrap-btn scrap-btn-order" data-box-select="{{ $cycle->id }}" aria-pressed="false">Order</button>
+                            <label>Qty <input form="additional-box-form" type="number" name="items[{{ $cycle->id }}][quantity]" data-box-qty="{{ $cycle->id }}" min="1" max="1000000" step="1" style="width:95px;padding:8px" disabled required></label>
+                            <input form="additional-box-form" type="hidden" name="items[{{ $cycle->id }}][cycle_id]" value="{{ $cycle->id }}" data-box-id="{{ $cycle->id }}" disabled>
+                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
+                        </div>
                     </div>
-                    @if(!$cycle->decision)
                         <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
                             <div class="scrap-reason-dialog">
                                 <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Membuat Order</h3>
@@ -709,9 +709,9 @@
                                 </form>
                             </div>
                         </div>
-                    @endif
                 </div>
             @endforeach
+            <button form="additional-box-form" type="submit" id="additional-box-submit" class="scrap-btn scrap-btn-order" disabled>Submit Request Additional Box</button>
         </div>
     </section>
     @endif
@@ -950,6 +950,37 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') document.querySelectorAll('.scrap-reason-modal').forEach(function (modal) { modal.hidden = true; });
     });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('additional-box-form');
+    if (!form) return;
+    const submit = document.getElementById('additional-box-submit');
+    const refresh = () => { submit.disabled = !document.querySelector('[data-box-select][aria-pressed="true"]'); };
+    document.querySelectorAll('[data-box-select]').forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.dataset.boxSelect;
+            const selected = button.getAttribute('aria-pressed') !== 'true';
+            button.setAttribute('aria-pressed', String(selected));
+            button.textContent = selected ? 'Batal Pilih' : 'Order';
+            const qty = document.querySelector('[data-box-qty="' + id + '"]');
+            qty.disabled = !selected;
+            document.querySelector('[data-box-id="' + id + '"]').disabled = !selected;
+            if (selected) qty.focus();
+            refresh();
+        });
+    });
+    const oldItems = @json(old('items', []));
+    Object.values(oldItems).forEach(item => {
+        const button = document.querySelector('[data-box-select="' + Number(item.cycle_id) + '"]');
+        if (button) {
+            button.click();
+            document.querySelector('[data-box-qty="' + Number(item.cycle_id) + '"]').value = item.quantity;
+        }
+    });
+    form.addEventListener('submit', () => { submit.disabled = true; submit.textContent = 'Menyimpan...'; });
+    window.addEventListener('pageshow', refresh);
 });
 </script>
 @endsection

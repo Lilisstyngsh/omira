@@ -37,6 +37,19 @@ class TargetController extends Controller
         ));
     }
 
+    public function abnormalityArchive(Request $request)
+    {
+        $data = $request->validate(['year' => ['nullable', 'integer', 'between:2000,2100']]);
+        $year = (int) ($data['year'] ?? (now()->month >= 4 ? now()->year : now()->year - 1));
+        $query = MonitoringAbnormality::query()
+            ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
+            ->where('scope_key', FiscalYearTarget::scopeKey(null));
+        $years = (clone $query)->distinct()->pluck('year')->push($year)->unique()->sortDesc()->values();
+        $abnormalities = (clone $query)->where('year', $year)
+            ->orderByRaw('CASE WHEN month >= 4 THEN month ELSE month + 12 END')->get();
+        return view('omd.targets.abnormality-archive', compact('year', 'years', 'abnormalities'));
+    }
+
     public function store(Request $request)
     {
         $currentYear = now()->year;

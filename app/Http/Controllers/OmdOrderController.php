@@ -81,7 +81,15 @@ class OmdOrderController extends Controller
     }
 
 
-    public function verify(
+    public function verify(Request $request, RepairOrder $order)
+    {
+        return DB::transaction(function () use ($request, $order) {
+            \App\Models\User::query()->lockForUpdate()->findOrFail($order->user_id);
+            return $this->verifyLocked($request, RepairOrder::query()->lockForUpdate()->findOrFail($order->id));
+        }, 3);
+    }
+
+    private function verifyLocked(
         Request $request,
         RepairOrder $order
     ) {
@@ -144,7 +152,30 @@ class OmdOrderController extends Controller
     |
     */
 
-    public function complete(
+    public function complete(Request $request, RepairOrder $order)
+    {
+        return DB::transaction(function () use ($request, $order) {
+            \App\Models\User::query()->lockForUpdate()->findOrFail($order->user_id);
+            $locked = RepairOrder::query()->lockForUpdate()->findOrFail($order->id);
+            return $this->completeLocked($request, $locked);
+        }, 3);
+    }
+
+    public function handover(Request $request, RepairOrder $order)
+    {
+        DB::transaction(function () use ($request, $order) {
+            \App\Models\User::query()->lockForUpdate()->findOrFail($order->user_id);
+            $locked = RepairOrder::query()->lockForUpdate()->findOrFail($order->id);
+            abort_unless(in_array($locked->status, ['completed', 'confirmed'], true)
+                && $locked->result()->exists(), 422, 'Hasil repair belum selesai.');
+            if (!$locked->handed_over_at) {
+                $locked->update(['handed_over_at' => now(), 'handed_over_by' => $request->user()->id]);
+            }
+        }, 3);
+        return back()->with('success', 'Penyerahan hasil repair tercatat.');
+    }
+
+    private function completeLocked(
         Request $request,
         RepairOrder $order
     ) {

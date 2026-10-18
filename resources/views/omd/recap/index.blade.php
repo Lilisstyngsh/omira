@@ -959,7 +959,7 @@
 
                 <div class="recap-field recap-custom-date"
                     style="{{ request('period_type', 'monthly') !== 'custom' ? 'display:none' : '' }}">
-                    <label for="start_date">Dari Tanggal</label>
+                    <label for="start_date">Dari Tanggal Konfirmasi</label>
                     <div class="recap-date-input" data-recap-datepicker="start">
                         <i class="fa-regular fa-calendar" aria-hidden="true"></i>
                         <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}"
@@ -970,7 +970,7 @@
 
                 <div class="recap-field recap-custom-date"
                     style="{{ request('period_type', 'monthly') !== 'custom' ? 'display:none' : '' }}">
-                    <label for="end_date">Sampai Tanggal</label>
+                    <label for="end_date">Sampai Tanggal Konfirmasi</label>
                     <div class="recap-date-input" data-recap-datepicker="end">
                         <i class="fa-regular fa-calendar" aria-hidden="true"></i>
                         <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}"
@@ -1094,7 +1094,7 @@
                 <table class="recap-table">
                     <thead>
                         <tr>
-                            <th>Tanggal</th>
+                            <th>Tanggal Konfirmasi</th>
                             <th>Line</th>
                             <th>No. Order</th>
                             <th>Produk / Model</th>
