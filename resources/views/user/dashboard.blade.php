@@ -586,8 +586,17 @@
     .scrap-limit-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; border:0; background:#fffafa; color:#263342; text-align:left; cursor:pointer; }
     .scrap-limit-toggle-main { display:flex; align-items:center; gap:10px; min-width:0; }
     .scrap-limit-toggle-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; color:#ad323a; background:transparent; border:0; border-radius:0; width:auto; height:auto; font-size:16px; }
-    .scrap-limit-toggle-title { display:block; font-size:12px; font-weight:900; line-height:1.5; }
-    .action-panel .dashboard-panel-title { font-size:12px; font-weight:900; line-height:1.5; }
+    .user-dashboard .scrap-limit-toggle,
+    .user-dashboard .action-panel-toggle { font-family:inherit; }
+    .user-dashboard .scrap-limit-toggle-title,
+    .user-dashboard .action-panel .dashboard-panel-title {
+        display:block;
+        margin:0;
+        font-family:inherit;
+        font-size:12px !important;
+        font-weight:900 !important;
+        line-height:1.5 !important;
+    }
     .recent-orders-panel .dashboard-panel-title { font-size:12px; font-weight:600; line-height:1.5; }
     .scrap-limit-count { display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; padding:0 8px; border-radius:999px; background:#fff449; color:#263342; font-size:12px; font-weight:800; }
     .scrap-limit-chevron { transition:transform .18s ease; color:#64748b; }
@@ -596,12 +605,17 @@
     .scrap-limit-items[hidden] { display:none !important; }
     .scrap-limit-alert { border:1px solid #eadba7; background:#fffbeb; border-radius:12px; padding:15px; }
     .scrap-limit-alert.is-reached { border-color:#efb4b6; background:#fff4f4; }
-    .scrap-limit-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; color:#9a681e; font-size:13px; }
-    .scrap-limit-alert.is-reached .scrap-limit-top { color:#ad323a; }
-    .scrap-limit-top span { font-size:12px; font-weight:600; background:#fff; border:1px solid currentColor; border-radius:999px; padding:5px 10px; }
-    .scrap-limit-product { margin-top:9px; font-size:14px; font-weight:600; color:#263342; }
-    .scrap-limit-meta,.scrap-limit-notice { margin-top:5px; font-size:12px; font-weight:400; color:#64748b; }
-    .scrap-limit-question { margin:12px 0 8px; font-weight:600; font-size:13px; }
+    .scrap-limit-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:12px; }
+    .scrap-limit-product { min-width:0; font-size:12px; font-weight:600; color:#263342; overflow-wrap:anywhere; }
+    .scrap-limit-quantity { font-size:12px; font-weight:400; color:#64748b; white-space:nowrap; }
+    .scrap-limit-row .scrap-limit-actions { justify-content:flex-end; flex-wrap:nowrap; }
+    .scrap-limit-actions form { margin:0; }
+    .scrap-limit-decision { justify-self:end; font-size:12px; font-weight:600; color:#64748b; white-space:nowrap; }
+    @media(max-width:680px) {
+        .scrap-limit-row { grid-template-columns:minmax(0,1fr) auto; gap:10px; }
+        .scrap-limit-row .scrap-limit-product { grid-column:1 / -1; }
+        .scrap-limit-row .scrap-btn { padding:9px 12px; }
+    }
     .scrap-limit-actions,.scrap-modal-actions { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
     .scrap-btn { border:0; border-radius:9px; padding:10px 16px; font-size:12px; font-weight:600; cursor:pointer; }
     .scrap-btn-order { background:#347554; color:#fff; }
@@ -663,23 +677,23 @@
         <div class="scrap-limit-items" id="scrap-limit-items" hidden>
             @foreach($scrapAlerts as $cycle)
                 <div class="scrap-limit-alert is-reached">
-                    <div class="scrap-limit-top">
-                        <strong>Danger — Scrap Limit Tercapai</strong>
-                        <span>Limit tercapai</span>
+                    <div class="scrap-limit-row">
+                        <div class="scrap-limit-product">{{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}</div>
+                        <div class="scrap-limit-quantity">Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</div>
+                        @if(!$cycle->decision)
+                            <div class="scrap-limit-actions">
+                                <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
+                                    @csrf
+                                    <input type="hidden" name="decision" value="yes">
+                                    <button type="submit" class="scrap-btn scrap-btn-order">Order</button>
+                                </form>
+                                <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
+                            </div>
+                        @else
+                            <span class="scrap-limit-decision" title="{{ $cycle->decision_reason ?: '' }}">{{ $cycle->decision === 'yes' ? 'Order' : 'Tidak Order' }}</span>
+                        @endif
                     </div>
-                    <div class="scrap-limit-product">{{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}</div>
-                    <div class="scrap-limit-meta">{{ $cycle->product?->masterModel?->line?->name ?? $cycle->line?->name }} · Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</div>
-                    <div class="scrap-limit-notice">Scrap Limit sebagai informasi monitoring. Order Repair Box dan Qty Scrap tetap dapat diproses.</div>
                     @if(!$cycle->decision)
-                        <p class="scrap-limit-question">Apakah ingin membuat Repair Order?</p>
-                        <div class="scrap-limit-actions">
-                            <form method="POST" action="{{ route('user.scrap-limit.decision', $cycle) }}">
-                                @csrf
-                                <input type="hidden" name="decision" value="yes">
-                                <button type="submit" class="scrap-btn scrap-btn-order">Ya, Order</button>
-                            </form>
-                            <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-open="scrap-reason-{{ $cycle->id }}">Tidak</button>
-                        </div>
                         <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
                             <div class="scrap-reason-dialog">
                                 <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Membuat Order</h3>
@@ -695,8 +709,6 @@
                                 </form>
                             </div>
                         </div>
-                    @elseif($cycle->decision)
-                        <div class="scrap-limit-meta">Keputusan: {{ $cycle->decision === 'yes' ? 'Order' : 'Tidak Order' }}{{ $cycle->decision_reason ? ' — '.$cycle->decision_reason : '' }}</div>
                     @endif
                 </div>
             @endforeach

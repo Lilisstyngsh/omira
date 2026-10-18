@@ -1,0 +1,48 @@
+OMIRA - Dashboard User, Informasi Order, dan penghapusan source TPS
+
+PEMASANGAN
+1. Salin folder resources dari ZIP ke root project Laravel, replace 2 file
+   dengan path yang sama. Jangan menghapus folder resources yang sudah ada.
+2. Salin hapus-tps.php ke root project (sejajar dengan artisan).
+3. Jalankan di terminal pada root project:
+   php hapus-tps.php
+   php artisan optimize:clear
+4. Setelah berhasil, hapus hapus-tps.php.
+
+FILE DIUBAH
+resources/views/user/dashboard.blade.php
+resources/views/partials/repair-order-information.blade.php
+
+FILE TPS DIHAPUS OLEH SKRIP
+app/Http/Controllers/TpsRepairController.php
+app/Models/TpsRepairOrder.php
+resources/views/omd/tps/index.blade.php
+resources/views/omd/tps/show.blade.php
+resources/views/user/tps/create.blade.php
+resources/views/user/tps/index.blade.php
+resources/views/user/tps/show.blade.php
+
+Jika skrip tidak bisa dijalankan, hapus tujuh file di atas secara manual.
+Route TPS sudah tidak ada pada source terbaru. Database dan migration lama
+TPS dipertahankan. Tidak perlu import SQL atau menjalankan migration.
+
+PERUBAHAN
+- Judul Perlu Tindakan dan Peringatan Scrap Limit Produk memakai font,
+  ukuran 12px, ketebalan, dan tinggi baris yang sama. Override font global
+  ditangani khusus untuk kedua judul ini.
+- Daftar peringatan ringkas: Model - Produk, Scrap terpakai / limit,
+  tombol Order dan Tidak di kanan. Pada layar kecil, susunan turun baris.
+- Perhitungan Scrap TERPAKAI dan limit tetap seperti source sebelumnya.
+- Modal alasan Tidak dan aturan tombol Simpan Alasan tetap dipertahankan.
+- Setelah keputusan tersimpan, tampil status ringkas. Alasan yang tersimpan
+  dapat dilihat sebagai tooltip pada status; data tetap tersimpan di database.
+- Informasi Order User/OMD dan detail history memakai label pada garis border
+  atas, border #4B5563 dan background putih. Data, ukuran/bold value, dan
+  grid responsif dipertahankan.
+
+PEMERIKSAAN
+- Hanya dua view diubah dan tujuh file TPS dihapus.
+- Controller, service, route, SQL, dan JavaScript Dashboard User tidak berubah.
+- Formula nilai Informasi Order, kedua form keputusan, dan modal tetap ada.
+- Pengujian tampilan browser serta runtime Laravel belum dijalankan karena
+  browser, PHP dan dependencies Laravel tidak tersedia di lingkungan kerja.

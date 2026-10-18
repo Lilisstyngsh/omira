@@ -23,16 +23,22 @@
         grid-template-columns:repeat(3,minmax(0,1fr));
         gap:9px;
     }
-    .repair-info-mini{
+    .repair-info-card .repair-info-grid .repair-info-mini{
+        margin:0;
         min-width:0;
         min-height:62px;
         padding:10px 11px;
-        border:1px solid transparent;
+        border:1px solid #4B5563;
+        border-color:#4B5563 !important;
         border-radius:10px;
+        background:#fff !important;
     }
-    .repair-info-mini span{
-        display:block;
-        margin-bottom:4px;
+    .repair-info-mini legend{
+        display:table;
+        width:auto;
+        max-width:100%;
+        padding:0 5px;
+        margin:0 0 0 -5px;
         font-size:9px;
         font-weight:550;
         letter-spacing:.02em;
@@ -47,17 +53,9 @@
         color:#0f172a;
         word-break:break-word;
     }
-    .repair-info-blue{background:#eff6ff;border-color:#dbeafe}
-    .repair-info-slate{background:#f8fafc;border-color:#e2e8f0}
-    .repair-info-indigo{background:#eef2ff;border-color:#e0e7ff}
-    .repair-info-violet{background:#F2F7F2;border-color:#E7F1E9}
-    .repair-info-cyan{background:#ecfeff;border-color:#cffafe}
-    .repair-info-amber{background:#fffbeb;border-color:#fde68a}
-    .repair-info-green{background:#f0fdf4;border-color:#bbf7d0}
-    .repair-info-green span,.repair-info-green strong{color:#166534}
+    .repair-info-green legend,.repair-info-green strong{color:#166534}
     .repair-info-qty strong{font-size:15px}
-    .repair-info-description{background:#fff7ed;border-color:#fed7aa}
-    .repair-info-description span{color:#9a3412}
+    .repair-info-description legend{color:#9a3412}
     .repair-info-description div{
         font-size:11px;
         line-height:1.45;
@@ -80,43 +78,43 @@
     <h3 class="repair-info-title">Informasi Order</h3>
 
     <div class="repair-info-grid">
-        <div class="repair-info-mini repair-info-blue">
-            <span>No Order</span>
+        <fieldset class="repair-info-mini repair-info-blue">
+            <legend>No Order</legend>
             <strong>{{ $order->order_number }}</strong>
-        </div>
-        <div class="repair-info-mini repair-info-slate">
-            <span>Tanggal</span>
+        </fieldset>
+        <fieldset class="repair-info-mini repair-info-slate">
+            <legend>Tanggal</legend>
             <strong>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</strong>
-        </div>
-        <div class="repair-info-mini repair-info-violet">
-            <span>User</span>
+        </fieldset>
+        <fieldset class="repair-info-mini repair-info-violet">
+            <legend>User</legend>
             <strong>{{ $order->user?->name ?? '-' }}</strong>
-        </div>
-        <div class="repair-info-mini repair-info-cyan">
-            <span>Plant</span>
+        </fieldset>
+        <fieldset class="repair-info-mini repair-info-cyan">
+            <legend>Plant</legend>
             <strong>{{ $order->line?->plant?->name ?? '-' }}</strong>
-        </div>
-        <div class="repair-info-mini repair-info-indigo">
-            <span>Line</span>
+        </fieldset>
+        <fieldset class="repair-info-mini repair-info-indigo">
+            <legend>Line</legend>
             <strong>{{ $order->line?->name ?? '-' }}</strong>
-        </div>
-        <div class="repair-info-mini repair-info-slate">
-            <span>Jenis</span>
+        </fieldset>
+        <fieldset class="repair-info-mini repair-info-slate">
+            <legend>Jenis</legend>
             <strong>Repair Box</strong>
-        </div>
-        <div class="repair-info-mini repair-info-amber repair-info-qty">
-            <span>Qty User</span>
+        </fieldset>
+        <fieldset class="repair-info-mini repair-info-amber repair-info-qty">
+            <legend>Qty User</legend>
             <strong>{{ $qtyUser > 0 ? $qtyUser . ' NG' : '-' }}</strong>
-        </div>
+        </fieldset>
         @if($hasOmdResult)
-            <div class="repair-info-mini repair-info-green repair-info-qty">
-                <span>Qty OMD</span>
+            <fieldset class="repair-info-mini repair-info-green repair-info-qty">
+                <legend>Qty OMD</legend>
                 <strong>{{ $qtyOmd > 0 ? $qtyOmd . ' NG' : '-' }}</strong>
-            </div>
+            </fieldset>
         @endif
-        <div class="repair-info-mini repair-info-description">
-            <span>Keterangan</span>
+        <fieldset class="repair-info-mini repair-info-description">
+            <legend>Keterangan</legend>
             <div>{{ $order->description ?: '-' }}</div>
-        </div>
+        </fieldset>
     </div>
 </div>
