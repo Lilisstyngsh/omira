@@ -712,8 +712,11 @@ class UserOrderController extends Controller
         $filename = 'Form_Order_Repair_Box_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $order->order_number);
 
         if ($format === 'pdf') {
-            return \Barryvdh\DomPDF\Facade\Pdf::loadView('user.orders.history-export-pdf', compact('order', 'entries', 'handedBy', 'date', 'logoData', 'isClosed', 'userApproval', 'omdApproval', 'approvedAt'))
-                ->setPaper('a4', 'portrait')->download($filename . '.pdf');
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.orders.history-export-pdf', compact('order', 'entries', 'handedBy', 'date', 'logoData', 'isClosed', 'userApproval', 'omdApproval', 'approvedAt'))
+                ->setPaper('a4', 'portrait');
+            return $request->boolean('preview')
+                ? $pdf->stream($filename . '.pdf')
+                : $pdf->download($filename . '.pdf');
         }
 
         return app(\App\Services\RepairOrderHistoryExcelService::class)->download(

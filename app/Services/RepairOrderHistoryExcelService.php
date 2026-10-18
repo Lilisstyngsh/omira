@@ -398,7 +398,7 @@ class RepairOrderHistoryExcelService
 
         $formRow = $sign + 8;
         $sheet->mergeCells("A{$formRow}:C{$formRow}");
-        $sheet->setCellValue("A{$formRow}", 'FRM-PSD-P3-057-00');
+        $sheet->setCellValue("A{$formRow}", \App\Models\FormNumber::activeNumber());
         $sheet->getStyle("A{$formRow}:C{$formRow}")->getBorders()->getOutline()->setBorderStyle($thin);
         $sheet->getStyle("A{$formRow}:C{$formRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getRowDimension($formRow)->setRowHeight(16);

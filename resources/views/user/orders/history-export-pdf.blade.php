@@ -532,7 +532,7 @@
     </table>
     <table class="form-number">
         <tr>
-            <td>FRM-PSD-P3-057-00</td>
+            <td>{{ \App\Models\FormNumber::activeNumber() }}</td>
         </tr>
     </table>
 </body>

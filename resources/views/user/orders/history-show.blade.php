@@ -260,7 +260,15 @@
                 min-height: 46px
             }
         }
-    </style>
+        .history-pdf-preview { margin-top: 18px; }
+    .history-pdf-preview-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .history-pdf-preview-heading h3 { margin: 0; font-size: 15px; font-weight: 750; }
+    .history-pdf-preview-heading span { color: #64748b; font-size: 12px; }
+    .history-pdf-preview iframe { display: block; width: 100%; min-height: 570px; height: 76vh; max-height: 900px; border: 1px solid #dce5de; border-radius: 9px; background: #f8faf9; }
+    .history-pdf-preview-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+    .history-pdf-download { display: inline-flex; align-items: center; gap: 7px; padding: 10px 15px; border: 1px solid #b7d2bf; border-radius: 9px; background: #eff7f1; color: #2b6046 !important; font-size: 12px; font-weight: 700; text-decoration: none; }
+    @media(max-width:768px) { .history-pdf-preview iframe { min-height: 420px; height: 62vh; } }
+</style>
 
     <div class="history-detail-head">
         <div>
@@ -360,7 +368,12 @@
         ])
     </div>
 
-    @if ($order->feedbacks->isNotEmpty())
+    @include('partials.history-order-pdf-preview', [
+    'previewUrl' => route('user.orders.history.export', ['order' => $order, 'format' => 'pdf', 'preview' => 1]),
+    'downloadUrl' => route('user.orders.history.export', ['order' => $order, 'format' => 'pdf']),
+])
+
+@if ($order->feedbacks->isNotEmpty())
         <div class="history-card">
             <h3>Feedback</h3>
             <div class="feedback-history">

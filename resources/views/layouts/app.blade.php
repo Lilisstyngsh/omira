@@ -2760,6 +2760,11 @@
                                         class="{{ request()->routeIs('omd.targets.*') ? 'active' : '' }}">
                                         <span>Fiscal Year</span>
                                     </a>
+
+                                    <a href="{{ route('omd.master.form-numbers.index') }}"
+                                        class="{{ request()->routeIs('omd.master.form-numbers.*') ? 'active' : '' }}">
+                                        <span>Nomor Form</span>
+                                    </a>
                                 </div>
                             </div>
                         @endif

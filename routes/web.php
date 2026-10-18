@@ -9,6 +9,7 @@ use App\Http\Controllers\OmdHistoryExportController;
 use App\Http\Controllers\UserOrderController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\MasterDataController;
+use App\Http\Controllers\FormNumberController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\ScrapLimitController;
 use App\Http\Controllers\UserScrapLimitController;
@@ -343,6 +344,12 @@ Route::middleware('auth')->group(function () {
                         '/ng-type/{ngType}',
                         [MasterDataController::class, 'destroyNgType']
                     )->name('ng-type.destroy');
+
+                    // Nomor Form export History Order — OMD only.
+                    Route::get('/form-numbers', [FormNumberController::class, 'index'])->name('form-numbers.index');
+                    Route::post('/form-numbers', [FormNumberController::class, 'store'])->name('form-numbers.store');
+                    Route::put('/form-numbers/{formNumber}', [FormNumberController::class, 'update'])->name('form-numbers.update');
+                    Route::delete('/form-numbers/{formNumber}', [FormNumberController::class, 'destroy'])->name('form-numbers.destroy');
                 });
 
 
