@@ -2655,14 +2655,20 @@
                         <a href="{{ route('user.orders.index') }}"
                             class="{{ (request()->routeIs('user.orders.index') || request()->routeIs('user.orders.show')) ? 'active' : '' }}">
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
-                            <span>Order Repair Box</span>
+                            <span>Order Repair</span>
                             <span id="userOrderNotification" class="nav-notification hidden">0</span>
                         </a>
 
                         <a href="{{ route('user.orders.history') }}"
                             class="{{ (request()->routeIs('user.orders.history') || request()->routeIs('user.orders.history.show')) ? 'active' : '' }}">
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 7v5l3 2"/></svg></span>
-                            <span>History Order Repair Box</span>
+                            <span>History Repair</span>
+                        </a>
+
+                        <a href="{{ route('user.additional-box.index') }}"
+                            class="{{ request()->routeIs('user.additional-box.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6"/><path d="M9 9h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span>
+                            <span>Additional Box</span>
                         </a>
 
 
@@ -2676,7 +2682,7 @@
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
 
                             <span>
-                                Order Repair Box
+                                Order Repair
                             </span>
 
                             <span id="omdOrderNotification" class="nav-notification hidden">
@@ -2691,7 +2697,7 @@
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 7v5l3 2"/></svg></span>
 
                             <span>
-                                History Order Repair Box
+                                History Repair
                             </span>
 
                         </a>
@@ -2974,65 +2980,6 @@
 
     @endif
 
-    @if (auth()->check() && in_array(auth()->user()->role, ['omd']))
-        <script>
-            function updateOmdOrderNotification() {
-
-                fetch("{{ route('omd.orders.pendingCount') }}", {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Gagal mengambil notifikasi order.');
-                        }
-
-                        return response.json();
-                    })
-                    .then(data => {
-
-                        const badge =
-                            document.getElementById('omdOrderNotification');
-
-                        if (!badge) {
-                            return;
-                        }
-
-                        const count = parseInt(data.count) || 0;
-
-                        if (count > 0) {
-
-                            badge.textContent =
-                                count > 99 ? '99+' : count;
-
-                            badge.classList.remove('hidden');
-                            badge.classList.add('pulse');
-
-                        } else {
-
-                            badge.textContent = '0';
-
-                            badge.classList.add('hidden');
-                            badge.classList.remove('pulse');
-                        }
-
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-            }
-
-            updateOmdOrderNotification();
-
-            setInterval(
-                updateOmdOrderNotification,
-                5000
-            );
-        </script>
-    @endif
-
     @if (auth()->check() && auth()->user()->role === 'omd')
         <script>
             function updateOmdOrderNotification() {
@@ -3169,6 +3116,68 @@
                 updateUserOrderNotification,
                 5000
             );
+        </script>
+    @endif
+
+    @if (auth()->check() && in_array(auth()->user()->role, ['user', 'omd'], true))
+        {{-- Smart auto-refresh: polling hanya mengambil fingerprint, bukan isi order. --}}
+        <script>
+            (function () {
+                const versionUrl = @json(route('activity.version'));
+                const pollInterval = 10000;
+                let lastVersion = null;
+                let requestInFlight = false;
+                let hasUnsavedInput = @json($errors->any());
+
+                function isEditing() {
+                    if (hasUnsavedInput) return true;
+                    const focused = document.activeElement;
+                    if (focused && focused.matches('input, textarea, select, [contenteditable="true"]')) return true;
+                    return Array.from(document.querySelectorAll('dialog[open], [role="dialog"]:not([hidden])'))
+                        .some(dialog => dialog.getClientRects().length > 0);
+                }
+
+                document.addEventListener('input', function (event) {
+                    if (event.target.closest('form, [contenteditable="true"]')) hasUnsavedInput = true;
+                }, true);
+                document.addEventListener('change', function (event) {
+                    if (event.target.closest('form')) hasUnsavedInput = true;
+                }, true);
+                document.addEventListener('submit', function () {
+                    hasUnsavedInput = true;
+                }, true);
+
+                async function checkForChanges() {
+                    if (document.visibilityState !== 'visible' || requestInFlight) return;
+                    requestInFlight = true;
+                    try {
+                        const response = await fetch(versionUrl, {
+                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                            cache: 'no-store',
+                            credentials: 'same-origin'
+                        });
+                        if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return;
+                        const payload = await response.json();
+                        if (typeof payload.version !== 'string') return;
+                        if (lastVersion !== null && payload.version !== lastVersion) {
+                            if (!isEditing()) window.location.reload();
+                            return; // perubahan tetap pending jika user sedang mengisi form
+                        }
+                        lastVersion = payload.version;
+                    } catch (error) {
+                        // Tidak memutus aktivitas user jika koneksi sementara bermasalah.
+                    } finally {
+                        requestInFlight = false;
+                    }
+                }
+
+                // Ambil baseline secepatnya, lalu cek maksimal sekali per 10 detik.
+                checkForChanges();
+                setInterval(checkForChanges, pollInterval);
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'visible') checkForChanges();
+                });
+            })();
         </script>
     @endif
 

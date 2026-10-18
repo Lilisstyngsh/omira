@@ -594,6 +594,7 @@
         @php
             $ngMap = $ngTypes->keyBy(fn($ngType) => strtoupper($ngType->code));
             $ngCodes = ['P', 'H', 'C', 'S'];
+            $ngLabels = ['P' => 'Partisi', 'H' => 'Holder', 'C' => 'Cover', 'S' => 'Scrap'];
             $hasProducts = $models->sum(fn($model) => $model->products->count()) > 0;
             $rowIndex = 0;
         @endphp
@@ -623,7 +624,7 @@
                             </tr>
                             <tr>
                                 @foreach ($ngCodes as $code)
-                                    <th>{{ $code }}</th>
+                                    <th>{{ $ngLabels[$code] }}</th>
                                 @endforeach
                             </tr>
                         </thead>
@@ -653,7 +654,7 @@
                                                     @if ($ng)
                                                         <div class="qty-control">
                                                             <button type="button" class="qty-step" data-step="-1"
-                                                                aria-label="Kurangi qty {{ $code }}">−</button>
+                                                                aria-label="Kurangi qty {{ $ngLabels[$code] }}">−</button>
                                                             <input type="number" class="qty-input" min="0"
                                                                 step="1" inputmode="numeric" autocomplete="off"
                                                                 data-ng-code="{{ $code }}"
@@ -662,7 +663,7 @@
                                                                 name="items[{{ $rowIndex }}][qty][{{ $ng->id }}]"
                                                                 value="{{ old('items.' . $rowIndex . '.qty.' . $ng->id, '') }}">
                                                             <button type="button" class="qty-step" data-step="1"
-                                                                aria-label="Tambah qty {{ $code }}">+</button>
+                                                                aria-label="Tambah qty {{ $ngLabels[$code] }}">+</button>
                                                         </div>
                                                     @endif
                                                 </td>

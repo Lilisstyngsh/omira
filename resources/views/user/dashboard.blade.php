@@ -660,7 +660,6 @@
         </a>
     </div>
 
-    <p><a href="{{ route('user.additional-box.index') }}">Riwayat Request Additional Box / Download PDF &amp; Excel</a></p>
     @if($errors->any())<div role="alert" style="padding:12px;background:#fff1f2;color:#991b1b">{{ $errors->first() }}</div>@endif
     @if($scrapAlerts->isNotEmpty())
     <section class="dashboard-panel scrap-limit-panel">
@@ -681,7 +680,6 @@
                 @csrf
                 <input type="hidden" name="submission_token" value="{{ old('submission_token', (string) \Illuminate\Support\Str::uuid()) }}">
             </form>
-            <p>Pilih Order pada produk yang diminta, isi Qty, lalu Submit. Scrap limit hanya sebagai peringatan.</p>
             @foreach($scrapAlerts as $cycle)
                 <div class="scrap-limit-alert is-reached">
                     <div class="scrap-limit-row">
@@ -716,8 +714,8 @@
     </section>
     @endif
 
-    <section class="dashboard-panel action-panel {{ $actionOrders->isNotEmpty() ? 'has-actions' : '' }}">
-        @if ($actionOrders->isNotEmpty())
+    @if ($actionOrders->isNotEmpty())
+        <section class="dashboard-panel action-panel has-actions">
             <button type="button" class="action-panel-toggle" id="action-panel-toggle" aria-expanded="false" aria-controls="action-panel-content">
                 <span class="action-heading">
                     <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
@@ -753,20 +751,8 @@
                     @endforeach
                 </div>
             </div>
-        @else
-            <div class="dashboard-panel-head">
-                <div class="action-heading">
-                    <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
-                    <h3 class="dashboard-panel-title">Perlu Tindakan</h3>
-                </div>
-            </div>
-            <div class="dashboard-empty">
-                <i class="fa-solid fa-circle-check"></i>
-                Tidak ada order yang perlu dikonfirmasi.
-            </div>
-        @endif
-    </section>
-
+        </section>
+    @endif
 
     <div class="dashboard-kpis">
         <div class="dashboard-kpi">

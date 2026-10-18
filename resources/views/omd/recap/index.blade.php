@@ -1134,13 +1134,13 @@
                                 </td>
                                 <td>
                                     <div class="recap-ng-list">
-                                        <span class="recap-ng-chip recap-ng-p">P:
+                                        <span class="recap-ng-chip recap-ng-p">Partisi:
                                             {{ number_format($row->qty_p, 0, ',', '.') }}</span>
-                                        <span class="recap-ng-chip recap-ng-h">H:
+                                        <span class="recap-ng-chip recap-ng-h">Holder:
                                             {{ number_format($row->qty_h, 0, ',', '.') }}</span>
-                                        <span class="recap-ng-chip recap-ng-c">C:
+                                        <span class="recap-ng-chip recap-ng-c">Cover:
                                             {{ number_format($row->qty_c, 0, ',', '.') }}</span>
-                                        <span class="recap-ng-chip recap-ng-s">S:
+                                        <span class="recap-ng-chip recap-ng-s">Scrap:
                                             {{ number_format($row->qty_s, 0, ',', '.') }}</span>
                                     </div>
                                 </td>

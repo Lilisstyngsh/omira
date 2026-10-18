@@ -2,6 +2,7 @@
     $showAfter = $showAfter ?? in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
     $showProductNote = $showProductNote ?? $showAfter;
     $ngCodes = ['P', 'H', 'C', 'S'];
+    $ngLabels = ['P' => 'Partisi', 'H' => 'Holder', 'C' => 'Cover', 'S' => 'Scrap'];
     $modelGroups = $order->items->groupBy('master_model_id');
     $columnCount = 2 + 4 + ($showAfter ? 4 : 0) + ($showProductNote ? 1 : 0);
     $beforeTotals = collect($ngCodes)->mapWithKeys(fn($code) => [$code => (int) $order->items->filter(fn($item) => strtoupper($item->ngType?->code ?? '') === $code)->sum('before_qty')]);
@@ -12,9 +13,11 @@
 
 <style>
     .repair-detail-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-    .repair-detail-table{width:100%;border-collapse:collapse;background:#fff;font-size:12px;color:#334155}
+    .repair-detail-table{width:100%;min-width:620px;border-collapse:collapse;background:#fff;font-size:12px;color:#334155}
     .repair-detail-table th,.repair-detail-table td{border:1px solid #cbd5e1;padding:8px 7px;vertical-align:middle;font-weight:400}
     .repair-detail-table thead th{text-align:center;font-weight:650;color:#0f172a;background:#fff;white-space:nowrap}
+    .repair-detail-table.has-results{min-width:900px}
+    .repair-detail-table .ng-code-header{min-width:68px}
     .repair-detail-table .model-group-row td{padding:9px 10px;font-weight:700;color:#1e293b;background:#fff;text-align:left}
     .repair-detail-table .cell-center{text-align:center}
     .repair-detail-table .product-name{font-weight:450;color:#1f2937}
@@ -30,7 +33,7 @@
 </style>
 
 <div class="repair-detail-scroll">
-    <table class="repair-detail-table">
+    <table class="repair-detail-table {{ $showAfter ? 'has-results' : '' }}">
         <thead>
             <tr>
                 <th rowspan="{{ $showAfter ? 3 : 2 }}" style="width:42px">No</th>
@@ -44,8 +47,8 @@
                 <tr><th colspan="4">Order</th><th colspan="4">Hasil</th></tr>
             @endif
             <tr>
-                @foreach($ngCodes as $code)<th style="width:48px">{{ $code }}</th>@endforeach
-                @if($showAfter) @foreach($ngCodes as $code)<th style="width:48px">{{ $code }}</th>@endforeach @endif
+                @foreach($ngCodes as $code)<th class="ng-code-header">{{ $ngLabels[$code] }}</th>@endforeach
+                @if($showAfter) @foreach($ngCodes as $code)<th class="ng-code-header">{{ $ngLabels[$code] }}</th>@endforeach @endif
             </tr>
         </thead>
         <tbody>

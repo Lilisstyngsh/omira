@@ -15,25 +15,21 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdditionalBoxExportService
 {
-    /** Keep five row-heights per page; long product names receive extra space. */
+    /** Render only real, non-empty request items; maximum five items per form page. */
     private function pages(AdditionalBoxRequest $document): array
     {
-        $pages = []; $rows = []; $used = 0; $number = 1;
-        foreach ($document->items as $item) {
-            $slots = min(5, max(1, (int) ceil(mb_strwidth($item->model_name . ' — ' . $item->product_name) / 40)));
-            if ($used + $slots > 5) {
-                $pages[] = $rows; $rows = []; $used = 0;
-            }
-            $rows[] = ['item' => $item, 'slots' => $slots, 'number' => $number++];
-            $used += $slots;
-        }
-        if ($rows) $pages[] = $rows;
-        foreach ($pages as &$rows) {
-            $free = 5 - array_sum(array_column($rows, 'slots'));
-            for ($i = 0; $i < $free; $i++) $rows[] = ['item' => null, 'slots' => 1, 'number' => null];
-        }
-        unset($rows);
-        return $pages;
+        $items = $document->items->filter(static function ($item): bool {
+            return (int) $item->quantity > 0
+                && (trim((string) $item->model_name) !== '' || trim((string) $item->product_name) !== '');
+        })->values();
+
+        $pages = $items->chunk(5)->values()->map(static function ($items, $pageIndex): array {
+            return $items->values()->map(static function ($item, $index) use ($pageIndex): array {
+                return ['item' => $item, 'number' => $pageIndex * 5 + $index + 1];
+            })->all();
+        })->all();
+
+        return $pages ?: [[]];
     }
 
     public function pdf(AdditionalBoxRequest $document)
@@ -57,29 +53,30 @@ class AdditionalBoxExportService
             $sheet->getSheetView()->setView('normal');
             $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4)
                 ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
-                ->setFitToWidth(1)->setFitToHeight(1)->setPrintArea('A1:P40');
+                ->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(1);
             $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.3)->setRight(0.3);
             $sheet->getHeaderFooter()->setOddHeader('')->setOddFooter('');
             $sheet->getColumnDimension('A')->setWidth(9);
             $sheet->getColumnDimension('B')->setWidth(21);
             foreach (range(3,16) as $col) $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($col))->setWidth(6.2);
-            $sheet->getStyle('A1:P40')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
-            $sheet->getStyle('A1:P40')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_HAIR)->getColor()->setARGB('FFE1E1E1');
-            foreach (range(1,40) as $row) $sheet->getRowDimension($row)->setRowHeight(18);
-            $box = function (string $range, string $text = '', ?string $fill = null, int $size = 10, bool $bold = false) use ($sheet) {
+            $sheet->getDefaultRowDimension()->setRowHeight(15);
+            $sheet->getStyle('A1:P45')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)
+                ->setHorizontal(Alignment::HORIZONTAL_LEFT)->setWrapText(true);
+            $box = function (string $range, string $text = '', ?string $fill = null, int $size = 10, bool $bold = false, string $alignment = Alignment::HORIZONTAL_LEFT) use ($sheet) {
                 if (str_contains($range, ':') && explode(':', $range)[0] !== explode(':', $range)[1]) $sheet->mergeCells($range);
                 $cell = explode(':', $range)[0];
                 // User/master data is always text, never an Excel formula.
                 $sheet->setCellValueExplicit($cell, $text, DataType::TYPE_STRING);
                 $style = $sheet->getStyle($range);
                 $style->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FF000000');
-                $style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $style->getAlignment()->setHorizontal($alignment);
                 $style->getFont()->setSize($size)->setBold($bold);
                 if ($fill) $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF' . $fill);
+                if ($fill === '195F7B') $style->getFont()->getColor()->setARGB('FFFFFFFF');
             };
-            $box('A1:B5');
-            $box('C1:L5', "FORM REQUEST ADDITIONAL\nBOX", null, 23, true);
-            $box('M1:P5', "OPERATION\nMANAGEMENT\nDEVELOPMENT DEPT.", null, 11, true);
+            $box('A1:B5', '', null, 10, false, Alignment::HORIZONTAL_CENTER);
+            $box('C1:L5', "FORM REQUEST ADDITIONAL\nBOX", null, 23, true, Alignment::HORIZONTAL_CENTER);
+            $box('M1:P5', "OPERATION\nMANAGEMENT\nDEVELOPMENT DEPT.", null, 11, true, Alignment::HORIZONTAL_CENTER);
             $logo = public_path('images/aisin-form-logo.jpg');
             if (is_file($logo)) {
                 $drawing = new Drawing();
@@ -87,45 +84,64 @@ class AdditionalBoxExportService
             } else $sheet->setCellValueExplicit('A1', 'AISIN', DataType::TYPE_STRING);
             $box('L7:P7', 'Date : ' . $document->created_at->format('d-m-Y'));
             $sheet->getStyle('L7:P7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            foreach (['A9'=>'NO','B9'=>'TYPE BOX','C9:F9'=>'MARKING','G9:M9'=>'PURPOSE','N9:P9'=>'QTY'] as $range=>$title) $box($range, $title, '195F7B', 14, true);
-            $sheet->getRowDimension(9)->setRowHeight(36);
+            foreach (['A9'=>'NO','B9'=>'TYPE BOX','C9:F9'=>'MARKING','G9:M9'=>'PURPOSE','N9:P9'=>'QTY'] as $range=>$title) {
+                $box($range, $title, '195F7B', 11, true, Alignment::HORIZONTAL_CENTER);
+            }
+            $sheet->getRowDimension(9)->setRowHeight(22);
             $row = 10;
             foreach ($rows as $line) {
                 $entry = $line['item'];
-                $lastRow = $row + $line['slots'] - 1;
-                foreach (range($row, $lastRow) as $r) $sheet->getRowDimension($r)->setRowHeight(32);
-                $box('A'.$row.':A'.$lastRow);
-                if ($entry) $sheet->setCellValue('A'.$row, $line['number']);
-                $box('B'.$row.':B'.$lastRow, $entry ? $entry->model_name . ' — ' . $entry->product_name : '', null, 9);
-                $box('C'.$row.':F'.$lastRow);
-                $box('G'.$row.':M'.$lastRow, $entry ? $document->purpose : '');
-                $box('N'.$row.':P'.$lastRow);
-                if ($entry) $sheet->setCellValue('N'.$row, (int) $entry->quantity);
-                $row = $lastRow + 1;
+                $typeBox = trim((string) $entry->model_name . ' — ' . (string) $entry->product_name, ' —');
+                // Standard Excel height for ordinary items; only expand genuinely wrapped names.
+                $lines = max(1, (int) ceil(mb_strwidth($typeBox) / 19));
+                $sheet->getRowDimension($row)->setRowHeight(max(15, $lines * 14));
+                $box('A'.$row);
+                $sheet->setCellValue('A'.$row, $line['number']);
+                $box('B'.$row, $typeBox, null, 9);
+                $box('C'.$row.':F'.$row);
+                $box('G'.$row.':M'.$row, (string) $document->purpose);
+                $box('N'.$row.':P'.$row);
+                $sheet->setCellValue('N'.$row, (int) $entry->quantity);
+                $row++;
             }
+
+            // Move all following sections up so no unused item-table rows remain.
+            $approvalHeader = $row + 1;
+            $approvalStart = $approvalHeader + 1;
+            $approvalEnd = $approvalHeader + 4;
+            $approvalLabel = $approvalEnd + 1;
             foreach (['H:J'=>['APPROVED','GM'],'K:M'=>['CHECKED','Ka. Dept'],'N:P'=>['PREPARED','Ka. Sie']] as $columns=>$labels) {
                 [$left,$right] = explode(':',$columns);
-                $box($left.'17:'.$right.'17', $labels[0]);
-                $box($left.'18:'.$right.'21');
-                $box($left.'22:'.$right.'22', $labels[1]);
+                $box($left.$approvalHeader.':'.$right.$approvalHeader, $labels[0], null, 10, false, Alignment::HORIZONTAL_CENTER);
+                $box($left.$approvalStart.':'.$right.$approvalEnd);
+                $box($left.$approvalLabel.':'.$right.$approvalLabel, $labels[1], null, 10, false, Alignment::HORIZONTAL_CENTER);
             }
-            $box('A24:P24', 'SCHEDULE ADDITIONAL BOX', '195F7B', 18, true);
-            $sheet->getRowDimension(24)->setRowHeight(30);
-            $box('A25:B26', 'ACTIVITY', 'C0C0C0', 16, true);
-            $box('C25:P25', 'LEAD TIME (IN WEEK)', 'C0C0C0', 18, true);
-            $sheet->getRowDimension(25)->setRowHeight(30);
+            $scheduleTitle = $approvalLabel + 2;
+            $scheduleHeader = $scheduleTitle + 1;
+            $weekHeader = $scheduleTitle + 2;
+            $activityStart = $scheduleTitle + 3;
+            $activityEnd = $activityStart + 4;
+            $noteStart = $activityEnd + 3;
+            $noteEnd = $noteStart + 3;
+            $box('A'.$scheduleTitle.':P'.$scheduleTitle, 'SCHEDULE ADDITIONAL BOX', '195F7B', 15, true, Alignment::HORIZONTAL_CENTER);
+            $sheet->getRowDimension($scheduleTitle)->setRowHeight(22);
+            $box('A'.$scheduleHeader.':B'.$weekHeader, 'ACTIVITY', 'C0C0C0', 12, true, Alignment::HORIZONTAL_CENTER);
+            $box('C'.$scheduleHeader.':P'.$scheduleHeader, 'LEAD TIME (IN WEEK)', 'C0C0C0', 13, true, Alignment::HORIZONTAL_CENTER);
+            $sheet->getRowDimension($scheduleHeader)->setRowHeight(21);
             for ($week=1; $week<=14; $week++) {
                 $col = Coordinate::stringFromColumnIndex($week+2);
-                $box($col.'26', (string) $week);
-                $sheet->setCellValue($col.'26', $week);
-                foreach (range(27,31) as $row) $box($col.$row);
+                $box($col.$weekHeader, (string) $week, null, 10, false, Alignment::HORIZONTAL_CENTER);
+                foreach (range($activityStart, $activityEnd) as $activityRow) $box($col.$activityRow);
             }
-            foreach (range(27,31) as $row) { $box('A'.$row.':B'.$row); $sheet->getRowDimension($row)->setRowHeight(27); }
-            $box('A34:F37', "Note:\nLEAD TIME TERHITUNG SETELAH PENGAJUAN DISETUJUI", '98DDF1', 12, true);
-            $sheet->getStyle('A34:F37')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $box('K34:P34','CONFIRMED');
-            $box('K35:M39'); $box('N35:P39');
-            $box('K40:M40','Ka. Dept OMC'); $box('N40:P40','Ka. Sie OMC');
+            foreach (range($activityStart, $activityEnd) as $activityRow) $box('A'.$activityRow.':B'.$activityRow);
+            $box('A'.$noteStart.':F'.$noteEnd, "Note:\nLEAD TIME TERHITUNG SETELAH PENGAJUAN DISETUJUI", '98DDF1', 12, true);
+            $box('K'.$noteStart.':P'.$noteStart, 'CONFIRMED', null, 10, false, Alignment::HORIZONTAL_CENTER);
+            $box('K'.($noteStart+1).':M'.($noteEnd+2));
+            $box('N'.($noteStart+1).':P'.($noteEnd+2));
+            $lastRow = $noteEnd + 3;
+            $box('K'.$lastRow.':M'.$lastRow, 'Ka. Dept OMC', null, 10, false, Alignment::HORIZONTAL_CENTER);
+            $box('N'.$lastRow.':P'.$lastRow, 'Ka. Sie OMC', null, 10, false, Alignment::HORIZONTAL_CENTER);
+            $sheet->getPageSetup()->setPrintArea('A1:P'.$lastRow);
         }
         $book->setActiveSheetIndex(0);
         return response()->streamDownload(function () use ($book) {

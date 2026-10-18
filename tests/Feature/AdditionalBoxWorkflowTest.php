@@ -143,6 +143,53 @@ class AdditionalBoxWorkflowTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_two_items_export_without_empty_rows_and_with_compact_left_aligned_body(): void
+    {
+        [$user, $cycles] = $this->fixture();
+        $this->actingAs($user)->post(route('user.additional-box.store'), $this->payload($cycles))->assertRedirect();
+        $document = AdditionalBoxRequest::with('items')->firstOrFail();
+        $service = app(\App\Services\AdditionalBoxExportService::class);
+
+        // Both file types share the same filtered, unpadded item rows.
+        $pages = (new \ReflectionMethod($service, 'pages'))->invoke($service, $document);
+        $this->assertCount(1, $pages);
+        $this->assertCount(2, $pages[0]);
+        $this->assertSame([1, 2], array_column($pages[0], 'number'));
+        $html = view('user.additional-box.pdf', [
+            'document' => $document, 'logoData' => null, 'pages' => $pages,
+        ])->render();
+        $this->assertMatchesRegularExpression('/<tbody>\s*<tr>.*?<\/tr>\s*<tr>.*?<\/tr>\s*<\/tbody>/s', $html);
+        $this->assertStringContainsString('width:5%', $html);
+        $this->assertStringContainsString('width:9%', $html);
+
+        ob_start();
+        try {
+            $service->excel($document)->sendContent();
+            $content = ob_get_contents();
+        } finally {
+            ob_end_clean();
+        }
+        $temp = tempnam(sys_get_temp_dir(), 'additional-box-');
+        try {
+            file_put_contents($temp, $content);
+            $workbook = \PhpOffice\PhpSpreadsheet\IOFactory::load($temp);
+            $sheet = $workbook->getActiveSheet();
+            $this->assertSame(1, $sheet->getCell('A10')->getValue());
+            $this->assertSame(2, $sheet->getCell('A11')->getValue());
+            $this->assertNull($sheet->getCell('A12')->getValue());
+            $this->assertEqualsWithDelta(15, $sheet->getRowDimension(10)->getRowHeight(), 0.01);
+            $this->assertSame('A1:P36', $sheet->getPageSetup()->getPrintArea());
+            $this->assertSame(1, $sheet->getPageSetup()->getFitToWidth());
+            $this->assertSame(1, $sheet->getPageSetup()->getFitToHeight());
+            $this->assertSame('left', $sheet->getStyle('B10')->getAlignment()->getHorizontal());
+            $this->assertSame('left', $sheet->getStyle('N10')->getAlignment()->getHorizontal());
+            $this->assertSame('center', $sheet->getStyle('B9')->getAlignment()->getHorizontal());
+            $workbook->disconnectWorksheets();
+        } finally {
+            @unlink($temp);
+        }
+    }
+
     public function test_archive_route_and_pdf_excel_exports_are_available(): void
     {
         [$user, $cycles] = $this->fixture();

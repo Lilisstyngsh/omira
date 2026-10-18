@@ -60,6 +60,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', fn() => redirect()->route('dashboard'));
 
+    // Polling perubahan order sesuai role; hanya mengirim fingerprint data.
+    Route::get('/activity-version', [\App\Http\Controllers\ActivityVersionController::class, 'show'])
+        ->middleware('role:omd,user')
+        ->name('activity.version');
+
     /*
     |--------------------------------------------------------------------------
     | Profile

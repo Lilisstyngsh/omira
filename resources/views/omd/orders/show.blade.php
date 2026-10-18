@@ -451,7 +451,7 @@
 
 
         .repair-table-unified {
-            min-width: 620px;
+            min-width: 760px;
             table-layout: fixed;
             border-collapse: separate;
             border-spacing: 0;
@@ -471,8 +471,12 @@
             border-bottom: 1px solid #dbe2ea;
         }
 
+        .repair-table-has-results {
+            min-width: 950px;
+        }
+
         .repair-table-editable {
-            min-width: 1040px;
+            min-width: 1120px;
         }
 
         .repair-table .grand-total-value {
@@ -1083,6 +1087,7 @@
         @php
             $modelGroups = $order->items->groupBy('master_model_id');
             $ngCodes = ['P', 'H', 'C', 'S'];
+            $ngLabels = ['P' => 'Partisi', 'H' => 'Holder', 'C' => 'Cover', 'S' => 'Scrap'];
 
             $isInRepair = $order->status === 'in_repair';
             $isCorrection = $order->status === 'revision_requested';
@@ -1158,17 +1163,17 @@
             @endif
 
             <div class="repair-table-scroll">
-                <table class="repair-table repair-table-unified {{ $canEditResult && $showAfter ? 'repair-table-editable' : '' }}">
+                <table class="repair-table repair-table-unified {{ $showAfter ? 'repair-table-has-results' : '' }} {{ $canEditResult && $showAfter ? 'repair-table-editable' : '' }}">
                     <colgroup>
                         <col style="width:38px;">
                         <col style="width:88px;">
                         <col style="width:120px;">
                         @foreach ($ngCodes as $code)
-                            <col style="width:44px;">
+                            <col style="width:68px;">
                         @endforeach
                         @if ($showAfter)
                             @foreach ($ngCodes as $code)
-                                <col style="width:{{ $canEditResult ? '104px' : '44px' }};">
+                                <col style="width:{{ $canEditResult ? '104px' : '68px' }};">
                             @endforeach
                         @endif
                         @if ($showProductNote)
@@ -1196,11 +1201,11 @@
 
                         <tr>
                             @foreach ($ngCodes as $code)
-                                <th>{{ $code }}</th>
+                                <th>{{ $ngLabels[$code] }}</th>
                             @endforeach
                             @if ($showAfter)
                                 @foreach ($ngCodes as $code)
-                                    <th>{{ $code }}</th>
+                                    <th>{{ $ngLabels[$code] }}</th>
                                 @endforeach
                             @endif
                         </tr>
@@ -1260,7 +1265,7 @@
                                                     @endif
                                                     @php $qtyInputId = $ngItem ? 'after_qty_' . $ngItem->id : 'new_after_' . $productId . '_' . $code; @endphp
                                                     <div class="repair-qty-control {{ $isCorrection ? 'correction-editor' : '' }}">
-                                                        <button type="button" class="repair-qty-step correction-step" data-step="-1" data-target="{{ $qtyInputId }}" aria-label="Kurangi qty {{ $code }}" @disabled($isCorrection)>−</button>
+                                                        <button type="button" class="repair-qty-step correction-step" data-step="-1" data-target="{{ $qtyInputId }}" aria-label="Kurangi qty {{ $ngLabels[$code] }}" @disabled($isCorrection)>−</button>
                                                         @if ($ngItem)
                                                             <input type="number"
                                                                 id="{{ $qtyInputId }}"
@@ -1278,7 +1283,7 @@
                                                                 value="{{ old('new_items.' . $productId . '.' . $code, '') }}"
                                                                 @disabled($isCorrection)>
                                                         @endif
-                                                        <button type="button" class="repair-qty-step correction-step" data-step="1" data-target="{{ $qtyInputId }}" aria-label="Tambah qty {{ $code }}" @disabled($isCorrection)>+</button>
+                                                        <button type="button" class="repair-qty-step correction-step" data-step="1" data-target="{{ $qtyInputId }}" aria-label="Tambah qty {{ $ngLabels[$code] }}" @disabled($isCorrection)>+</button>
                                                     </div>
                                                 @else
                                                     <div class="ng-value">{{ $afterQty > 0 ? $afterQty : '' }}</div>
