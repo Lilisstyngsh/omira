@@ -14,7 +14,7 @@
 <style>
     .mp-page{display:grid;gap:20px;color:#334155;font-size:12px;background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:28px 30px;box-shadow:0 8px 30px rgba(15,23,42,.04)}
     .mp-page *{box-sizing:border-box}
-    .mp-top{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+    .mp-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
     .mp-top h2{font-size:19px;font-weight:800;margin:0;color:#203044}
     .mp-card{background:#fff;border:1px solid #dfe6ef;border-radius:13px;box-shadow:0 2px 8px rgba(15,23,42,.035)}
     .mp-filters{padding:18px 20px;display:block;background:#f8fafc;border-color:#e4eaf1}
@@ -44,7 +44,7 @@
     .mp-table tbody tr:not(.mp-limit-row):not(.mp-history-row) td:not(:last-child){border-right:1px solid #dfe6ef}
     .mp-table th:nth-child(2),.mp-table td:nth-child(2){width:185px;text-align:center}
     .mp-table th:nth-child(3),.mp-table td:nth-child(3){width:135px}
-    .mp-table td:nth-child(3){text-align:right}
+    .mp-table td:nth-child(3){text-align:center}
     .mp-table td{padding:12px 14px;border-bottom:1px solid #dfe6ef;vertical-align:middle;font-size:12px;color:#334155}
     .mp-table tbody:last-of-type tr:last-child td{border-bottom:0}
     .mp-model-row{background:#fff}
@@ -66,17 +66,21 @@
     .mp-prod-name .mp-hierarchy-icon{color:#72877a;display:inline-block;width:17px;height:17px;stroke-width:1.7;flex-shrink:0}
     .mp-limit{font-weight:800;color:#2e7350;font-variant-numeric:tabular-nums}
     .mp-limit-empty{color:#6b786e;font-size:11px}
-    .mp-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+    .mp-actions{display:flex;align-items:center;justify-content:center;gap:6px}
     .mp-actions form{margin:0}
-    .mp-action-menu{position:relative}
-    .mp-action-menu summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1px solid #e1e8e3;color:#627a6c;background:white}
-    .mp-action-menu summary::-webkit-details-marker{display:none}
-    .mp-action-menu[open] summary{border-color:#7fa58c}
-    .mp-action-content{position:absolute;z-index:10;right:0;top:34px;min-width:147px;background:white;padding:5px;border:1px solid #e2eae5;border-radius:9px;box-shadow:0 10px 25px rgba(20,50,33,.14)}
-    .mp-action-content button{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;background:transparent;border:0;text-align:left;border-radius:6px;color:#3b5143;cursor:pointer;font:inherit;font-size:12px}
-    .mp-action-content .mp-delete-icon{width:17px;height:17px;stroke-width:1.7;flex-shrink:0}
-    .mp-action-content button:hover{background:#f4f8f5}
-    .mp-action-content .mp-danger{color:#ad5050}
+    .mp-delete-button{display:inline-grid;place-items:center;cursor:pointer;color:#627a6c}
+    .mp-delete-button .mp-delete-icon{width:17px;height:17px;stroke-width:1.7;flex-shrink:0}
+    .mp-delete-button:hover{background:#f4f8f5;border-color:#a9c2b3;color:#4b6d59}
+    /* SweetAlert seragam dengan konfirmasi penghapusan Plant/Line. */
+    .swal-plant-popup{width:320px!important;padding:20px!important;border-radius:18px!important;box-shadow:0 20px 60px rgba(0,0,0,.18)!important}
+    .swal-plant-popup .swal2-icon{width:55px!important;height:55px!important;margin:0 auto 12px!important}
+    .swal-plant-title{font-size:18px!important;font-weight:800!important;color:#172033!important}
+    .swal-plant-text{font-size:12px!important;color:#64748b!important}
+    .swal-plant-popup .swal2-actions{gap:10px!important;margin-top:18px!important}
+    .swal-plant-confirm{background:#dc5b68!important;color:white!important;border:none!important;border-radius:9px!important;height:36px!important;padding:0 18px!important;font-size:12px!important;font-weight:700!important;cursor:pointer!important}
+    .swal-plant-confirm:hover{background:#c94d5a!important}
+    .swal-plant-cancel{background:#f1f5f9!important;color:#475569!important;border:none!important;border-radius:9px!important;height:36px!important;padding:0 18px!important;font-size:12px!important;font-weight:700!important;cursor:pointer!important}
+    .swal-plant-cancel:hover{background:#e2e8f0!important}
     .mp-inline-trigger{font:inherit;color:inherit;border:0;background:transparent;padding:3px 5px;margin:-3px -5px;cursor:text;text-align:left;border-radius:5px;max-width:100%}
     .mp-inline-trigger:hover,.mp-inline-trigger:focus-visible{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;background:transparent}
     .mp-inline-trigger.mp-model-title{font-size:13px;font-weight:800;color:#26392d}
@@ -133,12 +137,12 @@
 
 <div class="mp-page" id="mpCatalog">
     <div class="mp-top">
+        <h2>Daftar Model Box &amp; Produk</h2>
         <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
             <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
         </button>
     </div>
 
-    @if(session('success')) <div class="mp-alert" role="status">{{ session('success') }}</div> @endif
     @if($errors->any()) <div class="mp-alert error" role="alert">{{ $errors->first() }}</div> @endif
 
     <form method="GET" action="{{ $catalogRoute }}" id="mpFilters" class="mp-card mp-filters">
@@ -238,16 +242,13 @@
                                         title="Tambah Produk" aria-label="Tambah Produk ke {{ $model->model }}">
                                         <i class="fa-solid fa-plus" aria-hidden="true"></i>
                                     </button>
-                                    <details class="mp-action-menu">
-                                        <summary title="Aksi Model" aria-label="Aksi Model"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></summary>
-                                        <div class="mp-action-content">
-                                            <form method="POST" action="{{ route('omd.master.model.destroy', $model) }}" class="js-delete-form"
-                                                data-confirm="Hapus model {{ $model->model }} beserta produknya? Pastikan tidak ada data transaksi yang masih menggunakan model ini.">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="mp-danger"><svg class="mp-delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9L2 12Z"/><path d="m12 9 6 6m0-6-6 6"/></svg><span>Hapus Model</span></button>
-                                            </form>
-                                        </div>
-                                    </details>
+                                    <form method="POST" action="{{ route('omd.master.model.destroy', $model) }}" class="js-delete-form"
+                                        data-delete-type="Model" data-confirm="Hapus model {{ $model->model }} beserta produknya? Pastikan tidak ada data transaksi yang masih menggunakan model ini.">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="mp-btn mp-btn-icon mp-delete-button" title="Hapus Model" aria-label="Hapus Model {{ $model->model }}">
+                                            <svg class="mp-delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9L2 12Z"/><path d="m12 9 6 6m0-6-6 6"/></svg>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -295,16 +296,13 @@
                                             title="Riwayat Scrap Limit" aria-label="Riwayat Scrap Limit {{ $product->name }}">
                                             <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
                                         </button>
-                                        <details class="mp-action-menu">
-                                            <summary title="Aksi Produk" aria-label="Aksi Produk"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></summary>
-                                            <div class="mp-action-content">
-                                                <form method="POST" action="{{ route('omd.master.product.destroy', $product) }}" class="js-delete-form"
-                                                    data-confirm="Hapus produk {{ $product->name }}? Pastikan produk ini tidak lagi digunakan transaksi.">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="mp-danger"><svg class="mp-delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9L2 12Z"/><path d="m12 9 6 6m0-6-6 6"/></svg><span>Hapus Produk</span></button>
-                                                </form>
-                                            </div>
-                                        </details>
+                                        <form method="POST" action="{{ route('omd.master.product.destroy', $product) }}" class="js-delete-form"
+                                            data-delete-type="Produk" data-confirm="Hapus produk {{ $product->name }}? Pastikan produk ini tidak lagi digunakan transaksi.">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="mp-btn mp-btn-icon mp-delete-button" title="Hapus Produk" aria-label="Hapus Produk {{ $product->name }}">
+                                                <svg class="mp-delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9L2 12Z"/><path d="m12 9 6 6m0-6-6 6"/></svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -397,6 +395,7 @@
         </form>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
@@ -504,11 +503,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (activeEditor) { event.preventDefault(); cancelEditor(); }
         document.querySelectorAll('.mp-overlay.is-open').forEach(closeModal);
     });
-    document.addEventListener('click', event => {
-        for (const menu of document.querySelectorAll('.mp-action-menu[open]')) {
-            if (!menu.contains(event.target)) menu.removeAttribute('open');
-        }
-    });
     function toggleModel(group) {
         if (!group) return;
         cancelEditor();
@@ -557,8 +551,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     root.addEventListener('submit', event => {
         const deleteForm = event.target.closest('.js-delete-form');
-        if (deleteForm && !window.confirm(deleteForm.dataset.confirm || 'Yakin ingin menghapus data ini?')) {
+        if (deleteForm) {
             event.preventDefault();
+            const type = deleteForm.dataset.deleteType || 'Data';
+            const message = deleteForm.dataset.confirm || 'Data yang dihapus tidak dapat dikembalikan.';
+            if (typeof Swal === 'undefined') {
+                if (window.confirm(message)) HTMLFormElement.prototype.submit.call(deleteForm);
+                return;
+            }
+            Swal.fire({
+                icon: 'warning',
+                title: 'Hapus ' + type + '?',
+                text: message,
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'swal-plant-popup',
+                    title: 'swal-plant-title',
+                    htmlContainer: 'swal-plant-text',
+                    confirmButton: 'swal-plant-confirm',
+                    cancelButton: 'swal-plant-cancel'
+                }
+            }).then(result => {
+                if (result.isConfirmed) HTMLFormElement.prototype.submit.call(deleteForm);
+            });
             return;
         }
         const form = event.target.closest('.js-inline-form');

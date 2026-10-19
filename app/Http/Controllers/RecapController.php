@@ -916,7 +916,9 @@ class RecapController extends Controller
         $draw->setCoordinates('A' . ($chartTopRow + 1));
         $draw->setOffsetX(8);
         $draw->setOffsetY(6);
-        $draw->setWidth(1380);
+        // Gambar mengikuti rasio capture dashboard; jangan dipaksa selebar area sheet.
+        $draw->setResizeProportional(true);
+        $draw->setWidth(1120);
         $draw->setWorksheet($sheet);
 
         $sheet->freezePane('A7');

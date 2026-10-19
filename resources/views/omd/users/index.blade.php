@@ -950,11 +950,12 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
     }
 
     .account-page-head {
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-bottom: 18px;
         gap: 12px;
     }
 
+    .account-list-heading { margin:0; color:#243d2e; font-size:16px; font-weight:750; line-height:1.4; }
     .account-btn-primary {
         height: 36px;
         gap: 8px;
@@ -1157,6 +1158,7 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
 
 <div class="account-page-shell">
     <div class="account-page-head">
+        <h2 class="account-list-heading">Daftar Akun</h2>
         <button type="button" class="account-btn-primary" id="openAccountCreate" aria-haspopup="dialog">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>Tambah Akun
         </button>
@@ -1166,11 +1168,6 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
     SUCCESS ALERT
 ===================================================== --}}
 
-@if (session('account_success'))
-<div class="account-success-alert">
-    {{ session('account_success') }}
-</div>
-@endif
 
 @if ($errors->has('account_error'))
 <div class="account-error-alert">

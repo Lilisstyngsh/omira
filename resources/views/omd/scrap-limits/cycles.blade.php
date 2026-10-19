@@ -99,9 +99,7 @@
 </style>
 
 <div class="scrap-history-card">
-    @if(session('success'))
-        <div role="status" style="margin-bottom:14px;padding:12px 14px;background:#effaf2;color:#277047;border:1px solid #ccebd5;border-radius:10px;font-size:12px">{{ session('success') }}</div>
-    @endif
+
     @if($errors->any())
         <div role="alert" style="margin-bottom:14px;padding:12px 14px;background:#fff1f2;color:#b42318;border:1px solid #fecaca;border-radius:10px;font-size:12px">{{ $errors->first() }}</div>
     @endif

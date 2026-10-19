@@ -408,13 +408,6 @@
         </div>
 
 
-        {{-- SUCCESS --}}
-        @if (session('success'))
-            <div class="profile-success">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
 
 
         {{-- PROFILE HERO --}}

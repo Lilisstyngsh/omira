@@ -475,9 +475,7 @@ return [
         </div>
     </div>
 
-    @if (session('success'))
-    <div class="sl-alert">{{ session('success') }}</div>
-    @endif
+
 
     @if ($errors->any())
     <div class="sl-alert error">{{ $errors->first() }}</div>

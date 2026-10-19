@@ -2591,6 +2591,7 @@
         }
     </style>
 
+    <link rel="stylesheet" href="{{ asset('css/omira-ui-shared.css') }}?v=20261020-success-art-b">
 </head>
 
 <body>
@@ -2730,6 +2731,7 @@
                             @php
                                 $dataMasterActive = request()->routeIs('omd.master.*')
                                     || request()->routeIs('omd.scrap-limits.*')
+                                    || request()->routeIs('omd.scrap-cycles.*')
                                     || request()->routeIs('omd.targets.*');
                             @endphp
 
@@ -2752,9 +2754,14 @@
                                         <span>Model &amp; Produk</span>
                                     </a>
 
-                                    <a href="{{ route('omd.master.ng-type') }}"
-                                        class="{{ request()->routeIs('omd.master.ng-type') ? 'active' : '' }}">
-                                        <span>Jenis NG</span>
+                                    <a href="{{ route('omd.scrap-cycles.index') }}"
+                                        class="{{ request()->routeIs('omd.scrap-cycles.*') ? 'active' : '' }}">
+                                        <span>Riwayat Scrap Limit</span>
+                                    </a>
+
+                                    <a href="{{ route('omd.master.form-numbers.index') }}"
+                                        class="{{ request()->routeIs('omd.master.form-numbers.*') ? 'active' : '' }}">
+                                        <span>Nomor Form</span>
                                     </a>
 
                                     <a href="{{ route('omd.targets.index') }}"
@@ -2948,13 +2955,6 @@
 
                 {{-- CONTENT --}}
                 <section class="content">
-
-                    {{-- SUCCESS --}}
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
 
 
                     {{-- ERROR --}}
@@ -3294,6 +3294,12 @@
     </script>
 
 
+    {{-- Shared notifications for authenticated User / OMD; success comes from server flash only. --}}
+    @if(auth()->check())
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>window.OMIRA_SUCCESS_MESSAGE = @json(session('success') ?: session('account_success'));</script>
+        <script src="{{ asset('js/omira-ui-shared.js') }}?v=20261020-success-art-b"></script>
+    @endif
 </body>
 
 </html>

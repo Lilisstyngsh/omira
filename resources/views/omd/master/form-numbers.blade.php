@@ -52,9 +52,6 @@
     <button class="fn-btn primary" type="button" id="fnAdd"><i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Nomor Form</button>
 </div>
 
-@if(session('success'))
-    <div class="fn-alert success" role="status">{{ session('success') }}</div>
-@endif
 @if($errors->any())
     <div class="fn-alert" role="alert">
         @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
@@ -82,7 +79,7 @@
                                 data-description="{{ $form->description }}"
                                 data-active="{{ $form->is_active ? '1' : '0' }}">Edit</button>
                             @unless($form->is_active)
-                                <form method="POST" action="{{ route('omd.master.form-numbers.destroy', $form) }}" onsubmit="return confirm('Arsipkan nomor form ini? Data dan riwayat tetap tersimpan.')">
+                                <form method="POST" action="{{ route('omd.master.form-numbers.destroy', $form) }}" class="js-archive-form">
                                     @csrf @method('DELETE')
                                     <button class="fn-btn danger" type="submit">Arsipkan</button>
                                 </form>
@@ -143,6 +140,17 @@
     </div>
 </div>
 <script>
+document.querySelectorAll('.js-archive-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!window.OmiraAlert || !window.Swal) {
+            if (window.confirm('Arsipkan nomor form ini? Data dan riwayat tetap tersimpan.')) HTMLFormElement.prototype.submit.call(form);
+            return;
+        }
+        window.OmiraAlert.confirmDelete('Arsipkan Nomor Form?', 'Nomor form akan diarsipkan, data dan riwayat tetap tersimpan.', 'Ya, Arsipkan')
+            .then(function(result) { if (result.isConfirmed) HTMLFormElement.prototype.submit.call(form); });
+    });
+});
 (function () {
     const modal = document.getElementById('fnModal');
     const form = document.getElementById('fnForm');

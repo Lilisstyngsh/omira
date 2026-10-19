@@ -347,9 +347,6 @@ $targetMap = $targetHistory
         </button>
     </div>
 
-    @if (session('success'))
-    <div class="fy-alert success">{{ session('success') }}</div>
-    @endif
 
     @if ($errors->any())
     <div class="fy-alert error">
