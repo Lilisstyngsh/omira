@@ -321,7 +321,7 @@ class RepairOrderHistoryExcelService
         $sheet->getStyle("A{$legendHeader}:C{$legendHeader}")->getFont()->setBold(true)->setSize(8);
         $legendRows = [
             ['P', 'NG Partisi'],
-            ['H', 'NG Holder Kanban'],
+            ['H', 'NG Holder'],
             ['C', 'NG Cover'],
             ['S', 'Box Scrap/Pecah'],
         ];

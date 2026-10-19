@@ -21,59 +21,46 @@
     .fy-header h2 {
         margin: 0;
         color: #172033;
-        font-size: 22px;
-        font-weight: 900;
-    }
-
-    .fy-header p {
-        margin: 5px 0 0;
-        color: #94a3b8;
-        font-size: 11px;
+        font-size: 18px;
+        font-weight: 800;
     }
 
     .fy-action {
-        min-height: 42px;
-        padding: 0 15px;
+        min-height: 38px;
+        padding: 0 16px;
         border: 0;
-        border-radius: 11px;
+        border-radius: 9px;
         background: #5F9278;
         color: #fff;
-        font-size: 11px;
-        font-weight: 900;
+        font-size: 12px;
+        font-weight: 750;
         cursor: pointer;
-        box-shadow: 0 8px 18px rgba(95, 146, 120, .18);
+        box-shadow: 0 6px 15px rgba(95, 146, 120, .18);
     }
 
     .fy-action:hover {
-        background: #5b4ce0;
+        background: #47775c;
     }
 
     .fy-card {
-        border: 1px solid #e5eaf1;
-        border-radius: 15px;
+        border: 1px solid #e8edf4;
+        border-radius: 18px;
         background: #fff;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+        box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
         overflow: hidden;
     }
 
     .fy-card-head {
-        padding: 15px 17px 12px;
-        border-bottom: 1px solid #eef2f7;
+        padding: 18px 20px;
+        border-bottom: 1px solid #edf1f5;
         background: #fff;
     }
 
     .fy-card-head h3 {
         margin: 0;
         color: #172033;
-        font-size: 13px;
-        font-weight: 900;
-    }
-
-    .fy-card-head p {
-        margin: 4px 0 0;
-        color: #94a3b8;
-        font-size: 10px;
-        line-height: 1.5;
+        font-size: 15px;
+        font-weight: 800;
     }
 
     .fy-scroll {
@@ -94,22 +81,22 @@
 
     .fy-table th,
     .fy-table td {
-        padding: 11px 13px;
-        border-bottom: 1px solid #eef2f7;
+        padding: 14px 18px;
+        border-bottom: 1px solid #eef2f6;
         color: #334155;
-        font-size: 10.5px;
+        font-size: 12px;
         text-align: left;
-        vertical-align: top;
+        vertical-align: middle;
     }
 
     .fy-table th {
         position: sticky;
         top: 0;
         z-index: 2;
-        background: #f8fafc;
+        background: #fafbfc;
         color: #64748b;
-        font-size: 9.5px;
-        font-weight: 900;
+        font-size: 11px;
+        font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .04em;
     }
@@ -205,8 +192,8 @@
     }
 
     .fy-modal {
-        width: min(430px, 100%);
-        border: 1px solid #e5eaf1;
+        width: min(440px, 100%);
+        border: 1px solid #e8edf4;
         border-radius: 18px;
         background: #fff;
         box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
@@ -215,24 +202,18 @@
 
     .fy-modal-head {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 17px 18px 13px;
-        border-bottom: 1px solid #eef2f7;
+        padding: 18px 20px;
+        border-bottom: 1px solid #edf1f5;
     }
 
     .fy-modal-head h3 {
         margin: 0;
         color: #172033;
-        font-size: 14px;
-        font-weight: 900;
-    }
-
-    .fy-modal-head p {
-        margin: 4px 0 0;
-        color: #94a3b8;
-        font-size: 10px;
+        font-size: 17px;
+        font-weight: 800;
     }
 
     .fy-modal-close {
@@ -248,8 +229,8 @@
 
     .fy-modal-body {
         display: grid;
-        gap: 13px;
-        padding: 17px 18px;
+        gap: 15px;
+        padding: 20px;
     }
 
     .fy-field {
@@ -258,17 +239,18 @@
     }
 
     .fy-field label {
-        color: #475569;
-        font-size: 10px;
-        font-weight: 900;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 750;
     }
 
     .fy-field input {
         width: 100%;
-        min-height: 43px;
+        height: 42px;
+        box-sizing: border-box;
         padding: 0 12px;
-        border: 1px solid #dbe3ee;
-        border-radius: 11px;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
         background: #fff;
         color: #172033;
         font-size: 12px;
@@ -276,17 +258,8 @@
     }
 
     .fy-field input:focus {
-        border-color: #818cf8;
+        border-color: #76a88b;
         box-shadow: 0 0 0 3px rgba(95, 146, 120, .10);
-    }
-
-    .fy-note {
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: #f8fafc;
-        color: #64748b;
-        font-size: 10px;
-        line-height: 1.55;
     }
 
     .fy-field-error {
@@ -299,29 +272,34 @@
         display: flex;
         justify-content: flex-end;
         gap: 9px;
-        padding: 13px 18px 17px;
-        border-top: 1px solid #eef2f7;
+        padding: 14px 20px 18px;
+        border-top: 1px solid #edf1f5;
     }
 
     .fy-btn {
         min-height: 40px;
-        padding: 0 14px;
-        border-radius: 10px;
-        font-size: 10.5px;
-        font-weight: 900;
+        padding: 0 16px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 750;
         cursor: pointer;
     }
 
     .fy-btn.cancel {
-        border: 1px solid #dbe3ee;
-        background: #fff;
-        color: #64748b;
+        border: 0;
+        background: #f1f5f9;
+        color: #475569;
     }
 
     .fy-btn.save {
-        border: 1px solid #5F9278;
+        border: 0;
         background: #5F9278;
         color: #fff;
+        box-shadow: 0 6px 15px rgba(95, 146, 120, .18);
+    }
+
+    .fy-btn.save:hover {
+        background: #47775c;
     }
 
     @media (max-width: 700px) {
@@ -362,10 +340,7 @@ $targetMap = $targetHistory
 
 <div class="fy-page">
     <div class="fy-header">
-        <div>
-            <h2>Target Fiscal Year</h2>
-            <p>Target tahunan global untuk seluruh Plant & Line.</p>
-        </div>
+        <h2>Target FY</h2>
 
         <button type="button" class="fy-action" id="openTargetModal">
             + Atur Target
@@ -386,8 +361,7 @@ $targetMap = $targetHistory
 
     <div class="fy-card">
         <div class="fy-card-head">
-            <h3>Ringkasan Target</h3>
-            <p>Riwayat Target Fiscal Year per tahun. Target pada tahun yang sama selalu menggunakan nilai update terbaru.</p>
+            <h3>Daftar Target FY</h3>
         </div>
 
         @if ($targetHistory->isEmpty())
@@ -398,9 +372,9 @@ $targetMap = $targetHistory
                 <thead>
                     <tr>
                         <th>Tahun</th>
-                        <th>Target Fiscal Year</th>
+                        <th>Target FY</th>
                         <th>Diubah Oleh</th>
-                        <th>Update Terakhir</th>
+                        <th>Terakhir Update</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -425,8 +399,7 @@ $targetMap = $targetHistory
 
     <div class="fy-card">
         <div class="fy-card-head">
-            <h3>Histori Abnormality</h3>
-            <p>Satu abnormality per bulan. History bulan sebelumnya tetap tersimpan ketika bulan berikutnya terjadi abnormality baru.</p>
+            <h3>Riwayat Abnormality</h3>
         </div>
 
         @if ($abnormalities->isEmpty())
@@ -438,7 +411,7 @@ $targetMap = $targetHistory
                     <tr>
                         <th>Periode</th>
                         <th>Actual Order</th>
-                        <th>Target Fiscal Year</th>
+                        <th>Target FY</th>
                         <th>Selisih</th>
                         <th>Alasan</th>
                         <th>Diinput Oleh</th>
@@ -472,13 +445,10 @@ $targetMap = $targetHistory
     </div>
 </div>
 
-<div class="fy-modal-backdrop @if($errors->has('year') || $errors->has('target_qty')) is-open @endif" id="targetModal" aria-hidden="true">
+<div class="fy-modal-backdrop @if($errors->has('year') || $errors->has('target_qty')) is-open @endif" id="targetModal" aria-hidden="{{ $errors->has('year') || $errors->has('target_qty') ? 'false' : 'true' }}">
     <div class="fy-modal" role="dialog" aria-modal="true" aria-labelledby="targetModalTitle">
         <div class="fy-modal-head">
-            <div>
-                <h3 id="targetModalTitle">Tambah / Update Target Fiscal Year</h3>
-                <p>Gunakan tahun berjalan atau tahun berikutnya.</p>
-            </div>
+            <h3 id="targetModalTitle">Atur Target FY</h3>
             <button type="button" class="fy-modal-close" id="closeTargetModal" aria-label="Tutup">×</button>
         </div>
 
@@ -502,7 +472,7 @@ $targetMap = $targetHistory
                 </div>
 
                 <div class="fy-field">
-                    <label for="target_qty">Target Fiscal Year</label>
+                    <label for="target_qty">Target FY</label>
                     <input
                         type="number"
                         id="target_qty"
@@ -515,14 +485,11 @@ $targetMap = $targetHistory
                     @enderror
                 </div>
 
-                <div class="fy-note">
-                    Berlaku untuk seluruh Plant & Line. Jika tahun tersebut sudah memiliki target, nilai baru akan menjadi Target Fiscal Year aktif.
-                </div>
             </div>
 
             <div class="fy-modal-actions">
                 <button type="button" class="fy-btn cancel" id="cancelTargetModal">Batal</button>
-                <button type="submit" class="fy-btn save">Simpan Target</button>
+                <button type="submit" class="fy-btn save">Simpan</button>
             </div>
         </form>
     </div>

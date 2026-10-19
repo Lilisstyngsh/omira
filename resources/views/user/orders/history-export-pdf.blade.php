@@ -436,7 +436,7 @@
                                 </tr>
                                 <tr>
                                     <td class="legend-code">H</td>
-                                    <td class="legend-description">NG Holder Kanban</td>
+                                    <td class="legend-description">NG Holder</td>
                                 </tr>
                                 <tr>
                                     <td class="legend-code">C</td>

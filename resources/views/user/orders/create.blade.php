@@ -264,12 +264,9 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, .12)
         }
 
-        .qty-step{width:34px;height:40px;border:0;background:transparent;font-size:23px;font-weight:400;line-height:1;cursor:pointer;touch-action:none;user-select:none;padding:0;display:inline-flex;align-items:center;justify-content:center}.qty-step[data-step="-1"] {
-            color: #b91c1c
-        }
-
+        .qty-step{width:34px;height:40px;border:0;background:transparent;font-size:23px;font-weight:400;line-height:1;cursor:pointer;touch-action:none;user-select:none;padding:0;display:inline-flex;align-items:center;justify-content:center}.qty-step[data-step="-1"],
         .qty-step[data-step="1"] {
-            color: #15803d
+            color: #374151;
         }
 
         .qty-step:active {

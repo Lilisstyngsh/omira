@@ -1,2551 +1,583 @@
 @extends('layouts.app')
 
-@section('header')
-    Data Master Model & Produk
-@endsection
+@section('title', 'Model & Produk')
+@section('header', 'Model & Produk')
 
 @section('content')
-
-    <style>
-        /* =====================================================
-                   PAGE
-                ===================================================== */
-
-        .page-heading {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 22px;
-        }
-
-        .page-heading h4 {
-            margin: 0 0 5px;
-            font-size: 18px;
-            font-weight: 800;
-        }
-
-        .page-heading p {
-            margin: 0;
-            font-size: 13px;
-            color: #64748b;
-        }
-
-
-        /* =====================================================
-                   LINE DASHBOARD
-                ===================================================== */
-
-        .line-dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 14px;
-            max-height: 250px;
-            overflow-y: auto;
-            padding: 5px 8px 5px 5px;
-        }
-
-        .line-dashboard::-webkit-scrollbar {
-            width: 7px;
-        }
-
-        .line-dashboard::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-        }
-
-        .line-dashboard::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-
-        .line-dashboard::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .line-card {
-            background: #ffffff;
-            border: 2px solid transparent;
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 7px 20px rgba(0, 0, 0, .06);
-            cursor: pointer;
-            transition: .22s ease;
-        }
-
-        .line-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, .09);
-        }
-
-        .line-card.active {
-            border-color: #5F9278;
-            background: #faf5ff;
-            box-shadow: 0 8px 22px rgba(95,146,120,.12);
-        }
-
-        .line-card-top {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .line-icon {
-            width: 46px;
-            height: 46px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: #E7F1E9;
-            color: #376B52;
-            font-size: 18px;
-        }
-
-        .line-info h4 {
-            margin: 0 0 4px;
-            font-size: 15px;
-            font-weight: 800;
-            color: #1e293b;
-        }
-
-        .line-info span {
-            display: block;
-            font-size: 10px;
-            color: #64748b;
-        }
-
-
-        /* =====================================================
-                   LINE STATS
-                ===================================================== */
-
-        .line-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 14px;
-        }
-
-        .stat-box {
-            padding: 8px 10px;
-            border-radius: 9px;
-            background: #f8fafc;
-        }
-
-        .stat-box strong {
-            display: block;
-            font-size: 16px;
-            font-weight: 800;
-            color: #334155;
-        }
-
-        .stat-box span {
-            display: block;
-            margin-top: 1px;
-            font-size: 9px;
-            color: #94a3b8;
-        }
-
-
-        /* =====================================================
-                   TABLE HEADER
-                ===================================================== */
-
-        .table-header {
-            margin-bottom: 18px;
-        }
-
-        .table-header-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 14px;
-        }
-
-        .table-title h4 {
-            margin: 0 0 4px;
-            font-size: 17px;
-            font-weight: 800;
-            color: #1e293b;
-        }
-
-        .table-title p {
-            margin: 0;
-            font-size: 11px;
-            color: #64748b;
-        }
-
-
-        /* =====================================================
-                   SEARCH
-                ===================================================== */
-
-        .search-box {
-            width: 100%;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            padding: 0 12px;
-            border: 1px solid #dfe4ea;
-            border-radius: 10px;
-            background: #ffffff;
-            box-sizing: border-box;
-        }
-
-        .search-box span {
-            font-size: 18px;
-            color: #94a3b8;
-        }
-
-        .search-box input {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            outline: none;
-            background: transparent;
-            font-size: 12px;
-            color: #334155;
-        }
-
-        .search-box input::placeholder {
-            color: #a1aab5;
-        }
-
-
-        /* =====================================================
-                   TABLE
-                ===================================================== */
-
-        .table-responsive {
-            border-radius: 14px;
-            overflow-x: auto;
-        }
-
-        .modern-table {
-            width: 100%;
-            min-width: 760px;
-            margin: 0;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .modern-table thead {
-            background: #f8fafc;
-        }
-
-        .modern-table th {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e8ecf0;
-            font-size: 10px;
-            font-weight: 800;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            white-space: nowrap;
-        }
-
-        .modern-table td {
-            padding: 15px;
-            vertical-align: middle;
-            border-bottom: 1px solid #eef1f4;
-        }
-
-        .modern-table tbody tr {
-            transition: .15s ease;
-            cursor: pointer;
-        }
-
-        .modern-table tbody tr:hover {
-            background: #faf5ff;
-        }
-
-        .modern-table tbody tr:last-child td {
-            border-bottom: 0;
-        }
-
-        .number-cell {
-            width: 70px;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-
-        /* =====================================================
-                   MODEL
-                ===================================================== */
-
-        .model-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .model-name {
-            display: inline-block;
-            color: #1e293b;
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .model-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .model-name {
-            display: inline-block;
-            color: #1e293b;
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-
-        /* =====================================================
-                   PRODUCT COUNT
-                ===================================================== */
-
-        .product-count-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 75px;
-            height: 29px;
-            padding: 0 10px;
-            border-radius: 999px;
-            background: #EAF3EC;
-            color: #6557dc;
-            font-size: 10px;
-            font-weight: 800;
-        }
-
-
-        /* =====================================================
-                   ACTION MODEL
-                ===================================================== */
-
-        .action-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .action-group form {
-            margin: 0;
-        }
-
-        .action-group .btn {
-            height: 32px;
-            padding: 0 13px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .action-group .btn-warning {
-            background: #f1f5f9;
-            border-color: #f1f5f9;
-            color: #475569;
-        }
-
-        .action-group .btn-warning:hover {
-            background: #e2e8f0;
-            border-color: #e2e8f0;
-            color: #334155;
-        }
-
-        .action-group .btn-danger {
-            background: #fff0f1;
-            border-color: #fff0f1;
-            color: #d14d5b;
-        }
-
-        .action-group .btn-danger:hover {
-            background: #ffe0e3;
-            border-color: #ffe0e3;
-            color: #c43f4d;
-        }
-
-
-        /* =====================================================
-                   EMPTY
-                ===================================================== */
-
-        .empty-table {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 55px 20px;
-            text-align: center;
-        }
-
-        .empty-table-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            margin-bottom: 10px;
-            border-radius: 14px;
-            background: #E7F1E9;
-            font-size: 22px;
-        }
-
-        .empty-table strong {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #334155;
-        }
-
-        .empty-table span {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-
-        /* =====================================================
-                   MODAL
-                ===================================================== */
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: rgba(15, 23, 42, .45);
-            z-index: 9999;
-        }
-
-        .modal-box {
-            width: 100%;
-            max-width: 410px;
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .16);
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h4 {
-            margin: 0 0 5px;
-            font-size: 17px;
-            font-weight: 800;
-            color: #172033;
-        }
-
-        .modal-header p {
-            margin: 0;
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .modal-close {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            padding: 0;
-            border: 0;
-            border-radius: 8px;
-            background: #f1f5f9;
-            color: #64748b;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .modal-close:hover {
-            background: #e2e8f0;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #334155;
-        }
-
-        .form-control {
-            width: 100%;
-            height: 42px;
-            border-radius: 10px;
-            font-size: 12px;
-            box-sizing: border-box;
-        }
-
-        .selected-line-box {
-            padding: 11px 12px;
-            margin-bottom: 17px;
-            border-radius: 10px;
-            background: #faf5ff;
-            border: 1px solid #E7F1E9;
-        }
-
-        .selected-line-box span {
-            display: block;
-            margin-bottom: 3px;
-            font-size: 9px;
-            font-weight: 700;
-            color: #7FA58C;
-            text-transform: uppercase;
-        }
-
-        .selected-line-box strong {
-            font-size: 12px;
-            color: #315E49;
-        }
-
-        .modal-action {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-
-        /* =====================================================
-                   PRODUCT LIST MODAL
-                ===================================================== */
-
-        .product-list-box {
-            width: 100%;
-            max-width: 580px;
-            max-height: 85vh;
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-list-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 15px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #edf1f5;
-        }
-
-        .product-list-header h4 {
-            margin: 0 0 5px;
-            font-size: 17px;
-            font-weight: 800;
-            color: #172033;
-        }
-
-        .product-list-header p {
-            margin: 0;
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .product-list-header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .product-list-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 65px;
-            height: 29px;
-            padding: 0 9px;
-            border-radius: 999px;
-            background: #EAF3EC;
-            color: #6557dc;
-            font-size: 10px;
-            font-weight: 800;
-        }
-
-        .product-list-content {
-            margin-top: 16px;
-            max-height: 390px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .product-list-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .product-list-content::-webkit-scrollbar-track {
-            background: #f8fafc;
-            border-radius: 10px;
-        }
-
-        .product-list-content::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-
-        .popup-product-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 11px 12px;
-            margin-bottom: 8px;
-            background: #f8fafc;
-            border: 1px solid #edf0f3;
-            border-radius: 10px;
-            cursor: text;
-        }
-
-        .popup-product-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .popup-product-name {
-            min-width: 0;
-            flex: 1;
-            color: #334155;
-            font-size: 12px;
-            font-weight: 650;
-            word-break: break-word;
-        }
-
-        .popup-product-name input {
-            width: 100%;
-            min-width: 0;
-            font: inherit;
-        }
-
-        .popup-product-delete {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            padding: 0;
-            color: #475569;
-            background: transparent;
-            border: 0;
-            border-radius: 0;
-            cursor: pointer;
-        }
-
-        .popup-product-delete:hover {
-            color: #1e293b;
-        }
-        .popup-product-actions {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            flex-shrink: 0;
-        }
-
-        .popup-product-actions form {
-            margin: 0;
-        }
-
-        .popup-action-btn {
-            height: 30px;
-            padding: 0 11px;
-            border: none;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: .15s ease;
-        }
-
-        .popup-action-edit {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        .popup-action-edit:hover {
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        .popup-action-delete {
-            background: #fff0f1;
-            color: #d14d5b;
-        }
-
-        .popup-action-delete:hover {
-            background: #ffe0e3;
-            color: #c43f4d;
-        }
-
-        .popup-empty {
-            padding: 35px 20px;
-            text-align: center;
-            background: #fafbfc;
-            border: 1px dashed #dfe5eb;
-            border-radius: 12px;
-        }
-
-        .popup-empty strong {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #475569;
-        }
-
-        .popup-empty span {
-            font-size: 10px;
-            color: #94a3b8;
-        }
-
-        .product-list-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            margin-top: 18px;
-            padding-top: 16px;
-            border-top: 1px solid #edf1f5;
-        }
-
-        .product-list-footer .btn {
-            height: 36px;
-            padding: 0 14px;
-            border-radius: 9px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-
-        /* =====================================================
-                   BUTTON
-                ===================================================== */
-
-        .btn {
-            border-radius: 10px;
-            font-weight: 700;
-        }
-
-        .btn-primary {
-            background: #5F9278;
-            border-color: #5F9278;
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background: #376B52;
-            border-color: #376B52;
-            color: #ffffff;
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            border-color: #e2e8f0;
-            color: #475569;
-        }
-
-        .btn-secondary:hover {
-            background: #cbd5e1;
-            border-color: #cbd5e1;
-            color: #334155;
-        }
-
-
-        /* =====================================================
-                   SWEETALERT
-                ===================================================== */
-        .swal2-container {
-            z-index: 11000 !important;
-        }
-
-        .swal-plant-popup {
-            width: 320px !important;
-            padding: 20px !important;
-            border-radius: 18px !important;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, .18) !important;
-        }
-
-        .swal-plant-popup .swal2-icon {
-            width: 55px !important;
-            height: 55px !important;
-            margin: 0 auto 12px !important;
-        }
-
-        .swal-plant-title {
-            font-size: 18px !important;
-            font-weight: 800 !important;
-            color: #172033 !important;
-        }
-
-        .swal-plant-text {
-            font-size: 12px !important;
-            color: #64748b !important;
-        }
-
-        .swal-plant-popup .swal2-actions {
-            gap: 10px !important;
-            margin-top: 18px !important;
-        }
-
-        .swal-plant-confirm {
-            background: #dc5b68 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 9px !important;
-            height: 36px !important;
-            padding: 0 18px !important;
-            font-size: 12px !important;
-            font-weight: 700 !important;
-        }
-
-        .swal-plant-cancel {
-            background: #f1f5f9 !important;
-            color: #475569 !important;
-            border: none !important;
-            border-radius: 9px !important;
-            height: 36px !important;
-            padding: 0 18px !important;
-            font-size: 12px !important;
-            font-weight: 700 !important;
-        }
-
-
-        /* =====================================================
-                   RESPONSIVE
-                ===================================================== */
-
-        @media (max-width: 1000px) {
-
-            .line-dashboard {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-        }
-
-        @media (max-width: 700px) {
-
-            .page-heading,
-            .table-header-top {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .page-heading .btn,
-            .table-header-top .btn {
-                width: 100%;
-            }
-
-            .line-dashboard {
-                grid-template-columns: 1fr;
-                max-height: 300px;
-            }
-
-            .product-list-box {
-                max-height: 90vh;
-                padding: 18px;
-            }
-
-            .popup-product-item {
-                align-items: center;
-                flex-direction: row;
-            }
-
-            .popup-product-actions {
-                width: auto;
-            }
-
-            .popup-action-btn {
-                flex: 1;
-            }
-
-            .product-list-footer {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .product-list-footer .btn {
-                width: 100%;
-            }
-
-        }
-    
-/* Flat Model Box browsing: clean list cards, no nested icon badges */
-.line-card{border:1px solid #e0e9e2!important;box-shadow:none!important;border-radius:12px!important;background:#fff!important}
-.line-card:hover{transform:none!important;border-color:#a7c7b0!important;box-shadow:none!important}
-.line-card.active{border-color:#5f947a!important;background:#f4f9f5!important}
-.line-icon,.empty-table-icon{display:none!important}
-.line-card-top{gap:8px!important}
-.stat-box{background:transparent!important;box-shadow:none!important;border:0!important;padding:4px 0!important}
-
+@php
+    $activeAt = now();
+    $defaultAddLineId = $selectedLineId ?: $lines->first(
+        fn ($line) => !$selectedPlantId || (int) $line->plant_id === (int) $selectedPlantId
+    )?->id;
+    $catalogRoute = route('omd.master.model-product');
+@endphp
+<style>
+    .mp-page{display:grid;gap:20px;color:#334155;font-size:12px;background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:28px 30px;box-shadow:0 8px 30px rgba(15,23,42,.04)}
+    .mp-page *{box-sizing:border-box}
+    .mp-top{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+    .mp-top h2{font-size:19px;font-weight:800;margin:0;color:#203044}
+    .mp-card{background:#fff;border:1px solid #dfe6ef;border-radius:13px;box-shadow:0 2px 8px rgba(15,23,42,.035)}
+    .mp-filters{padding:18px 20px;display:block;background:#f8fafc;border-color:#e4eaf1}
+    .mp-filter-controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+    .mp-filter-controls>.mp-field{flex:0 1 215px}
+    .mp-filter-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+    .mp-filter-controls>.mp-filter-search{margin-left:auto;flex:1 1 245px;max-width:365px}
+    .mp-field{display:grid;gap:5px;min-width:0}
+    .mp-label{font-size:10px;font-weight:800;letter-spacing:.035em;color:#566780}
+    .mp-input,.mp-select{height:38px;width:100%;min-width:0;border:1px solid #dbe2ea;border-radius:10px;background:#fff;padding:0 12px;font:inherit;font-size:12px;color:#334155;outline:none}
+    .mp-input:focus,.mp-select:focus,.mp-textarea:focus{border-color:#5f9278;box-shadow:0 0 0 3px rgba(95,146,120,.12)}
+    .mp-input::placeholder{color:#9aa8bb;font-weight:400}
+    .mp-btn{border:1px solid transparent;height:38px;border-radius:10px;padding:0 15px;background:#f0f4f1;color:#345747;font:inherit;font-size:12px;font-weight:700;display:inline-flex;gap:7px;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;white-space:nowrap}
+    .mp-btn:hover{filter:brightness(.96);text-decoration:none}
+    .mp-btn-primary{color:#fff;background:#5f9278;border-color:#5f9278}
+    .mp-btn-outline{color:#42594e;border-color:#dce6e0;background:#fff}
+    .mp-btn-muted{background:#f4f6f5;color:#56665e}
+    .mp-btn-icon{height:30px;min-width:30px;padding:0 7px;background:#fff;border:1px solid #dce4df;color:#617568}
+    .mp-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 1px}
+    .mp-summary-text{color:#334155;font-size:12px;font-weight:700}
+    .mp-summary-right{display:flex;align-items:center;gap:8px}
+    .mp-summary-right .mp-select{height:36px;width:82px;padding:0 10px;font-weight:700}
+    .mp-table-scroll{width:100%;overflow-x:auto}
+    .mp-table{border-collapse:collapse;width:100%;min-width:710px;table-layout:fixed}
+    .mp-table th{background:#f9fafb;text-align:center;font-size:11px;letter-spacing:.035em;font-weight:800;color:#667085;padding:13px 14px;border-bottom:1px solid #dfe6ef}
+    .mp-table thead th:not(:last-child){border-right:1px solid #dfe6ef}
+    .mp-table tbody tr:not(.mp-limit-row):not(.mp-history-row) td:not(:last-child){border-right:1px solid #dfe6ef}
+    .mp-table th:nth-child(2),.mp-table td:nth-child(2){width:185px;text-align:center}
+    .mp-table th:nth-child(3),.mp-table td:nth-child(3){width:135px}
+    .mp-table td:nth-child(3){text-align:right}
+    .mp-table td{padding:12px 14px;border-bottom:1px solid #dfe6ef;vertical-align:middle;font-size:12px;color:#334155}
+    .mp-table tbody:last-of-type tr:last-child td{border-bottom:0}
+    .mp-model-row{background:#fff}
+    .mp-model-row:hover{background:#f8fbf9}
+    .mp-model-row{cursor:pointer}
+    .mp-model-row .mp-inline-trigger,.mp-model-row button,.mp-model-row summary,.mp-model-row input{cursor:pointer}
+    .mp-model-row .mp-inline-form input{cursor:text}
+    .mp-model-row:focus-visible{outline:2px solid #5f9278;outline-offset:-2px}
+    .mp-model-wrap{display:flex;align-items:center;gap:9px;min-width:0}
+    .mp-caret{width:32px;height:32px;border:1px solid #c5d5ca;border-radius:50%;background:#fff;color:#4a8063;cursor:pointer;flex-shrink:0;display:grid;place-items:center}
+    .mp-caret:hover{background:#f2f7f3;border-color:#91b19d}
+    .mp-caret .mp-chevron{width:16px;height:16px;stroke-width:1.7;transition:transform .15s ease}
+    .mp-group[data-expanded="true"] .mp-caret .mp-chevron{transform:rotate(90deg)}
+    .mp-model-title{font-weight:800;color:#26392d;font-size:13px;overflow-wrap:anywhere}
+    .mp-crumb{font-size:11px;color:#536678;margin-top:4px}
+    .mp-product-row{background:#fcfdfc}
+    .mp-product-row:hover{background:#f7faf8}
+    .mp-prod-name{padding-left:38px;display:flex;gap:9px;align-items:center;min-width:0;overflow-wrap:anywhere}
+    .mp-prod-name .mp-hierarchy-icon{color:#72877a;display:inline-block;width:17px;height:17px;stroke-width:1.7;flex-shrink:0}
+    .mp-limit{font-weight:800;color:#2e7350;font-variant-numeric:tabular-nums}
+    .mp-limit-empty{color:#6b786e;font-size:11px}
+    .mp-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+    .mp-actions form{margin:0}
+    .mp-action-menu{position:relative}
+    .mp-action-menu summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1px solid #e1e8e3;color:#627a6c;background:white}
+    .mp-action-menu summary::-webkit-details-marker{display:none}
+    .mp-action-menu[open] summary{border-color:#7fa58c}
+    .mp-action-content{position:absolute;z-index:10;right:0;top:34px;min-width:147px;background:white;padding:5px;border:1px solid #e2eae5;border-radius:9px;box-shadow:0 10px 25px rgba(20,50,33,.14)}
+    .mp-action-content button{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;background:transparent;border:0;text-align:left;border-radius:6px;color:#3b5143;cursor:pointer;font:inherit;font-size:12px}
+    .mp-action-content .mp-delete-icon{width:17px;height:17px;stroke-width:1.7;flex-shrink:0}
+    .mp-action-content button:hover{background:#f4f8f5}
+    .mp-action-content .mp-danger{color:#ad5050}
+    .mp-inline-trigger{font:inherit;color:inherit;border:0;background:transparent;padding:3px 5px;margin:-3px -5px;cursor:text;text-align:left;border-radius:5px;max-width:100%}
+    .mp-inline-trigger:hover,.mp-inline-trigger:focus-visible{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;background:transparent}
+    .mp-inline-trigger.mp-model-title{font-size:13px;font-weight:800;color:#26392d}
+    .mp-inline-trigger.mp-product-title{font-size:12px;font-weight:500;color:#334155;overflow-wrap:anywhere}
+    .mp-inline-trigger.mp-limit,.mp-inline-trigger.mp-limit-empty{cursor:text}
+    .mp-inline-form{display:none;align-items:center;gap:5px;min-width:0;max-width:100%}
+    .mp-inline-form.is-open{display:flex}
+    .mp-inline-form .mp-input{height:32px;min-width:0;padding:0 8px}
+    .mp-model-edit{flex-wrap:wrap}
+    .mp-model-edit .mp-input{width:min(220px,100%);flex:1 1 135px}
+    .mp-product-edit .mp-input{width:min(290px,100%)}
+    .mp-limit-edit .mp-input{width:76px;text-align:center}
+    .mp-inline-form .mp-btn-icon{height:30px;min-width:30px}
+    .mp-inline-form .mp-inline-save{background:#397e58;border-color:#397e58;color:#fff}
+    .mp-inline-form .mp-inline-save:hover{background:#2b6948;border-color:#2b6948;filter:none}
+    .mp-inline-form .mp-inline-cancel{background:#fff0f0;border-color:#d8a3a3;color:#a73131}
+    .mp-inline-form .mp-inline-cancel:hover{background:#fbe1e1;border-color:#c77d7d;filter:none}
+    .mp-limit-row td{padding:0 14px 11px!important;background:#fcfdfc}
+    .mp-limit-fields{margin:0 0 0 37px;padding:11px;border:1px solid #cbd9ce;border-radius:9px;display:flex;gap:9px;align-items:end;flex-wrap:wrap}
+    .mp-limit-fields .mp-field{min-width:145px;flex:0 1 190px}
+    .mp-limit-fields .mp-note-field{flex:1 1 190px}
+    .mp-limit-fields .mp-input{height:34px}
+    .mp-limit-fields .mp-btn{height:34px}
+    .mp-inline-trigger:focus-visible,.mp-btn:focus-visible{outline:2px solid #5f9278;outline-offset:2px}
+    .mp-history-row td{padding:0 14px 12px!important;background:#f9fcfa}
+    .mp-history{margin:0 0 0 37px;padding:9px 11px;border:1px solid #cbd9ce;border-radius:9px}
+    .mp-history h5{font-size:12px;margin:0 0 6px;font-weight:800;color:#587663}
+    .mp-history-line{padding:7px 0;display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid #d5e0d6;flex-wrap:wrap;color:#3b5847;font-size:11px}
+    .mp-history-line strong{color:#2b704e;font-size:12px}
+    .mp-nodata{text-align:center!important;padding:34px!important;color:#8b988f}
+    .mp-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid #dfe6ef;color:#52627a;font-size:12px}
+    .mp-pages{display:flex;gap:4px;align-items:center}
+    .mp-page-link{display:grid;place-items:center;min-width:31px;height:31px;padding:0 7px;border-radius:7px;border:1px solid #e5eae5;color:#526c5e;text-decoration:none;background:#fff}
+    .mp-page-link.active{background:#5f9278;color:#fff;border-color:#5f9278}
+    .mp-page-link.disabled{opacity:.35;pointer-events:none}
+    .mp-alert{padding:11px 13px;border-radius:10px;border:1px solid #d4e7da;background:#f0f9f3;color:#347451}
+    .mp-alert.error{border-color:#efcccc;background:#fff6f6;color:#a54444}
+    .mp-overlay{position:fixed;inset:0;z-index:10000;background:rgba(18,32,26,.5);display:none;align-items:center;justify-content:center;padding:15px}
+    .mp-overlay.is-open{display:flex}
+    .mp-modal{background:#fff;border:1px solid #e1eae4;border-radius:15px;width:100%;max-width:465px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 75px rgba(0,0,0,.15)}
+    .mp-modal-head{padding:16px 19px;border-bottom:1px solid #edf1ed;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .mp-modal-title{font-weight:800;font-size:16px;margin:0;color:#23432d}
+    .mp-modal-body{padding:16px 19px;display:grid;gap:13px}
+    .mp-textarea{width:100%;min-height:75px;border:1px solid #dbe3de;border-radius:9px;padding:9px 11px;font:inherit;resize:vertical;outline:none}
+    .mp-modal-foot{padding:13px 19px;border-top:1px solid #edf1ed;display:flex;justify-content:flex-end;gap:8px}
+    .mp-modal .mp-field{gap:6px}
+    .mp-hint{font-size:11px;color:#4e6556}
+    body.mp-modal-active{overflow:hidden}
+    .mp-mobile-only{display:none}
+    [hidden]{display:none!important}
+    @media(max-width:840px){.mp-page{padding:20px}.mp-filter-controls>.mp-field{flex:1 1 170px}.mp-filter-controls>.mp-filter-search{flex:1 1 100%;max-width:none}}
+    @media(max-width:550px){.mp-page{padding:14px;gap:15px}.mp-filters{padding:13px}.mp-filter-controls{gap:10px}.mp-filter-controls>.mp-field{flex:1 1 115px}.mp-filter-actions{order:2}.mp-filter-controls>.mp-filter-search{order:3;flex-basis:100%}.mp-limit-fields{margin-left:0}.mp-limit-fields .mp-field{flex:1 1 100%}.mp-inline-form .mp-input{max-width:170px}.mp-top .mp-btn{width:auto}.mp-history{margin-left:0}.mp-table{min-width:580px}.mp-table th,.mp-table td{padding:9px 10px}.mp-prod-name{padding-left:21px}.mp-pagination{justify-content:center;text-align:center}}
 </style>
 
-    @include('omd.master.partials.master_colors')
+<div class="mp-page" id="mpCatalog">
+    <div class="mp-top">
+        <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
+        </button>
+    </div>
 
-    {{-- =====================================================
-    LINE DASHBOARD
-===================================================== --}}
+    @if(session('success')) <div class="mp-alert" role="status">{{ session('success') }}</div> @endif
+    @if($errors->any()) <div class="mp-alert error" role="alert">{{ $errors->first() }}</div> @endif
 
-    <div class="card omd-master-accent">
+    <form method="GET" action="{{ $catalogRoute }}" id="mpFilters" class="mp-card mp-filters">
+        <div class="mp-filter-controls">
+            <div class="mp-field">
+                <label class="mp-label" for="mpPlant">PLANT</label>
+                <select class="mp-select" id="mpPlant" name="plant_id">
+                    <option value="">Semua Plant</option>
+                    @foreach($plants as $plant)
+                        <option value="{{ $plant->id }}" @selected((string)$selectedPlantId === (string)$plant->id)>{{ $plant->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mp-field">
+                <label class="mp-label" for="mpLine">LINE</label>
+                <select class="mp-select" id="mpLine" name="line_id">
+                    <option value="">Semua Line</option>
+                    @foreach($lines as $line)
+                        <option value="{{ $line->id }}" data-plant="{{ $line->plant_id }}"
+                            @selected((string)$selectedLineId === (string)$line->id)>{{ $line->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mp-filter-actions">
+                <button class="mp-btn mp-btn-primary" type="submit" title="Terapkan filter"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button>
+                @if($selectedPlantId || $selectedLineId)
+                    <a class="mp-btn mp-btn-outline" href="{{ route('omd.master.model-product', ['q' => $search, 'per_page' => $perPage]) }}" title="Reset Plant dan Line"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</a>
+                @endif
+            </div>
+            <div class="mp-field mp-filter-search">
+                <label class="mp-label" for="mpSearch">PENCARIAN</label>
+                <input class="mp-input" id="mpSearch" type="search" name="q" maxlength="150"
+                    placeholder="Cari model / produk..." value="{{ $search }}" autocomplete="off">
+            </div>
+        </div>
+        <input type="hidden" name="per_page" value="{{ $perPage }}" id="mpFilterPerPage">
+    </form>
 
-        <div class="card-body">
+    <div class="mp-summary">
+        <div class="mp-summary-right">
+            <select class="mp-select" id="mpPerPage" aria-label="Jumlah model per halaman">
+                @foreach([10,25,50,100] as $count)
+                    <option value="{{ $count }}" @selected($perPage === $count)>{{ $count }}</option>
+                @endforeach
+            </select>
+        </div>
+        <span class="mp-summary-text"><strong>{{ number_format($models->total()) }}</strong> Model</span>
+    </div>
 
-            <div class="line-dashboard">
-
-                @forelse($lines as $line)
+    <div class="mp-card">
+        <div class="mp-table-scroll">
+            <table class="mp-table" aria-label="Daftar Model Box, Produk dan Scrap Limit">
+                <thead><tr>
+                    <th scope="col">MODEL / PRODUK</th>
+                    <th scope="col">SCRAP LIMIT</th>
+                    <th scope="col">AKSI</th>
+                </tr></thead>
+                @forelse($models as $model)
                     @php
-                        $lineModels = $models->where('line_id', $line->id);
-                        $modelCount = $lineModels->count();
-                        $productCount = $lineModels->sum(function ($model) {
-                            return $model->products->count();
-                        });
+                        $plantName = $model->line?->plant?->name ?? '-';
+                        $lineName = $model->line?->name ?? '-';
+                        $searchMatchesModel = $search === '' || stripos($model->model, $search) !== false
+                            || stripos($lineName, $search) !== false || stripos($plantName, $search) !== false;
+                        $visibleProducts = $searchMatchesModel ? $model->products : $model->products->filter(
+                            fn ($product) => stripos($product->name, $search) !== false
+                        );
+                        $modelOpen = $search !== '';
                     @endphp
-
-                    <div class="line-card" data-line-id="{{ $line->id }}" data-line-name="{{ $line->name }}"
-                        onclick="loadModel({{ $line->id }}, this)">
-
-                        <div class="line-card-top">
-
-                            <div class="line-icon" title="Line">
-                                <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
-                            </div>
-
-                            <div class="line-info">
-
-                                <h4>
-                                    {{ $line->name }}
-                                </h4>
-
-                                <span>
-                                    {{ $line->plant->name ?? '-' }}
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="line-stats">
-
-                            <div class="stat-box">
-
-                                <strong>
-                                    {{ $modelCount }}
-                                </strong>
-
-                                <span>
-                                    Model
-                                </span>
-
-                            </div>
-
-
-                            <div class="stat-box">
-
-                                <strong>
-                                    {{ $productCount }}
-                                </strong>
-
-                                <span>
-                                    Produk
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                @empty
-
-                    <div class="empty-table">
-
-                        <div class="empty-table-icon">
-                            <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
-                        </div>
-
-                        <strong>
-                            Belum ada Line
-                        </strong>
-
-                        <span>
-                            Tambahkan Line terlebih dahulu.
-                        </span>
-
-                    </div>
-                @endforelse
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-    MODEL TABLE
-===================================================== --}}
-
-    <div class="card mt-4 omd-master-accent">
-
-        <div class="card-body">
-
-            <div class="table-header">
-
-                <div class="table-header-top">
-
-                    <div class="table-title">
-
-                        <h4 id="lineTitle">
-                            {{ $selectedLineId
-                                ? optional($lines->firstWhere('id', $selectedLineId))->name
-                                : $lines->first()?->name ?? 'Pilih Line' }}
-                        </h4>
-
-                        <p id="lineSubtitle">
-                            {{ $selectedLineId
-                                ? optional(optional($lines->firstWhere('id', $selectedLineId))->plant)->name
-                                : $lines->first()?->plant->name ?? 'Belum ada Line' }}
-                        </p>
-
-                    </div>
-
-
-                    <button type="button" class="btn btn-primary" onclick="openAddModelModal()">
-                        + Tambah Model
-                    </button>
-
-                </div>
-
-
-                <div class="search-box">
-
-                    <span>
-                        ⌕
-                    </span>
-
-                    <input type="text" id="searchModel" placeholder="Cari model...">
-
-                </div>
-
-            </div>
-
-
-            <div class="table-responsive">
-
-                <table class="table modern-table" id="modelTable">
-
-                    <thead>
-
-                        <tr>
-
-                            <th width="70">
-                                No
-                            </th>
-
-                            <th>
-                                Model
-                            </th>
-
-                            <th width="150">
-                                Jumlah Produk
-                            </th>
-
-                            <th width="190">
-                                Aksi
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @forelse($models as $index => $model)
-                            <tr class="model-row" data-line-id="{{ $model->line_id }}" data-model-id="{{ $model->id }}"
-                                data-model-name="{{ $model->model }}">
-
-                                <td class="number-cell">
-                                    {{ $index + 1 }}
-                                </td>
-
-
-                                {{-- MODEL --}}
-                                <td>
-
-                                    <div class="model-info">
-
-                                        <strong class="model-name">
-                                            {{ $model->model }}
-                                        </strong>
-
-                                    </div>
-
-                                </td>
-
-
-                                {{-- JUMLAH PRODUK --}}
-                                <td>
-
-                                    <span class="product-count-badge">
-                                        {{ $model->products->count() }}
-                                        Produk
-                                    </span>
-
-                                </td>
-
-
-                                {{-- AKSI MODEL --}}
-                                <td class="model-action-cell">
-
-                                    <div class="action-group">
-
-                                        <button type="button" class="btn btn-warning btn-sm edit-model-btn action-icon-only"
-                                            data-id="{{ $model->id }}" data-line-id="{{ $model->line_id }}"
-                                            data-name="{{ $model->model }}" title="Edit Model" aria-label="Edit Model">
-                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                        </button>
-
-
-                                        <form method="POST" action="{{ route('omd.master.model.destroy', $model->id) }}"
-                                            class="delete-model-form">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit" class="btn btn-danger btn-sm action-icon-only" title="Hapus Model" aria-label="Hapus Model">
-                                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-                                            </button>
-
+                    <tbody id="model-{{ $model->id }}" class="mp-group" data-model-id="{{ $model->id }}" data-expanded="{{ $modelOpen ? 'true' : 'false' }}">
+                        <tr class="mp-model-row" tabindex="0" title="Klik area baris untuk melihat produk" data-toggle-row="model">
+                            <td>
+                                <div class="mp-model-wrap">
+                                    <button type="button" class="mp-caret js-toggle-model" aria-label="{{ $modelOpen ? 'Tutup' : 'Lihat produk' }} {{ $model->model }}"
+                                        aria-expanded="{{ $modelOpen ? 'true' : 'false' }}">
+                                        <svg class="mp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="m9 5 7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <div style="min-width:0;flex:1">
+                                        <button type="button" class="mp-inline-trigger mp-model-title js-start-edit" data-edit="model" title="Klik untuk edit Model">{{ $model->model }}</button>
+                                        <form class="mp-inline-form mp-model-edit js-inline-form" method="POST" action="{{ route('omd.master.model.update', $model) }}" data-edit-form="model">
+                                            @csrf @method('PUT')
+                                            <input type="hidden" name="line_id" value="{{ $model->line_id }}">
+                                            <input class="mp-input js-inline-input" name="model" maxlength="100" required value="{{ $model->model }}" data-original="{{ $model->model }}" aria-label="Nama Model">
+                                            <button type="submit" class="mp-btn mp-btn-primary mp-btn-icon mp-inline-save" title="Simpan Model" aria-label="Simpan Model"><i class="fa-solid fa-check"></i></button>
+                                            <button type="button" class="mp-btn mp-btn-icon mp-inline-cancel js-cancel-inline" title="Batal" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>
                                         </form>
-
+                                        <div class="mp-crumb">{{ $plantName }} / {{ $lineName }} · {{ $model->products->count() }} produk</div>
                                     </div>
-
-                                </td>
-
-                            </tr>
-
-
-                            {{-- =================================================
-                             PRODUCT SOURCE UNTUK POPUP
-                        ================================================== --}}
-
-                            <template id="product-source-{{ $model->id }}">
-
-                                @forelse($model->products as $product)
-                                    <div class="popup-product-item" data-product-id="{{ $product->id }}"
-                                        data-model-id="{{ $product->master_model_id }}" data-name="{{ $product->name }}"
-                                        data-update-url="{{ route('omd.master.product.update', $product) }}"
-                                        tabindex="0" aria-label="Edit nama Produk {{ $product->name }}">
-
-                                        <span class="popup-product-name inline-name">
-                                            <span data-product-name-display>{{ $product->name }}</span>
-                                        </span>
-
-
-                                        <div class="popup-product-actions">
-
-                                            <form method="POST"
-                                                action="{{ route('omd.master.product.destroy', $product->id) }}"
-                                                class="delete-product-form">
-
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button type="submit" class="popup-product-delete" title="Hapus Produk" aria-label="Hapus Produk">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                        stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-                                                        <path d="m6 6 12 12M18 6 6 18" />
-                                                    </svg>
-                                                </button>
-
+                                </div>
+                            </td>
+                            <td></td>
+                            <td>
+                                <div class="mp-actions">
+                                    <button type="button" class="mp-btn mp-btn-icon js-add-product"
+                                        data-model-id="{{ $model->id }}" data-model-name="{{ $model->model }}"
+                                        title="Tambah Produk" aria-label="Tambah Produk ke {{ $model->model }}">
+                                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                                    </button>
+                                    <details class="mp-action-menu">
+                                        <summary title="Aksi Model" aria-label="Aksi Model"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></summary>
+                                        <div class="mp-action-content">
+                                            <form method="POST" action="{{ route('omd.master.model.destroy', $model) }}" class="js-delete-form"
+                                                data-confirm="Hapus model {{ $model->model }} beserta produknya? Pastikan tidak ada data transaksi yang masih menggunakan model ini.">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="mp-danger"><svg class="mp-delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9L2 12Z"/><path d="m12 9 6 6m0-6-6 6"/></svg><span>Hapus Model</span></button>
                                             </form>
-
                                         </div>
-
-                                    </div>
-
-                                @empty
-
-                                    <div class="popup-empty">
-
-                                        <strong>
-                                            Belum ada Produk
-                                        </strong>
-
-                                        <span>
-                                            Tambahkan Produk untuk Model ini.
-                                        </span>
-
-                                    </div>
-                                @endforelse
-
-                            </template>
-
-                        @empty
-
-                            <tr>
-
-                                <td colspan="4">
-
-                                    <div class="empty-table">
-
-                                        <div class="empty-table-icon">
-                                            !
+                                    </details>
+                                </div>
+                            </td>
+                        </tr>
+                        @forelse($visibleProducts as $product)
+                            @php
+                                $activeLimit = $product->scrapLimits->first(fn ($limit) => $limit->effective_from->lte($activeAt)
+                                    && ($limit->effective_to === null || $limit->effective_to->gte($activeAt)));
+                            @endphp
+                            <tr class="mp-product-row" @if(!$modelOpen) hidden @endif>
+                                <td>
+                                    <div class="mp-prod-name"><svg class="mp-hierarchy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M5 4v7a4 4 0 0 0 4 4h10" />
+                                        <path d="m15 11 4 4-4 4" />
+                                    </svg>
+                                        <div style="min-width:0;flex:1">
+                                            <button type="button" class="mp-inline-trigger mp-product-title js-start-edit" data-edit="product" title="Klik untuk edit Produk">{{ $product->name }}</button>
+                                            <form class="mp-inline-form mp-product-edit js-inline-form" data-edit-form="product" method="POST" action="{{ route('omd.master.product.update', $product) }}">
+                                                @csrf @method('PUT')
+                                                <input type="hidden" name="master_model_id" value="{{ $model->id }}">
+                                                <input class="mp-input js-inline-input" name="name" maxlength="150" required value="{{ $product->name }}" data-original="{{ $product->name }}" aria-label="Nama Produk">
+                                                <button type="submit" class="mp-btn mp-btn-primary mp-btn-icon mp-inline-save" title="Simpan Produk" aria-label="Simpan Produk"><i class="fa-solid fa-check"></i></button>
+                                                <button type="button" class="mp-btn mp-btn-icon mp-inline-cancel js-cancel-inline" title="Batal" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>
+                                            </form>
                                         </div>
-
-                                        <strong>
-                                            Belum ada Model
-                                        </strong>
-
-                                        <span>
-                                            Tambahkan Model terlebih dahulu.
-                                        </span>
-
                                     </div>
-
                                 </td>
-
+                                <td>
+                                    <button type="button" class="mp-inline-trigger js-start-edit js-limit-value {{ $activeLimit ? 'mp-limit' : 'mp-limit-empty' }}" data-edit="limit" title="Klik untuk edit Scrap Limit">{{ $activeLimit ? number_format($activeLimit->limit_qty) : 'Belum diatur' }}</button>
+                                    <form class="mp-inline-form mp-limit-edit js-inline-form" id="mpLimitForm{{ $product->id }}" data-edit-form="limit" method="POST" action="{{ route('omd.scrap-limits.store') }}">
+                                        @csrf
+                                        <input type="hidden" name="master_model_id" value="{{ $model->id }}">
+                                        <input type="hidden" name="return_to" value="model-product">
+                                        <input type="hidden" name="return_plant" value="{{ $selectedPlantId }}">
+                                        <input type="hidden" name="return_line_id" value="{{ $selectedLineId }}">
+                                        <input type="hidden" name="return_q" value="{{ $search }}">
+                                        <input type="hidden" name="return_per_page" value="{{ $perPage }}">
+                                        <input class="mp-input js-inline-input" type="number" inputmode="numeric" name="limits[{{ $product->id }}]" min="0" step="1" required value="{{ $activeLimit?->limit_qty }}" data-original="{{ $activeLimit?->limit_qty }}" aria-label="Qty Scrap Limit {{ $product->name }}">
+                                        <button type="submit" class="mp-btn mp-btn-primary mp-btn-icon mp-inline-save" title="Simpan Limit" aria-label="Simpan Limit"><i class="fa-solid fa-check"></i></button>
+                                        <button type="button" class="mp-btn mp-btn-icon mp-inline-cancel js-cancel-inline" title="Batal" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="mp-actions">
+                                        <button type="button" class="mp-btn mp-btn-icon js-history" aria-expanded="false"
+                                            title="Riwayat Scrap Limit" aria-label="Riwayat Scrap Limit {{ $product->name }}">
+                                            <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+                                        </button>
+                                        <details class="mp-action-menu">
+                                            <summary title="Aksi Produk" aria-label="Aksi Produk"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></summary>
+                                            <div class="mp-action-content">
+                                                <form method="POST" action="{{ route('omd.master.product.destroy', $product) }}" class="js-delete-form"
+                                                    data-confirm="Hapus produk {{ $product->name }}? Pastikan produk ini tidak lagi digunakan transaksi.">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="mp-danger"><svg class="mp-delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9L2 12Z"/><path d="m12 9 6 6m0-6-6 6"/></svg><span>Hapus Produk</span></button>
+                                                </form>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </td>
                             </tr>
+                            <tr class="mp-limit-row" hidden>
+                                <td colspan="3">
+                                    <div class="mp-limit-fields">
+                                        <div class="mp-field">
+                                            <label class="mp-label" for="mpDate{{ $product->id }}">MULAI BERLAKU</label>
+                                            <input class="mp-input" type="date" id="mpDate{{ $product->id }}" name="effective_from" form="mpLimitForm{{ $product->id }}" value="{{ now()->toDateString() }}" required>
+                                        </div>
+                                        <div class="mp-field mp-note-field">
+                                            <label class="mp-label" for="mpNote{{ $product->id }}">CATATAN (OPSIONAL)</label>
+                                            <input class="mp-input" type="text" id="mpNote{{ $product->id }}" name="note" form="mpLimitForm{{ $product->id }}" maxlength="1000" placeholder="Catatan...">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="mp-history-row" hidden>
+                                <td colspan="3">
+                                    <div class="mp-history">
+                                        <h5>Riwayat Scrap Limit · {{ $product->name }}</h5>
+                                        @forelse($product->scrapLimits as $entry)
+                                            <div class="mp-history-line">
+                                                <strong>{{ number_format($entry->limit_qty) }}</strong>
+                                                <span>
+                                                    @if($entry->source === \App\Models\ProductScrapLimit::SOURCE_SEED)
+                                                        Baseline awal
+                                                    @else
+                                                        {{ $entry->effective_from->format('d/m/Y H:i') }}
+                                                        @if($entry->effective_to) — {{ $entry->effective_to->format('d/m/Y H:i') }} @endif
+                                                    @endif
+                                                </span>
+                                                <span>{{ $entry->source === \App\Models\ProductScrapLimit::SOURCE_SEED ? 'Seeder' : ($entry->creator?->name ?? 'OMD') }}</span>
+                                                @if($entry->note)<span title="Catatan" style="width:100%;text-align:right">{{ $entry->note }}</span>@endif
+                                            </div>
+                                        @empty
+                                            <div class="mp-hint">Belum ada perubahan limit tercatat.</div>
+                                        @endforelse
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr class="mp-product-row" @if(!$modelOpen) hidden @endif><td colspan="3" class="mp-nodata">Belum ada produk. Klik tombol + pada model untuk menambahkan.</td></tr>
                         @endforelse
-
                     </tbody>
-
-                </table>
-
-            </div>
-
+                @empty
+                    <tbody><tr><td colspan="3" class="mp-nodata">Model atau produk tidak ditemukan. Coba kata kunci atau filter lain.</td></tr></tbody>
+                @endforelse
+            </table>
         </div>
-
+        @if($models->hasPages())
+            <div class="mp-pagination">
+                <span>Menampilkan {{ $models->firstItem() }}–{{ $models->lastItem() }} dari {{ $models->total() }} model</span>
+                <div class="mp-pages">
+                    <a class="mp-page-link {{ $models->onFirstPage() ? 'disabled' : '' }}" href="{{ $models->previousPageUrl() ?: '#' }}" aria-label="Sebelumnya">‹</a>
+                    @foreach($models->getUrlRange(max(1, $models->currentPage()-2), min($models->lastPage(), $models->currentPage()+2)) as $page => $url)
+                        <a class="mp-page-link {{ $models->currentPage() === $page ? 'active' : '' }}" href="{{ $url }}">{{ $page }}</a>
+                    @endforeach
+                    <a class="mp-page-link {{ !$models->hasMorePages() ? 'disabled' : '' }}" href="{{ $models->nextPageUrl() ?: '#' }}" aria-label="Selanjutnya">›</a>
+                </div>
+            </div>
+        @endif
     </div>
+</div>
 
-
-    {{-- =====================================================
-    MODAL PRODUCT LIST
-===================================================== --}}
-
-    <div id="productListModal" class="modal-overlay">
-
-        <div class="product-list-box omd-master-accent">
-
-            <div class="product-list-header">
-
-                <div>
-
-                    <h4 id="productListTitle">
-                        Produk Model
-                    </h4>
-
-                    <p>Klik baris produk untuk mengedit. Enter untuk menyimpan.</p>
-
+{{-- Modal CRUD tetap menggunakan endpoint aplikasi lama. --}}
+<div class="mp-overlay" id="mp-add-model" aria-hidden="true">
+    <div class="mp-modal" role="dialog" aria-modal="true" aria-labelledby="mpAddModelTitle">
+        <div class="mp-modal-head"><div><h3 class="mp-modal-title" id="mpAddModelTitle">Tambah Model Box</h3></div><button type="button" class="mp-btn mp-btn-icon js-close-modal" aria-label="Tutup">×</button></div>
+        <form method="POST" action="{{ route('omd.master.model.store') }}">@csrf
+            <div class="mp-modal-body">
+                <div class="mp-field"><label class="mp-label" for="mpNewLine">LINE</label>
+                    <select class="mp-select" id="mpNewLine" name="line_id" required>
+                        @foreach($lines as $line)<option value="{{ $line->id }}" @selected((string)$defaultAddLineId === (string)$line->id)>{{ $line->plant?->name }} / {{ $line->name }}</option>@endforeach
+                    </select>
                 </div>
-
-
-                <div class="product-list-header-right">
-
-                    <span id="productListCount" class="product-list-count">
-                        0 Produk
-                    </span>
-
-                    <button type="button" class="modal-close" onclick="closeProductListModal()">
-                        ×
-                    </button>
-
-                </div>
-
+                <div class="mp-field"><label class="mp-label" for="mpNewModel">NAMA MODEL</label><input class="mp-input" id="mpNewModel" name="model" maxlength="100" placeholder="Nama Model Box" required></div>
             </div>
-
-
-            <div id="productListFeedback" class="alert" role="status" aria-live="polite" hidden></div>
-
-            <div id="productListContent" class="product-list-content">
-            </div>
-
-
-            <div class="product-list-footer">
-
-                <button type="button" class="btn btn-secondary" onclick="closeProductListModal()">
-                    Tutup
-                </button>
-
-
-                <button type="button" class="btn btn-primary" id="addProductFromListBtn">
-                    + Tambah Produk
-                </button>
-
-            </div>
-
-        </div>
-
+            <div class="mp-modal-foot"><button type="button" class="mp-btn mp-btn-muted js-close-modal">Batal</button><button type="submit" class="mp-btn mp-btn-primary">Simpan</button></div>
+        </form>
     </div>
-
-
-    {{-- =====================================================
-    MODAL TAMBAH MODEL
-===================================================== --}}
-
-    <div id="addModelModal" class="modal-overlay">
-
-        <div class="modal-box">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h4>
-                        Tambah Model
-                    </h4>
-
-                    <p>
-                        Tambahkan Model pada Line yang dipilih.
-                    </p>
-
-                </div>
-
-                <button type="button" class="modal-close" onclick="closeAddModelModal()">
-                    ×
-                </button>
-
-            </div>
-
-
-            <form method="POST" action="{{ route('omd.master.model.store') }}">
-
-                @csrf
-
-
-                <input type="hidden" name="line_id" id="addModelLineId" value="{{ $selectedLineId }}">
-
-
-                <div class="selected-line-box">
-
-                    <span>
-                        Line yang dipilih
-                    </span>
-
-                    <strong id="selectedLineName">
-                        {{ $selectedLineId ? optional($lines->firstWhere('id', $selectedLineId))->name : $lines->first()?->name ?? '-' }}
-                    </strong>
-
-                </div>
-
-
-                <label for="addModelName" class="form-label">
-                    Nama Model
-                </label>
-
-                <input type="text" name="model" id="addModelName" class="form-control"
-                    placeholder="Contoh: Model A" required>
-
-
-                <div class="modal-action">
-
-                    <button type="button" onclick="closeAddModelModal()" class="btn btn-secondary">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
+</div>
+<div class="mp-overlay" id="mp-add-product" aria-hidden="true">
+    <div class="mp-modal" role="dialog" aria-modal="true" aria-labelledby="mpAddProductTitle">
+        <div class="mp-modal-head"><div><h3 class="mp-modal-title" id="mpAddProductTitle">Tambah Produk</h3></div><button type="button" class="mp-btn mp-btn-icon js-close-modal" aria-label="Tutup">×</button></div>
+        <form method="POST" action="{{ route('omd.master.product.store') }}">@csrf
+            <input type="hidden" name="master_model_id" id="mpAddProductModel">
+            <div class="mp-modal-body"><div class="mp-field"><label class="mp-label" for="mpNewProduct">NAMA PRODUK</label><input class="mp-input" id="mpNewProduct" name="name" maxlength="150" required placeholder="Nama Produk"></div></div>
+            <div class="mp-modal-foot"><button type="button" class="mp-btn mp-btn-muted js-close-modal">Batal</button><button type="submit" class="mp-btn mp-btn-primary">Simpan</button></div>
+        </form>
     </div>
-
-
-    {{-- =====================================================
-    MODAL EDIT MODEL
-===================================================== --}}
-
-    <div id="editModelModal" class="modal-overlay">
-
-        <div class="modal-box">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h4>
-                        Edit Model
-                    </h4>
-
-                    <p>
-                        Perbarui data Model.
-                    </p>
-
-                </div>
-
-                <button type="button" class="modal-close" onclick="closeEditModelModal()">
-                    ×
-                </button>
-
-            </div>
-
-
-            <form method="POST" id="editModelForm">
-
-                @csrf
-                @method('PUT')
-
-
-                <input type="hidden" name="line_id" id="editModelLineId">
-
-
-                <label for="editModelName" class="form-label">
-                    Nama Model
-                </label>
-
-                <input type="text" name="model" id="editModelName" class="form-control" required>
-
-
-                <div class="modal-action">
-
-                    <button type="button" onclick="closeEditModelModal()" class="btn btn-secondary">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-    MODAL TAMBAH PRODUK
-===================================================== --}}
-
-    <div id="addProductModal" class="modal-overlay">
-
-        <div class="modal-box">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h4>
-                        Tambah Produk
-                    </h4>
-
-                    <p>
-                        Tambahkan Produk ke dalam Model.
-                    </p>
-
-                </div>
-
-                <button type="button" class="modal-close" onclick="closeAddProductModal()">
-                    ×
-                </button>
-
-            </div>
-
-
-            <form method="POST" action="{{ route('omd.master.product.store') }}">
-
-                @csrf
-
-
-                <input type="hidden" name="master_model_id" id="addProductModelId">
-
-
-                <div class="selected-line-box">
-
-                    <span>
-                        Model
-                    </span>
-
-                    <strong id="selectedModelName">
-                        -
-                    </strong>
-
-                </div>
-
-
-                <label for="addProductName" class="form-label">
-                    Nama Produk
-                </label>
-
-                <input type="text" name="name" id="addProductName" class="form-control"
-                    placeholder="Contoh: Produk A" required>
-
-
-                <div class="modal-action">
-
-                    <button type="button" onclick="closeAddProductModal()" class="btn btn-secondary">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-    <script>
-        /* =====================================================
-                   SELECTED LINE
-                ===================================================== */
-
-        let selectedLineId =
-            @json($selectedLineId);
-
-
-        /* =====================================================
-           PRODUCT STATE
-        ===================================================== */
-
-        let activeProductModelId =
-            null;
-
-        let activeProductModelName =
-            '';
-
-
-        const productListContent = document.getElementById('productListContent');
-        const productListFeedback = document.getElementById('productListFeedback');
-        const productCsrfToken = @json(csrf_token());
-        let productEditor = null;
-
-        function showProductFeedback(message, type = 'success') {
-            productListFeedback.className = 'alert alert-' + type;
-            productListFeedback.textContent = message;
-            productListFeedback.hidden = false;
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+    const root = document.getElementById('mpCatalog');
+    const search = document.getElementById('mpSearch');
+    const filters = document.getElementById('mpFilters');
+    const plant = document.getElementById('mpPlant');
+    const line = document.getElementById('mpLine');
+    const perPage = document.getElementById('mpPerPage');
+    const modalMap = document.querySelectorAll('.mp-overlay');
+    let searchTimer;
+    let lastFocus = null;
+    let activeEditor = null;
+
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        lastFocus = document.activeElement;
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('mp-modal-active');
+        const focusable = modal.querySelector('input:not([type=hidden]), select, textarea, button');
+        if (focusable) focusable.focus();
+    }
+    function closeModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        if (!document.querySelector('.mp-overlay.is-open')) document.body.classList.remove('mp-modal-active');
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+    }
+    function updateLineOptions() {
+        for (const option of line.options) {
+            if (!option.value) continue;
+            option.hidden = !!plant.value && option.dataset.plant !== plant.value;
+            option.disabled = option.hidden;
         }
-
-        function cancelProductEditor(editor) {
-            if (productEditor !== editor) return;
-            productEditor = null;
-            editor.input.remove();
-            editor.display.hidden = false;
-        }
-
-        function beginProductEdit(item) {
-            if (productEditor?.saving) return;
-            if (productEditor?.item === item) {
-                productEditor.input.focus();
-                return;
+        if (line.selectedOptions[0] && line.selectedOptions[0].disabled) line.value = '';
+    }
+    function cancelEditor() {
+        if (!activeEditor) return;
+        const {form, trigger, detailsRow} = activeEditor;
+        form.classList.remove('is-open');
+        trigger.hidden = false;
+        if (detailsRow) detailsRow.hidden = true;
+        form.reset();
+        activeEditor = null;
+    }
+    function startEditor(trigger) {
+        if (activeEditor) cancelEditor();
+        const type = trigger.dataset.edit;
+        const row = trigger.closest('tr');
+        const form = row.querySelector('.js-inline-form[data-edit-form="' + type + '"]');
+        if (!form) return;
+        const detailsRow = type === 'limit' ? row.nextElementSibling : null;
+        trigger.hidden = true;
+        form.classList.add('is-open');
+        if (detailsRow) detailsRow.hidden = false;
+        activeEditor = {form, trigger, detailsRow};
+        const input = form.querySelector('.js-inline-input');
+        if (input) {
+            input.focus({preventScroll: true});
+            // Tempatkan caret di akhir, tanpa menyeleksi isi awal.
+            if (input.type !== 'number' && typeof input.setSelectionRange === 'function') {
+                input.setSelectionRange(input.value.length, input.value.length);
             }
-            if (productEditor) cancelProductEditor(productEditor);
-            const container = item.querySelector('.popup-product-name');
-            const display = container.querySelector('[data-product-name-display]');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'form-control';
-            input.maxLength = 150;
-            input.value = item.dataset.name;
-            input.setAttribute('aria-label', 'Nama Produk');
-            const editor = {item, container, display, input, saving: false};
-            productEditor = editor;
-            display.hidden = true;
-            container.append(input);
+        }
+    }
+    updateLineOptions();
+    // Plant dan Line baru diterapkan setelah tombol Filter ditekan.
+    plant.addEventListener('change', updateLineOptions);
+    filters.addEventListener('submit', () => clearTimeout(searchTimer));
+    function navigateCatalog(overrides) {
+        // Pencarian dan jumlah data memakai filter yang sudah diterapkan, bukan pilihan draft.
+        const url = new URL(filters.action, window.location.href);
+        const current = new URLSearchParams(window.location.search);
+        for (const key of ['plant_id', 'line_id', 'q', 'per_page']) {
+            const value = current.get(key);
+            if (value) url.searchParams.set(key, value);
+        }
+        for (const [key, value] of Object.entries(overrides)) {
+            if (value === '' || value === null) url.searchParams.delete(key);
+            else url.searchParams.set(key, value);
+        }
+        window.location.assign(url.toString());
+    }
+    search.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => navigateCatalog({q: search.value.trim()}), 650);
+    });
+    search.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            clearTimeout(searchTimer);
+            navigateCatalog({q: search.value.trim()});
+        }
+    });
+    perPage.addEventListener('change', () => navigateCatalog({per_page: perPage.value}));
+    document.querySelectorAll('[data-open-modal]').forEach(button => button.addEventListener('click', () => openModal(button.dataset.openModal)));
+    modalMap.forEach(modal => {
+        modal.addEventListener('click', event => {if (event.target === modal || event.target.closest('.js-close-modal')) closeModal(modal);});
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        if (activeEditor) { event.preventDefault(); cancelEditor(); }
+        document.querySelectorAll('.mp-overlay.is-open').forEach(closeModal);
+    });
+    document.addEventListener('click', event => {
+        for (const menu of document.querySelectorAll('.mp-action-menu[open]')) {
+            if (!menu.contains(event.target)) menu.removeAttribute('open');
+        }
+    });
+    function toggleModel(group) {
+        if (!group) return;
+        cancelEditor();
+        const toggle = group.querySelector('.js-toggle-model');
+        const expanded = group.dataset.expanded !== 'true';
+        group.dataset.expanded = String(expanded);
+        toggle.setAttribute('aria-expanded', String(expanded));
+        const modelName = group.querySelector('.mp-model-title').textContent.trim();
+        toggle.setAttribute('aria-label', (expanded ? 'Tutup' : 'Lihat produk') + ' ' + modelName);
+        for (const row of group.querySelectorAll('.mp-product-row')) row.hidden = !expanded;
+        for (const row of group.querySelectorAll('.mp-history-row,.mp-limit-row')) row.hidden = true;
+        for (const button of group.querySelectorAll('.js-history')) button.setAttribute('aria-expanded', 'false');
+    }
+    root.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        if (!event.target.matches('.mp-model-row')) return;
+        event.preventDefault();
+        toggleModel(event.target.closest('.mp-group'));
+    });
+    root.addEventListener('click', event => {
+        const trigger = event.target.closest('.js-start-edit');
+        if (trigger) {startEditor(trigger);return;}
+        const cancel = event.target.closest('.js-cancel-inline');
+        if (cancel) {cancelEditor();return;}
+        const toggle = event.target.closest('.js-toggle-model');
+        if (toggle) {toggleModel(toggle.closest('.mp-group'));return;}
+        // Area kosong pada baris Model: buka/tutup. Kontrol form/menu tetap mandiri.
+        const modelRow = event.target.closest('.mp-model-row');
+        if (modelRow && !event.target.closest('button, a, input, select, textarea, form, details, summary, label, [contenteditable], .mp-inline-form')) {
+            toggleModel(modelRow.closest('.mp-group'));
+            return;
+        }
+        const addProduct = event.target.closest('.js-add-product');
+        if (addProduct) {
+            document.getElementById('mpAddProductModel').value = addProduct.dataset.modelId;
+            document.getElementById('mpNewProduct').value = '';
+            openModal('mp-add-product');
+            return;
+        }
+        const history = event.target.closest('.js-history');
+        if (history) {
+            const row = history.closest('tr').nextElementSibling.nextElementSibling;
+            row.hidden = !row.hidden;
+            history.setAttribute('aria-expanded', String(!row.hidden));
+        }
+    });
+    root.addEventListener('submit', event => {
+        const deleteForm = event.target.closest('.js-delete-form');
+        if (deleteForm && !window.confirm(deleteForm.dataset.confirm || 'Yakin ingin menghapus data ini?')) {
+            event.preventDefault();
+            return;
+        }
+        const form = event.target.closest('.js-inline-form');
+        if (!form) return;
+        const input = form.querySelector('.js-inline-input');
+        if (input && (!input.reportValidity() || (input.type !== 'number' && !input.value.trim()))) {
+            event.preventDefault();
             input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
-            input.addEventListener('click', event => event.stopPropagation());
-            input.addEventListener('keydown', event => {
-                event.stopPropagation();
-                if (event.isComposing) return;
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    saveProductEditor(editor);
-                } else if (event.key === 'Escape' && !editor.saving) {
-                    event.preventDefault();
-                    cancelProductEditor(editor);
-                    item.focus();
-                }
-            });
-            input.addEventListener('blur', () => {
-                if (!editor.saving) cancelProductEditor(editor);
-            });
+            return;
         }
-
-        async function saveProductEditor(editor) {
-            if (productEditor !== editor || editor.saving) return;
-            const name = editor.input.value.trim();
-            if (name === editor.item.dataset.name) {
-                cancelProductEditor(editor);
-                return;
-            }
-            editor.saving = true;
-            editor.input.readOnly = true;
-            editor.input.setAttribute('aria-busy', 'true');
-            try {
-                const response = await fetch(editor.item.dataset.updateUrl, {
-                    method: 'PUT',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': productCsrfToken,
-                    },
-                    body: JSON.stringify({
-                        name,
-                        master_model_id: Number(editor.item.dataset.modelId),
-                    }),
-                });
-                if (!response.headers.get('content-type')?.includes('application/json')) {
-                    throw new Error('Respons server tidak valid. Muat ulang halaman dan coba lagi.');
-                }
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(response.status >= 500
-                        ? 'Produk gagal disimpan. Coba lagi.'
-                        : Object.values(data.errors || {}).flat()[0] || data.message || 'Produk gagal disimpan.');
-                }
-                const saved = data.product;
-                editor.item.dataset.name = saved.name;
-                editor.item.setAttribute('aria-label', 'Edit nama Produk ' + saved.name);
-                editor.display.textContent = saved.name;
-                cancelProductEditor(editor);
-
-                // Update the stored list so reopening this Model shows the saved name.
-                const source = document.getElementById('product-source-' + saved.master_model_id);
-                const cachedItem = source.content.querySelector(`[data-product-id="${saved.id}"]`);
-                cachedItem.dataset.name = saved.name;
-                cachedItem.setAttribute('aria-label', 'Edit nama Produk ' + saved.name);
-                cachedItem.querySelector('[data-product-name-display]').textContent = saved.name;
-                showProductFeedback(data.message);
-            } catch (error) {
-                showProductFeedback(error.message, 'danger');
-                editor.input.focus();
-            } finally {
-                editor.saving = false;
-                editor.input.readOnly = false;
-                editor.input.removeAttribute('aria-busy');
-            }
-        }
-
-        productListContent.addEventListener('click', event => {
-            if (event.target.closest('button, input, select, textarea, a, form')) return;
-            const item = event.target.closest('.popup-product-item');
-            if (item) beginProductEdit(item);
-        });
-        productListContent.addEventListener('keydown', event => {
-            if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.popup-product-item')) {
+        // Tanggal berlaku dan catatan terkait menggunakan atribut form HTML5.
+        if (form.dataset.editForm === 'limit') {
+            const date = document.querySelector('input[form="' + form.id + '"][name="effective_from"]');
+            if (!date || !date.value || !date.reportValidity()) {
                 event.preventDefault();
-                beginProductEdit(event.target);
+                if (date) date.focus();
             }
-        });
-
-
-        /* =====================================================
-           LOAD MODEL BY LINE
-        ===================================================== */
-
-        function loadModel(id, element) {
-
-            document
-                .querySelectorAll('.line-card')
-                .forEach(
-                    function(card) {
-                        card.classList.remove('active');
-                    }
-                );
-
-
-            if (element) {
-
-                element.classList.add('active');
-
-            }
-
-
-            selectedLineId =
-                String(id);
-
-
-            document.getElementById(
-                    'addModelLineId'
-                ).value =
-                id;
-
-
-            document.getElementById(
-                    'selectedLineName'
-                ).innerText =
-                element.dataset.lineName;
-
-
-            document.getElementById(
-                    'lineTitle'
-                ).innerText =
-                element.dataset.lineName;
-
-
-            const plantName =
-                element.querySelector(
-                    '.line-info span'
-                )?.innerText || '-';
-
-
-            document.getElementById(
-                    'lineSubtitle'
-                ).innerText =
-                plantName;
-
-
-            const url = new URL(window.location.href);
-            url.searchParams.set('line_id', selectedLineId);
-            window.history.replaceState(null, '', url);
-
-            filterModels();
-
         }
-
-
-        /* =====================================================
-           FILTER MODEL
-        ===================================================== */
-
-        function filterModels() {
-
-            const keyword =
-                document.getElementById(
-                    'searchModel'
-                )
-                .value
-                .toLowerCase()
-                .trim();
-
-
-            const rows =
-                document.querySelectorAll(
-                    '.model-row'
-                );
-
-
-            let visibleCount =
-                0;
-
-
-            rows.forEach(
-                function(row) {
-
-                    const lineId =
-                        String(
-                            row.dataset.lineId
-                        );
-
-
-                    const text =
-                        row.innerText
-                        .toLowerCase();
-
-
-                    const sameLine =
-                        String(
-                            selectedLineId
-                        ) === lineId;
-
-
-                    const matchSearch =
-                        keyword === '' ||
-                        text.includes(keyword);
-
-
-                    if (
-                        sameLine &&
-                        matchSearch
-                    ) {
-
-                        row.style.display =
-                            '';
-
-                        visibleCount++;
-
-                    } else {
-
-                        row.style.display =
-                            'none';
-
-                    }
-
-                }
-            );
-
-
-            document
-                .querySelector(
-                    '.empty-filter-row'
-                )
-                ?.remove();
-
-
-            if (
-                visibleCount === 0 &&
-                selectedLineId
-            ) {
-
-                const tbody =
-                    document.querySelector(
-                        '#modelTable tbody'
-                    );
-
-
-                const row =
-                    document.createElement(
-                        'tr'
-                    );
-
-
-                row.className =
-                    'empty-filter-row';
-
-
-                row.innerHTML = `
-                <td colspan="4">
-
-                    <div class="empty-table">
-
-                        <div class="empty-table-icon">
-                            !
-                        </div>
-
-                        <strong>
-                            Data tidak ditemukan
-                        </strong>
-
-                        <span>
-                            Tidak ada Model yang sesuai.
-                        </span>
-
-                    </div>
-
-                </td>
-            `;
-
-
-                tbody.appendChild(row);
-
-            }
-
-
-            let no =
-                1;
-
-
-            document
-                .querySelectorAll(
-                    '.model-row'
-                )
-                .forEach(
-                    function(row) {
-
-                        if (
-                            row.style.display !==
-                            'none'
-                        ) {
-
-                            const numberCell =
-                                row.querySelector(
-                                    '.number-cell'
-                                );
-
-
-                            if (
-                                numberCell
-                            ) {
-
-                                numberCell.textContent =
-                                    no++;
-
-                            }
-
-                        }
-
-                    }
-                );
-
-        }
-
-
-        /* =====================================================
-           SEARCH
-        ===================================================== */
-
-        document
-            .getElementById(
-                'searchModel'
-            )
-            .addEventListener(
-                'input',
-                function() {
-
-                    filterModels();
-
-                }
-            );
-
-
-        /* =====================================================
-           CLICK ENTIRE MODEL ROW
-        ===================================================== */
-
-        document
-            .querySelector(
-                '#modelTable tbody'
-            )
-            .addEventListener(
-                'click',
-                function(event) {
-
-                    const actionCell =
-                        event.target.closest(
-                            '.model-action-cell'
-                        );
-
-
-                    if (
-                        actionCell
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    const row =
-                        event.target.closest(
-                            '.model-row'
-                        );
-
-
-                    if (
-                        !row
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    const modelId =
-                        row.dataset.modelId;
-
-
-                    const modelName =
-                        row.dataset.modelName;
-
-
-                    openProductListModal(
-                        modelId,
-                        modelName
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           EDIT MODEL BUTTON
-        ===================================================== */
-
-        document
-            .querySelectorAll(
-                '.edit-model-btn'
-            )
-            .forEach(
-                function(button) {
-
-                    button.addEventListener(
-                        'click',
-                        function(event) {
-
-                            event.stopPropagation();
-
-
-                            openEditModelModal(
-                                this.dataset.id,
-                                this.dataset.lineId,
-                                this.dataset.name
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           PRODUCT LIST MODAL
-        ===================================================== */
-
-        function openProductListModal(
-            modelId,
-            modelName
-        ) {
-
-            if (productEditor?.saving) return;
-            if (productEditor) cancelProductEditor(productEditor);
-            productListFeedback.hidden = true;
-
-            activeProductModelId =
-                modelId;
-
-
-            activeProductModelName =
-                modelName;
-
-
-            document.getElementById(
-                    'productListTitle'
-                ).innerText =
-                'Daftar Produk ' + modelName;
-
-
-            const source =
-                document.getElementById(
-                    'product-source-' + modelId
-                );
-
-
-            const content =
-                document.getElementById(
-                    'productListContent'
-                );
-
-
-            if (
-                source
-            ) {
-
-                content.innerHTML =
-                    source.innerHTML;
-
-            } else {
-
-                content.innerHTML = `
-                <div class="popup-empty">
-
-                    <strong>
-                        Belum ada Produk
-                    </strong>
-
-                    <span>
-                        Tambahkan Produk untuk Model ini.
-                    </span>
-
-                </div>
-            `;
-
-            }
-
-
-            const productItems =
-                content.querySelectorAll(
-                    '.popup-product-item'
-                );
-
-
-            document.getElementById(
-                    'productListCount'
-                ).innerText =
-                productItems.length +
-                ' Produk';
-
-
-            document.getElementById(
-                    'addProductFromListBtn'
-                ).onclick =
-                function() {
-
-                    openAddProductModal(
-                        modelId,
-                        modelName
-                    );
-
-                };
-
-
-            bindPopupProductActions();
-
-
-            document.getElementById(
-                    'productListModal'
-                ).style.display =
-                'flex';
-
-        }
-
-
-        function closeProductListModal() {
-            if (productEditor?.saving) return;
-            if (productEditor) cancelProductEditor(productEditor);
-
-            document.getElementById(
-                    'productListModal'
-                ).style.display =
-                'none';
-
-        }
-
-
-        /* =====================================================
-           POPUP PRODUCT ACTION
-        ===================================================== */
-
-        function bindPopupProductActions() {
-
-            document
-                .querySelectorAll(
-                    '#productListContent .delete-product-form'
-                )
-                .forEach(
-                    function(form) {
-
-                        form.addEventListener(
-                            'submit',
-                            function(event) {
-
-                                event.preventDefault();
-                                if (productEditor?.saving) return;
-                                if (productEditor) cancelProductEditor(productEditor);
-
-
-                                const targetForm =
-                                    this;
-
-
-                                Swal.fire({
-
-                                        title: 'Hapus Produk?',
-
-                                        html: `
-                                    Data <b>Produk</b> yang dihapus
-                                    tidak dapat dikembalikan.
-                                `,
-
-                                        icon: 'warning',
-
-                                        showCancelButton: true,
-
-                                        confirmButtonText: 'Ya, Hapus',
-
-                                        cancelButtonText: 'Batal',
-
-                                        reverseButtons: true,
-
-                                        buttonsStyling: false,
-
-                                        customClass: {
-
-                                            popup: 'swal-plant-popup',
-
-                                            title: 'swal-plant-title',
-
-                                            htmlContainer: 'swal-plant-text',
-
-                                            confirmButton: 'swal-plant-confirm',
-
-                                            cancelButton: 'swal-plant-cancel'
-
-                                        }
-
-                                    })
-                                    .then(
-                                        function(result) {
-
-                                            if (
-                                                result.isConfirmed
-                                            ) {
-
-                                                targetForm.submit();
-
-                                            }
-
-                                        }
-                                    );
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-
-
-        /* =====================================================
-           ADD MODEL
-        ===================================================== */
-
-        function openAddModelModal() {
-
-            if (
-                !selectedLineId
-            ) {
-
-                const firstLine =
-                    document.querySelector(
-                        '.line-card'
-                    );
-
-
-                if (
-                    firstLine
-                ) {
-
-                    loadModel(
-                        firstLine.dataset.lineId,
-                        firstLine
-                    );
-
-                } else {
-
-                    Swal.fire({
-
-                        icon: 'warning',
-
-                        title: 'Line Belum Tersedia',
-
-                        text: 'Tambahkan Line terlebih dahulu.',
-
-                        width: 320,
-
-                        customClass: {
-
-                            popup: 'swal-plant-popup',
-
-                            title: 'swal-plant-title',
-
-                            htmlContainer: 'swal-plant-text'
-
-                        }
-
-                    });
-
-                    return;
-
-                }
-
-            }
-
-
-            document.getElementById(
-                    'addModelModal'
-                ).style.display =
-                'flex';
-
-        }
-
-
-        function closeAddModelModal() {
-
-            document.getElementById(
-                    'addModelModal'
-                ).style.display =
-                'none';
-
-        }
-
-
-        /* =====================================================
-           EDIT MODEL
-        ===================================================== */
-
-        function openEditModelModal(
-            id,
-            lineId,
-            name
-        ) {
-
-            document.getElementById(
-                    'editModelModal'
-                ).style.display =
-                'flex';
-
-
-            document.getElementById(
-                    'editModelLineId'
-                ).value =
-                lineId;
-
-
-            document.getElementById(
-                    'editModelName'
-                ).value =
-                name;
-
-
-            document.getElementById(
-                    'editModelForm'
-                ).action =
-                "{{ url('/omd/master/model') }}/" +
-                id;
-
-        }
-
-
-        function closeEditModelModal() {
-
-            document.getElementById(
-                    'editModelModal'
-                ).style.display =
-                'none';
-
-        }
-
-
-        /* =====================================================
-           ADD PRODUCT
-        ===================================================== */
-
-        function openAddProductModal(
-            modelId,
-            modelName
-        ) {
-
-            if (productEditor?.saving) return;
-            if (productEditor) cancelProductEditor(productEditor);
-            productListFeedback.hidden = true;
-
-            activeProductModelId =
-                modelId;
-
-
-            activeProductModelName =
-                modelName;
-
-
-            document.getElementById(
-                    'addProductModelId'
-                ).value =
-                modelId;
-
-
-            document.getElementById(
-                    'selectedModelName'
-                ).innerText =
-                modelName;
-
-
-            document.getElementById(
-                    'productListModal'
-                ).style.display =
-                'none';
-
-
-            document.getElementById(
-                    'addProductModal'
-                ).style.display =
-                'flex';
-
-        }
-
-
-        function closeAddProductModal() {
-
-            document.getElementById(
-                    'addProductModal'
-                ).style.display =
-                'none';
-
-        }
-
-
-        /* =====================================================
-           DELETE MODEL
-        ===================================================== */
-
-        document.addEventListener(
-            'submit',
-            function(e) {
-
-                if (
-                    !e.target.classList.contains(
-                        'delete-model-form'
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                e.preventDefault();
-
-
-                const form =
-                    e.target;
-
-
-                Swal.fire({
-
-                        title: 'Hapus Model?',
-
-                        html: `
-                    Data <b>Model</b> yang dihapus
-                    tidak dapat dikembalikan.
-                `,
-
-                        icon: 'warning',
-
-                        showCancelButton: true,
-
-                        confirmButtonText: 'Ya, Hapus',
-
-                        cancelButtonText: 'Batal',
-
-                        reverseButtons: true,
-
-                        buttonsStyling: false,
-
-                        customClass: {
-
-                            popup: 'swal-plant-popup',
-
-                            title: 'swal-plant-title',
-
-                            htmlContainer: 'swal-plant-text',
-
-                            confirmButton: 'swal-plant-confirm',
-
-                            cancelButton: 'swal-plant-cancel'
-
-                        }
-
-                    })
-                    .then(
-                        function(result) {
-
-                            if (
-                                result.isConfirmed
-                            ) {
-
-                                form.submit();
-
-                            }
-
-                        }
-                    );
-
-            }
-        );
-
-
-        /* =====================================================
-           CLICK OUTSIDE MODAL
-        ===================================================== */
-
-        document
-            .querySelectorAll(
-                '.modal-overlay'
-            )
-            .forEach(
-                function(modal) {
-
-                    modal.addEventListener(
-                        'click',
-                        function(e) {
-
-                            if (
-                                e.target === modal
-                            ) {
-
-                                if (modal.id === 'productListModal') {
-                                    closeProductListModal();
-                                } else {
-                                    modal.style.display = 'none';
-                                }
-
-                            }
-
-                        }
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           INITIAL LINE
-        ===================================================== */
-
-        document.addEventListener(
-            'DOMContentLoaded',
-            function() {
-
-                let targetId =
-                    selectedLineId;
-
-
-                let targetCard =
-                    null;
-
-
-                if (
-                    targetId
-                ) {
-
-                    targetCard =
-                        document.querySelector(
-                            `.line-card[data-line-id="${targetId}"]`
-                        );
-
-                }
-
-
-                if (
-                    !targetCard
-                ) {
-
-                    targetCard =
-                        document.querySelector(
-                            '.line-card'
-                        );
-
-                }
-
-
-                if (
-                    targetCard
-                ) {
-
-                    loadModel(
-                        targetCard.dataset.lineId,
-                        targetCard
-                    );
-
-                }
-
-            }
-        );
-    </script>
-
+    });
+});
+</script>
 @endsection

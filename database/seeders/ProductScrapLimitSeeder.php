@@ -14,8 +14,7 @@ class ProductScrapLimitSeeder extends Seeder
 
     public function run(): void
     {
-        // Supaya command ini aman dijalankan langsung pada database existing.
-        // Master Plant/Line/Model/Product yang dibutuhkan disinkronkan terlebih dahulu.
+
         $this->call(ScrapLimitMasterDataSeeder::class);
 
         foreach (ScrapLimitSeedData::rows() as [$plantName, $lineName, $modelName, $productName, $limitQty]) {
@@ -65,8 +64,7 @@ class ProductScrapLimitSeeder extends Seeder
                 ->exists();
 
             if ($seedLimit) {
-                // Baseline boleh diselaraskan dengan Excel selama Product tersebut
-                // belum pernah mempunyai limit operasional dari OMD.
+
                 if (! $hasOmdLimit && (int) $seedLimit->limit_qty !== (int) $limitQty) {
                     $seedLimit->update([
                         'limit_qty' => (int) $limitQty,

@@ -939,6 +939,12 @@
 
 
 
+    .history-date-picker input::placeholder {
+        color: #94a3b8;
+        font-weight: 400;
+        opacity: 1;
+    }
+
     .history-date-picker input:focus {
 
         outline: none;
@@ -1466,36 +1472,6 @@
         border-color: #4c8167 !important
     }
 
-    /* Export actions: identical to former Rekap Data page. */
-    .omira-recap-btn {
-        min-height: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        padding: 0 14px;
-        border-radius: 10px;
-        border: 1px solid transparent;
-        font-family: inherit;
-        font-size: 11px;
-        font-weight: 800;
-        cursor: pointer;
-        text-decoration: none
-    }
-
-    .omira-recap-btn-pdf {
-        color: #b42318;
-        background: #fff1f2;
-        border-color: #fecdd3
-    }
-
-    .omira-recap-btn-excel {
-        color: #166534;
-        background: #ecfdf3;
-        border-color: #bbf7d0
-    }
-
-
     /* Calendar compact: narrower outer footprint without shrinking touch targets excessively. */
     .history-filter-field {
         min-width: 0;
@@ -1559,19 +1535,6 @@
     {{-- =========================================================
      FILTER TANGGAL
 ========================================================= --}}
-
-    {{-- Export menggunakan filter History aktif; tetap memakai route rekap OMD yang sudah ada. --}}
-    @php
-    $exportParams = array_filter([
-    'start_date' => request('start_date'),
-    'end_date' => request('end_date'),
-    ], static function ($value) {
-    return $value !== null && $value !== '';
-    });
-    if (request('line_id')) {
-    $exportParams['line_ids'] = [(int) request('line_id')];
-    }
-    @endphp
 
     <div class="history-filter-box">
         <form action="{{ route('omd.orders.history') }}" method="GET" class="history-filter-form">
@@ -1766,15 +1729,6 @@
 
         </form>
 
-    </div>
-
-    <div class="omira-history-exports" aria-label="Export History" style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin:14px 0 18px">
-        <a class="omira-recap-btn omira-recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
-            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF
-        </a>
-        <button type="button" class="omira-recap-btn omira-recap-btn-excel" data-export-form="omiraChartExport">
-            <i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel
-        </button>
     </div>
 
     <div class="history-toolbar">
@@ -2471,19 +2425,4 @@
 
 
 
-<form id="omiraChartExport" method="POST" action="{{ route('omd.recap.excel') }}" data-preview-url="{{ route('omd.recap.chart-preview') }}" style="display:none">
-    @csrf
-    @foreach ($exportParams as $key => $value)
-    @if (is_array($value))
-    @foreach ($value as $item)
-    <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
-    @endforeach
-    @else
-    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-    @endif
-    @endforeach
-    <input type="hidden" name="chart_image" value="">
-</form>
-<script src="{{ asset('vendor/html2canvas.min.js') }}"></script>
-<script src="{{ asset('js/omira-excel-capture.js') }}"></script>
 @endsection

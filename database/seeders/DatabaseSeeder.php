@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    public const DEFAULT_OMD_PASSWORD = 'password';
+    public const DEFAULT_OMD_PASSWORD = 'psdomd';
     public const DEFAULT_USER_PASSWORD = 'aiia';
 
     public function run(): void
@@ -55,13 +55,35 @@ class DatabaseSeeder extends Seeder
 
         );
 
+        // Normalize existing Line names before firstOrCreate to preserve their IDs
+        // even when an operator runs db:seed before the rename migration.
+        foreach ([
+            'Body' => ['AS Body' => 'Assy Body', 'INJ' => 'Injection', 'PT' => 'Painting'],
+            'Electric' => ['AS Electric' => 'Assy Electric'],
+            'Unit' => ['DC' => 'Die Casting', 'MA' => 'Machining', 'AS Unit' => 'Assy Unit'],
+        ] as $plantName => $renames) {
+            $plantId = Plant::where('name', $plantName)->value('id');
+
+            foreach ($renames as $oldName => $newName) {
+                $legacy = Line::where('plant_id', $plantId)->where('name', $oldName)->first();
+                $existing = Line::where('plant_id', $plantId)->where('name', $newName)->first();
+
+                if ($legacy && ! $existing) {
+                    $legacy->update(['name' => $newName]);
+                } elseif ($legacy && $existing && $legacy->id !== $existing->id) {
+                    throw new \RuntimeException(
+                        "Line [{$oldName}] dan [{$newName}] sama-sama ada di Plant [{$plantName}]."
+                    );
+                }
+            }
+        }
+
         $lines = [];
 
         foreach (
 
             [
 
-                // UNIT
                 [
                     'plant_id' => $unit->id,
                     'name' => 'PPIC Unit'
@@ -69,20 +91,19 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'AS Unit'
+                    'name' => 'Assy Unit'
                 ],
 
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'MA'
+                    'name' => 'Machining'
                 ],
 
                 [
                     'plant_id' => $unit->id,
-                    'name' => 'DC'
+                    'name' => 'Die Casting'
                 ],
 
-                // BODY
                 [
                     'plant_id' => $body->id,
                     'name' => 'PPIC Body'
@@ -90,20 +111,19 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $body->id,
-                    'name' => 'AS Body'
+                    'name' => 'Assy Body'
                 ],
 
                 [
                     'plant_id' => $body->id,
-                    'name' => 'PT'
+                    'name' => 'Painting'
                 ],
 
                 [
                     'plant_id' => $body->id,
-                    'name' => 'INJ'
+                    'name' => 'Injection'
                 ],
 
-                // ELECTRIC
                 [
                     'plant_id' => $electric->id,
                     'name' => 'PPIC Electric'
@@ -111,7 +131,7 @@ class DatabaseSeeder extends Seeder
 
                 [
                     'plant_id' => $electric->id,
-                    'name' => 'AS Electric'
+                    'name' => 'Assy Electric'
                 ],
             ]
 
@@ -140,22 +160,22 @@ class DatabaseSeeder extends Seeder
             [
                 [
                     'code' => 'P',
-                    'name' => 'NG Part'
+                    'name' => 'Partisi'
                 ],
 
                 [
                     'code' => 'H',
-                    'name' => 'NG Holder'
+                    'name' => 'Holder'
                 ],
 
                 [
                     'code' => 'C',
-                    'name' => 'NG Cover'
+                    'name' => 'Cover'
                 ],
 
                 [
                     'code' => 'S',
-                    'name' => 'NG Scrap'
+                    'name' => 'Scrap'
                 ],
 
             ]
@@ -200,21 +220,21 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Ubaydillah',
                 'email' => 'ubaydillah@aiia.co.id',
                 'plant' => 'Body',
-                'line' => 'AS Body',
+                'line' => 'Assy Body',
             ],
 
             [
                 'name' => 'Marcel',
                 'email' => 'marcellino@aiia.co.id',
                 'plant' => 'Body',
-                'line' => 'PT',
+                'line' => 'Painting',
             ],
 
             [
                 'name' => 'Marcellino',
                 'email' => 'marcellino.reyhan@aiia.co.id',
                 'plant' => 'Body',
-                'line' => 'INJ',
+                'line' => 'Injection',
             ],
 
             [
@@ -228,21 +248,21 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Teddy',
                 'email' => 'teddy@aiia.co.id',
                 'plant' => 'Unit',
-                'line' => 'AS Unit',
+                'line' => 'Assy Unit',
             ],
 
             [
                 'name' => 'Anhar',
                 'email' => 'anhar.kurniaji@aiia.co.id',
                 'plant' => 'Unit',
-                'line' => 'MA',
+                'line' => 'Machining',
             ],
 
             [
                 'name' => 'Ade F',
                 'email' => 'ade.firmansyah@aiia.co.id',
                 'plant' => 'Unit',
-                'line' => 'DC',
+                'line' => 'Die Casting',
             ],
 
             [
@@ -256,7 +276,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Widiyan',
                 'email' => 'widiyan@aiia.co.id',
                 'plant' => 'Electric',
-                'line' => 'AS Electric',
+                'line' => 'Assy Electric',
             ],
         ];
 
@@ -284,13 +304,6 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | TARGET FY GLOBAL
-        |--------------------------------------------------------------------------
-        | Baseline 2026 = 855 untuk seluruh Plant & Line. firstOrCreate dipakai
-        | agar db:seed berikutnya tidak menimpa target terbaru yang sudah diubah OMD.
-        */
         FiscalYearTarget::firstOrCreate(
             [
                 'year' => 2026,
@@ -317,15 +330,6 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | HISTORICAL DASHBOARD SNAPSHOT APRIL–AGUSTUS 2026
-        |--------------------------------------------------------------------------
-        | Data sumber lama hanya memiliki agregat bulanan Order / Finish / Scrap,
-        | sehingga tidak dibuat menjadi Repair Order fiktif. Snapshot ini hanya
-        | dipakai untuk histori grafik Dashboard dan tidak ikut export detail.
-        */
         $this->call(RepairMonthlySnapshotSeeder::class);
     }
 }

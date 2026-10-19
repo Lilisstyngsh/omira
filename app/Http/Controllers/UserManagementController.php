@@ -20,12 +20,12 @@ class UserManagementController extends Controller
     {
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
-            'line_id' => ['nullable', 'integer', 'exists:lines,id'],
+            'plant_id' => ['nullable', 'integer', 'exists:plants,id'],
             'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
         ]);
 
         $search = trim((string) ($validated['search'] ?? ''));
-        $lineId = isset($validated['line_id']) ? (int) $validated['line_id'] : null;
+        $plantId = isset($validated['plant_id']) ? (int) $validated['plant_id'] : null;
         $perPage = (int) ($validated['per_page'] ?? 10);
 
         $users = User::query()
@@ -46,7 +46,9 @@ class UserManagementController extends Controller
                         });
                 });
             })
-            ->when($lineId, fn ($query) => $query->where('line_id', $lineId))
+            ->when($plantId, fn ($query) => $query->whereHas('line', fn ($lineQuery) =>
+                $lineQuery->where('plant_id', $plantId)
+            ))
             ->orderByRaw("CASE WHEN role = 'omd' THEN 0 ELSE 1 END")
             ->orderBy('name')
             ->paginate($perPage)
@@ -58,7 +60,7 @@ class UserManagementController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('omd.users.index', compact('users', 'lines', 'search', 'lineId', 'perPage'));
+        return view('omd.users.index', compact('users', 'lines', 'search', 'plantId', 'perPage'));
     }
 
     /**

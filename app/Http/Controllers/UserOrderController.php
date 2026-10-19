@@ -14,26 +14,44 @@ class UserOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = RepairOrder::with([
-            'line',
-            'result',
-            'confirmation',
+        $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'search' => ['nullable', 'string', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
+        ]);
+
+        $query = RepairOrder::with([
+            'line', 'result', 'confirmation',
         ])
             ->withSum('items as before_qty_sum', 'before_qty')
             ->withSum('items as after_qty_sum', 'after_qty')
             ->where('user_id', $request->user()->id)
             ->whereIn('status', [
-                'submitted',
-                'in_repair',
-                'completed',
-                'revision_requested',
-            ])
+                'submitted', 'in_repair', 'completed', 'revision_requested',
+            ]);
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->input('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->input('end_date'));
+        }
+
+        $search = trim((string) $request->input('search', ''));
+        if ($search !== '') {
+            $query->where('order_number', 'like', '%' . $search . '%');
+        }
+
+        $orders = $query
             ->latest('created_at')
-            ->paginate(10);
+            ->latest('id')
+            ->paginate((int) $request->input('per_page', 10))
+            ->withQueryString();
 
         return view('user.orders.index', compact('orders'));
     }
-
 
     public function create(Request $request)
     {
@@ -712,11 +730,8 @@ class UserOrderController extends Controller
         $filename = 'Form_Order_Repair_Box_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $order->order_number);
 
         if ($format === 'pdf') {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.orders.history-export-pdf', compact('order', 'entries', 'handedBy', 'date', 'logoData', 'isClosed', 'userApproval', 'omdApproval', 'approvedAt'))
-                ->setPaper('a4', 'portrait');
-            return $request->boolean('preview')
-                ? $pdf->stream($filename . '.pdf')
-                : $pdf->download($filename . '.pdf');
+            return \Barryvdh\DomPDF\Facade\Pdf::loadView('user.orders.history-export-pdf', compact('order', 'entries', 'handedBy', 'date', 'logoData', 'isClosed', 'userApproval', 'omdApproval', 'approvedAt'))
+                ->setPaper('a4', 'portrait')->download($filename . '.pdf');
         }
 
         return app(\App\Services\RepairOrderHistoryExcelService::class)->download(
@@ -742,11 +757,13 @@ class UserOrderController extends Controller
     {
         return match (strtolower(trim($lineName))) {
 
+            'injection',
             'inj' => 'IJ',
 
             'painting',
             'pt' => 'PT',
 
+            'assy unit',
             'as unit' => 'AU',
 
             'machining',
@@ -757,11 +774,13 @@ class UserOrderController extends Controller
 
             'ppic unit' => 'PU',
 
+            'assy electric',
             'as electric' => 'AE',
 
             'ppic electric',
             'ppic electris' => 'PE',
 
+            'assy body',
             'as body' => 'AB',
 
             'ppic body' => 'PB',

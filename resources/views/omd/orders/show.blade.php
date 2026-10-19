@@ -451,12 +451,9 @@ $totalQtyOmd = $order->items->sum(fn($item) => (int) ($item->after_qty ?? 0));
         user-select: none;
     }
 
-    .repair-qty-step[data-step="-1"] {
-        color: #b91c1c;
-    }
-
+    .repair-qty-step[data-step="-1"],
     .repair-qty-step[data-step="1"] {
-        color: #15803d;
+        color: #374151;
     }
 
     .repair-qty-step:active {
@@ -1254,7 +1251,7 @@ $beforeGrandTotal = (int) $beforeTotals->sum();
 $afterGrandTotal = (int) $afterTotals->sum();
 @endphp
 
-<div class="repair-card" id="repairResultCard">
+<div class="repair-card" id="repairResultCard" style="scroll-margin-top: 96px;">
 
     <h3 class="repair-card-title">
         @switch($order->status)

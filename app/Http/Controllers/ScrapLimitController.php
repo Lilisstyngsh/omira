@@ -203,6 +203,20 @@ class ScrapLimitController extends Controller
             ? $changed . ' Scrap Limit produk berhasil diperbarui.'
             : 'Tidak ada perubahan Scrap Limit.';
 
+        // Katalog terpadu memakai penyimpanan limit yang sama; endpoint lama tetap aktif.
+        if ($request->input('return_to') === 'model-product') {
+            $catalogFilters = array_filter([
+                'plant_id' => $request->input('return_plant'),
+                'line_id' => $request->input('return_line_id'),
+                'q' => trim((string) $request->input('return_q', '')) ?: null,
+                'per_page' => $request->input('return_per_page'),
+            ], fn ($value) => $value !== null && $value !== '');
+
+            return redirect()
+                ->to(route('omd.master.model-product', $catalogFilters) . '#model-' . $model->id)
+                ->with('success', $message);
+        }
+
         return redirect()
             ->route('omd.scrap-limits.index', array_filter([
                 'line_id' => $returnLine,

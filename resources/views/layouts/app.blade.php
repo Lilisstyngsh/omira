@@ -482,6 +482,12 @@
             font-weight: 700;
         }
 
+        /* Hanya avatar yang tampil pada tombol profil; dropdown tetap lengkap. */
+        .profile.profile-icon-only {
+            padding: 5px;
+            border-radius: 50%;
+        }
+
         /* =========================================================
            CONTENT
         ========================================================== */
@@ -2653,7 +2659,7 @@
                     {{-- USER --}}
                     @if (auth()->user()->role === 'user')
                         <a href="{{ route('user.orders.index') }}"
-                            class="{{ (request()->routeIs('user.orders.index') || request()->routeIs('user.orders.show')) ? 'active' : '' }}">
+                            class="{{ request()->routeIs('user.orders.index', 'user.orders.create', 'user.orders.show') ? 'active' : '' }}">
                             <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
                             <span>Order Repair</span>
                             <span id="userOrderNotification" class="nav-notification hidden">0</span>
@@ -2743,7 +2749,7 @@
 
                                     <a href="{{ route('omd.master.model-product') }}"
                                         class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
-                                        <span>Model Box</span>
+                                        <span>Model &amp; Produk</span>
                                     </a>
 
                                     <a href="{{ route('omd.master.ng-type') }}"
@@ -2751,19 +2757,9 @@
                                         <span>Jenis NG</span>
                                     </a>
 
-                                    <a href="{{ route('omd.scrap-limits.index') }}"
-                                        class="{{ request()->routeIs('omd.scrap-limits.*') ? 'active' : '' }}">
-                                        <span>Scrap Limit Produk</span>
-                                    </a>
-
                                     <a href="{{ route('omd.targets.index') }}"
                                         class="{{ request()->routeIs('omd.targets.*') ? 'active' : '' }}">
                                         <span>Fiscal Year</span>
-                                    </a>
-
-                                    <a href="{{ route('omd.master.form-numbers.index') }}"
-                                        class="{{ request()->routeIs('omd.master.form-numbers.*') ? 'active' : '' }}">
-                                        <span>Nomor Form</span>
                                     </a>
                                 </div>
                             </div>
@@ -2862,16 +2858,11 @@
 
                         <div class="profile-dropdown">
 
-                            <button type="button" class="profile" id="profileToggle">
-
+                            <button type="button" class="profile profile-icon-only" id="profileToggle"
+                                aria-label="Buka menu profil" aria-haspopup="true">
                                 <div class="profile-avatar">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
-
-                                <div class="profile-name">
-                                    {{ explode(' ', trim(auth()->user()->name))[0] }}
-                                </div>
-
                             </button>
 
 

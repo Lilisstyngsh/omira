@@ -946,7 +946,7 @@
                 </label>
 
                 <input type="text" name="name" id="addLineName" class="form-control"
-                    placeholder="Contoh : AS Body" maxlength="100" required>
+                    placeholder="Contoh: Assy Body" maxlength="100" required>
 
 
                 <div class="modal-action">

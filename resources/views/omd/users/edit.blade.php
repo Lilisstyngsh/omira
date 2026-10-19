@@ -238,7 +238,7 @@
                     </label>
 
                     <input id="name" type="text" name="name" value="{{ old('name', $user->name) }}"
-                        placeholder="Contoh: User INJ" maxlength="100" required>
+                        placeholder="Contoh: User Injection" maxlength="100" required>
 
                     @error('name')
                     <span class="account-error">

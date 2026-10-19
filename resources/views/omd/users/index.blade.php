@@ -939,6 +939,215 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
             padding: 16px;
         }
     }
+
+    /* Selaraskan tampilan dengan History Order, tanpa menyentuh logika akun. */
+    .account-page-shell {
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+    }
+
+    .account-page-head {
+        justify-content: flex-end;
+        margin-bottom: 18px;
+        gap: 12px;
+    }
+
+    .account-btn-primary {
+        height: 36px;
+        gap: 8px;
+        padding: 0 14px;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .account-btn-primary:hover { transform: none; }
+
+    .account-table-card {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    .account-filter-bar {
+        padding: 0 0 17px;
+        border: none;
+        background: transparent;
+        gap: 12px;
+    }
+
+    .account-filter-bar .account-filter-left {
+        flex: 0 0 72px;
+        width: 72px;
+    }
+
+    .account-filter-bar .account-filter-right {
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .account-filter-bar .account-filter-line {
+        flex: 0 0 170px;
+        width: 170px;
+    }
+
+    .account-filter-bar .account-filter-search {
+        flex: 0 1 320px;
+        width: 320px;
+        min-width: 180px;
+    }
+
+    .account-filter-bar .account-filter-field input,
+    .account-filter-bar .account-filter-field select {
+        height: 34px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .account-filter-bar .account-filter-left select {
+        font-weight: 800;
+    }
+
+    .account-filter-bar .account-filter-field input::placeholder {
+        color: #a3adba;
+        font-weight: 400;
+    }
+
+    .account-filter-bar .account-filter-field input:focus,
+    .account-filter-bar .account-filter-field select:focus {
+        border-color: #5f9278;
+        box-shadow: 0 0 0 3px rgba(95, 146, 120, .1);
+    }
+
+    .account-search-wrap .account-search-icon { font-size: 11px; }
+
+    .account-table-wrap {
+        border: 1px solid #dfe6ef;
+        border-radius: 12px;
+        overflow-x: auto;
+    }
+
+    .account-table {
+        min-width: 940px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .account-table thead th {
+        padding: 12px 14px;
+        background: #f9fafb;
+        color: #6b7280;
+        text-align: center;
+        font-size: 10px;
+        letter-spacing: .04em;
+        border-right: 1px solid #dfe6ef;
+        border-bottom: 1px solid #dfe6ef;
+        white-space: nowrap;
+    }
+
+    .account-table tbody td {
+        padding: 13px 14px;
+        color: #374151;
+        font-size: 12px;
+        border-right: 1px solid #dfe6ef;
+        border-bottom: 1px solid #dfe6ef;
+    }
+
+    .account-table th:last-child,
+    .account-table td:last-child { border-right: none; }
+
+    .account-table tbody tr:last-child td { border-bottom: none; }
+    .account-table tbody tr:hover { background: #f8fafc; }
+
+    .account-number {
+        text-align: center;
+        font-weight: 400;
+    }
+
+    .account-user-name { font-size: 12px; font-weight: 600; }
+    .account-email { font-size: 12px; }
+    .account-badge { min-height: 26px; font-size: 10px; font-weight: 600; }
+    .account-actions { justify-content: center; flex-wrap: nowrap; }
+
+    .account-pagination {
+        margin-top: 20px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .account-pagination-info { font-size: 10px; font-weight: 600; }
+    .account-page-btn { font-size: 10px; font-weight: 700; border-radius: 7px; }
+    .account-page-btn.active { background: #334155; border-color: #334155; }
+    .account-page-btn:not(.disabled):not(.active):hover { background: #f8fafc; border-color: #cbd5e1; }
+
+    /* Modal tambah dan edit menggunakan tipografi, radius dan kontrol seragam. */
+    .account-edit-modal,
+    .account-create-modal {
+        width: min(620px, calc(100vw - 24px));
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, .18);
+    }
+
+    .account-edit-head { padding: 16px 20px; }
+    .account-edit-title { font-size: 16px; }
+    .account-edit-body,
+    .account-create-modal .account-edit-body { padding: 18px 20px; }
+    .account-edit-grid,
+    .account-create-modal .account-edit-grid { gap: 14px; }
+
+    .account-edit-field label { font-size: 11px; }
+    .account-edit-field input,
+    .account-edit-field select {
+        height: 38px;
+        border-radius: 8px;
+        font-size: 12px;
+    }
+
+    .account-edit-field input:focus,
+    .account-edit-field select:focus,
+    .account-create-modal .account-edit-field input:focus,
+    .account-create-modal .account-edit-field select:focus {
+        border-color: #5f9278;
+        box-shadow: 0 0 0 3px rgba(95, 146, 120, .1);
+        outline: none;
+    }
+
+    .account-edit-actions { padding: 14px 20px 16px; }
+    .account-edit-btn { min-height: 38px; border-radius: 8px; }
+
+    @media (max-width: 768px) {
+        .account-page-shell { padding: 16px; }
+        .account-filter-bar { flex-wrap: wrap; }
+        .account-filter-bar .account-filter-right {
+            flex: 1 1 100%;
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .account-filter-bar .account-filter-line { flex: 0 1 170px; width: 170px; }
+        .account-filter-bar .account-filter-search {
+            flex: 1 1 210px;
+            width: auto;
+            min-width: 160px;
+        }
+        .account-pagination { align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+        .account-filter-bar .account-filter-right { flex-wrap: wrap; }
+        .account-filter-bar .account-filter-line,
+        .account-filter-bar .account-filter-search { flex: 1 1 100%; width: 100%; }
+        .account-edit-body,
+        .account-create-modal .account-edit-body { padding: 16px; }
+        .account-edit-actions { padding: 12px 16px 16px; }
+    }
+
 </style>
 
 
@@ -946,23 +1155,12 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
     PAGE HEADER
 ===================================================== --}}
 
-<div class="account-page-head">
-
-    <div>
-
-        <h2 class="account-page-title">
-            Daftar Akun
-        </h2>
-
+<div class="account-page-shell">
+    <div class="account-page-head">
+        <button type="button" class="account-btn-primary" id="openAccountCreate" aria-haspopup="dialog">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>Tambah Akun
+        </button>
     </div>
-
-
-    <button type="button" class="account-btn-primary" id="openAccountCreate" aria-haspopup="dialog">
-        <i class="fa-solid fa-plus" aria-hidden="true" style="margin-right:8px"></i>Tambah Akun
-    </button>
-
-</div>
-
 
 {{-- =====================================================
     SUCCESS ALERT
@@ -1001,12 +1199,12 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
 
         <div class="account-filter-right">
             <div class="account-filter-field account-filter-line">
-                <label for="account_line">Filter Line</label>
-                <select id="account_line" name="line_id" onchange="this.form.submit()" aria-label="Filter Line">
-                    <option value="">Semua Line</option>
-                    @foreach ($lines as $line)
-                    <option value="{{ $line->id }}" @selected((string) request('line_id')===(string) $line->id)>
-                        {{ $line->name }}{{ $line->plant?->name ? ' · ' . $line->plant->name : '' }}
+                <label for="account_plant">Filter Plant</label>
+                <select id="account_plant" name="plant_id" onchange="this.form.submit()" aria-label="Filter Plant">
+                    <option value="">Semua Plant</option>
+                    @foreach ($accountPlants as $plant)
+                    <option value="{{ $plant->id }}" @selected((string) request('plant_id') === (string) $plant->id)>
+                        {{ $plant->name }}
                     </option>
                     @endforeach
                 </select>
@@ -1242,10 +1440,7 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
     </div>
 
 </div>
-
-
-
-
+</div>
 
 {{-- Tambah akun: modal menggunakan endpoint store dan validasi Laravel yang sama. --}}
 <div class="account-edit-overlay" id="accountCreateModal" aria-hidden="true">
@@ -1279,7 +1474,7 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
                     <div class="account-edit-field"><label for="create_password_confirm">Konfirmasi Password</label><input type="password" name="password_confirmation" id="create_password_confirm" minlength="4" autocomplete="new-password" placeholder="Ulangi password"></div>
                 </div>
             </div>
-            <div class="account-edit-actions"><button type="button" class="account-edit-btn account-edit-cancel js-close-create">Batal</button><button type="submit" class="account-edit-btn account-edit-save">Simpan Akun</button></div>
+            <div class="account-edit-actions"><button type="button" class="account-edit-btn account-edit-cancel js-close-create">Batal</button><button type="submit" class="account-edit-btn account-edit-save">Simpan</button></div>
         </form>
     </div>
 </div>
@@ -1343,7 +1538,7 @@ $accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
                     <div class="account-edit-field">
                         <label for="edit_password">Password Baru</label>
                         <input id="edit_password" name="password" type="password" minlength="4" autocomplete="new-password" placeholder="Kosongkan jika tidak diubah">
-                        <p class="account-edit-helper">Opsional.</p>
+                        
                     </div>
                     <div class="account-edit-field">
                         <label for="edit_password_confirmation">Konfirmasi Password</label>

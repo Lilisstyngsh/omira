@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\AdditionalBoxRequest;
@@ -14,8 +15,68 @@ class AdditionalBoxRequestController extends Controller
 {
     public function index(Request $request)
     {
-        $requests = AdditionalBoxRequest::query()->where('user_id', $request->user()->id)
-            ->with(['decisions', 'items'])->latest('id')->paginate(15);
+        $filters = $request->validate([
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+            'search' => ['nullable', 'string', 'max:150'],
+            'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
+        ]);
+
+        if (
+            !empty($filters['start_date']) && !empty($filters['end_date'])
+            && $filters['end_date'] < $filters['start_date']
+        ) {
+            throw ValidationException::withMessages([
+                'end_date' => 'Sampai Tanggal tidak boleh sebelum Dari Tanggal.',
+            ]);
+        }
+
+        $requests = AdditionalBoxRequest::query()
+            ->where('user_id', $request->user()->id)
+            ->with(['decisions', 'items']);
+
+        if (!empty($filters['start_date'])) {
+            $requests->whereDate('created_at', '>=', $filters['start_date']);
+        }
+        if (!empty($filters['end_date'])) {
+            $requests->whereDate('created_at', '<=', $filters['end_date']);
+        }
+
+        $search = trim((string) ($filters['search'] ?? ''));
+        if ($search !== '') {
+            $like = '%' . addcslashes($search, '%_\\') . '%';
+            // Nomor AB-YYYY-000001 adalah accessor (bukan kolom database).
+            $numberParts = [];
+            $yearParts = [];
+            $isFullNumber = preg_match('/^AB-(\d{4})-(\d+)$/i', $search, $numberParts) === 1;
+            $isYearPrefix = !$isFullNumber && preg_match('/^AB-(\d{4})$/i', $search, $yearParts) === 1;
+
+            $requests->where(function ($query) use ($like, $isFullNumber, $isYearPrefix, $numberParts, $yearParts) {
+                $query->whereHas('decisions', function ($items) use ($like) {
+                    $items->where('model_name', 'like', $like)
+                        ->orWhere('product_name', 'like', $like);
+                })->orWhereHas('items', function ($items) use ($like) {
+                    $items->where('model_name', 'like', $like)
+                        ->orWhere('product_name', 'like', $like);
+                });
+
+                if ($isFullNumber) {
+                    $query->orWhere(function ($number) use ($numberParts) {
+                        $number->where('id', (int) $numberParts[2])
+                            ->whereYear('created_at', (int) $numberParts[1]);
+                    });
+                } elseif ($isYearPrefix) {
+                    $query->orWhere(function ($year) use ($yearParts) {
+                        $year->whereYear('created_at', (int) $yearParts[1]);
+                    });
+                }
+            });
+        }
+
+        $requests = $requests->latest('id')
+            ->paginate((int) ($filters['per_page'] ?? 10))
+            ->withQueryString();
+
         return view('user.additional-box.index', compact('requests'));
     }
 

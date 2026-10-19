@@ -29,7 +29,7 @@ class FormNumberController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $data) {
-            // Lock current rows before changing the single active number.
+
             FormNumber::withTrashed()->orderBy('id')->lockForUpdate()->get();
             $active = (bool) $data['is_active'];
             if ($active) $this->deactivatePrevious($request->user()->id);

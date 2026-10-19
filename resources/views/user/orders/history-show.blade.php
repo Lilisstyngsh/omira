@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Detail History Order Repair Box')
-@section('header', 'Detail History Order Repair Box')
+@section('title', 'History Order')
+@section('header', 'Detail Order Repair Box')
 
 @section('content')
     <style>
@@ -273,7 +273,6 @@
     <div class="history-detail-head">
         <div>
             <h2>{{ $order->order_number }}</h2>
-            <p>History</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <a href="{{ route('user.orders.history') }}" class="btn-history-back">← Kembali</a>

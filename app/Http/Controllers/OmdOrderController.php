@@ -12,45 +12,60 @@ use Illuminate\Validation\ValidationException;
 
 class OmdOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = RepairOrder::with([
-            'user',
-            'line',
-            'area',
-            'product',
-            'masterModel',
-            'ngType',
-            'result',
-            'confirmation',
-            'openFeedback.user',
+        $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'search' => ['nullable', 'string', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
+            'line_id' => ['nullable', 'integer', 'exists:lines,id'],
+        ]);
+
+        $query = RepairOrder::with([
+            'user', 'line', 'area', 'product', 'masterModel',
+            'ngType', 'result', 'confirmation', 'openFeedback.user',
         ])
             ->withSum('items as before_qty_sum', 'before_qty')
             ->withSum('items as after_qty_sum', 'after_qty')
             ->whereIn('status', [
-                'submitted',
-                'in_repair',
-                'completed',
-                'revision_requested',
-            ])
+                'submitted', 'in_repair', 'completed', 'revision_requested',
+            ]);
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->input('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->input('end_date'));
+        }
+
+        if ($request->filled('line_id')) {
+            $query->where('line_id', (int) $request->input('line_id'));
+        }
+
+        $search = trim((string) $request->input('search', ''));
+        if ($search !== '') {
+            $query->where(function ($matching) use ($search) {
+                $matching->where('order_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', fn ($userQuery) =>
+                        $userQuery->where('name', 'like', '%' . $search . '%'))
+                    ->orWhereHas('line', fn ($lineQuery) =>
+                        $lineQuery->where('name', 'like', '%' . $search . '%'));
+            });
+        }
+
+        $orders = $query
             ->latest('created_at')
-            ->paginate(10);
+            ->latest('id')
+            ->paginate((int) $request->input('per_page', 10))
+            ->withQueryString();
 
+        $lines = Line::query()->orderBy('name')->get();
+        $completedCount = RepairOrder::query()->where('status', 'completed')->count();
 
-        $completedCount = RepairOrder::query()
-            ->where('status', 'completed')
-            ->count();
-
-
-        return view(
-            'omd.orders.index',
-            compact(
-                'orders',
-                'completedCount'
-            )
-        );
+        return view('omd.orders.index', compact('orders', 'lines', 'completedCount'));
     }
-
 
     public function show(RepairOrder $order)
     {
@@ -112,10 +127,7 @@ class OmdOrderController extends Controller
 
 
         return redirect()
-            ->route(
-                'omd.orders.show',
-                $order
-            )
+            ->to(route('omd.orders.show', $order) . '#repairResultCard')
             ->with(
                 'success',
                 'Order berhasil diverifikasi dan langsung masuk proses repair.'

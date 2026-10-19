@@ -31,8 +31,6 @@ class ScrapLimitMasterDataSeeder extends Seeder
             $this->ensureProduct($model, $productName);
         }
 
-        // Produk gabungan dari versi seeder lama tidak sesuai Excel terbaru.
-        // Jangan dihapus agar histori transaksi lama tetap aman; cukup nonaktifkan.
         $this->deactivateLegacyProduct('PPIC Body', 'TTI', 'Slide R / L');
         $this->deactivateLegacyProduct('PPIC Body', 'TTI', 'Reclining R /L');
         $this->deactivateLegacyProduct('PPIC Body', 'TTI', 'Reclining R / L');
@@ -131,14 +129,21 @@ class ScrapLimitMasterDataSeeder extends Seeder
         foreach ([
             'Body' => [
                 'PPIC BODY' => 'PPIC Body',
-                'AS BODY' => 'AS Body',
+                'AS BODY' => 'Assy Body',
+                'AS Body' => 'Assy Body',
+                'INJ' => 'Injection',
+                'PT' => 'Painting',
             ],
             'Unit' => [
                 'PPIC UNIT' => 'PPIC Unit',
-                'AS UNIT' => 'AS Unit',
+                'AS UNIT' => 'Assy Unit',
+                'AS Unit' => 'Assy Unit',
+                'MA' => 'Machining',
+                'DC' => 'Die Casting',
             ],
             'Electric' => [
-                'AS ELECTRIC' => 'AS Electric',
+                'AS ELECTRIC' => 'Assy Electric',
+                'AS Electric' => 'Assy Electric',
                 'PPIC ELECTRIC' => 'PPIC Electric',
             ],
         ] as $plantName => $lineNames) {
@@ -172,16 +177,16 @@ class ScrapLimitMasterDataSeeder extends Seeder
         );
 
         $this->renameProductIfSafe('PPIC Unit', 'TNGA', 'TCC No 2', 'Tcc No 2');
-        $this->renameModelIfSafe('DC', 'All Model Kecuali TNGA', 'ALL MODEL kecuali TNGA');
+        $this->renameModelIfSafe('Die Casting', 'All Model Kecuali TNGA', 'ALL MODEL kecuali TNGA');
 
         // Model Electric pada versi lama sempat tertukar Line.
         // Bila tujuan belum ada, pindahkan record yang sama agar ID/histori tetap terjaga.
         foreach (['4WD IMV', 'PBD 582D/737D/840D', 'PBD 5P45'] as $modelName) {
-            $this->moveModelIfSafe('PPIC Electric', 'AS Electric', $modelName);
+            $this->moveModelIfSafe('PPIC Electric', 'Assy Electric', $modelName);
         }
 
         foreach (['EWP EF160', 'EWP GA35', 'OP T431', 'EWP EF160 Toyota', '4WD 5F00/5K45', 'PBD Y17'] as $modelName) {
-            $this->moveModelIfSafe('AS Electric', 'PPIC Electric', $modelName);
+            $this->moveModelIfSafe('Assy Electric', 'PPIC Electric', $modelName);
         }
     }
 

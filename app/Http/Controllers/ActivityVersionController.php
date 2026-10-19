@@ -10,10 +10,6 @@ use Illuminate\Http\Request;
 
 class ActivityVersionController extends Controller
 {
-    /**
-     * Sidik jari perubahan data lintas tab/user tanpa membuka data order lain.
-     * Tidak mengubah data dan tidak memerlukan migrasi atau WebSocket.
-     */
     public function show(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -38,7 +34,7 @@ class ActivityVersionController extends Controller
         $state = ['orders' => $orderState?->toArray()];
 
         if ($user->role === 'user') {
-            // Daftar Additional Box dan peringatan Scrap Limit juga bisa berubah.
+
             $state['additional_box'] = AdditionalBoxRequest::query()
                 ->where('user_id', $user->id)
                 ->selectRaw('COUNT(*) as total, MAX(updated_at) as latest')

@@ -133,7 +133,7 @@
             @csrf
             <div class="field" style="margin:0;min-width:220px;">
                 <label for="area_name">Nama Area / Line</label>
-                <input id="area_name" name="name" value="{{ old('name') }}" placeholder="Contoh: DC" required maxlength="100">
+                <input id="area_name" name="name" value="{{ old('name') }}" placeholder="Contoh: Die Casting" required maxlength="100">
             </div>
             <button class="btn btn-primary">Tambah Area</button>
         </form>

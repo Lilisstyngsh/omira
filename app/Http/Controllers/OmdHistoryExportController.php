@@ -20,7 +20,8 @@ class OmdHistoryExportController extends Controller
             $key = ($item->master_model_id ?? $model) . ':' . ($item->product_id ?? $product);
             if (!isset($groups[$key])) {
                 $groups[$key] = [
-                    'model' => $model, 'product' => $product,
+                    'model' => $model,
+                    'product' => $product,
                     'mismatch_note' => trim((string) ($item->mismatch_note ?? '')),
                     'before' => ['P' => null, 'H' => null, 'C' => null, 'S' => null],
                     'after' => ['P' => null, 'H' => null, 'C' => null, 'S' => null],
@@ -35,7 +36,7 @@ class OmdHistoryExportController extends Controller
             $groups[$key]['after'][$ng] = ($groups[$key]['after'][$ng] ?? 0) + (int) ($item->after_qty ?? 0);
         }
         $entries = array_values($groups);
-        usort($entries, fn ($a, $b) => [$a['model'], $a['product']] <=> [$b['model'], $b['product']]);
+        usort($entries, fn($a, $b) => [$a['model'], $a['product']] <=> [$b['model'], $b['product']]);
         $handedBy = ($order->user?->name ?? '-') . ' - ' . ($order->line?->name ?? '-');
         $date = ($order->handed_over_at ?? $order->created_at)?->locale('id')->translatedFormat('l, d F Y') ?? '-';
         $logoPath = public_path('images/aisin-form-logo.jpg');
@@ -56,8 +57,13 @@ class OmdHistoryExportController extends Controller
         }
 
         return app(\App\Services\RepairOrderHistoryExcelService::class)->download(
-            $order, $entries, $filename, (bool) $isClosed, $userApproval, $omdApproval, $approvedAt
+            $order,
+            $entries,
+            $filename,
+            (bool) $isClosed,
+            $userApproval,
+            $omdApproval,
+            $approvedAt
         );
     }
-
 }

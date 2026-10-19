@@ -634,7 +634,7 @@ return [
         const models = @json($modelPayload);
         const oldModelId = @json((string) old('master_model_id', ''));
         const oldLimits = @json(old('limits', []));
-        const hasErrors = @json($errors - > any());
+        const hasErrors = @json($errors -> any());
 
         const limitModal = document.getElementById('sl-limit-modal');
         const historyModal = document.getElementById('sl-history-modal');

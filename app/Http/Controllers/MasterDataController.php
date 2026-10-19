@@ -14,14 +14,6 @@ use Illuminate\Support\Facades\DB;
 
 class MasterDataController extends Controller
 {
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | PLANT
-    |--------------------------------------------------------------------------
-    */
-
     public function plant()
     {
         $plants = Plant::orderBy('name')
@@ -123,18 +115,11 @@ class MasterDataController extends Controller
             );
     }
 
-    /*
-|--------------------------------------------------------------------------
-| LINE
-|--------------------------------------------------------------------------
-*/
-
-
     public function line(Request $request)
     {
 
 
-        $plants = Plant::with(['lines' => fn ($query) => $query->orderBy('name')])
+        $plants = Plant::with(['lines' => fn($query) => $query->orderBy('name')])
             ->withCount('lines')
             ->orderBy('name')
             ->get();
@@ -292,46 +277,56 @@ class MasterDataController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MODEL & PRODUCT
-    |--------------------------------------------------------------------------
-    */
-
-
-
-    public function modelProduct()
+    public function modelProduct(Request $request)
     {
-        $models = MasterModel::with([
-            'line.plant',
-            'products'
-        ])
+        $filters = $request->validate([
+            'plant_id' => ['nullable', 'integer', 'exists:plants,id'],
+            'line_id' => ['nullable', 'integer', 'exists:lines,id'],
+            'q' => ['nullable', 'string', 'max:150'],
+            'per_page' => ['nullable', 'in:10,25,50,100'],
+        ]);
+
+        $selectedPlantId = $filters['plant_id'] ?? null;
+        $selectedLineId = $filters['line_id'] ?? null;
+        $search = trim($filters['q'] ?? '');
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $plants = Plant::query()->orderBy('name')->get();
+        $lines = Line::query()->with('plant')->orderBy('name')->get();
+
+        $models = MasterModel::query()
+            ->with([
+                'line.plant',
+                'products' => fn ($query) => $query->orderBy('name'),
+                'products.scrapLimits' => fn ($query) => $query
+                    ->with('creator')
+                    ->orderByDesc('effective_from')
+                    ->orderByDesc('id'),
+            ])
+            ->when($selectedPlantId, fn ($query) => $query->whereHas('line',
+                fn ($line) => $line->where('plant_id', $selectedPlantId)))
+            ->when($selectedLineId, fn ($query) => $query->where('line_id', $selectedLineId))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('model', 'like', '%' . $search . '%')
+                        ->orWhereHas('products', fn ($product) => $product
+                            ->where('name', 'like', '%' . $search . '%'))
+                        ->orWhereHas('line', fn ($line) => $line
+                            ->where('name', 'like', '%' . $search . '%')
+                            ->orWhereHas('plant', fn ($plant) => $plant
+                                ->where('name', 'like', '%' . $search . '%')));
+                });
+            })
             ->orderBy('model')
-            ->get();
+            ->orderBy('id')
+            ->paginate($perPage)
+            ->withQueryString();
 
-        $lines = Line::with('plant')
-            ->orderBy('name')
-            ->get();
-
-        $selectedLineId = request()->query('line_id');
-
-        if (!$selectedLineId) {
-            $selectedLineId = $lines->first()?->id;
-        }
-
-        return view(
-            'omd.master.model-product',
-            compact(
-                'models',
-                'lines',
-                'selectedLineId'
-            )
-        );
+        return view('omd.master.model-product', compact(
+            'models', 'plants', 'lines', 'selectedPlantId', 'selectedLineId',
+            'search', 'perPage'
+        ));
     }
-
-
-
-
 
     public function storeModel(
         Request $request
@@ -390,11 +385,6 @@ class MasterDataController extends Controller
             ->with('selected_line_id', $validated['line_id']);
     }
 
-
-
-
-
-
     public function destroyModel(
         MasterModel $model
     ) {
@@ -410,19 +400,6 @@ class MasterDataController extends Controller
                 'Model dan produk berhasil dihapus'
             );
     }
-
-
-
-
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | PRODUCT
-    |--------------------------------------------------------------------------
-    */
-
 
 
     public function storeProduct(
@@ -447,9 +424,6 @@ class MasterDataController extends Controller
 
         ]);
 
-
-
-
         Product::create([
 
             'master_model_id' => $validated['master_model_id'],
@@ -460,8 +434,6 @@ class MasterDataController extends Controller
 
         ]);
 
-
-
         return back()
             ->with(
                 'success',
@@ -469,17 +441,10 @@ class MasterDataController extends Controller
             );
     }
 
-
-
-
-
-
-
     public function updateProduct(
         Request $request,
         Product $product
     ) {
-
 
         $validated = $request->validate([
 
@@ -518,11 +483,6 @@ class MasterDataController extends Controller
     }
 
 
-
-
-
-
-
     public function destroyProduct(
         Product $product
     ) {
@@ -539,37 +499,16 @@ class MasterDataController extends Controller
             );
     }
 
-
-
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | NG TYPE
-    |--------------------------------------------------------------------------
-    */
-
-
-
     public function ngType()
     {
-
-
         $ngTypes = NgType::orderBy('code')
             ->get();
-
-
 
         return view(
             'omd.master.ng-type',
             compact('ngTypes')
         );
     }
-
-
-
-
 
     public function storeNgType(
         Request $request

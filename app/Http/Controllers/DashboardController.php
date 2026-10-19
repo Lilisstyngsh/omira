@@ -22,7 +22,7 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        // Fiscal Year default mengikuti periode aktif April–Maret, tetapi tetap bisa dipilih melalui filter Tahun.
+
         $today = now();
         $activeFiscalYear = (int) ($today->month >= 4 ? $today->year : $today->year - 1);
         $year = $request->filled('year')
@@ -66,7 +66,7 @@ class DashboardController extends Controller
             $fiscalMonths[] = ['year' => $calendarYear, 'month' => $calendarMonth];
         }
 
-        $selectedMetrics = $monthlyMetrics->first(fn ($row) => (int) $row['month'] === $month && (int) $row['year'] === (int) $today->year) ?? [
+        $selectedMetrics = $monthlyMetrics->first(fn($row) => (int) $row['month'] === $month && (int) $row['year'] === (int) $today->year) ?? [
             'order' => 0,
             'ok' => 0,
             'scrap' => 0,
@@ -76,11 +76,6 @@ class DashboardController extends Controller
         $finishedOrders = (int) $selectedMetrics['ok'];
         $scrap = (int) $selectedMetrics['scrap'];
 
-        /*
-         * Target FY hanya 1 nilai global per tahun untuk seluruh Plant & Line.
-         * Filter Line tetap berlaku untuk KPI/grafik, tetapi abnormality selalu
-         * membandingkan total Order global bulanan dengan Target FY global.
-         */
         $targetRecord = $this->resolveTarget($year);
         $target = (int) ($targetRecord?->target_qty ?? 0);
         $targetScopeLabel = $targetRecord
@@ -107,8 +102,8 @@ class DashboardController extends Controller
                     $q->where('year', $year + 1)->whereBetween('month', [1, 3]);
                 });
             });
-        $abnormalityRows = $abnormalityQuery->get()->sortBy(fn ($row) => (((int) $row->month) >= 4 ? (int) $row->month - 4 : (int) $row->month + 8));
-        $abnormalitiesByMonth = $abnormalityRows->keyBy(fn ($row) => $row->year . '-' . str_pad((string) $row->month, 2, '0', STR_PAD_LEFT));
+        $abnormalityRows = $abnormalityQuery->get()->sortBy(fn($row) => (((int) $row->month) >= 4 ? (int) $row->month - 4 : (int) $row->month + 8));
+        $abnormalitiesByMonth = $abnormalityRows->keyBy(fn($row) => $row->year . '-' . str_pad((string) $row->month, 2, '0', STR_PAD_LEFT));
         $abnormality = $abnormalitiesByMonth->get($today->year . '-' . str_pad((string) $month, 2, '0', STR_PAD_LEFT));
 
         $periodEnd = Carbon::create((int) $today->year, $month, 1)->endOfMonth();
@@ -124,7 +119,7 @@ class DashboardController extends Controller
             $periodEnd->toDateTimeString()
         );
 
-        $orderSeries = $monthlyMetrics->pluck('order')->map(fn ($value) => (int) $value)->values();
+        $orderSeries = $monthlyMetrics->pluck('order')->map(fn($value) => (int) $value)->values();
         // Target FY bersifat global meskipun grafik sedang difilter menurut Line.
         // Snapshot historis dari seeder ikut dibaca oleh metricsForMonth(..., null).
         $globalOrderSeries = $lineId === null
@@ -135,8 +130,8 @@ class DashboardController extends Controller
                     ? 0
                     : (int) $this->metricsForMonth((int) $row['year'], (int) $row['month'], null)['order'];
             })->values();
-        $finishSeries = $monthlyMetrics->pluck('ok')->map(fn ($value) => (int) $value)->values();
-        $scrapSeries = $monthlyMetrics->pluck('scrap')->map(fn ($value) => (int) $value)->values();
+        $finishSeries = $monthlyMetrics->pluck('ok')->map(fn($value) => (int) $value)->values();
+        $scrapSeries = $monthlyMetrics->pluck('scrap')->map(fn($value) => (int) $value)->values();
         $months = $monthlyMetrics->pluck('label')->values();
 
         $maxMetric = max(
@@ -147,9 +142,6 @@ class DashboardController extends Controller
             $target
         );
 
-        // Target FY adalah reference line, bukan batas maksimum chart.
-        // Beri headroom agar batang yang melebihi target tetap terlihat menembus
-        // garis Target FY dan label angka di atas batang tidak terpotong.
         $chartMax = $this->roundChartMax((int) ceil($maxMetric * 1.15));
 
         return view('omd.dashboard.index', compact(
@@ -189,7 +181,7 @@ class DashboardController extends Controller
                 'nullable',
                 'integer',
                 Rule::exists('lines', 'id')->where(
-                    fn ($query) => $query->where('is_active', true)
+                    fn($query) => $query->where('is_active', true)
                 ),
             ],
             'reason' => ['required', 'string', 'min:5', 'max:2000'],
@@ -214,10 +206,8 @@ class DashboardController extends Controller
         $redirectParams = array_filter([
             'year' => $fiscalYear,
             'line_id' => $returnLineId,
-        ], fn ($value) => $value !== null && $value !== '');
+        ], fn($value) => $value !== null && $value !== '');
 
-        // Data bulan yang sudah tercatat boleh diedit kapan pun, tanpa
-        // bergantung pada perubahan Target FY atau total order sesudahnya.
         if ($existing) {
             $existing->update([
                 'reason' => trim($data['reason']),
@@ -262,11 +252,7 @@ class DashboardController extends Controller
 
     private function metricsForMonth(int $year, int $month, ?int $lineId): array
     {
-        /*
-         * Historical snapshot April–Agustus 2026 hanya tersedia dalam agregat
-         * global. Gunakan persis nilai sumber ketika Dashboard tidak difilter
-         * per Line. Snapshot tidak dibuat menjadi Repair Order fiktif.
-         */
+
         if ($lineId === null) {
             $snapshot = RepairMonthlySnapshot::query()
                 ->where('year', $year)
@@ -287,23 +273,12 @@ class DashboardController extends Controller
                 $this->applyConfirmedOrderFilter($query, $year, $month, $lineId);
             });
 
-        /*
-         * Dashboard baru membaca hasil final OMD setelah barang dikonfirmasi
-         * sesuai oleh User:
-         * Order = P + H + C + S (after_qty)
-         * Scrap = S (after_qty)
-         * OK    = Order - Scrap
-         */
         $order = (int) (clone $itemQuery)->sum('after_qty');
         $scrap = (int) (clone $itemQuery)
-            ->whereHas('ngType', fn ($query) => $query->where('code', 'S'))
+            ->whereHas('ngType', fn($query) => $query->where('code', 'S'))
             ->sum('after_qty');
         $ok = max($order - $scrap, 0);
 
-        /*
-         * Compatibility untuk order lama yang belum mempunyai repair_order_items.
-         * Periode tetap memakai tanggal User melakukan konfirmasi penerimaan.
-         */
         $legacyResults = RepairResult::query()
             ->whereHas('order', function ($query) use ($year, $month, $lineId) {
                 $query->whereDoesntHave('items');
@@ -336,7 +311,7 @@ class DashboardController extends Controller
                     ->whereYear('confirmed_at', $year)
                     ->whereMonth('confirmed_at', $month);
             })
-            ->when($lineId, fn ($q) => $q->where('line_id', $lineId));
+            ->when($lineId, fn($q) => $q->where('line_id', $lineId));
     }
 
     private function resolveTarget(int $year): ?FiscalYearTarget
@@ -356,7 +331,7 @@ class DashboardController extends Controller
         $items = RepairOrderItem::query()
             ->with(['product.masterModel.line', 'ngType'])
             ->whereNotNull('product_id')
-            ->whereHas('ngType', fn ($query) => $query->where('code', 'S'))
+            ->whereHas('ngType', fn($query) => $query->where('code', 'S'))
             ->whereHas('repairOrder', function ($query) use ($year, $month, $lineId) {
                 $this->applyConfirmedOrderFilter($query, $year, $month, $lineId);
             })
@@ -379,7 +354,7 @@ class DashboardController extends Controller
             ->orderByDesc('id')
             ->get()
             ->groupBy('product_id')
-            ->map(fn ($rows) => $rows->first());
+            ->map(fn($rows) => $rows->first());
 
         $resetProducts = UserScrapLimitCycle::query()
             ->whereNotNull('reset_at')
