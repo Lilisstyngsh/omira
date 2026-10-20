@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\FiscalYearTarget;
+use App\Models\MonitoringAbnormality;
 use App\Models\RepairMonthlySnapshot;
+use App\Services\AnnualRecapPdfConverter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -148,7 +150,22 @@ class RecapController extends Controller
         $selectedLineIds = $this->resolveLineIds($request);
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
         $isYearly = $request->input('period_type', 'monthly') === 'yearly';
-        $annualSummary = $isYearly ? $this->annualSummary($startDate->year, $selectedLineIds) : [];
+        // PDF tahunan berasal dari workbook yang sama dengan Export Excel (termasuk Native Chart).
+        if ($isYearly) {
+            $workbook = $this->createAnnualRecapWorkbook($startDate->year, $selectedLineIds, $selectedLineNames);
+            try {
+                $pdfPath = app(AnnualRecapPdfConverter::class)->convert($workbook);
+            } catch (\RuntimeException $exception) {
+                abort(503, $exception->getMessage());
+            } finally {
+                $workbook->disconnectWorksheets();
+            }
+
+            $filename = sprintf('Rekap_Repair_Box_%s_sd_%s.pdf', $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
+            return response()->download($pdfPath, $filename)->deleteFileAfterSend(true);
+        }
+
+        $annualSummary = [];
         $monthlyReports = collect();
 
         if (! $isYearly) {
@@ -206,28 +223,7 @@ class RecapController extends Controller
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
         $isYearly = $request->input('period_type', 'monthly') === 'yearly';
         if ($isYearly) {
-            // Rekap tahunan memakai tabel Monitoring dan grafik native Excel.
-            $chartData = $this->dashboardChartData($endDate, $selectedLineIds);
-            $chartRows = $this->chartRowsFromDashboard($chartData);
-            $spreadsheet = new Spreadsheet();
-            $spreadsheet->removeSheetByIndex(0);
-            $sheet = $spreadsheet->createSheet();
-            $sheet->setTitle('Rekap Tahunan');
-            $this->buildAnnualSummarySheet(
-                $sheet,
-                $this->annualSummary($startDate->year, $selectedLineIds),
-                $startDate->year,
-                $selectedLineNames
-            );
-            $monitoringSheet = $spreadsheet->createSheet();
-            $monitoringSheet->setTitle('Monitoring');
-            $this->buildMonitoringSheet(
-                $monitoringSheet,
-                $chartRows,
-                $selectedLineNames,
-                $startDate,
-                $endDate
-            );
+            $spreadsheet = $this->createAnnualRecapWorkbook($startDate->year, $selectedLineIds, $selectedLineNames);
         } else {
             // Load file yang diminta user secara langsung agar merge, posisi TOTAL,
             // GRAND TOTAL, lebar kolom, dan style tidak diubah menjadi format baru.
@@ -258,6 +254,26 @@ class RecapController extends Controller
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
         return response()->download($xlsxPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    /** Sumber tunggal Excel dan PDF FY: angka, format, chart, dan abnormality identik. */
+    private function createAnnualRecapWorkbook(int $fiscalYear, array $lineIds, Collection $lineNames): Spreadsheet
+    {
+        $months = $this->annualSummary($fiscalYear, $lineIds);
+        $workbook = new Spreadsheet();
+        $sheet = $workbook->getActiveSheet();
+        $sheet->setTitle('Rekap Tahunan');
+        $this->buildAnnualSummarySheet($sheet, $months, $fiscalYear, $lineNames);
+        $this->addAnnualNativeChart($sheet, $fiscalYear);
+        $this->buildAnnualAbnormalityTable(
+            $sheet,
+            $months,
+            $fiscalYear,
+            $this->annualAbnormalityReasons($fiscalYear, empty($lineIds))
+        );
+        $workbook->setActiveSheetIndex(0);
+
+        return $workbook;
     }
 
     private function resolvePeriod(Request $request): array
@@ -760,20 +776,20 @@ class RecapController extends Controller
 
         $sheet->mergeCells("B{$footerRow}:E" . ($footerRow + 2));
         $sheet->setCellValue("B{$footerRow}", 'TOTAL');
-        $totalByDay = $this->sumDailyMatrix($matrixRows, $dates);
-        foreach (['order' => 'NG', 'ok' => 'OK', 'scrap' => 'Scrap'] as $offsetKey => $label) {
-            $offset = array_search($offsetKey, ['order', 'ok', 'scrap'], true);
+        foreach (['NG', 'OK', 'Scrap'] as $offset => $label) {
             $thisRow = $footerRow + $offset;
             $sheet->setCellValue("F{$thisRow}", $label);
             $sheet->setCellValue("{$grandLabelCol}{$thisRow}", $label);
             foreach ($dates as $index => $date) {
-                $amount = (int) ($totalByDay[$date['key']][$offsetKey] ?? 0);
-                if ($amount) {
-                    $col = Coordinate::stringFromColumnIndex(7 + $index);
-                    $sheet->setCellValue("{$col}{$thisRow}", $amount);
-                }
+                $col = Coordinate::stringFromColumnIndex(7 + $index);
+                // Jenis pada kolom F tetap menjadi kriteria penjumlahan seperti sebelumnya.
+                // SUMIF menghitung ulang TOTAL ketika OMD mengedit rincian NG/OK/Scrap.
+                $sheet->setCellValue(
+                    "{$col}{$thisRow}",
+                    sprintf('=SUMIF($F$6:$F$%d,$F$%d,%s$6:%s$%d)', $lastDataRow, $thisRow, $col, $col, $lastDataRow)
+                );
             }
-            // GRAND TOTAL berasal dari baris TOTAL harian, bukan rincian NG berulang.
+            // GRAND TOTAL tetap SUM dari baris TOTAL setiap hari.
             $sheet->setCellValue("{$grandNumberCol}{$thisRow}", "=SUM(G{$thisRow}:{$lastDayColumn}{$thisRow})");
         }
         $sheet->getStyle("B{$footerRow}:{$grandLabelCol}" . ($footerRow + 2))
@@ -790,64 +806,175 @@ class RecapController extends Controller
             ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle("G5:{$grandLabelCol}" . ($footerRow + 2))
             ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Baris 1 kosong pada template: gunakan untuk judul tanpa menggeser tabel.
+        $sheet->mergeCells("B1:{$grandLabelCol}1");
+        $sheet->setCellValue('B1', 'Repair Box Workshop OMD');
+        $sheet->getStyle("B1:{$grandLabelCol}1")->getFont()->setBold(true)->setSize(18);
+        $sheet->getStyle("B1:{$grandLabelCol}1")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(32);
         $sheet->setShowGridlines(false);
         $setup = $sheet->getPageSetup();
         $setup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
             ->setPaperSize(PageSetup::PAPERSIZE_A4)
             ->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(0);
-        $setup->setRowsToRepeatAtTopByStartAndEnd(4, 5);
-        $setup->setPrintArea("B4:{$grandLabelCol}" . ($footerRow + 2));
+        $setup->setRowsToRepeatAtTopByStartAndEnd(1, 5);
+        $setup->setPrintArea("B1:{$grandLabelCol}" . ($footerRow + 2));
         $sheet->getPageMargins()->setTop(0.25)->setBottom(0.25)->setLeft(0.2)->setRight(0.2);
         $sheet->freezePane('G6');
     }
 
-    /** Rekap tahunan 12 bulan, bersih tanpa warna cell, siap cetak A4 landscape. */
-    private function buildAnnualSummarySheet($sheet, array $months, int $fiscalYear, Collection $selectedLineNames): void
+    /** Layout FY April–Maret: rekap A4:M8, chart A10:K29, abnormality mulai A31. */
+    private function buildAnnualSummarySheet(Worksheet $sheet, array $months, int $fiscalYear, Collection $selectedLineNames): void
     {
         $sheet->mergeCells('A1:M1');
-        $sheet->setCellValue('A1', 'DATA REKAP REPAIR BOX - FY ' . $fiscalYear);
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->setCellValue('A1', 'DATA REKAP REPAIR BOX FY ' . $fiscalYear);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getRowDimension(1)->setRowHeight(27);
+        $sheet->getRowDimension(1)->setRowHeight(24);
+
         $sheet->mergeCells('A2:M2');
         $sheet->setCellValue('A2', 'Periode: April ' . $fiscalYear . ' - Maret ' . ($fiscalYear + 1));
         $sheet->mergeCells('A3:M3');
         $sheet->setCellValue('A3', 'Line: ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ')));
+        $sheet->getStyle('A2:M3')->getFont()->setSize(9);
         $sheet->getStyle('A2:M3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A2:M3')->getFont()->setSize(10);
+        $sheet->getRowDimension(2)->setRowHeight(17);
+        $sheet->getRowDimension(3)->setRowHeight(17);
 
-        $sheet->setCellValue('A5', 'INDIKATOR');
+        $sheet->setCellValue('A4', 'INDIKATOR');
         foreach ($months as $i => $month) {
-            $sheet->setCellValue(Coordinate::stringFromColumnIndex($i + 2) . '5', strtoupper($month['label']));
+            $column = Coordinate::stringFromColumnIndex($i + 2);
+            $sheet->setCellValue($column . '4', strtoupper($month['label']));
         }
-        foreach (['target' => 'TARGET', 'order' => 'ORDER', 'finish' => 'FINISH', 'scrap' => 'SCRAP'] as $key => $label) {
-            $row = 6 + array_search($key, ['target', 'order', 'finish', 'scrap'], true);
+        foreach ([5 => ['target', 'TARGET'], 6 => ['order', 'ORDER'], 7 => ['finish', 'FINISH'], 8 => ['scrap', 'SCRAP']] as $row => [$key, $label]) {
             $sheet->setCellValue('A' . $row, $label);
             foreach ($months as $monthIndex => $month) {
-                $value = $month[$key];
-                if ($value !== null) {
-                    $sheet->setCellValue(Coordinate::stringFromColumnIndex($monthIndex + 2) . $row, (int) $value);
+                if ($month[$key] !== null) {
+                    $column = Coordinate::stringFromColumnIndex($monthIndex + 2);
+                    $sheet->setCellValue($column . $row, (int) $month[$key]);
                 }
             }
         }
-        $sheet->getStyle('A5:M9')->getBorders()->getAllBorders()
+
+        $sheet->getStyle('A4:M8')->getBorders()->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFB8C3CC');
-        $sheet->getStyle('A5:M5')->getFont()->setBold(true)->setSize(10);
-        $sheet->getStyle('A6:A9')->getFont()->setBold(true);
-        $sheet->getStyle('A5:M9')->getAlignment()
+        $sheet->getStyle('A4:M4')->getFont()->setBold(true);
+        $sheet->getStyle('A5:A8')->getFont()->setBold(true);
+        $sheet->getStyle('A4:M8')->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A5:M9')->getFont()->setSize(10);
-        $sheet->getStyle('B6:M9')->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('A4:M8')->getFont()->setSize(10);
+        $sheet->getStyle('B5:M8')->getNumberFormat()->setFormatCode('#,##0');
         $sheet->getColumnDimension('A')->setWidth(17);
-        foreach (range('B', 'M') as $col) $sheet->getColumnDimension($col)->setWidth(11);
-        foreach (range(5, 9) as $row) $sheet->getRowDimension($row)->setRowHeight(23);
+        foreach (range('B', 'M') as $column) {
+            $sheet->getColumnDimension($column)->setWidth(11);
+        }
+        foreach (range(4, 8) as $row) {
+            $sheet->getRowDimension($row)->setRowHeight(21);
+        }
+        $sheet->getRowDimension(9)->setRowHeight(10);
+        foreach (range(10, 29) as $row) {
+            $sheet->getRowDimension($row)->setRowHeight(17);
+        }
+        $sheet->getRowDimension(30)->setRowHeight(10);
+        $sheet->freezePane('B5');
         $sheet->setShowGridlines(false);
-        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
-        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
-        $sheet->getPageSetup()->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(1);
-        $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.3)->setRight(0.3);
-        $sheet->getPageSetup()->setHorizontalCentered(true);
-        $sheet->getPageSetup()->setPrintArea('A1:M9');
+        $setup = $sheet->getPageSetup();
+        $setup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)
+            ->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(1);
+        $sheet->getPageMargins()->setTop(0.25)->setBottom(0.25)->setLeft(0.2)->setRight(0.2);
+        $setup->setHorizontalCentered(true);
+    }
+
+    /** Catatan Dashboard hanya milik cakupan global; jangan kaitkan ke filter Line. */
+    private function annualAbnormalityReasons(int $fiscalYear, bool $isGlobal): array
+    {
+        if (! $isGlobal) {
+            return [];
+        }
+
+        return MonitoringAbnormality::query()
+            ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
+            ->where('scope_key', FiscalYearTarget::scopeKey(null))
+            ->where(function ($query) use ($fiscalYear) {
+                $query->where(function ($q) use ($fiscalYear) {
+                    $q->where('year', $fiscalYear)->whereBetween('month', [4, 12]);
+                })->orWhere(function ($q) use ($fiscalYear) {
+                    $q->where('year', $fiscalYear + 1)->whereBetween('month', [1, 3]);
+                });
+            })
+            ->get()
+            ->mapWithKeys(fn($item) => [sprintf('%04d-%02d', $item->year, $item->month) => trim((string) $item->reason)])
+            ->all();
+    }
+
+    /** Tabel abnormality menggunakan referensi langsung ke sel rekap agar selisih editable. */
+    private function buildAnnualAbnormalityTable(Worksheet $sheet, array $months, int $fiscalYear, array $reasonsByMonth): void
+    {
+        $sheet->mergeCells('A31:I31');
+        $sheet->setCellValue('A31', 'TABEL ABNORMALITY');
+        $sheet->getStyle('A31')->getFont()->setBold(true)->setSize(10);
+        $sheet->getRowDimension(31)->setRowHeight(20);
+
+        foreach (['A' => 'Bulan', 'B' => 'ORDER/NG', 'C' => 'TARGET FY', 'D' => 'SELISIH', 'E' => 'KETERANGAN'] as $column => $heading) {
+            $sheet->setCellValue($column . '32', $heading);
+        }
+        $sheet->mergeCells('E32:I32');
+        $sheet->getStyle('A32:I32')->getFont()->setBold(true)->setSize(9);
+        $sheet->getRowDimension(32)->setRowHeight(21);
+
+        $abnormalMonths = [];
+        foreach ($months as $index => $month) {
+            $date = Carbon::create($fiscalYear, 4, 1)->addMonths($index);
+            $key = $date->format('Y-m');
+            $order = $month['order'];
+            $target = (int) $month['target'];
+            $hasReason = isset($reasonsByMonth[$key]) && $reasonsByMonth[$key] !== '';
+            if (($order !== null && $target > 0 && (int) $order > $target) || $hasReason) {
+                $abnormalMonths[] = [
+                    'label' => $date->locale('id')->translatedFormat('M Y'),
+                    'source' => Coordinate::stringFromColumnIndex($index + 2),
+                    'reason' => $reasonsByMonth[$key] ?? '',
+                ];
+            }
+        }
+
+        // Bila tidak ada abnormality, sisakan 3 baris kosong sesuai format referensi.
+        $entries = $abnormalMonths ?: array_fill(0, 3, null);
+        foreach ($entries as $index => $entry) {
+            $row = 33 + $index;
+            $sheet->mergeCells("E{$row}:I{$row}");
+            if ($entry !== null) {
+                $col = $entry['source'];
+                $sheet->setCellValue("A{$row}", $entry['label']);
+                $sheet->setCellValue("B{$row}", "=IF(ISNUMBER({$col}6),{$col}6,\"\")");
+                $sheet->setCellValue("C{$row}", "=IF(ISNUMBER({$col}5),{$col}5,\"\")");
+                $sheet->setCellValue("D{$row}", "=IF(OR(B{$row}=\"\",C{$row}=\"\"),\"\",B{$row}-C{$row})");
+                $sheet->setCellValue("E{$row}", $entry['reason']);
+                $reasonLength = mb_strlen($entry['reason']);
+                $sheet->getRowDimension($row)->setRowHeight(max(21, min(78, 18 * (int) ceil(max(1, $reasonLength) / 64))));
+            } else {
+                $sheet->getRowDimension($row)->setRowHeight(21);
+            }
+        }
+
+        $lastRow = 32 + count($entries);
+        $sheet->getStyle("A32:I{$lastRow}")->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FF64748B');
+        $sheet->getStyle("A32:I{$lastRow}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A32:I32')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A33:D{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("E33:I{$lastRow}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT)->setWrapText(true);
+        $sheet->getStyle("B33:D{$lastRow}")->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle("A33:I{$lastRow}")->getFont()->setSize(9);
+
+        // Banyaknya alasan bersifat dinamis. Jangan paksa satu halaman bila sulit dibaca.
+        $sheet->getPageSetup()->setFitToHeight(count($abnormalMonths) > 5 ? 0 : 1);
+        $sheet->getPageSetup()->setPrintArea('A1:M' . $lastRow);
     }
 
     private function buildMonthlyMatrixSheet($sheet, Collection $matrixRows, Carbon $monthStart, Carbon $monthEnd, Collection $selectedLineNames): void
@@ -1010,103 +1137,31 @@ class RecapController extends Controller
         $sheet->getPageSetup()->setPrintArea("A1:{$lastColumn}{$summaryEnd}");
     }
 
-    private function buildMonitoringSheet(Worksheet $sheet, Collection $rows, Collection $selectedLineNames, Carbon $start, Carbon $end): void
-    {
-        $sheet->mergeCells('A1:M1');
-        $fiscalYear = $end->month >= 4 ? $end->year : $end->year - 1;
-        $sheet->setCellValue('A1', 'DATA MONITORING & GRAFIK REPAIR BOX FY ' . $fiscalYear);
-        $sheet->mergeCells('A2:M2');
-        $sheet->setCellValue('A2', 'Line: ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ')));
-        $sheet->mergeCells('A3:M3');
-        $sheet->setCellValue('A3', 'Visual Dashboard: April ' . $fiscalYear . ' - Maret ' . ($fiscalYear + 1));
-        $sheet->mergeCells('A4:M4');
-        $sheet->setCellValue('A4', 'Periode rekap detail: ' . $start->format('d/m/Y') . ' - ' . $end->format('d/m/Y'));
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(15);
-        $sheet->getStyle('A2:A4')->getFont()->setSize(10);
-
-        $sheet->fromArray(['Bulan', 'NG', 'OK', 'Scrap', 'Target FY'], null, 'A6');
-        $sheet->getStyle('A6:E6')->getFont()->setBold(true)->setSize(10);
-
-        $rowIndex = 7;
-        foreach ($rows as $monthIndex => $row) {
-            $monthDate = Carbon::create($fiscalYear, 4, 1)->addMonths($monthIndex);
-            $hasOccurred = $monthDate->startOfMonth()->lte(now()->startOfMonth());
-            $sheet->fromArray([
-                (string) $row['label'],
-                $hasOccurred ? (int) $row['order'] : null,
-                $hasOccurred ? (int) $row['ok'] : null,
-                $hasOccurred ? (int) $row['scrap'] : null,
-                (int) $row['target'],
-            ], null, 'A' . $rowIndex);
-            $rowIndex++;
-        }
-
-        $lastDataRow = max(6, $rowIndex - 1);
-        $sheet->getStyle('A6:E' . $lastDataRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFD8DEE8');
-        $sheet->getStyle('A6:E' . $lastDataRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A7:E' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A7:A' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        foreach (['A' => 18, 'B' => 14, 'C' => 14, 'D' => 14, 'E' => 16] as $column => $width) {
-            $sheet->getColumnDimension($column)->setWidth($width);
-        }
-        foreach (range('F', 'M') as $column) {
-            $sheet->getColumnDimension($column)->setWidth(11);
-        }
-
-        $chartTopRow = $lastDataRow + 3;
-        $sheet->mergeCells("A{$chartTopRow}:M{$chartTopRow}");
-        $sheet->setCellValue("A{$chartTopRow}", 'Grafik Order Repair Box FY ' . $fiscalYear);
-        $sheet->getStyle("A{$chartTopRow}")->getFont()->setBold(true)->setSize(12);
-
-        // Grafik membaca sel Monitoring secara langsung, bukan gambar atau data hardcode.
-        // Dashboard selalu memberi 12 bulan (April-Maret), termasuk saat belum ada transaksi.
-        $this->addAnnualNativeChart($sheet, $fiscalYear, 7, max(7, $lastDataRow), $chartTopRow + 1);
-
-        $sheet->freezePane('A7');
-        $sheet->setShowGridlines(false);
-        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
-        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
-        $sheet->getPageSetup()->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(0);
-        $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
-        $sheet->getPageSetup()->setPrintArea('A1:M' . ($chartTopRow + 30));
-    }
-
-    /** Combo chart: tiga clustered columns dan satu line, seluruh seri mereferensikan sel. */
-    private function addAnnualNativeChart(Worksheet $sheet, int $fiscalYear, int $firstRow, int $lastRow, int $chartRow): void
+    /** Native combo chart membaca baris horizontal dari tabel utama, tanpa worksheet tambahan. */
+    private function addAnnualNativeChart(Worksheet $sheet, int $fiscalYear): void
     {
         $source = "'" . str_replace("'", "''", $sheet->getTitle()) . "'!";
-        $count = $lastRow - $firstRow + 1;
-        $categories = $source . '$A$' . $firstRow . ':$A$' . $lastRow;
+        $categories = $source . '$B$4:$M$4';
         $barLabels = [];
         $barCategories = [];
         $barValues = [];
-        foreach (['B' => 'F59E0B', 'C' => '94A3B8', 'D' => 'FACC15'] as $column => $color) {
-            $barLabels[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $source . '$' . $column . '$6', null, 1);
-            $barCategories[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, $count);
+        foreach ([6 => ['NG', 'F59E0B'], 7 => ['OK', '94A3B8'], 8 => ['Scrap', 'FACC15']] as $row => [$label, $color]) {
+            $barLabels[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, [$label]);
+            $barCategories[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, 12);
             $barValues[] = new DataSeriesValues(
                 DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                $source . '$' . $column . '$' . $firstRow . ':$' . $column . '$' . $lastRow,
-                '#,##0',
-                $count,
-                [],
-                null,
-                $color
+                $source . '$B$' . $row . ':$M$' . $row,
+                '#,##0', 12, [], null, $color
             );
         }
-
         $bars = new DataSeries(DataSeries::TYPE_BARCHART, DataSeries::GROUPING_CLUSTERED,
             [0, 1, 2], $barLabels, $barCategories, $barValues);
         $bars->setPlotDirection(DataSeries::DIRECTION_COL);
 
         $targetValues = new DataSeriesValues(
             DataSeriesValues::DATASERIES_TYPE_NUMBER,
-            $source . '$E$' . $firstRow . ':$E$' . $lastRow,
-            '#,##0',
-            $count,
-            [],
-            'circle',
-            '2563EB',
-            6
+            $source . '$B$5:$M$5',
+            '#,##0', 12, [], 'circle', '2563EB', 6
         );
         $targetValues->setLineColorProperties('2563EB');
         $targetValues->setLineWidth(2.5);
@@ -1115,8 +1170,8 @@ class RecapController extends Controller
 
         $line = new DataSeries(DataSeries::TYPE_LINECHART, DataSeries::GROUPING_STANDARD,
             [3],
-            [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $source . '$E$6', null, 1)],
-            [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, $count)],
+            [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['Target FY'])],
+            [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, 12)],
             [$targetValues]);
 
         $layout = new Layout();
@@ -1126,16 +1181,13 @@ class RecapController extends Controller
             new Title('Grafik Order Repair Box FY ' . $fiscalYear),
             new Legend(Legend::POSITION_BOTTOM, null, false),
             new PlotArea($layout, [$bars, $line]),
-            true,
-            DataSeries::EMPTY_AS_GAP,
-            null,
-            new Title('Jumlah Box')
+            true, DataSeries::EMPTY_AS_GAP, new Title('FY ' . $fiscalYear), new Title('Jumlah Box')
         );
         $gridlines = new GridLines();
         $gridlines->setLineColorProperties('DDE5ED');
         $chart->getChartAxisY()->setMajorGridlines($gridlines);
-        $chart->setTopLeftPosition('A' . $chartRow, 8, 6);
-        $chart->setBottomRightPosition('M' . ($chartRow + 26));
+        $chart->setTopLeftPosition('A10', 8, 4);
+        $chart->setBottomRightPosition('K29', 0, 0);
         $sheet->addChart($chart);
     }
 
