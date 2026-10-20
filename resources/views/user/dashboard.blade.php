@@ -5,10 +5,19 @@
 
 @section('content')
 <style>
+    /* Ambient sage is confined to User Dashboard, not the application shell. */
     .user-dashboard {
         display: flex;
         flex-direction: column;
         gap: 18px;
+        isolation: isolate;
+        margin: -14px;
+        padding: 14px;
+        border-radius: 24px;
+        background:
+            radial-gradient(ellipse at 84% 10%, rgba(160,198,166,.34), transparent 48%),
+            radial-gradient(ellipse at 8% 88%, rgba(191,216,194,.26), transparent 54%),
+            linear-gradient(145deg, rgba(244,250,245,.54), rgba(255,255,255,.10));
     }
 
     .dashboard-welcome {
@@ -47,10 +56,12 @@
         min-height: 112px;
         padding: 18px 19px;
         overflow: hidden;
-        background: #fff;
-        border: 1px solid #e5ece7;
+        background: rgba(255, 255, 255, .78);
+        border: 1px solid rgba(255,255,255,.90);
         border-radius: 17px;
-        box-shadow: 0 6px 20px rgba(34, 75, 53, .045);
+        box-shadow: 0 10px 28px rgba(40,78,51,.065), inset 0 1px 0 rgba(255,255,255,.65);
+        -webkit-backdrop-filter: blur(12px) saturate(112%);
+        backdrop-filter: blur(12px) saturate(112%);
         transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
     }
 
@@ -151,10 +162,12 @@
 
     .dashboard-panel {
         overflow: hidden;
-        background: #fff;
-        border: 1px solid #e5eaf1;
+        background: rgba(255, 255, 255, .79);
+        border: 1px solid rgba(255,255,255,.90);
         border-radius: 17px;
-        box-shadow: 0 9px 28px rgba(15, 23, 42, .045);
+        box-shadow: 0 12px 30px rgba(40,78,51,.065), inset 0 1px 0 rgba(255,255,255,.65);
+        -webkit-backdrop-filter: blur(12px) saturate(112%);
+        backdrop-filter: blur(12px) saturate(112%);
     }
 
     .dashboard-panel-head {
@@ -176,8 +189,8 @@
 
     /* Header Perlu Tindakan memakai pola dropdown Scrap Limit dengan tema oranye. */
     .dashboard-panel.action-panel.has-actions {
-        border-color: #F1EAD8;
-        background: #ffffff;
+        border-color: rgba(238,225,199,.90);
+        background: rgba(255,255,255,.83);
         overflow: hidden;
     }
 
@@ -213,7 +226,7 @@
     }
 
     .action-panel .action-panel-content[hidden] { display: none !important; }
-    .action-panel .action-panel-content { background: #ffffff; }
+    .action-panel .action-panel-content { background: rgba(255,255,255,.92); }
 
     .action-heading {
         display: flex;
@@ -370,7 +383,7 @@
         overflow-x: auto;
         border: 1px solid #dce5ef;
         border-radius: 14px;
-        background: #fff;
+        background: rgba(255,255,255,.92);
     }
 
     .recent-table {
@@ -659,6 +672,41 @@
     .scrap-reason-dialog textarea { width:100%; box-sizing:border-box; min-height:110px; border:1px solid #cbd5e1; border-radius:9px; padding:10px; font:inherit; font-size:13px; resize:vertical; }
     .scrap-modal-actions { justify-content:flex-end; margin-top:12px; }
     .scrap-save-error { color:#b91c1c !important; margin:7px 0 0 !important; }
+    /* Preserve data legibility and semantic alert colors; glass is only on card shells. */
+    @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+        .user-dashboard :is(.dashboard-kpi,.dashboard-panel) { background: rgba(255,255,255,.96); }
+    }
+    html[data-theme="dark"] .user-dashboard {
+        background:
+            radial-gradient(ellipse at 86% 10%, rgba(108,153,119,.17), transparent 50%),
+            radial-gradient(ellipse at 6% 89%, rgba(73,119,88,.13), transparent 54%);
+    }
+    html[data-theme="dark"] body .user-dashboard :is(.dashboard-kpi,.dashboard-panel) {
+        background: rgba(32,48,37,.76) !important;
+        border-color: rgba(144,177,151,.22) !important;
+        box-shadow: 0 14px 34px rgba(0,0,0,.18), inset 0 1px 0 rgba(234,249,237,.05) !important;
+    }
+    html[data-theme="dark"] .user-dashboard .dashboard-kpi.attention { border-color: rgba(208,177,107,.46) !important; }
+    html[data-theme="dark"] .user-dashboard :is(.dashboard-kpi-value,.dashboard-kpi-label,.dashboard-panel-title) { color: var(--text) !important; }
+    html[data-theme="dark"] .user-dashboard .recent-table-wrap { background: rgba(27,40,31,.91) !important; border-color: var(--border) !important; }
+    html[data-theme="dark"] .user-dashboard .action-panel .action-panel-content { background: rgba(29,43,33,.92); }
+    html[data-theme="dark"] .user-dashboard .action-panel .action-panel-toggle {
+        background: rgba(66,78,58,.55);
+        border-color: rgba(144,177,151,.20);
+        color: var(--text);
+    }
+    html[data-theme="dark"] .user-dashboard .scrap-limit-panel .scrap-limit-toggle {
+        background: rgba(92,55,56,.47);
+        border-color: rgba(205,126,126,.27);
+        color: var(--text);
+    }
+    @media (max-width: 680px) {
+        .user-dashboard { margin: 0; padding: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .user-dashboard .dashboard-kpi { transition: none; }
+        .user-dashboard .dashboard-kpi:hover { transform: none; }
+    }
 </style>
 
 @php

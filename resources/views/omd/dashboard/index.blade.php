@@ -37,9 +37,19 @@
     @endphp
 
     <style>
+        /* Frosted surface is scoped to OMD Dashboard; main layout stays unchanged. */
         .monitor-page {
             display: grid;
+            grid-template-columns: minmax(0, 1fr);
             gap: 18px;
+            isolation: isolate;
+            margin: -14px;
+            padding: 14px;
+            border-radius: 24px;
+            background:
+                radial-gradient(ellipse at 84% 12%, rgba(160, 198, 166, .34), transparent 48%),
+                radial-gradient(ellipse at 5% 86%, rgba(191, 216, 194, .27), transparent 54%),
+                linear-gradient(145deg, rgba(244, 250, 245, .54), rgba(255, 255, 255, .10));
         }
 
         .monitor-head {
@@ -84,10 +94,12 @@
         }
 
         .monitor-card {
-            background: #fff;
-            border: 1px solid #e6ebf2;
+            background: rgba(255, 255, 255, .78);
+            border: 1px solid rgba(255, 255, 255, .90);
             border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, .05);
+            box-shadow: 0 10px 30px rgba(40, 78, 51, .065), inset 0 1px 0 rgba(255,255,255,.65);
+            -webkit-backdrop-filter: blur(12px) saturate(112%);
+            backdrop-filter: blur(12px) saturate(112%);
         }
 
         .monitor-filter {
@@ -113,31 +125,21 @@
             max-width: 100%;
         }
 
-        /* Soft-green abstract cloud pattern, decorative only. */
+        /* Glass filter: calm translucent surface instead of the old cloud decoration. */
         .monitor-filter {
             position: relative;
-            isolation: isolate;
             overflow: hidden;
-            border-color: #d5e9dc;
-            background:
-                radial-gradient(ellipse 165px 82px at 6% 112%, rgba(157, 210, 171, .25) 0 65%, transparent 66%),
-                radial-gradient(ellipse 185px 105px at 27% 116%, rgba(204, 232, 204, .53) 0 65%, transparent 66%),
-                radial-gradient(ellipse 160px 90px at 61% 115%, rgba(139, 197, 163, .24) 0 65%, transparent 66%),
-                radial-gradient(ellipse 205px 95px at 92% 111%, rgba(187, 227, 198, .5) 0 65%, transparent 66%),
-                radial-gradient(circle at 18% 23%, rgba(122, 180, 147, .30) 0 2px, transparent 3px),
-                radial-gradient(circle at 68% 17%, rgba(122, 180, 147, .20) 0 2px, transparent 3px),
-                linear-gradient(112deg, #f0f8f2 0%, #e5f2e9 54%, #f5faf5 100%);
+            border-color: rgba(221, 235, 223, .88);
+            background: rgba(255, 255, 255, .78);
         }
         .monitor-filter::before {
             content: "";
             position: absolute;
             inset: 0;
-            z-index: -1;
             pointer-events: none;
-            background:
-                radial-gradient(circle at 37% 18%, rgba(255,255,255,.84) 0 1.5px, transparent 2.5px),
-                radial-gradient(circle at 79% 55%, rgba(255,255,255,.88) 0 2px, transparent 3px);
+            background: radial-gradient(ellipse at 95% 0%, rgba(175, 210, 179, .19), transparent 56%);
         }
+        .monitor-filter > * { position: relative; }
         .monitor-filter .monitor-field label { color: #365c44; }
         .monitor-filter .monitor-field select,
         .monitor-filter .monitor-field input {
@@ -145,23 +147,18 @@
             border-color: #d2e5d8;
         }
 
-        /* Color-tinted KPI cards; values and card hierarchy stay unchanged. */
-        .monitor-kpis .monitor-kpi { position: relative; overflow: hidden; }
-        .monitor-kpis .monitor-kpi:nth-child(1) {
-            background: linear-gradient(135deg, #f2f6ff, #e8efff);
-            border-color: #d4e1ff;
+        /* Unified frosted KPI surfaces. Category identity remains in the colored dots. */
+        .monitor-kpis .monitor-kpi {
+            position: relative;
+            overflow: hidden;
+            background: rgba(255,255,255,.76);
+            border-color: rgba(255,255,255,.90);
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
         }
-        .monitor-kpis .monitor-kpi:nth-child(2) {
-            background: linear-gradient(135deg, #f4fbed, #e9f6df);
-            border-color: #d9ebcc;
-        }
-        .monitor-kpis .monitor-kpi:nth-child(3) {
-            background: linear-gradient(135deg, #fff9ef, #fbf0dd);
-            border-color: #f0e1c6;
-        }
-        .monitor-kpis .monitor-kpi:nth-child(4) {
-            background: linear-gradient(135deg, #fff5f5, #fde9eb);
-            border-color: #f1d4d8;
+        .monitor-kpis .monitor-kpi:hover {
+            transform: translateY(-2px);
+            border-color: rgba(152,190,159,.64);
+            box-shadow: 0 13px 34px rgba(40,78,51,.10);
         }
         .monitor-kpis .kpi-label { color: #34413b; }
         .monitor-kpis .kpi-value { color: #1a2922; }
@@ -953,6 +950,45 @@
             .target-reason-meta {
                 white-space: normal;
             }
+        }
+        /* Accessible fallbacks, and scoped dark-sage glass in the existing dark theme. */
+        @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+            .monitor-page .monitor-card { background: rgba(255,255,255,.96); }
+        }
+        html[data-theme="dark"] .monitor-page {
+            background:
+                radial-gradient(ellipse at 86% 11%, rgba(108,153,119,.17), transparent 50%),
+                radial-gradient(ellipse at 5% 88%, rgba(73,119,88,.13), transparent 54%);
+        }
+        html[data-theme="dark"] body .monitor-page .monitor-card:not(.target-reason-card):not(.scrap-alert) {
+            background: rgba(32,48,37,.75) !important;
+            border-color: rgba(144,177,151,.22) !important;
+            box-shadow: 0 14px 34px rgba(0,0,0,.18), inset 0 1px 0 rgba(234,249,237,.05) !important;
+        }
+        html[data-theme="dark"] body .monitor-page .monitor-kpis .monitor-kpi {
+            background: rgba(32,48,37,.75) !important;
+            border-color: rgba(144,177,151,.22) !important;
+        }
+        html[data-theme="dark"] .monitor-page .monitor-filter::before {
+            background: radial-gradient(ellipse at 95% 0%, rgba(124,162,135,.12), transparent 55%);
+        }
+        html[data-theme="dark"] .monitor-page :is(.kpi-label,.kpi-value,.card-title,.monitor-head h2,.alert-title) { color: var(--text) !important; }
+        html[data-theme="dark"] .monitor-page :is(.kpi-note,.monitor-muted,.chart-legend,.monitor-pill) { color: var(--text-soft) !important; }
+        html[data-theme="dark"] .monitor-page :is(.chart-axis,.axis-caption,.axis-y-label,.month-label) { color: var(--text-soft) !important; }
+        html[data-theme="dark"] .monitor-page .monitor-pill {
+            background: rgba(35,51,40,.72);
+            border-color: rgba(144,177,151,.2);
+            color: var(--text-soft) !important;
+        }
+        html[data-theme="dark"] .monitor-page .monitor-field label {
+            color: var(--text-soft) !important;
+        }
+        @media (max-width: 680px) {
+            .monitor-page { margin: 0; padding: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .monitor-kpis .monitor-kpi { transition: none; }
+            .monitor-kpis .monitor-kpi:hover { transform: none; }
         }
     </style>
 
