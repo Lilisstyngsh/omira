@@ -689,6 +689,170 @@
     @include('omd.master.partials.master_colors')
 
 
+    {{-- Visual override khusus Plant & Line: gunakan surface tema, tanpa mengubah master lain. --}}
+    <style>
+        /* Surface halaman mengikuti komponen OMIRA lainnya (light / dark). */
+        .card.plant-dashboard-card.omd-master-accent,
+        .card.line-table-card.omd-master-accent {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 15px;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        .plant-dashboard-card .plant-dashboard-header h4,
+        .line-table-card .table-header h4 {
+            color: var(--text) !important;
+            font-size: 16px;
+            letter-spacing: -.2px;
+        }
+
+        .plant-dashboard-card .plant-dashboard {
+            gap: 13px;
+            padding: 4px 2px 9px;
+        }
+
+        /* Card tetap horizontal; hanya visual yang diperhalus. */
+        .plant-dashboard-card.omd-master-accent .plant-dashboard .plant-card {
+            min-width: 235px;
+            padding: 17px;
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 13px;
+            box-shadow: 0 2px 9px rgba(31, 52, 39, .035) !important;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+
+        .plant-dashboard-card.omd-master-accent .plant-dashboard .plant-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary) !important;
+            box-shadow: 0 5px 15px rgba(31, 52, 39, .07) !important;
+        }
+
+        .plant-dashboard-card.omd-master-accent .plant-dashboard .plant-card.active {
+            background: var(--surface) !important;
+            border-color: var(--primary) !important;
+            box-shadow: inset 3px 0 0 var(--primary), 0 3px 12px rgba(31, 52, 39, .055) !important;
+        }
+
+        .plant-dashboard-card.omd-master-accent .plant-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 11px;
+            background: var(--surface-hover) !important;
+            color: var(--primary-dark) !important;
+            font-size: 19px;
+        }
+
+        .plant-dashboard-card.omd-master-accent .plant-card h4 {
+            color: var(--text) !important;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .plant-dashboard-card.omd-master-accent .plant-card p {
+            color: var(--text-soft) !important;
+            font-size: 12px;
+        }
+
+        .plant-dashboard-card .plant-manage {
+            min-height: 0;
+            margin-top: 9px;
+            padding-top: 0;
+            border-top: 0 !important;
+        }
+
+        /* Underline hanya saat teks nama disorot / diakses lewat keyboard. */
+        .plant-dashboard-card .plant-name-edit [data-name-display],
+        .line-table-card .inline-name [data-name-display] {
+            text-decoration: none;
+            text-underline-offset: 3px;
+            text-decoration-thickness: 1px;
+            cursor: text;
+        }
+
+        .plant-dashboard-card .plant-name-edit [data-name-display]:hover,
+        .plant-dashboard-card .plant-name-edit:focus-visible [data-name-display],
+        .line-table-card .inline-name [data-name-display]:hover,
+        .line-table-card .editable-line-row:focus-visible .inline-name [data-name-display] {
+            text-decoration: underline;
+        }
+
+        .plant-dashboard-card .plant-card:focus-visible,
+        .plant-dashboard-card .plant-name-edit:focus-visible,
+        .line-table-card .editable-line-row:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Tabel Line compact, tetap memakai palet surface halaman lain. */
+        .line-table-card #lineTable {
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: var(--surface);
+        }
+
+        .line-table-card.omd-master-accent #lineTable table thead th {
+            background: var(--table-head-bg) !important;
+            color: var(--text-soft) !important;
+            border-bottom: 1px solid var(--border) !important;
+            font-size: 11px;
+            letter-spacing: .35px;
+        }
+
+        .line-table-card #lineTable th,
+        .line-table-card #lineTable td {
+            padding: 11px 16px;
+        }
+
+        .line-table-card #lineTable th:nth-child(2),
+        .line-table-card #lineTable td:nth-child(2) {
+            width: 92px;
+            text-align: right;
+        }
+
+        .line-table-card #lineTable table tbody tr {
+            height: 54px;
+        }
+
+        .line-table-card.omd-master-accent #lineTable table tbody tr:hover,
+        .line-table-card.omd-master-accent #lineTable table tbody tr:hover td {
+            background: var(--surface-hover) !important;
+        }
+
+        .line-table-card #lineTable table tbody td {
+            border-bottom-color: var(--border-soft) !important;
+        }
+
+        .line-table-card #lineTable .inline-name [data-name-display] {
+            color: var(--text);
+            font-weight: 650;
+        }
+
+        .line-table-card #lineTable .action-group {
+            justify-content: flex-end;
+        }
+
+        .plant-dashboard-card .master-delete,
+        .line-table-card .master-delete {
+            color: var(--text-soft);
+            border-radius: 7px;
+        }
+
+        .plant-dashboard-card .master-delete:hover,
+        .line-table-card .master-delete:hover {
+            background: var(--surface-hover);
+            color: var(--danger);
+        }
+
+        @media (max-width: 700px) {
+            .plant-dashboard-card.omd-master-accent .plant-dashboard .plant-card {
+                min-width: 210px;
+            }
+        }
+    </style>
+
+
     {{-- =====================================================
     DASHBOARD PLANT
 ===================================================== --}}

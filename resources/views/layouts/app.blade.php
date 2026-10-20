@@ -2756,7 +2756,7 @@
 
                                     <a href="{{ route('omd.scrap-cycles.index') }}"
                                         class="{{ request()->routeIs('omd.scrap-cycles.*') ? 'active' : '' }}">
-                                        <span>Riwayat Scrap Limit</span>
+                                        <span>Riwayat Scrap</span>
                                     </a>
 
                                     <a href="{{ route('omd.master.form-numbers.index') }}"
