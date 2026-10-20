@@ -10,10 +10,44 @@ use App\Models\NgType;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Closure;
 
 
 class MasterDataController extends Controller
 {
+    /** Nama master dibandingkan tanpa perbedaan kapital dan spasi berulang. */
+    private function normalizeMasterName(Request $request): void
+    {
+        if (is_string($request->input('name'))) {
+            $request->merge(['name' => Str::squish($request->input('name'))]);
+        }
+    }
+
+    private function uniqueMasterName(string $type, ?int $ignoreId = null, ?int $plantId = null): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($type, $ignoreId, $plantId): void {
+            if (!is_string($value) || $value === '') {
+                return;
+            }
+
+            $query = $type === 'plant' ? Plant::query() : Line::query()->where('plant_id', $plantId);
+            $needle = Str::lower(Str::squish($value));
+            $duplicate = $query->get(['id', 'name'])->first(function ($row) use ($needle, $ignoreId) {
+                return (int) $row->id !== $ignoreId && Str::lower(Str::squish($row->name)) === $needle;
+            });
+
+            if ($duplicate) {
+                if ($type === 'plant') {
+                    $fail("Plant {$value} sudah terdaftar.");
+                } else {
+                    $plantName = Plant::find($plantId)?->name ?? '-';
+                    $fail("Line {$value} sudah terdaftar pada Plant {$plantName}.");
+                }
+            }
+        };
+    }
+
     public function plant()
     {
         $plants = Plant::orderBy('name')
@@ -28,12 +62,10 @@ class MasterDataController extends Controller
 
     public function storePlant(Request $request)
     {
-
+        $this->normalizeMasterName($request);
         $request->validate([
-
-            'name' => 'required|max:100',
-
-        ]);
+            'name' => ['required', 'string', 'max:100', $this->uniqueMasterName('plant')],
+        ], ['name.required' => 'Nama Plant wajib diisi.']);
 
 
         Plant::create([
@@ -55,12 +87,10 @@ class MasterDataController extends Controller
         Request $request,
         Plant $plant
     ) {
-
+        $this->normalizeMasterName($request);
         $request->validate([
-
-            'name' => 'required|max:100',
-
-        ]);
+            'name' => ['required', 'string', 'max:100', $this->uniqueMasterName('plant', (int) $plant->id)],
+        ], ['name.required' => 'Nama Plant wajib diisi.']);
 
 
 
@@ -164,17 +194,17 @@ class MasterDataController extends Controller
 
     public function storeLine(Request $request)
     {
+        $this->normalizeMasterName($request);
         $validated = $request->validate([
             'plant_id' => [
                 'required',
                 'exists:plants,id'
             ],
             'name' => [
-                'required',
-                'string',
-                'max:100'
+                'required', 'string', 'max:100',
+                $this->uniqueMasterName('line', null, (int) $request->input('plant_id')),
             ]
-        ]);
+        ], ['name.required' => 'Nama Line wajib diisi.']);
 
         Line::create([
             'plant_id' => $validated['plant_id'],
@@ -196,6 +226,7 @@ class MasterDataController extends Controller
         Request $request,
         Line $line
     ) {
+        $this->normalizeMasterName($request);
         $validated = $request->validate([
             'plant_id' => [
                 'required',
@@ -203,11 +234,10 @@ class MasterDataController extends Controller
             ],
 
             'name' => [
-                'required',
-                'string',
-                'max:100'
+                'required', 'string', 'max:100',
+                $this->uniqueMasterName('line', (int) $line->id, (int) $request->input('plant_id')),
             ]
-        ]);
+        ], ['name.required' => 'Nama Line wajib diisi.']);
 
         $line->update([
             'plant_id' => $validated['plant_id'],
@@ -277,55 +307,33 @@ class MasterDataController extends Controller
         ]);
     }
 
-    public function modelProduct(Request $request)
+    public function modelProduct()
     {
-        $filters = $request->validate([
-            'plant_id' => ['nullable', 'integer', 'exists:plants,id'],
-            'line_id' => ['nullable', 'integer', 'exists:lines,id'],
-            'q' => ['nullable', 'string', 'max:150'],
-            'per_page' => ['nullable', 'in:10,25,50,100'],
-        ]);
-
-        $selectedPlantId = $filters['plant_id'] ?? null;
-        $selectedLineId = $filters['line_id'] ?? null;
-        $search = trim($filters['q'] ?? '');
-        $perPage = (int) ($filters['per_page'] ?? 10);
-
-        $plants = Plant::query()->orderBy('name')->get();
-        $lines = Line::query()->with('plant')->orderBy('name')->get();
-
-        $models = MasterModel::query()
-            ->with([
-                'line.plant',
-                'products' => fn ($query) => $query->orderBy('name'),
-                'products.scrapLimits' => fn ($query) => $query
-                    ->with('creator')
-                    ->orderByDesc('effective_from')
-                    ->orderByDesc('id'),
-            ])
-            ->when($selectedPlantId, fn ($query) => $query->whereHas('line',
-                fn ($line) => $line->where('plant_id', $selectedPlantId)))
-            ->when($selectedLineId, fn ($query) => $query->where('line_id', $selectedLineId))
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('model', 'like', '%' . $search . '%')
-                        ->orWhereHas('products', fn ($product) => $product
-                            ->where('name', 'like', '%' . $search . '%'))
-                        ->orWhereHas('line', fn ($line) => $line
-                            ->where('name', 'like', '%' . $search . '%')
-                            ->orWhereHas('plant', fn ($plant) => $plant
-                                ->where('name', 'like', '%' . $search . '%')));
-                });
-            })
+        $models = MasterModel::with([
+            'line.plant',
+            'products'
+        ])
             ->orderBy('model')
-            ->orderBy('id')
-            ->paginate($perPage)
-            ->withQueryString();
+            ->get();
 
-        return view('omd.master.model-product', compact(
-            'models', 'plants', 'lines', 'selectedPlantId', 'selectedLineId',
-            'search', 'perPage'
-        ));
+        $lines = Line::with('plant')
+            ->orderBy('name')
+            ->get();
+
+        $selectedLineId = request()->query('line_id');
+
+        if (!$selectedLineId) {
+            $selectedLineId = $lines->first()?->id;
+        }
+
+        return view(
+            'omd.master.model-product',
+            compact(
+                'models',
+                'lines',
+                'selectedLineId'
+            )
+        );
     }
 
     public function storeModel(

@@ -191,10 +191,10 @@ $totalQtyOmd = $order->items->sum(fn($item) => (int) ($item->after_qty ?? 0));
     }
 
     .repair-card-title {
-        margin: 0 0 4px;
-        font-size: 16px;
-        font-weight: 800;
-        color: #172033;
+        margin: 0 0 12px;
+        font-size: 14px;
+        font-weight: 650;
+        color: #0f172a;
     }
 
     .repair-card-desc {
@@ -1044,10 +1044,6 @@ $totalQtyOmd = $order->items->sum(fn($item) => (int) ($item->after_qty ?? 0));
     <h3 class="repair-card-title">
         Progress Order
     </h3>
-
-    <p class="repair-card-desc">
-        Riwayat tahapan Order Repair Box.
-    </p>
 
 
     <div class="timeline-wrap">

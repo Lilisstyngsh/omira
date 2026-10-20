@@ -907,7 +907,7 @@
 /* Unified operational status chips; numeric and status cells centered. */
 .recent-table th:nth-child(4), .recent-table th:nth-child(5),
 .recent-table td:nth-child(4), .recent-table td:nth-child(5) {text-align:center!important;}
-.recent-table .status-pill {display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border:0!important;border-radius:999px!important;padding:8px 13px!important;font-weight:800!important;white-space:nowrap;}
+.recent-table .status-pill {display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border:0!important;border-radius:999px!important;padding:8px 13px!important;font-weight:600!important;white-space:nowrap;}
 .recent-table .status-pill::before {content:"";display:inline-block;width:7px;height:7px;min-width:7px;background:currentColor;border-radius:50%;}
 </style>
 <script>

@@ -872,7 +872,8 @@
             </div>
 
 
-            <form method="POST" action="{{ route('omd.master.plant.store') }}">
+            <form method="POST" action="{{ route('omd.master.plant.store') }}" data-master-name-form="plant">
+                <input type="hidden" name="_master_form" value="plant">
 
                 @csrf
 
@@ -882,7 +883,7 @@
                 </label>
 
                 <input type="text" id="addPlantName" name="name" class="form-control" placeholder="Contoh : Body"
-                    maxlength="100" required>
+                    value="{{ old('_master_form') === 'plant' ? old('name') : '' }}" maxlength="100" required>
 
 
                 <div class="modal-action">
@@ -933,7 +934,8 @@
             </div>
 
 
-            <form method="POST" action="{{ route('omd.master.line.store') }}">
+            <form method="POST" action="{{ route('omd.master.line.store') }}" data-master-name-form="line">
+                <input type="hidden" name="_master_form" value="line">
 
                 @csrf
 
@@ -946,7 +948,7 @@
                 </label>
 
                 <input type="text" name="name" id="addLineName" class="form-control"
-                    placeholder="Contoh: Assy Body" maxlength="100" required>
+                    placeholder="Contoh: Assy Body" value="{{ old('_master_form') === 'line' ? old('name') : '' }}" maxlength="100" required>
 
 
                 <div class="modal-action">
@@ -973,6 +975,15 @@
 ===================================================== --}}
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @include('partials.master-validation-alert')
+    @if (old('_master_form') === 'plant' || old('_master_form') === 'line')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalId = @json(old('_master_form') === 'plant' ? 'addPlantModal' : 'addLineModal');
+            document.getElementById(modalId).style.display = 'flex';
+        });
+    </script>
+    @endif
 
 
     <script>
@@ -999,6 +1010,10 @@
         keepSelectedPlantInUrl();
 
         function showMasterFeedback(message, type = 'success') {
+            if (type === 'danger') {
+                showOmiraMasterWarning(message);
+                return;
+            }
             const feedback = document.getElementById('masterFeedback');
             feedback.className = 'alert alert-' + type;
             feedback.textContent = message;

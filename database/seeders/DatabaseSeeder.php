@@ -231,8 +231,8 @@ class DatabaseSeeder extends Seeder
             ],
 
             [
-                'name' => 'Marcellino',
-                'email' => 'marcellino.reyhan@aiia.co.id',
+                'name' => 'Aden',
+                'email' => 'aden@aiia.co.id',
                 'plant' => 'Body',
                 'line' => 'Injection',
             ],

@@ -198,11 +198,12 @@ Data Master Plant
             Tambah Plant
         </h3>
 
-        <form method="POST" action="{{ route('omd.master.plant.store') }}">
+        <form method="POST" action="{{ route('omd.master.plant.store') }}" data-master-name-form="plant">
+            <input type="hidden" name="_master_form" value="plant">
             @csrf
 
             <div class="plant-input-row">
-                <input type="text" name="name" class="form-control" placeholder="Masukkan nama plant" required>
+                <input type="text" name="name" class="form-control" placeholder="Masukkan nama plant" value="{{ old('_master_form') === 'plant' ? old('name') : '' }}" maxlength="100" required>
 
                 <button class="btn btn-primary plant-save-btn">
                     Simpan
@@ -301,7 +302,9 @@ Data Master Plant
             </button>
         </div>
 
-        <form id="editPlantForm" method="POST">
+        <form id="editPlantForm" method="POST" data-master-name-form="plant">
+            <input type="hidden" name="_master_form" value="edit-plant">
+            <input type="hidden" name="_master_id" id="editPlantId">
             @csrf
             @method('PUT')
 
@@ -338,6 +341,7 @@ Data Master Plant
         .forEach(btn => {
             btn.onclick = function() {
                 editName.value = this.dataset.name;
+                document.getElementById('editPlantId').value = this.dataset.id;
 
                 editForm.action =
                     "{{ url('/omd/master/plant') }}/" +
@@ -357,6 +361,17 @@ Data Master Plant
     ===================================================== --}}
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@include('partials.master-validation-alert')
+@if (old('_master_form') === 'edit-plant' && old('_master_id'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('editPlantId').value = @json(old('_master_id'));
+        editForm.action = "{{ url('/omd/master/plant') }}/" + @json(old('_master_id'));
+        editName.value = @json(old('name'));
+        editModal.style.display = 'flex';
+    });
+</script>
+@endif
 
 <script>
     document.querySelectorAll('.delete-plant-form')

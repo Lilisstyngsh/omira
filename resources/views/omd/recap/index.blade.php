@@ -6,6 +6,9 @@
 @section('content')
     @php
         $exportParams = [
+            'period_type' => request('period_type', 'monthly'),
+            'report_year' => (int) request('report_year', $startDate->year),
+            'report_month' => (int) request('report_month', $startDate->month),
             'start_date' => $startDate->toDateString(),
             'end_date' => $endDate->toDateString(),
         ];

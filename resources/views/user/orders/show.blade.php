@@ -80,10 +80,10 @@
         }
 
         .repair-card-title {
-            margin: 0 0 4px;
-            font-size: 16px;
-            font-weight: 800;
-            color: #172033;
+            margin: 0 0 12px;
+            font-size: 14px;
+            font-weight: 650;
+            color: #0f172a;
         }
 
         .repair-card-desc {
@@ -744,10 +744,6 @@
             Progress Order
         </h3>
 
-        <p class="repair-card-desc">
-            Riwayat tahapan Order Repair Box.
-        </p>
-
 
         <div class="timeline-wrap">
 
@@ -934,25 +930,27 @@
             $showAfter = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
         @endphp
         <div class="repair-card">
-            <h3 class="repair-card-title">
-                @if ($order->status === 'submitted')
-                    Detail Order Repair Box
-                @elseif ($order->status === 'in_repair')
-                    Order Sedang Diproses OMD
-                @elseif ($order->status === 'completed')
-                    Hasil Repair OMD
-                @elseif ($order->status === 'revision_requested')
-                    Menunggu Koreksi OMD
-                @else
-                    Hasil Repair &amp; Serah Terima
+            <div class="omira-detail-export-head">
+                <h3 class="repair-card-title">
+                    @if ($order->status === 'submitted')
+                        Detail Order Repair Box
+                    @elseif ($order->status === 'in_repair')
+                        Order Sedang Diproses OMD
+                    @elseif ($order->status === 'completed')
+                        Hasil Repair OMD
+                    @elseif ($order->status === 'revision_requested')
+                        Menunggu Koreksi OMD
+                    @else
+                        Hasil Repair &amp; Serah Terima
+                    @endif
+                </h3>
+                @if ($order->status === 'confirmed')
+                    <div class="omira-detail-export-actions">
+                        <a class="pdf" href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'pdf']) }}"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> PDF</a>
+                        <a class="excel" href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'excel']) }}"><i class="fa-regular fa-file-excel" aria-hidden="true"></i> Excel</a>
+                    </div>
                 @endif
-            </h3>
-            @if($order->status === 'confirmed')
-                <div class="omira-detail-export-head"><div class="omira-detail-export-actions">
-    <a class="pdf" href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'pdf']) }}"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> PDF</a>
-    <a class="excel" href="{{ route('user.orders.history.export', ['order'=>$order, 'format'=>'excel']) }}"><i class="fa-regular fa-file-excel" aria-hidden="true"></i> Excel</a>
-</div></div>
-            @endif
+            </div>
             @include('partials.repair-order-readonly-table', [
                 'order' => $order,
                 'showAfter' => $showAfter,

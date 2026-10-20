@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FiscalYearTarget;
+use App\Models\RepairMonthlySnapshot;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -14,8 +15,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class RecapController extends Controller
 {
@@ -54,18 +56,19 @@ class RecapController extends Controller
         ));
     }
 
-    /** The dashboard controller is the single source of monitoring metrics. */
+
     private function dashboardChartData(Carbon $endDate, array $lineIds): array
     {
         $dashboard = app(DashboardController::class);
-        $params = ['year' => $endDate->year, 'month' => $endDate->month];
+        
+        $fiscalYear = $endDate->month >= 4 ? $endDate->year : $endDate->year - 1;
+        $params = ['year' => $fiscalYear];
         $selectedLines = array_values(array_unique(array_map('intval', $lineIds)));
         $base = $dashboard->index(Request::create('/dashboard', 'GET', $params))->getData();
 
-        // Dashboard supports one Line. For multiple Line selections, combine
-        // the respective dashboard series. Do not use global snapshots here.
+
         if (count($selectedLines) > 1) {
-            $order = array_fill(0, $endDate->month, 0);
+            $order = array_fill(0, count($base['months']), 0);
             $ok = $order;
             $scrap = $order;
             foreach ($selectedLines as $id) {
@@ -128,7 +131,7 @@ class RecapController extends Controller
         [, $end] = $this->resolvePeriod($request);
         $ids = $this->resolveLineIds($request);
         $data = $this->dashboardChartData($end, $ids);
-        // Render the EXACT Dashboard Blade and capture its existing chart-card.
+
         return view('omd.dashboard.index', $data);
     }
 
@@ -137,101 +140,56 @@ class RecapController extends Controller
         [$startDate, $endDate] = $this->resolvePeriod($request);
         $selectedLineIds = $this->resolveLineIds($request);
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
-
-        // A separate matrix for each month prevents duplicate day numbers
-        // when the selected reporting period spans multiple months.
+        $isYearly = $request->input('period_type', 'monthly') === 'yearly';
+        $annualSummary = $isYearly ? $this->annualSummary($startDate->year, $selectedLineIds) : [];
         $monthlyReports = collect();
-        $cursor = $startDate->copy()->startOfMonth();
-        $lastMonth = $endDate->copy()->startOfMonth();
 
-        while ($cursor->lte($lastMonth)) {
-            $monthStart = $cursor->copy()->startOfMonth()->max($startDate->copy());
-            $monthEnd = $cursor->copy()->endOfMonth()->min($endDate->copy());
-            $matrixRows = $this->matrixData($monthStart, $monthEnd, $selectedLineIds);
-
-            $plants = $matrixRows->groupBy('plant')->map(function (Collection $plantRows, $plantName) {
-                $lines = $plantRows->groupBy('line')->map(function (Collection $lineRows, $lineName) {
-                    $models = $lineRows->groupBy('model')->map(function (Collection $modelRows, $modelName) {
-                        $products = $modelRows->map(function ($product) {
-                            $total = ['order' => 0, 'ok' => 0, 'scrap' => 0];
-                            foreach ($product['daily'] as $values) {
-                                foreach ($total as $key => $_) {
-                                    $total[$key] += (int) ($values[$key] ?? 0);
-                                }
-                            }
-                            $product['totals'] = $total;
-                            return $product;
-                        })->values();
-                        $totals = ['order' => 0, 'ok' => 0, 'scrap' => 0];
-                        $daily = [];
-                        foreach ($products as $product) {
-                            foreach ($totals as $key => $_) {
-                                $totals[$key] += $product['totals'][$key];
-                            }
-                            foreach ($product['daily'] as $day => $values) {
-                                foreach ($totals as $key => $_) {
-                                    $daily[$day][$key] = ($daily[$day][$key] ?? 0) + (int) ($values[$key] ?? 0);
-                                }
-                            }
-                        }
-                        return [
-                            'name' => $modelName,
-                            'products' => $products,
-                            // Exactly three status rows per product; no model subtotal rows.
-                            'rowspan' => $products->count() * 3,
-                            'totals' => $totals,
-                            'daily' => $daily,
-                        ];
-                    })->values();
-                    return [
-                        'name' => $lineName,
-                        'models' => $models,
-                        'rowspan' => $models->sum('rowspan'),
-                    ];
-                })->values();
-                return [
-                    'name' => $plantName,
-                    'lines' => $lines,
-                    'rowspan' => $lines->sum('rowspan'),
-                ];
-            })->values();
-
-            $grandDaily = [];
-            $grandTotals = ['order' => 0, 'ok' => 0, 'scrap' => 0];
-            foreach ($matrixRows as $product) {
-                foreach ($product['daily'] as $day => $values) {
-                    foreach ($grandTotals as $key => $_) {
-                        $amount = (int) ($values[$key] ?? 0);
-                        $grandDaily[$day][$key] = ($grandDaily[$day][$key] ?? 0) + $amount;
-                        $grandTotals[$key] += $amount;
-                    }
-                }
-            }
-
+        if (! $isYearly) {
+            $dates = $this->reportDates($startDate, $endDate);
+            $matrixRows = $this->matrixData($startDate, $endDate, $selectedLineIds);
             $monthlyReports->push([
-                'label' => $cursor->copy()->locale('id')->translatedFormat('F Y'),
-                'days' => range($monthStart->day, $monthEnd->day),
-                'plants' => $plants,
-                'grandDaily' => $grandDaily,
-                'grandTotals' => $grandTotals,
+                'label' => $startDate->locale('id')->translatedFormat('F Y'),
+                'days' => $dates,
+                'range_label' => $startDate->isSameMonth($endDate)
+                    ? $startDate->locale('id')->translatedFormat('F Y')
+                    : $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y'),
+                
+                    'pages' => $matrixRows->isEmpty()
+                    ? collect([collect()])
+                    : $matrixRows->chunk(18)->map(fn(Collection $chunk) => $this->groupMatrixForPdf($chunk))->values(),
+                'grandDaily' => $this->sumDailyMatrix($matrixRows, $dates),
+                'productCount' => $matrixRows->count(),
             ]);
-            $cursor->addMonth();
         }
 
-        $filename = sprintf(
-            'Rekap_Repair_Box_%s_sd_%s.pdf',
-            $startDate->format('Y-m-d'),
-            $endDate->format('Y-m-d')
-        );
-
+        $filename = sprintf('Rekap_Repair_Box_%s_sd_%s.pdf', $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
         return Pdf::loadView('omd.recap.pdf', compact(
             'startDate',
             'endDate',
             'monthlyReports',
-            'selectedLineNames'
-        ))
-            ->setPaper('a3', 'landscape')
-            ->download($filename);
+            'selectedLineNames',
+            'isYearly',
+            'annualSummary'
+        ))->setPaper('a4', 'landscape')->download($filename);
+    }
+
+    /** Susunan grup dan rowspan tetap sama dengan report harian sebelumnya. */
+    private function groupMatrixForPdf(Collection $matrixRows): Collection
+    {
+        return $matrixRows->groupBy('plant')->map(function (Collection $plantRows, $plantName) {
+            $lines = $plantRows->groupBy('line')->map(function (Collection $lineRows, $lineName) {
+                $models = $lineRows->groupBy('model')->map(function (Collection $modelRows, $modelName) {
+                    $products = $modelRows->values();
+                    return [
+                        'name' => $modelName,
+                        'products' => $products,
+                        'rowspan' => $products->count() * 3,
+                    ];
+                })->values();
+                return ['name' => $lineName, 'models' => $models, 'rowspan' => $models->sum('rowspan')];
+            })->values();
+            return ['name' => $plantName, 'lines' => $lines, 'rowspan' => $lines->sum('rowspan')];
+        })->values();
     }
 
     public function exportExcel(Request $request)
@@ -239,59 +197,22 @@ class RecapController extends Controller
         [$startDate, $endDate] = $this->resolvePeriod($request);
         $selectedLineIds = $this->resolveLineIds($request);
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
-        $chartData = $this->dashboardChartData($endDate, $selectedLineIds);
-        $chartRows = $this->chartRowsFromDashboard($chartData);
-        $chartImage = $this->validateChartImage($request);
-
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->removeSheetByIndex(0);
+        $isYearly = $request->input('period_type', 'monthly') === 'yearly';
         $temporaryChartPath = null;
 
-        $cursor = $startDate->copy()->startOfMonth();
-        $lastMonth = $endDate->copy()->startOfMonth();
-        $createdSheets = 0;
-
-        while ($cursor->lte($lastMonth)) {
-            $monthStart = $cursor->copy()->startOfMonth()->max($startDate->copy());
-            $monthEnd = $cursor->copy()->endOfMonth()->min($endDate->copy());
-            $matrixRows = $this->matrixData($monthStart, $monthEnd, $selectedLineIds);
-
-            $sheetName = $this->safeSheetName($cursor->locale('id')->translatedFormat('M Y'));
+        if ($isYearly) {
+            // Rekap tahunan tetap memakai format FY dan grafik Monitoring yang sudah ada.
+            $chartData = $this->dashboardChartData($endDate, $selectedLineIds);
+            $chartRows = $this->chartRowsFromDashboard($chartData);
+            $chartImage = $this->validateChartImage($request);
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->removeSheetByIndex(0);
             $sheet = $spreadsheet->createSheet();
-            $sheet->setTitle($sheetName);
-            $this->buildMonthlyMatrixSheet(
+            $sheet->setTitle('Rekap Tahunan');
+            $this->buildAnnualSummarySheet(
                 $sheet,
-                $matrixRows,
-                $monthStart,
-                $monthEnd,
-                $selectedLineNames
-            );
-            $createdSheets++;
-
-            if ($createdSheets === 1) {
-                $monitoringSheet = $spreadsheet->createSheet();
-                $monitoringSheet->setTitle('Monitoring');
-                $temporaryChartPath = $this->buildMonitoringSheet(
-                    $monitoringSheet,
-                    $chartRows,
-                    $chartImage,
-                    $selectedLineNames,
-                    $startDate,
-                    $endDate
-                );
-            }
-
-            $cursor->addMonth();
-        }
-
-        if ($createdSheets === 0) {
-            $sheet = $spreadsheet->createSheet();
-            $sheet->setTitle('Rekap');
-            $this->buildMonthlyMatrixSheet(
-                $sheet,
-                collect(),
-                $startDate,
-                $endDate,
+                $this->annualSummary($startDate->year, $selectedLineIds),
+                $startDate->year,
                 $selectedLineNames
             );
             $monitoringSheet = $spreadsheet->createSheet();
@@ -304,20 +225,27 @@ class RecapController extends Controller
                 $startDate,
                 $endDate
             );
+        } else {
+            // Load file yang diminta user secara langsung agar merge, posisi TOTAL,
+            // GRAND TOTAL, lebar kolom, dan style tidak diubah menjadi format baru.
+            $spreadsheet = IOFactory::load(resource_path('templates/DATA_REKAP_BULANAN_OMD.xlsx'));
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Rekap');
+            $dates = $this->reportDates($startDate, $endDate);
+            $this->fillDailyTemplateSheet(
+                $sheet,
+                $this->matrixData($startDate, $endDate, $selectedLineIds),
+                $dates,
+                $startDate,
+                $endDate
+            );
         }
-
         $spreadsheet->setActiveSheetIndex(0);
 
-        $filename = sprintf(
-            'Rekap_Repair_Box_%s_sd_%s.xlsx',
-            $startDate->format('Y-m-d'),
-            $endDate->format('Y-m-d')
-        );
-
+        $filename = sprintf('Rekap_Repair_Box_%s_sd_%s.xlsx', $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
         $tempPath = tempnam(sys_get_temp_dir(), 'omira_recap_');
         $xlsxPath = $tempPath . '.xlsx';
         @unlink($tempPath);
-
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         try {
             $writer->save($xlsxPath);
@@ -326,10 +254,7 @@ class RecapController extends Controller
         }
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
-
-        return response()
-            ->download($xlsxPath, $filename)
-            ->deleteFileAfterSend(true);
+        return response()->download($xlsxPath, $filename)->deleteFileAfterSend(true);
     }
 
     private function resolvePeriod(Request $request): array
@@ -342,7 +267,7 @@ class RecapController extends Controller
             'report_month' => ['nullable', 'integer', 'between:1,12'],
         ]);
 
-        $periodType = $request->input('period_type');
+        $periodType = $request->input('period_type', 'monthly');
 
         // Rentang tanggal menggunakan tanggal pilihan pengguna, bukan periode fiscal year.
         if ($periodType === 'custom') {
@@ -358,25 +283,15 @@ class RecapController extends Controller
             return [$startDate, $endDate];
         }
 
-        if ($periodType && $request->filled('report_year')) {
-            $year = (int) $request->input('report_year');
-            if ($periodType === 'yearly') {
-                return [Carbon::create($year, 4, 1)->startOfDay(), Carbon::create($year + 1, 3, 31)->endOfDay()];
-            }
-            if ($request->filled('report_month')) {
-                $month = (int) $request->input('report_month');
-                return [Carbon::create($year, $month, 1)->startOfMonth()->startOfDay(), Carbon::create($year, $month, 1)->endOfMonth()->endOfDay()];
-            }
+        if ($periodType === 'yearly') {
+            $year = (int) $request->input('report_year', now()->year);
+            return [Carbon::create($year, 4, 1)->startOfDay(), Carbon::create($year + 1, 3, 31)->endOfDay()];
         }
 
-        $startDate = $request->filled('start_date')
-            ? Carbon::parse($request->input('start_date'))->startOfDay()
-            : now()->startOfMonth()->startOfDay();
-        $endDate = $request->filled('end_date')
-            ? Carbon::parse($request->input('end_date'))->endOfDay()
-            : now()->endOfDay();
-
-        return [$startDate, $endDate];
+        // Bulanan selalu tanggal 1 sampai akhir bulan, meskipun bulan belum selesai.
+        $year = (int) $request->input('report_year', now()->year);
+        $month = (int) $request->input('report_month', now()->month);
+        return [Carbon::create($year, $month, 1)->startOfDay(), Carbon::create($year, $month, 1)->endOfMonth()->endOfDay()];
     }
 
     /** Annual summary follows the fiscal year: April through March. */
@@ -402,7 +317,25 @@ class RecapController extends Controller
             ->selectRaw("SUM(CASE WHEN UPPER(ng.code) = 'S' THEN roi.after_qty ELSE 0 END) as scrap_qty")
             ->groupByRaw('YEAR(rc.confirmed_at), MONTH(rc.confirmed_at)')
             ->get()
-            ->keyBy(fn ($row) => sprintf('%04d-%02d', $row->calendar_year, $row->calendar_month));
+            ->keyBy(fn($row) => sprintf('%04d-%02d', $row->calendar_year, $row->calendar_month));
+
+        // Snapshot historis digunakan hanya pada rekap global (Semua Line).
+        // Jangan dijumlahkan dengan transaksi agar angka FY tidak terhitung ganda.
+        // Snapshot tidak memiliki rincian per Line, sehingga filter Line tetap
+        // memakai data transaksi aktual dari $actualRows.
+        $snapshots = collect();
+        if (empty($lineIds)) {
+            $snapshots = RepairMonthlySnapshot::query()
+                ->where(function ($query) use ($fiscalYear) {
+                    $query->where(function ($q) use ($fiscalYear) {
+                        $q->where('year', $fiscalYear)->whereBetween('month', [4, 12]);
+                    })->orWhere(function ($q) use ($fiscalYear) {
+                        $q->where('year', $fiscalYear + 1)->whereBetween('month', [1, 3]);
+                    });
+                })
+                ->get()
+                ->keyBy(fn($row) => sprintf('%04d-%02d', $row->year, $row->month));
+        }
 
         if (empty($lineIds)) {
             $target = (int) FiscalYearTarget::query()
@@ -421,14 +354,15 @@ class RecapController extends Controller
         while ($cursor->lte($end)) {
             $key = $cursor->format('Y-m');
             $actual = $actualRows->get($key);
-            $order = $actual ? (int) $actual->order_qty : null;
-            $scrap = $actual ? (int) $actual->scrap_qty : null;
+            $snapshot = $snapshots->get($key);
+            $order = $snapshot ? (int) $snapshot->order_qty : ($actual ? (int) $actual->order_qty : null);
+            $scrap = $snapshot ? (int) $snapshot->scrap_qty : ($actual ? (int) $actual->scrap_qty : null);
 
             $months[] = [
                 'label' => $cursor->locale('id')->translatedFormat('M'),
-                'target' => $target,
+                'target' => $snapshot ? (int) $snapshot->target_qty : $target,
                 'order' => $order,
-                'finish' => $actual ? max($order - $scrap, 0) : null,
+                'finish' => $snapshot ? (int) $snapshot->ok_qty : ($actual ? max($order - $scrap, 0) : null),
                 'scrap' => $scrap,
             ];
             $cursor->addMonth();
@@ -641,48 +575,276 @@ class RecapController extends Controller
 
     private function matrixData(Carbon $startDate, Carbon $endDate, array $lineIds = []): Collection
     {
-        $rows = $this->detailQuery($startDate, $endDate, $lineIds)
-            ->orderBy('plant')
-            ->orderBy('line')
-            ->orderBy('model')
-            ->orderBy('produk')
-            ->orderBy('tanggal')
-            ->get();
+        // Sumber baris adalah transaksi Order Repair OMD pada periode terpilih,
+        // bukan seluruh katalog Data Master. Plant/Line/Model/Produk tanpa
+        // transaksi tidak ditampilkan pada export PDF maupun Excel.
+        $grouped = [];
+        $add = function ($plant, $line, $model, $produk) use (&$grouped): string {
+            $plant = (string) ($plant ?? '-');
+            $line = (string) ($line ?? '-');
+            $model = (string) ($model ?? '-');
+            $produk = (string) ($produk ?? '-');
+            $key = json_encode([$plant, $line, $model, $produk], JSON_UNESCAPED_UNICODE);
+            if (! isset($grouped[$key])) {
+                $grouped[$key] = compact('plant', 'line', 'model', 'produk') + ['daily' => []];
+            }
+            return $key;
+        };
+        foreach ($this->detailQuery($startDate, $endDate, $lineIds)->get() as $item) {
+            $key = $add($item->plant, $item->line, $item->model, $item->produk);
+            // Full date, not the day number: handles custom ranges crossing months.
+            $date = Carbon::parse($item->tanggal)->toDateString();
+            $grouped[$key]['daily'][$date] ??= ['order' => 0, 'scrap' => 0];
+            $grouped[$key]['daily'][$date]['order'] += (int) $item->total;
+            if (strtoupper((string) ($item->jenis_ng ?? '')) === 'S') {
+                $grouped[$key]['daily'][$date]['scrap'] += (int) $item->total;
+            }
+        }
+        foreach ($grouped as &$item) {
+            foreach ($item['daily'] as &$values) {
+                $values['ok'] = max($values['order'] - $values['scrap'], 0);
+            }
+            unset($values);
+        }
+        unset($item);
+        return collect(array_values($grouped))
+            ->sortBy(fn($item) => json_encode([$item['plant'], $item['line'], $item['model'], $item['produk']]))
+            ->values();
+    }
 
-        return $rows
-            ->groupBy(fn($row) => implode('|', [
-                $row->plant,
-                $row->line,
-                $row->model ?? '-',
-                $row->produk ?? '-',
-            ]))
-            ->map(function (Collection $items) {
-                $first = $items->first();
-                $daily = [];
+    private function reportDates(Carbon $startDate, Carbon $endDate): array
+    {
+        $dates = [];
+        for ($day = $startDate->copy()->startOfDay(); $day->lte($endDate); $day->addDay()) {
+            $dates[] = [
+                'key' => $day->toDateString(),
+                'day' => $day->day,
+                'header' => $startDate->isSameMonth($endDate) ? (string) $day->day : $day->format('d/m'),
+            ];
+        }
+        return $dates;
+    }
 
-                foreach ($items as $item) {
-                    $day = Carbon::parse($item->tanggal)->day;
-                    $daily[$day] ??= ['order' => 0, 'scrap' => 0];
-                    $daily[$day]['order'] += (int) $item->total;
-                    if (strtoupper((string) ($item->jenis_ng ?? '')) === 'S') {
-                        $daily[$day]['scrap'] += (int) $item->total;
+    private function sumDailyMatrix(Collection $matrixRows, array $dates): array
+    {
+        $totals = [];
+        foreach ($dates as $date) {
+            foreach (['order', 'ok', 'scrap'] as $key) {
+                $totals[$date['key']][$key] = $matrixRows->sum(
+                    fn($product) => (int) ($product['daily'][$date['key']][$key] ?? 0)
+                );
+            }
+        }
+        return $totals;
+    }
+
+    /**
+     * Isi cell langsung pada template Excel permintaan user.
+     * Lokasi asli: B:E grup, F jenis, G:AK tanggal, AL:AM GRAND TOTAL,
+     * B264:E266 TOTAL dengan NG/OK/Scrap di F264:F266.
+     */
+    private function fillDailyTemplateSheet(Worksheet $sheet, Collection $matrixRows, array $dates, Carbon $start, Carbon $end): void
+    {
+        $productCount = max(1, $matrixRows->count());
+        $originalProducts = 86; // Baris 6 s.d. 263 pada template asli, 3 baris/produk.
+        $lastDataRow = 5 + ($productCount * 3);
+        $footerRow = $lastDataRow + 1;
+        $dayCount = count($dates);
+        $extraDays = max(0, $dayCount - 31);
+
+        // Lepaskan hanya merge dinamis; header template tetap seperti aslinya.
+        foreach (array_keys($sheet->getMergeCells()) as $range) {
+            if (preg_match('/^[A-Z]+(\d+):[A-Z]+\d+$/', $range, $match) && (int) $match[1] >= 6) {
+                $sheet->unmergeCells($range);
+            }
+        }
+
+        if ($productCount > $originalProducts) {
+            $sheet->insertNewRowBefore(264, ($productCount - $originalProducts) * 3);
+            // Baris tambahan mewarisi format per indikator dari template.
+            for ($row = 264; $row <= $lastDataRow; $row++) {
+                $sourceRow = 6 + (($row - 6) % 3);
+                foreach (range(2, 37) as $column) {
+                    $letter = Coordinate::stringFromColumnIndex($column);
+                    $sheet->duplicateStyle($sheet->getStyle("{$letter}{$sourceRow}"), "{$letter}{$row}");
+                }
+            }
+        } elseif ($productCount < $originalProducts) {
+            $sheet->removeRow($footerRow, ($originalProducts - $productCount) * 3);
+        }
+
+        if ($extraDays) {
+            $sheet->unmergeCells('G4:AK4');
+            $sheet->insertNewColumnBefore('AL', $extraDays);
+            $lastDayColumn = Coordinate::stringFromColumnIndex(37 + $extraDays);
+            $sheet->mergeCells("G4:{$lastDayColumn}4");
+            for ($n = 0; $n < $extraDays; $n++) {
+                $col = Coordinate::stringFromColumnIndex(38 + $n);
+                $sheet->duplicateStyle($sheet->getStyle('AK5'), "{$col}5");
+                for ($row = 6; $row <= $footerRow + 2; $row++) {
+                    $sheet->duplicateStyle($sheet->getStyle("AK{$row}"), "{$col}{$row}");
+                }
+                $sheet->getColumnDimension($col)->setWidth(7);
+            }
+        }
+        $grandNumberCol = Coordinate::stringFromColumnIndex(38 + $extraDays); // AL
+        $grandLabelCol = Coordinate::stringFromColumnIndex(39 + $extraDays);  // AM
+        $lastDayColumn = Coordinate::stringFromColumnIndex(6 + $dayCount);
+
+        // Header dan tanggal tidak mengubah susunan template.
+        $sheet->setCellValue('G4', 'Bulan : ' . ($start->isSameMonth($end)
+            ? $start->locale('id')->translatedFormat('F Y')
+            : $start->format('d/m/Y') . ' - ' . $end->format('d/m/Y')));
+        for ($i = 0; $i < $dayCount; $i++) {
+            $col = Coordinate::stringFromColumnIndex(7 + $i);
+            $sheet->setCellValue("{$col}5", $start->isSameMonth($end) ? $dates[$i]['day'] : $dates[$i]['header']);
+            if (! $start->isSameMonth($end)) $sheet->getColumnDimension($col)->setWidth(7.5);
+        }
+        // Sembunyikan tanggal template yang tidak termasuk periode, tanpa memindahkan TOTAL.
+        for ($i = $dayCount; $i < 31; $i++) {
+            $col = Coordinate::stringFromColumnIndex(7 + $i);
+            $sheet->setCellValue("{$col}5", null);
+            $sheet->getColumnDimension($col)->setVisible(false);
+        }
+
+        // Ganti hanya nilai lama; merge, ukuran dan style aslinya digunakan lagi.
+        foreach (range(6, $lastDataRow) as $row) {
+            foreach (['B', 'C', 'D', 'E', 'F', $grandNumberCol, $grandLabelCol] as $col) {
+                $sheet->setCellValue("{$col}{$row}", null);
+            }
+        }
+        $plants = $lines = $models = [];
+        $row = 6;
+        foreach ($matrixRows as $item) {
+            $firstRow = $row;
+            $sheet->mergeCells("E{$row}:E" . ($row + 2));
+            $sheet->setCellValue("E{$row}", $item['produk']);
+            $plantKey = $item['plant'];
+            $lineKey = json_encode([$item['plant'], $item['line']]);
+            $modelKey = json_encode([$item['plant'], $item['line'], $item['model']]);
+            $plants[$plantKey] = $this->extendSpan($plants[$plantKey] ?? null, $row, $row + 2, $item['plant']);
+            $lines[$lineKey] = $this->extendSpan($lines[$lineKey] ?? null, $row, $row + 2, $item['line']);
+            $models[$modelKey] = $this->extendSpan($models[$modelKey] ?? null, $row, $row + 2, $item['model']);
+            foreach (['order' => 'NG', 'ok' => 'OK', 'scrap' => 'Scrap'] as $offsetKey => $label) {
+                $offset = array_search($offsetKey, ['order', 'ok', 'scrap'], true);
+                $thisRow = $firstRow + $offset;
+                $sheet->setCellValue("F{$thisRow}", $label);
+                foreach ($dates as $index => $date) {
+                    $val = (int) ($item['daily'][$date['key']][$offsetKey] ?? 0);
+                    if ($val > 0) {
+                        $col = Coordinate::stringFromColumnIndex(7 + $index);
+                        $sheet->setCellValue("{$col}{$thisRow}", $val);
                     }
                 }
+            }
+            $row += 3;
+        }
+        if ($matrixRows->isEmpty()) {
+            $sheet->setCellValue('F6', 'NG');
+            $sheet->setCellValue('F7', 'OK');
+            $sheet->setCellValue('F8', 'Scrap');
+        }
+        foreach ($plants as $span) $this->mergeGroupedCell($sheet, 'B', $span);
+        foreach ($lines as $span) $this->mergeGroupedCell($sheet, 'C', $span);
+        foreach ($models as $span) $this->mergeGroupedCell($sheet, 'D', $span);
 
-                foreach ($daily as $day => $values) {
-                    $daily[$day]['ok'] = max($values['order'] - $values['scrap'], 0);
+        // Pada template asli, GRAND TOTAL mulai di AL263, yaitu sisi kanan
+        // baris produk terakhir, bukan judul kolom Total per produk.
+        $sheet->mergeCells("{$grandNumberCol}{$lastDataRow}:{$grandLabelCol}{$lastDataRow}");
+        $sheet->setCellValue("{$grandNumberCol}{$lastDataRow}", 'GRAND TOTAL');
+        $sheet->getStyle("{$grandNumberCol}{$lastDataRow}:{$grandLabelCol}{$lastDataRow}")
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells("B{$footerRow}:E" . ($footerRow + 2));
+        $sheet->setCellValue("B{$footerRow}", 'TOTAL');
+        $totalByDay = $this->sumDailyMatrix($matrixRows, $dates);
+        foreach (['order' => 'NG', 'ok' => 'OK', 'scrap' => 'Scrap'] as $offsetKey => $label) {
+            $offset = array_search($offsetKey, ['order', 'ok', 'scrap'], true);
+            $thisRow = $footerRow + $offset;
+            $sheet->setCellValue("F{$thisRow}", $label);
+            $sheet->setCellValue("{$grandLabelCol}{$thisRow}", $label);
+            foreach ($dates as $index => $date) {
+                $amount = (int) ($totalByDay[$date['key']][$offsetKey] ?? 0);
+                if ($amount) {
+                    $col = Coordinate::stringFromColumnIndex(7 + $index);
+                    $sheet->setCellValue("{$col}{$thisRow}", $amount);
                 }
+            }
+            // GRAND TOTAL berasal dari baris TOTAL harian, bukan rincian NG berulang.
+            $sheet->setCellValue("{$grandNumberCol}{$thisRow}", "=SUM(G{$thisRow}:{$lastDayColumn}{$thisRow})");
+        }
+        $sheet->getStyle("B{$footerRow}:{$grandLabelCol}" . ($footerRow + 2))
+            ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("B{$footerRow}:{$grandLabelCol}" . ($footerRow + 2))->getFont()->setBold(true);
 
-                return [
-                    'plant' => $first->plant,
-                    'line' => $first->line,
-                    'model' => $first->model ?? '-',
-                    'produk' => $first->produk ?? '-',
-                    'daily' => $daily,
-                ];
-            })
-            ->sortBy(fn($row) => implode('|', [$row['plant'], $row['line'], $row['model'], $row['produk']]))
-            ->values();
+        // Area kanan di atas GRAND TOTAL sengaja tanpa border seperti template.
+        // Hanya judul GRAND TOTAL dan tiga baris nilai NG/OK/Scrap yang dibingkai.
+        $sheet->getStyle("{$grandNumberCol}4:{$grandLabelCol}" . ($lastDataRow - 1))
+            ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_NONE);
+        $sheet->getStyle("{$grandNumberCol}{$lastDataRow}:{$grandLabelCol}{$lastDataRow}")
+            ->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("{$grandNumberCol}{$footerRow}:{$grandLabelCol}" . ($footerRow + 2))
+            ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("G5:{$grandLabelCol}" . ($footerRow + 2))
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->setShowGridlines(false);
+        $setup = $sheet->getPageSetup();
+        $setup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)
+            ->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(0);
+        $setup->setRowsToRepeatAtTopByStartAndEnd(4, 5);
+        $setup->setPrintArea("B4:{$grandLabelCol}" . ($footerRow + 2));
+        $sheet->getPageMargins()->setTop(0.25)->setBottom(0.25)->setLeft(0.2)->setRight(0.2);
+        $sheet->freezePane('G6');
+    }
+
+    /** Rekap tahunan 12 bulan, bersih tanpa warna cell, siap cetak A4 landscape. */
+    private function buildAnnualSummarySheet($sheet, array $months, int $fiscalYear, Collection $selectedLineNames): void
+    {
+        $sheet->mergeCells('A1:M1');
+        $sheet->setCellValue('A1', 'DATA REKAP REPAIR BOX - FY ' . $fiscalYear);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(27);
+        $sheet->mergeCells('A2:M2');
+        $sheet->setCellValue('A2', 'Periode: April ' . $fiscalYear . ' - Maret ' . ($fiscalYear + 1));
+        $sheet->mergeCells('A3:M3');
+        $sheet->setCellValue('A3', 'Line: ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ')));
+        $sheet->getStyle('A2:M3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A2:M3')->getFont()->setSize(10);
+
+        $sheet->setCellValue('A5', 'INDIKATOR');
+        foreach ($months as $i => $month) {
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($i + 2) . '5', strtoupper($month['label']));
+        }
+        foreach (['target' => 'TARGET', 'order' => 'ORDER', 'finish' => 'FINISH', 'scrap' => 'SCRAP'] as $key => $label) {
+            $row = 6 + array_search($key, ['target', 'order', 'finish', 'scrap'], true);
+            $sheet->setCellValue('A' . $row, $label);
+            foreach ($months as $monthIndex => $month) {
+                $value = $month[$key];
+                if ($value !== null) {
+                    $sheet->setCellValue(Coordinate::stringFromColumnIndex($monthIndex + 2) . $row, (int) $value);
+                }
+            }
+        }
+        $sheet->getStyle('A5:M9')->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFB8C3CC');
+        $sheet->getStyle('A5:M5')->getFont()->setBold(true)->setSize(10);
+        $sheet->getStyle('A6:A9')->getFont()->setBold(true);
+        $sheet->getStyle('A5:M9')->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A5:M9')->getFont()->setSize(10);
+        $sheet->getStyle('B6:M9')->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getColumnDimension('A')->setWidth(17);
+        foreach (range('B', 'M') as $col) $sheet->getColumnDimension($col)->setWidth(11);
+        foreach (range(5, 9) as $row) $sheet->getRowDimension($row)->setRowHeight(23);
+        $sheet->setShowGridlines(false);
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
+        $sheet->getPageSetup()->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(1);
+        $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.3)->setRight(0.3);
+        $sheet->getPageSetup()->setHorizontalCentered(true);
+        $sheet->getPageSetup()->setPrintArea('A1:M9');
     }
 
     private function buildMonthlyMatrixSheet($sheet, Collection $matrixRows, Carbon $monthStart, Carbon $monthEnd, Collection $selectedLineNames): void
@@ -733,7 +895,6 @@ class RecapController extends Controller
         $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(10)->getColor()->setARGB('FF24332B');
         $sheet->getStyle($headerRange)->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE5EEE8');
         $sheet->getStyle($headerRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFB7C8BA');
 
         $row = 7;
@@ -813,8 +974,6 @@ class RecapController extends Controller
                 $sheet->setCellValue("{$totalColumn}{$summaryRow}", $grand);
             }
         }
-        $sheet->getStyle("A{$summaryStart}:{$lastColumn}{$summaryEnd}")->getFill()
-            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE8F2EC');
         $sheet->getStyle("A{$summaryStart}:{$lastColumn}{$summaryEnd}")->getFont()->setBold(true);
         $sheet->getStyle("A{$summaryStart}:{$lastColumn}{$summaryEnd}")->getBorders()->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FF94A99B');
@@ -822,7 +981,7 @@ class RecapController extends Controller
             ->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $dataRange = "A7:{$lastColumn}{$lastDataRow}";
-        $sheet->getStyle($dataRange)->getFont()->setSize(9);
+        $sheet->getStyle($dataRange)->getFont()->setSize(10);
         $sheet->getStyle($dataRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFD1D5DB');
         $sheet->getStyle("A7:C{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -833,16 +992,19 @@ class RecapController extends Controller
             $sheet->getColumnDimension($column)->setWidth($width);
         }
         for ($columnIndex = $firstDayColumn; $columnIndex < $lastColumnIndex; $columnIndex++) {
-            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($columnIndex))->setWidth(5);
+            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($columnIndex))->setWidth(5.5);
         }
         $sheet->getColumnDimension($totalColumn)->setWidth(16);
         $sheet->freezePane('F7');
         $sheet->setShowGridlines(false);
-        $sheet->getPageSetup()->setOrientation('landscape');
-        $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
-        $sheet->getPageSetup()->setPaperSize('8');
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
+        // Jangan perkecil 31 kolom ke 1 halaman: biarkan beberapa halaman A4.
+        $sheet->getPageSetup()->setFitToPage(false)->setScale(85);
+        $sheet->getPageSetup()->setColumnsToRepeatAtLeftByStartAndEnd('A', 'E');
         $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(5, 6);
         $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
+        $sheet->getPageSetup()->setPrintArea("A1:{$lastColumn}{$summaryEnd}");
     }
 
     private function validateChartImage(Request $request): string
@@ -860,28 +1022,30 @@ class RecapController extends Controller
 
     private function buildMonitoringSheet($sheet, Collection $rows, string $image, Collection $selectedLineNames, Carbon $start, Carbon $end): string
     {
-        $sheet->mergeCells('A1:Q1');
-        $sheet->setCellValue('A1', 'DATA MONITORING & GRAFIK REPAIR BOX ' . $end->year);
-        $sheet->mergeCells('A2:Q2');
-        $sheet->setCellValue('A2', 'Line: ' . $selectedLineNames->implode(', '));
-        $sheet->mergeCells('A3:Q3');
-        $sheet->setCellValue('A3', 'Visual Dashboard: Januari - ' . $end->locale('id')->translatedFormat('F Y'));
-        $sheet->mergeCells('A4:Q4');
+        $sheet->mergeCells('A1:M1');
+        $fiscalYear = $end->month >= 4 ? $end->year : $end->year - 1;
+        $sheet->setCellValue('A1', 'DATA MONITORING & GRAFIK REPAIR BOX FY ' . $fiscalYear);
+        $sheet->mergeCells('A2:M2');
+        $sheet->setCellValue('A2', 'Line: ' . ($selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ')));
+        $sheet->mergeCells('A3:M3');
+        $sheet->setCellValue('A3', 'Visual Dashboard: April ' . $fiscalYear . ' - Maret ' . ($fiscalYear + 1));
+        $sheet->mergeCells('A4:M4');
         $sheet->setCellValue('A4', 'Periode rekap detail: ' . $start->format('d/m/Y') . ' - ' . $end->format('d/m/Y'));
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(15);
         $sheet->getStyle('A2:A4')->getFont()->setSize(10);
 
         $sheet->fromArray(['Bulan', 'Order', 'OK', 'Scrap', 'Target FY'], null, 'A6');
-        $sheet->getStyle('A6:E6')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A6:E6')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF5F9278');
+        $sheet->getStyle('A6:E6')->getFont()->setBold(true)->setSize(10);
 
         $rowIndex = 7;
-        foreach ($rows as $row) {
+        foreach ($rows as $monthIndex => $row) {
+            $monthDate = Carbon::create($fiscalYear, 4, 1)->addMonths($monthIndex);
+            $hasOccurred = $monthDate->startOfMonth()->lte(now()->startOfMonth());
             $sheet->fromArray([
                 (string) $row['label'],
-                (int) $row['order'],
-                (int) $row['ok'],
-                (int) $row['scrap'],
+                $hasOccurred ? (int) $row['order'] : null,
+                $hasOccurred ? (int) $row['ok'] : null,
+                $hasOccurred ? (int) $row['scrap'] : null,
                 (int) $row['target'],
             ], null, 'A' . $rowIndex);
             $rowIndex++;
@@ -895,12 +1059,12 @@ class RecapController extends Controller
         foreach (['A' => 18, 'B' => 14, 'C' => 14, 'D' => 14, 'E' => 16] as $column => $width) {
             $sheet->getColumnDimension($column)->setWidth($width);
         }
-        foreach (range('F', 'Q') as $column) {
+        foreach (range('F', 'M') as $column) {
             $sheet->getColumnDimension($column)->setWidth(11);
         }
 
         $chartTopRow = $lastDataRow + 3;
-        $sheet->mergeCells("A{$chartTopRow}:Q{$chartTopRow}");
+        $sheet->mergeCells("A{$chartTopRow}:M{$chartTopRow}");
         $sheet->setCellValue("A{$chartTopRow}", 'Grafik Monitoring Dashboard');
         $sheet->getStyle("A{$chartTopRow}")->getFont()->setBold(true)->setSize(12);
 
@@ -916,17 +1080,18 @@ class RecapController extends Controller
         $draw->setCoordinates('A' . ($chartTopRow + 1));
         $draw->setOffsetX(8);
         $draw->setOffsetY(6);
-        // Gambar mengikuti rasio capture dashboard; jangan dipaksa selebar area sheet.
+        // Lebar seragam dan lebih ringkas; tinggi otomatis menjaga rasio PNG.
         $draw->setResizeProportional(true);
         $draw->setWidth(1120);
         $draw->setWorksheet($sheet);
 
         $sheet->freezePane('A7');
         $sheet->setShowGridlines(false);
-        $sheet->getPageSetup()->setOrientation('landscape');
-        $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
-        $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A3);
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
+        $sheet->getPageSetup()->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(0);
         $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
+        $sheet->getPageSetup()->setPrintArea('A1:M' . ($chartTopRow + (int) ceil($draw->getHeight() / 20) + 3));
 
         return $pngPath;
     }

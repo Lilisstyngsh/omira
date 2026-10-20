@@ -235,7 +235,7 @@
     }
     .history-pdf-preview { margin-top: 18px; }
     .history-pdf-preview-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-    .history-pdf-preview-heading h3 { margin: 0; font-size: 15px; font-weight: 750; }
+    .history-pdf-preview-heading h3 { margin: 0; font-size: 14px; font-weight: 650; color: #0f172a; }
     .history-pdf-preview-heading span { color: #64748b; font-size: 12px; }
     .history-pdf-preview iframe { display: block; width: 100%; min-height: 570px; height: 76vh; max-height: 900px; border: 1px solid #dce5de; border-radius: 9px; background: #f8faf9; }
     .history-pdf-preview-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
@@ -307,6 +307,20 @@
 
 @include('partials.repair-order-information', ['order' => $order, 'context' => 'omd-history'])
 
+@if($order->feedbacks->isNotEmpty())
+<div class="history-card">
+    <h3>Feedback User</h3>
+    <div class="feedback-history">
+        @foreach($order->feedbacks->sortByDesc('created_at') as $feedback)
+        <div class="feedback-row">
+            <strong>{{ $feedback->reason }}</strong>
+            <small>{{ $feedback->created_at?->format('d-m-Y H:i') }} · {{ $feedback->status === 'resolved' ? 'Sudah dikoreksi' : 'Open' }}</small>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 <div class="history-card">
     <div class="omira-detail-export-head">
         <h3>Detail Repair</h3>
@@ -323,17 +337,5 @@
     'downloadUrl' => route('omd.orders.history.export', ['order' => $order, 'format' => 'pdf']),
 ])
 
-@if($order->feedbacks->isNotEmpty())
-<div class="history-card">
-    <h3>Feedback User</h3>
-    <div class="feedback-history">
-        @foreach($order->feedbacks->sortByDesc('created_at') as $feedback)
-        <div class="feedback-row">
-            <strong>{{ $feedback->reason }}</strong>
-            <small>{{ $feedback->created_at?->format('d-m-Y H:i') }} · {{ $feedback->status === 'resolved' ? 'Sudah dikoreksi' : 'Open' }}</small>
-        </div>
-        @endforeach
-    </div>
-</div>
-@endif
+
 @endsection

@@ -260,15 +260,14 @@
                 min-height: 46px
             }
         }
-        /* Sama dengan card Preview Form Additional Box */
-        .order-pdf-card { background: #fff; border: 1px solid #e8edf4; border-radius: 18px; box-shadow: 0 10px 35px rgba(15,23,42,.06); overflow: hidden; margin-top: 18px; }
-        .order-pdf-card-header { padding: 18px 20px; border-bottom: 1px solid #edf1f5; background: linear-gradient(135deg,#F4F8F5 0%,#fff 75%); }
-        .order-pdf-card-header h2 { margin: 0; font-size: 15px; font-weight: 650; color: #172033; }
-        .order-pdf-preview-wrap { padding: 14px; }
-        .order-pdf-preview-frame { display: block; width: 100%; height: 680px; border: 1px solid #dfe6ef; border-radius: 10px; background: #f8fafc; }
-        .order-pdf-preview-fallback { margin: 10px 2px 0; color: #64748b; font-size: 11px; }
-        .order-pdf-preview-fallback a { color: #347554; font-weight: 700; }
-        @media(max-width:640px) { .order-pdf-preview-wrap { padding: 9px; } .order-pdf-preview-frame { height: 470px; } }
+        .history-pdf-preview { margin-top: 18px; }
+    .history-pdf-preview-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .history-pdf-preview-heading h3 { margin: 0; font-size: 14px; font-weight: 650; color: #0f172a; }
+    .history-pdf-preview-heading span { color: #64748b; font-size: 12px; }
+    .history-pdf-preview iframe { display: block; width: 100%; min-height: 570px; height: 76vh; max-height: 900px; border: 1px solid #dce5de; border-radius: 9px; background: #f8faf9; }
+    .history-pdf-preview-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+    .history-pdf-download { display: inline-flex; align-items: center; gap: 7px; padding: 10px 15px; border: 1px solid #b7d2bf; border-radius: 9px; background: #eff7f1; color: #2b6046 !important; font-size: 12px; font-weight: 700; text-decoration: none; }
+    @media(max-width:768px) { .history-pdf-preview iframe { min-height: 420px; height: 62vh; } }
 </style>
 
     <div class="history-detail-head">
@@ -349,6 +348,21 @@
         @include('partials.repair-order-information', ['order' => $order, 'context' => 'user-history'])
     </div>
 
+@if ($order->feedbacks->isNotEmpty())
+        <div class="history-card">
+            <h3>Feedback User</h3>
+            <div class="feedback-history">
+                @foreach ($order->feedbacks->sortByDesc('created_at') as $feedback)
+                    <div class="feedback-row">
+                        <strong>{{ $feedback->reason }}</strong>
+                        <small>{{ $feedback->created_at?->format('d-m-Y H:i') }} ·
+                            {{ $feedback->status === 'resolved' ? 'Sudah dikoreksi OMD' : 'Open' }}</small>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div class="history-card">
         <div class="omira-detail-export-head">
             <h3>Detail Repair</h3>
@@ -368,30 +382,10 @@
         ])
     </div>
 
-    <section class="order-pdf-card" aria-label="Preview Form Order Repair Box">
-        <div class="order-pdf-card-header"><h2>Preview Form Order Repair Box</h2></div>
-        <div class="order-pdf-preview-wrap">
-            <iframe
-                class="order-pdf-preview-frame"
-                src="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'pdf', 'preview' => 1]) }}"
-                title="Preview PDF {{ $order->order_number }}"
-                loading="lazy"></iframe>
-            <p class="order-pdf-preview-fallback">Jika preview tidak tampil, <a href="{{ route('user.orders.history.export', ['order' => $order, 'format' => 'pdf', 'preview' => 1]) }}" target="_blank" rel="noopener noreferrer">buka PDF di tab baru</a>.</p>
-        </div>
-    </section>
+    @include('partials.history-order-pdf-preview', [
+    'previewUrl' => route('user.orders.history.export', ['order' => $order, 'format' => 'pdf', 'preview' => 1]),
+    'downloadUrl' => route('user.orders.history.export', ['order' => $order, 'format' => 'pdf']),
+])
 
-@if ($order->feedbacks->isNotEmpty())
-        <div class="history-card">
-            <h3>Feedback</h3>
-            <div class="feedback-history">
-                @foreach ($order->feedbacks->sortByDesc('created_at') as $feedback)
-                    <div class="feedback-row">
-                        <strong>{{ $feedback->reason }}</strong>
-                        <small>{{ $feedback->created_at?->format('d-m-Y H:i') }} ·
-                            {{ $feedback->status === 'resolved' ? 'Sudah dikoreksi OMD' : 'Open' }}</small>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
+
 @endsection

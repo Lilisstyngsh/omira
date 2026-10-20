@@ -39,11 +39,11 @@
         max-width:100%;
         padding:0 5px;
         margin:0 0 0 -5px;
-        font-size:9px;
-        font-weight:550;
-        letter-spacing:.02em;
+        font-size:11px;
+        font-weight:600;
+        letter-spacing:.01em;
         text-transform:uppercase;
-        color:#64748b;
+        color:#475569;
     }
     .repair-info-mini strong{
         display:block;
@@ -53,8 +53,10 @@
         color:#0f172a;
         word-break:break-word;
     }
-    .repair-info-green legend,.repair-info-green strong{color:#166534}
-    .repair-info-qty strong{font-size:15px}
+    /* Label dan value Qty mengikuti field informasi lainnya, tanpa warna khusus. */
+    .repair-info-green legend{color:#475569}
+    .repair-info-green strong{color:#0f172a}
+    .repair-info-qty strong{font-size:12px;font-weight:600}
     .repair-info-description legend{color:#9a3412}
     .repair-info-description div{
         font-size:11px;
