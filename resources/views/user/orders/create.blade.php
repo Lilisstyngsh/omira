@@ -690,7 +690,7 @@
             @endif
 
             <div class="field">
-                <label for="orderDescription">Catatan Umum</label>
+                <label for="orderDescription">Catatan</label>
                 <textarea id="orderDescription" name="description" rows="3" maxlength="1000"
                     placeholder="Catatan untuk seluruh order (opsional)">{{ old('description') }}</textarea>
             </div>

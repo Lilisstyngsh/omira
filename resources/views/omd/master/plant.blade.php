@@ -368,7 +368,7 @@ Data Master Plant
         document.getElementById('editPlantId').value = @json(old('_master_id'));
         editForm.action = "{{ url('/omd/master/plant') }}/" + @json(old('_master_id'));
         editName.value = @json(old('name'));
-        editModal.style.display = 'flex';
+        // The validation SweetAlert reopens this form after OK.
     });
 </script>
 @endif

@@ -56,7 +56,16 @@
     /* Label dan value Qty mengikuti field informasi lainnya, tanpa warna khusus. */
     .repair-info-green legend{color:#475569}
     .repair-info-green strong{color:#0f172a}
-    .repair-info-qty strong{font-size:12px;font-weight:600}
+    .repair-info-card .repair-info-mini.repair-info-qty legend {
+        font-size: 11px;
+        font-weight: 600;
+        color: #475569;
+    }
+    .repair-info-card .repair-info-mini.repair-info-qty strong {
+        font-size: 12px;
+        font-weight: 600;
+        color: #0f172a;
+    }
     .repair-info-description legend{color:#9a3412}
     .repair-info-description div{
         font-size:11px;

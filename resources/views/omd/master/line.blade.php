@@ -859,10 +859,6 @@
                         Tambah Plant
                     </h4>
 
-                    <p>
-                        Tambahkan Plant baru ke dalam sistem.
-                    </p>
-
                 </div>
 
                 <button type="button" onclick="closeAddPlantModal()" class="modal-close">
@@ -921,10 +917,6 @@
                         Tambah Line
                     </h4>
 
-                    <p>
-                        Tambahkan Line pada Plant yang dipilih.
-                    </p>
-
                 </div>
 
                 <button type="button" onclick="closeAddLineModal()" class="modal-close">
@@ -940,7 +932,7 @@
                 @csrf
 
 
-                <input type="hidden" name="plant_id" id="addPlantId" value="{{ $selectedPlant?->id }}">
+                <input type="hidden" name="plant_id" id="addPlantId" value="{{ old('_master_form') === 'line' ? old('plant_id') : $selectedPlant?->id }}">
 
 
                 <label for="addLineName" class="form-label">
@@ -976,14 +968,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @include('partials.master-validation-alert')
-    @if (old('_master_form') === 'plant' || old('_master_form') === 'line')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modalId = @json(old('_master_form') === 'plant' ? 'addPlantModal' : 'addLineModal');
-            document.getElementById(modalId).style.display = 'flex';
-        });
-    </script>
-    @endif
 
 
     <script>

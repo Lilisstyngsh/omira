@@ -11,11 +11,18 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\GridLines;
+use PhpOffice\PhpSpreadsheet\Chart\Layout;
+use PhpOffice\PhpSpreadsheet\Chart\Legend;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
@@ -198,13 +205,10 @@ class RecapController extends Controller
         $selectedLineIds = $this->resolveLineIds($request);
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
         $isYearly = $request->input('period_type', 'monthly') === 'yearly';
-        $temporaryChartPath = null;
-
         if ($isYearly) {
-            // Rekap tahunan tetap memakai format FY dan grafik Monitoring yang sudah ada.
+            // Rekap tahunan memakai tabel Monitoring dan grafik native Excel.
             $chartData = $this->dashboardChartData($endDate, $selectedLineIds);
             $chartRows = $this->chartRowsFromDashboard($chartData);
-            $chartImage = $this->validateChartImage($request);
             $spreadsheet = new Spreadsheet();
             $spreadsheet->removeSheetByIndex(0);
             $sheet = $spreadsheet->createSheet();
@@ -217,10 +221,9 @@ class RecapController extends Controller
             );
             $monitoringSheet = $spreadsheet->createSheet();
             $monitoringSheet->setTitle('Monitoring');
-            $temporaryChartPath = $this->buildMonitoringSheet(
+            $this->buildMonitoringSheet(
                 $monitoringSheet,
                 $chartRows,
-                $chartImage,
                 $selectedLineNames,
                 $startDate,
                 $endDate
@@ -247,11 +250,11 @@ class RecapController extends Controller
         $xlsxPath = $tempPath . '.xlsx';
         @unlink($tempPath);
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        try {
-            $writer->save($xlsxPath);
-        } finally {
-            if ($temporaryChartPath && is_file($temporaryChartPath)) @unlink($temporaryChartPath);
+        // Chart harus diikutsertakan: default writer XLSX tidak mengekspor chart.
+        if ($isYearly) {
+            $writer->setIncludeCharts(true);
         }
+        $writer->save($xlsxPath);
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
         return response()->download($xlsxPath, $filename)->deleteFileAfterSend(true);
@@ -1007,20 +1010,7 @@ class RecapController extends Controller
         $sheet->getPageSetup()->setPrintArea("A1:{$lastColumn}{$summaryEnd}");
     }
 
-    private function validateChartImage(Request $request): string
-    {
-        $raw = $request->validate(['chart_image' => ['required', 'string', 'max:12000000']])['chart_image'];
-        if (!str_starts_with($raw, 'data:image/png;base64,')) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['chart_image' => 'Format gambar grafik tidak valid.']);
-        }
-        $bytes = base64_decode(substr($raw, strlen('data:image/png;base64,')), true);
-        if ($bytes === false || strlen($bytes) > 7500000 || substr($bytes, 0, 8) !== "\x89PNG\r\n\x1a\n") {
-            throw \Illuminate\Validation\ValidationException::withMessages(['chart_image' => 'Gambar grafik PNG tidak valid atau terlalu besar.']);
-        }
-        return $bytes;
-    }
-
-    private function buildMonitoringSheet($sheet, Collection $rows, string $image, Collection $selectedLineNames, Carbon $start, Carbon $end): string
+    private function buildMonitoringSheet(Worksheet $sheet, Collection $rows, Collection $selectedLineNames, Carbon $start, Carbon $end): void
     {
         $sheet->mergeCells('A1:M1');
         $fiscalYear = $end->month >= 4 ? $end->year : $end->year - 1;
@@ -1034,7 +1024,7 @@ class RecapController extends Controller
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(15);
         $sheet->getStyle('A2:A4')->getFont()->setSize(10);
 
-        $sheet->fromArray(['Bulan', 'Order', 'OK', 'Scrap', 'Target FY'], null, 'A6');
+        $sheet->fromArray(['Bulan', 'NG', 'OK', 'Scrap', 'Target FY'], null, 'A6');
         $sheet->getStyle('A6:E6')->getFont()->setBold(true)->setSize(10);
 
         $rowIndex = 7;
@@ -1065,25 +1055,12 @@ class RecapController extends Controller
 
         $chartTopRow = $lastDataRow + 3;
         $sheet->mergeCells("A{$chartTopRow}:M{$chartTopRow}");
-        $sheet->setCellValue("A{$chartTopRow}", 'Grafik Monitoring Dashboard');
+        $sheet->setCellValue("A{$chartTopRow}", 'Grafik Order Repair Box FY ' . $fiscalYear);
         $sheet->getStyle("A{$chartTopRow}")->getFont()->setBold(true)->setSize(12);
 
-        $path = tempnam(sys_get_temp_dir(), 'omira_graph_');
-        if ($path === false) throw new \RuntimeException('Tidak dapat membuat file grafik sementara.');
-        $pngPath = $path . '.png';
-        @unlink($path);
-        file_put_contents($pngPath, $image);
-
-        $draw = new Drawing();
-        $draw->setName('Grafik Dashboard OMIRA');
-        $draw->setPath($pngPath);
-        $draw->setCoordinates('A' . ($chartTopRow + 1));
-        $draw->setOffsetX(8);
-        $draw->setOffsetY(6);
-        // Lebar seragam dan lebih ringkas; tinggi otomatis menjaga rasio PNG.
-        $draw->setResizeProportional(true);
-        $draw->setWidth(1120);
-        $draw->setWorksheet($sheet);
+        // Grafik membaca sel Monitoring secara langsung, bukan gambar atau data hardcode.
+        // Dashboard selalu memberi 12 bulan (April-Maret), termasuk saat belum ada transaksi.
+        $this->addAnnualNativeChart($sheet, $fiscalYear, 7, max(7, $lastDataRow), $chartTopRow + 1);
 
         $sheet->freezePane('A7');
         $sheet->setShowGridlines(false);
@@ -1091,9 +1068,75 @@ class RecapController extends Controller
         $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
         $sheet->getPageSetup()->setFitToPage(true)->setFitToWidth(1)->setFitToHeight(0);
         $sheet->getPageMargins()->setTop(0.3)->setBottom(0.3)->setLeft(0.25)->setRight(0.25);
-        $sheet->getPageSetup()->setPrintArea('A1:M' . ($chartTopRow + (int) ceil($draw->getHeight() / 20) + 3));
+        $sheet->getPageSetup()->setPrintArea('A1:M' . ($chartTopRow + 30));
+    }
 
-        return $pngPath;
+    /** Combo chart: tiga clustered columns dan satu line, seluruh seri mereferensikan sel. */
+    private function addAnnualNativeChart(Worksheet $sheet, int $fiscalYear, int $firstRow, int $lastRow, int $chartRow): void
+    {
+        $source = "'" . str_replace("'", "''", $sheet->getTitle()) . "'!";
+        $count = $lastRow - $firstRow + 1;
+        $categories = $source . '$A$' . $firstRow . ':$A$' . $lastRow;
+        $barLabels = [];
+        $barCategories = [];
+        $barValues = [];
+        foreach (['B' => 'F59E0B', 'C' => '94A3B8', 'D' => 'FACC15'] as $column => $color) {
+            $barLabels[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $source . '$' . $column . '$6', null, 1);
+            $barCategories[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, $count);
+            $barValues[] = new DataSeriesValues(
+                DataSeriesValues::DATASERIES_TYPE_NUMBER,
+                $source . '$' . $column . '$' . $firstRow . ':$' . $column . '$' . $lastRow,
+                '#,##0',
+                $count,
+                [],
+                null,
+                $color
+            );
+        }
+
+        $bars = new DataSeries(DataSeries::TYPE_BARCHART, DataSeries::GROUPING_CLUSTERED,
+            [0, 1, 2], $barLabels, $barCategories, $barValues);
+        $bars->setPlotDirection(DataSeries::DIRECTION_COL);
+
+        $targetValues = new DataSeriesValues(
+            DataSeriesValues::DATASERIES_TYPE_NUMBER,
+            $source . '$E$' . $firstRow . ':$E$' . $lastRow,
+            '#,##0',
+            $count,
+            [],
+            'circle',
+            '2563EB',
+            6
+        );
+        $targetValues->setLineColorProperties('2563EB');
+        $targetValues->setLineWidth(2.5);
+        $targetValues->getMarkerFillColor()->setColorProperties('2563EB');
+        $targetValues->getMarkerBorderColor()->setColorProperties('2563EB');
+
+        $line = new DataSeries(DataSeries::TYPE_LINECHART, DataSeries::GROUPING_STANDARD,
+            [3],
+            [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $source . '$E$6', null, 1)],
+            [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, $count)],
+            [$targetValues]);
+
+        $layout = new Layout();
+        $layout->setShowVal(true);
+        $chart = new Chart(
+            'omira_rekap_fy_' . $fiscalYear,
+            new Title('Grafik Order Repair Box FY ' . $fiscalYear),
+            new Legend(Legend::POSITION_BOTTOM, null, false),
+            new PlotArea($layout, [$bars, $line]),
+            true,
+            DataSeries::EMPTY_AS_GAP,
+            null,
+            new Title('Jumlah Box')
+        );
+        $gridlines = new GridLines();
+        $gridlines->setLineColorProperties('DDE5ED');
+        $chart->getChartAxisY()->setMajorGridlines($gridlines);
+        $chart->setTopLeftPosition('A' . $chartRow, 8, 6);
+        $chart->setBottomRightPosition('M' . ($chartRow + 26));
+        $sheet->addChart($chart);
     }
 
     private function extendSpan(?array $span, int $start, int $end, string $value): array

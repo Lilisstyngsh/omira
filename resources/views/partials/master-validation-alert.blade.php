@@ -1,5 +1,7 @@
 {{-- Validasi Master Plant / Line; SweetAlert2 already loaded by parent view. --}}
 <style>
+    /* Above Master add/edit modals (their overlays use z-index: 9999). */
+    .omira-master-warning-layer { z-index: 20000 !important; }
     .omira-master-warning-popup {
         width: 340px !important;
         padding: 24px 24px 22px !important;
@@ -66,6 +68,7 @@
             showClass: { popup: 'omira-master-warning-enter' },
             hideClass: { popup: 'omira-master-warning-exit' },
             customClass: {
+                container: 'omira-master-warning-layer',
                 popup: 'omira-master-warning-popup',
                 title: 'omira-master-warning-title',
                 htmlContainer: 'omira-master-warning-text',
@@ -75,15 +78,44 @@
     }
     document.addEventListener('DOMContentLoaded', function () {
         const serverError = @json($errors->first());
-        if (serverError) showOmiraMasterWarning(serverError);
+        const invalidMasterForm = @json(old('_master_form'));
+        const invalidModalId = {
+            plant: 'addPlantModal',
+            line: 'addLineModal',
+            'edit-plant': 'editPlantModal'
+        }[invalidMasterForm];
+
+        function hideMasterModal(modal) {
+            if (modal) modal.style.display = 'none';
+        }
+        function restoreMasterModal(modal, input) {
+            if (modal) modal.style.display = 'flex';
+            if (input) input.focus();
+        }
+
+        // After a rejected POST, show the warning FIRST. Reopen the old form on OK
+        // with its previously submitted values still intact.
+        if (serverError) {
+            const invalidModal = invalidModalId ? document.getElementById(invalidModalId) : null;
+            hideMasterModal(invalidModal);
+            showOmiraMasterWarning(serverError).then(function () {
+                restoreMasterModal(invalidModal, invalidModal?.querySelector('input[name="name"]'));
+            });
+        }
+
         document.querySelectorAll('form[data-master-name-form]').forEach(function (form) {
             form.setAttribute('novalidate', 'novalidate');
             form.addEventListener('submit', function (event) {
                 const input = form.querySelector('input[name="name"]');
                 if (input && !input.value.trim()) {
                     event.preventDefault();
+                    const modal = form.closest('.modal-overlay, .edit-overlay');
+                    hideMasterModal(modal);
                     showOmiraMasterWarning('Nama ' + (form.dataset.masterNameForm === 'line' ? 'Line' : 'Plant') + ' wajib diisi.')
-                        .then(function () { input.focus(); });
+                        .then(function () { restoreMasterModal(modal, input); });
+                } else if (!event.defaultPrevented) {
+                    // Close the add/edit modal immediately after a valid submission.
+                    hideMasterModal(form.closest('.modal-overlay, .edit-overlay'));
                 }
             });
         });

@@ -86,6 +86,16 @@
             color: #0f172a;
         }
 
+        /* Samakan judul semua card aktif dengan Detail History Order. */
+        .repair-card > .repair-card-title,
+        .repair-card .omira-detail-export-head > .repair-card-title,
+        .repair-info-card > .repair-info-title {
+            font-size: 14px;
+            font-weight: 650;
+            line-height: 1.4;
+            color: #0f172a;
+        }
+
         .repair-card-desc {
             margin: 0 0 18px;
             font-size: 11px;

@@ -1026,7 +1026,7 @@
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
                             PDF
                         </a>
-                        <button type="button" class="recap-btn recap-btn-excel" data-export-form="omiraChartExport">
+                        <button type="submit" form="omiraChartExport" class="recap-btn recap-btn-excel">
                             <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
                             Excel
                         </button>
@@ -1087,7 +1087,7 @@
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
                             PDF
                         </a>
-                        <button type="button" class="recap-btn recap-btn-excel" data-export-form="omiraChartExport">
+                        <button type="submit" form="omiraChartExport" class="recap-btn recap-btn-excel">
                             <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
                             Excel
                         </button>
@@ -1409,7 +1409,7 @@
     </script>
 
     <form id="omiraChartExport" method="POST" action="{{ route('omd.recap.excel') }}"
-        data-preview-url="{{ route('omd.recap.chart-preview') }}" style="display:none">
+        style="display:none">
         @csrf
         @foreach ($exportParams as $key => $value)
             @if (is_array($value))
@@ -1420,8 +1420,5 @@
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
             @endif
         @endforeach
-        <input type="hidden" name="chart_image" value="">
     </form>
-    <script src="{{ asset('vendor/html2canvas.min.js') }}"></script>
-    <script src="{{ asset('js/omira-excel-capture.js') }}"></script>
 @endsection
