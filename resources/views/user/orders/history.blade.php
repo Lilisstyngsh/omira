@@ -450,38 +450,56 @@
 
     .orders-table {
         width: 100%;
-        min-width: 900px;
+        min-width: 850px;
         border-collapse: separate;
         border-spacing: 0;
     }
 
     .orders-table th {
         background: #f9fafb;
-        text-align: center;
+        text-align: left;
         padding: 12px 14px;
-        font-size: 10px;
-        font-weight: 800;
+        font-size: 11px;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .04em;
-        color: #6b7280;
+        color: #64748b;
         white-space: nowrap;
-        border-right: 1px solid #dfe6ef;
-        border-bottom: 1px solid #dfe6ef;
+        border-bottom: 1px solid #e3e9f0;
     }
 
     .orders-table td {
         padding: 13px 14px;
-        border-right: 1px solid #dfe6ef;
-        border-bottom: 1px solid #dfe6ef;
-        font-size: 12px;
-        color: #374151;
+        border-bottom: 1px solid #edf1f5;
+        font-size: 11px;
+        color: #334155;
         vertical-align: middle;
     }
 
-    .orders-table th:last-child,
-    .orders-table td:last-child {
-        border-right: 0;
+    /* Scope khusus: layout global mengatur font isi orders-table 12px !important. */
+    body .orders-table.orders-table th,
+    body .orders-table.orders-table td {
+        font-size: 11px !important;
     }
+
+    .orders-table th:nth-child(1),
+    .orders-table th:nth-child(5),
+    .orders-table th:nth-child(6) { text-align: center; }
+
+    .orders-table td:nth-child(5),
+    .orders-table td:nth-child(6) { text-align: center; }
+
+    .order-history-date { display:block; text-align:center; white-space:nowrap; }
+    .order-history-date-main { display:block; font-size:11px; font-weight:700; line-height:1.35; }
+    .order-history-date-time { display:block; margin-top:4px; color:#94a3b8; font-size:10px; font-weight:400; line-height:1.35; }
+    html[data-theme="dark"] .order-history-date-time { color:var(--text-soft); }
+
+    .orders-table .order-number { font-weight:600 !important; }
+    .order-type-label { font-size:10px; font-weight:400; color:#64748b; }
+    .order-line-label { font-size:11px; font-weight:700; color:#172033; }
+    .order-qty-value { font-size:11px; font-weight:600; }
+    html[data-theme="dark"] .order-type-label { color:var(--text-soft); }
+    html[data-theme="dark"] .order-line-label { color:var(--text); }
 
     .orders-table tbody tr {
         cursor: pointer;
@@ -496,15 +514,8 @@
         border-bottom: none;
     }
 
-    .order-no {
-        width: 55px;
-        color: #94a3b8 !important;
-        font-weight: 400;
-        text-align: center;
-    }
-
     .order-number {
-        font-weight: 500;
+        font-weight: 600;
         color: #111827;
         white-space: nowrap;
     }
@@ -519,7 +530,7 @@
         padding: 0 11px;
         border-radius: 999px;
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 600;
     }
 
     .status::before {
@@ -542,7 +553,7 @@
     }
 
     .order-empty-text {
-        font-size: 12px;
+        font-size: 11px;
         color: #94a3b8;
     }
 
@@ -957,7 +968,6 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
             <thead>
                 <tr>
-                    <th style="width:55px;text-align:center;">No</th>
                     <th>Tanggal</th>
                     <th>No Order</th>
                     <th>Jenis Order</th>
@@ -969,21 +979,28 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
             <tbody>
 
-                @forelse ($orders as $index => $order)
+                @forelse ($orders as $order)
                 <tr onclick="window.location='{{ route('user.orders.history.show', $order) }}'"
                     title="Klik untuk melihat detail history order">
 
-                    <td class="order-no">{{ $orders->firstItem() + $index }}</td>
-
-                    <td>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</td>
+                    <td>
+                        @if($order->created_at)
+                            <time class="order-history-date" datetime="{{ $order->created_at->toIso8601String() }}">
+                                <span class="order-history-date-main">{{ $order->created_at->format('d-m-Y') }}</span>
+                                <span class="order-history-date-time">{{ $order->created_at->format('H:i') }}</span>
+                            </time>
+                        @else
+                            —
+                        @endif
+                    </td>
 
                     <td class="order-number">{{ $order->order_number }}</td>
 
-                    <td>Repair Box</td>
+                    <td><span class="order-type-label">Repair Box</span></td>
 
-                    <td>{{ $order->line?->name ?? '-' }}</td>
+                    <td><span class="order-line-label">{{ $order->line?->name ?? '-' }}</span></td>
 
-                    <td>{{ in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}</td>
+                    <td><span class="order-qty-value">{{ in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}</span></td>
 
                     <td>
                         <span class="status status-confirmed">Selesai</span>
@@ -992,7 +1009,7 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
                 </tr>
                 @empty
                 <tr style="cursor:default;">
-                    <td colspan="7" class="order-empty">
+                    <td colspan="6" class="order-empty">
                         <div class="order-empty-text">
                             {{ $hasFilter ? 'Tidak ada order yang sesuai dengan filter.' : 'Belum ada history Order Repair Box.' }}
                         </div>

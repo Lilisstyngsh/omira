@@ -1198,8 +1198,8 @@
                             @php $diff=(int)$item->actual_qty-(int)$item->threshold_qty; @endphp
                             <tr>
                                 <td><strong>{{ ($monthNames[(int) $item->month] ?? $item->month) . ' ' . $item->year }}</strong></td>
-                                <td>{{ number_format((int) $item->actual_qty) }}</td>
-                                <td>{{ number_format((int) $item->threshold_qty) }}</td>
+                                <td class="abnormality-qty">{{ number_format((int) $item->actual_qty) }}</td>
+                                <td class="abnormality-qty">{{ number_format((int) $item->threshold_qty) }}</td>
                                 <td><span class="abnormality-diff {{ $diff > 0 ? 'danger' : 'safe' }}">{{ $diff > 0 ? '+' : '' }}{{ number_format($diff) }}</span></td>
                                 <td class="reason-cell">{{ $item->reason ?: '-' }}</td>
                             </tr>
@@ -1367,18 +1367,53 @@
             }, true);
         })();
     </script>
-@endsection
-
 <style>
-.modern-table-wrap{border:1px solid #e8edf0;border-radius:16px;overflow:hidden;background:#fff;}
-.modern-abnormality-table{width:100%;border-collapse:collapse;}
-.modern-abnormality-table thead{background:#f7f9fa;}
-.modern-abnormality-table th{padding:14px 16px;color:#64748b;font-size:12px;text-transform:uppercase;text-align:left;}
-.modern-abnormality-table td{padding:15px 16px;border-top:1px solid #eef2f3;color:#334155;font-family:inherit;font-size:12px;}
-.modern-abnormality-table td strong,.modern-abnormality-table td .abnormality-diff{font-family:inherit;font-size:inherit;}
-.modern-abnormality-table tbody tr:hover{background:#f8faf9;}
-.abnormality-diff{display:inline-flex;padding:5px 10px;border-radius:999px;font-weight:700;font-size:inherit;}
-.abnormality-diff.danger{background:#feecec;color:#dc2626;}
-.abnormality-diff.safe{background:#eaf7ef;color:#15803d;}
-.reason-cell{max-width:420px;}
+/* Daftar Abnormality FY: konsisten dengan tabel History (tanpa pemisah vertikal). */
+.abnormality-summary.modern-table-wrap {
+    border: 1px solid var(--border, #e8edf0);
+    border-radius: 14px;
+    overflow-x: auto;
+    background: var(--surface, #fff);
+}
+.modern-abnormality-table { width: 100%; min-width: 650px; border-collapse: separate; border-spacing: 0; }
+.modern-abnormality-table thead { background: var(--table-head-bg, #f7f9fa); }
+body .modern-abnormality-table.modern-abnormality-table th {
+    padding: 12px 14px;
+    border: 0;
+    border-bottom: 1px solid var(--border, #e3e9f0);
+    color: #64748b;
+    font-size: 11px !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+}
+body .modern-abnormality-table.modern-abnormality-table td {
+    padding: 12px 14px;
+    border: 0;
+    border-bottom: 1px solid var(--border-soft, #edf1f5);
+    color: #334155;
+    font: inherit;
+    font-size: 11px !important;
+    font-weight: 400;
+    vertical-align: middle;
+}
+.modern-abnormality-table tbody tr:last-child td { border-bottom: 0; }
+.modern-abnormality-table tbody tr:hover { background: var(--table-hover-bg, #f8faf9); }
+.modern-abnormality-table td strong { font-size: 11px; font-weight: 700; }
+.modern-abnormality-table .abnormality-qty { font-weight: 600 !important; }
+body .modern-abnormality-table.modern-abnormality-table td.reason-cell { max-width: 420px; font-size: 10px !important; line-height: 1.5; }
+.modern-abnormality-table .abnormality-diff {
+    display: inline-flex;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.abnormality-diff.danger { background: #feecec; color: #dc2626; }
+.abnormality-diff.safe { background: #eaf7ef; color: #15803d; }
+html[data-theme="dark"] .modern-abnormality-table tbody tr:hover { background: var(--table-hover-bg) !important; }
+html[data-theme="dark"] .modern-abnormality-table th { color: #d4e1d8 !important; }
+html[data-theme="dark"] .modern-abnormality-table td { color: var(--text) !important; }
 </style>
+@endsection

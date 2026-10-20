@@ -329,15 +329,15 @@
                     <td class="blank" style="width:33%;vertical-align:top">
                         <table class="confirmation">
                             <tr>
-                                <td colspan="2">CONFIRMED</td>
+                                <td colspan="2">CONFIRMED PSD – OMD</td>
                             </tr>
                             <tr class="space">
                                 <td></td>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>PSD – OMD</td>
-                                <td>PSD – OMD</td>
+                                <td>Ka. Dept</td>
+                                <td>Ka. Sie</td>
                             </tr>
                         </table>
                     </td>

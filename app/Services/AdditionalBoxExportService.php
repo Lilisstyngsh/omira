@@ -208,11 +208,11 @@ class AdditionalBoxExportService
                 Alignment::HORIZONTAL_LEFT,
                 true
             );
-            $box('K' . $noteStart . ':P' . $noteStart, 'CONFIRMED');
+            $box('K' . $noteStart . ':P' . $noteStart, 'CONFIRMED PSD - OMD');
             $box('K' . ($noteStart + 1) . ':M' . ($noteEnd - 1));
             $box('N' . ($noteStart + 1) . ':P' . ($noteEnd - 1));
-            $box('K' . $noteEnd . ':M' . $noteEnd, 'PSD - OMD', null, 9);
-            $box('N' . $noteEnd . ':P' . $noteEnd, 'PSD - OMD', null, 9);
+            $box('K' . $noteEnd . ':M' . $noteEnd, 'Ka. Dept', null, 9);
+            $box('N' . $noteEnd . ':P' . $noteEnd, 'Ka. Sie', null, 9);
 
             $sheet->getPageSetup()->setPrintArea('A1:P' . $noteEnd);
         }

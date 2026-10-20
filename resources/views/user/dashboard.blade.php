@@ -381,13 +381,12 @@
     }
 
     .recent-table th {
-        padding: 10px 13px;
+        padding: 12px 13px;
         background: #fafbfc;
-        border-right: 1px solid #dce5ef;
         border-bottom: 1px solid #dce5ef;
         color: #64748b;
-        font-size: 9px;
-        font-weight: 800;
+        font-size: 11px;
+        font-weight: 700;
         letter-spacing: .025em;
         text-align: center;
         text-transform: uppercase;
@@ -396,17 +395,24 @@
 
     .recent-table td {
         padding: 12px 13px;
-        border-right: 1px solid #e3eaf2;
         border-bottom: 1px solid #e3eaf2;
         color: #334155;
-        font-size: 10.5px;
+        font-size: 11px;
+        font-weight: 400;
         vertical-align: middle;
     }
 
-    .recent-table th:last-child,
-    .recent-table td:last-child {
-        border-right: 0;
-    }
+    /* Layout global memakai font isi 12px: kunci tabel ini maksimal 11px. */
+    body .recent-table.recent-table th,
+    body .recent-table.recent-table td { font-size: 11px !important; }
+
+    .recent-order-date { display: block; text-align: center; white-space: nowrap; }
+    .recent-order-date-main { display: block; font-size: 11px; font-weight: 700; line-height: 1.35; }
+    .recent-order-date-time { display: block; margin-top: 4px; font-size: 10px; font-weight: 400; line-height: 1.35; color: #94a3b8; }
+    .recent-table .recent-order-qty { font-size: 11px; font-weight: 600; }
+    body .recent-table.recent-table .order-number { font-size: 11px; font-weight: 600 !important; }
+    .recent-table .order-model-product strong { font-size: 11px; font-weight: 700; }
+    .recent-table .order-model-product span { font-size: 10px; font-weight: 400; }
 
     .recent-table tbody tr {
         cursor: pointer;
@@ -460,12 +466,14 @@
 
     .order-model-product strong {
         color: #172033;
-        font-size: 10.5px;
+        font-size: 11px;
+        font-weight: 700;
     }
 
     .order-model-product span {
         color: #64748b;
-        font-size: 9.5px;
+        font-size: 10px;
+        font-weight: 400;
     }
 
     .status-pill {
@@ -868,7 +876,16 @@
                             aria-label="Lihat detail order {{ $order->order_number }}"
                             title="Lihat detail order">
                             <td class="order-number">{{ $order->order_number }}</td>
-                            <td>{{ $order->created_at?->format('d-m-Y H:i') ?? '-' }}</td>
+                            <td>
+                                @if ($order->created_at)
+                                    <time class="recent-order-date" datetime="{{ $order->created_at->toIso8601String() }}">
+                                        <span class="recent-order-date-main">{{ $order->created_at->format('d-m-Y') }}</span>
+                                        <span class="recent-order-date-time">{{ $order->created_at->format('H:i') }}</span>
+                                    </time>
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td>
                                 <div class="order-model-product">
                                     <strong>{{ $modelName }}</strong>
@@ -880,7 +897,7 @@
                                     </span>
                                 </div>
                             </td>
-                            <td>{{ $qty }} NG</td>
+                            <td class="recent-order-qty">{{ $qty }} NG</td>
                             <td>
                                 <span class="status-pill {{ $status['class'] }}">
                                     {{ $status['label'] }}
@@ -907,7 +924,10 @@
 /* Unified operational status chips; numeric and status cells centered. */
 .recent-table th:nth-child(4), .recent-table th:nth-child(5),
 .recent-table td:nth-child(4), .recent-table td:nth-child(5) {text-align:center!important;}
-.recent-table .status-pill {display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border:0!important;border-radius:999px!important;padding:8px 13px!important;font-weight:600!important;white-space:nowrap;}
+.recent-table .status-pill {display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border:0!important;border-radius:999px!important;padding:8px 13px!important;font-size:10px!important;font-weight:600!important;white-space:nowrap;}
+html[data-theme="dark"] .recent-order-date-time,
+html[data-theme="dark"] .recent-table .order-model-product span { color: var(--text-soft); }
+html[data-theme="dark"] .recent-table-wrap { background: var(--surface); border-color: var(--border); }
 .recent-table .status-pill::before {content:"";display:inline-block;width:7px;height:7px;min-width:7px;background:currentColor;border-radius:50%;}
 </style>
 <script>

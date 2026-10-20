@@ -35,47 +35,58 @@
 
     .orders-table {
         width: 100%;
-        min-width: 1250px;
+        min-width: 1000px;
         border-collapse: separate;
         border-spacing: 0;
     }
 
     .orders-table th {
         background: #f9fafb;
-        text-align: center;
+        text-align: left;
         padding: 12px 14px;
-        font-size: 10px;
-        font-weight: 800;
+        font-size: 11px;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .04em;
-        color: #6b7280;
+        color: #64748b;
         white-space: nowrap;
-        border-right: 1px solid #dfe6ef;
-        border-bottom: 1px solid #dfe6ef;
+        border-bottom: 1px solid #e3e9f0;
     }
 
     .orders-table td {
         padding: 13px 14px;
-        border-right: 1px solid #dfe6ef;
-        border-bottom: 1px solid #dfe6ef;
-        font-size: 12px;
-        color: #374151;
+        border-bottom: 1px solid #edf1f5;
+        font-size: 11px;
+        color: #334155;
         vertical-align: middle;
     }
 
-    .orders-table th:last-child,
-    .orders-table td:last-child {
-        border-right: 0;
-    }
+    /* Override lokal font table dari layout global agar isi tidak lebih besar dari header. */
+    body .orders-table.orders-table th,
+    body .orders-table.orders-table td { font-size:11px !important; }
+
+    .orders-table th:nth-child(1),
+    .orders-table th:nth-child(6),
+    .orders-table th:nth-child(7) { text-align:center; }
+
+    .orders-table td:nth-child(6),
+    .orders-table td:nth-child(7) { text-align:center; }
+
+    .orders-table .order-number { font-weight:600 !important; }
+    .order-type-label { font-size:11px; font-weight:400; color:#64748b; }
+    .order-line-label { font-size:11px; font-weight:600; color:#172033; }
+    .order-qty-value { font-size:11px; font-weight:600; }
+    html[data-theme="dark"] .order-user,
+    html[data-theme="dark"] .order-type-label { color:var(--text-soft); }
+    html[data-theme="dark"] .order-line-label { color:var(--text); }
 
     .orders-table tbody tr {
         cursor: pointer;
-        transition: .18s ease;
+        transition: background .15s ease;
     }
 
     .orders-table tbody tr:hover {
-        background: #f8fafc;
-        transform: translateY(-1px);
+        background: #F4F8F5;
     }
 
     .orders-table tbody tr:active {
@@ -86,21 +97,21 @@
         border-bottom: none;
     }
 
-    .order-no {
-        width: 55px;
-        color: #94a3b8 !important;
-        font-weight: 400;
-        text-align: center;
-    }
+    .order-history-date { display:block; text-align:center; white-space:nowrap; }
+    .order-history-date-main { display:block; font-size:11px; font-weight:700; line-height:1.35; color:inherit; }
+    .order-history-date-time { display:block; margin-top:4px; font-size:10px; font-weight:400; line-height:1.35; color:#94a3b8; }
+    html[data-theme="dark"] .order-history-date-time { color:var(--text-soft); }
 
     .order-number {
-        font-weight: 500;
+        font-weight: 600;
         color: #111827;
         white-space: nowrap;
     }
 
     .order-user {
-        color: #475569;
+        font-size: 10px;
+        font-weight: 400;
+        color: #64748b;
         white-space: nowrap;
     }
 
@@ -131,7 +142,7 @@
     }
 
     .order-qty {
-        font-size: 13px !important;
+        font-size: 11px !important;
         font-weight: 600;
         color: #172033 !important;
         text-align: center;
@@ -258,7 +269,7 @@
         }
 
         .orders-table {
-            min-width: 1250px;
+            min-width: 1000px;
         }
     }
 
@@ -1845,10 +1856,6 @@
 
                 <tr>
 
-                    <th style="width:55px;">
-                        No
-                    </th>
-
                     <th>
                         Tanggal
                     </th>
@@ -1883,16 +1890,19 @@
 
             <tbody>
 
-                @forelse ($orders as $index => $order)
+                @forelse ($orders as $order)
                 <tr onclick="window.location='{{ route('omd.orders.history.show', $order) }}'"
                     title="Klik untuk melihat detail riwayat order">
 
-                    <td class="order-no">
-                        {{ $orders->firstItem() + $index }}
-                    </td>
-
                     <td>
-                        {{ $order->created_at ? $order->created_at->format('d-m-Y H:i') : '-' }}
+                        @if($order->created_at)
+                            <time class="order-history-date" datetime="{{ $order->created_at->toIso8601String() }}">
+                                <span class="order-history-date-main">{{ $order->created_at->format('d-m-Y') }}</span>
+                                <span class="order-history-date-time">{{ $order->created_at->format('H:i') }}</span>
+                            </time>
+                        @else
+                            —
+                        @endif
                     </td>
 
                     <td class="order-number">
@@ -1904,15 +1914,15 @@
                     </td>
 
                     <td>
-                        Repair Box
+                        <span class="order-type-label">Repair Box</span>
                     </td>
 
                     <td>
-                        {{ $order->line?->name ?? ($order->area?->name ?? '-') }}
+                        <span class="order-line-label">{{ $order->line?->name ?? ($order->area?->name ?? '-') }}</span>
                     </td>
 
                     <td>
-                        {{ in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}
+                        <span class="order-qty-value">{{ in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}</span>
                     </td>
 
                     <td>
@@ -1927,7 +1937,7 @@
 
                 <tr>
 
-                    <td colspan="9" class="order-empty">
+                    <td colspan="7" class="order-empty">
 
                         <div class="order-empty-text">
                             Belum ada history Order Repair Box.

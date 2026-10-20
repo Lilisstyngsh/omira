@@ -27,20 +27,24 @@
     .scrap-history-clear-search { position:absolute; top:50%; right:6px; transform:translateY(-50%); border:0; border-radius:7px; width:25px; height:25px; background:transparent; color:#94a3b8; cursor:pointer; }
     .scrap-history-clear-search:hover { background:#f1f5f9; }
     .scrap-history-table-wrap { overflow-x:auto; border:1px solid #e3e9f0; border-radius:12px; }
-    .scrap-history-table { width:100%; min-width:790px; border-spacing:0; border-collapse:separate; font-size:12px; }
-    .scrap-history-table thead th { background:#f9fafb; border-bottom:1px solid #e3e9f0; padding:12px 14px; text-align:left; text-transform:uppercase; letter-spacing:.04em; color:#64748b; font-size:10px; font-weight:800; }
-    .scrap-history-table tbody td { padding:13px 14px; border-bottom:1px solid #edf1f5; vertical-align:middle; color:#334155; }
+    .scrap-history-table { width:100%; min-width:790px; border-spacing:0; border-collapse:separate; font-size:11px; }
+    .scrap-history-table thead th { background:#f9fafb; border-bottom:1px solid #e3e9f0; padding:12px 14px; text-align:left; text-transform:uppercase; letter-spacing:.04em; color:#64748b; font-size:11px; font-weight:700; }
+    .scrap-history-table tbody td { padding:13px 14px; border-bottom:1px solid #edf1f5; vertical-align:middle; color:#334155; font-size:11px; font-weight:400; }
     .scrap-history-table tbody tr:last-child td { border-bottom:0; }
     .scrap-history-row { cursor:pointer; }
     .scrap-history-row:hover, .scrap-history-row:focus-visible { background:#f8fafc; outline:none; }
     .scrap-history-row.is-open { background:#f7faf8; }
     .scrap-history-expand { display:flex; align-items:center; gap:9px; }
-    .scrap-history-chevron { display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border:1px solid #dfe7e2; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; }
+    .scrap-history-chevron { font-size:11px; display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border:1px solid #dfe7e2; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; }
     .scrap-history-chevron i { transition:transform .15s; }
     .scrap-history-row.is-open .scrap-history-chevron i { transform:rotate(180deg); }
-    .scrap-history-main { font-weight:750; color:#172033; }
-    .scrap-history-sub { margin-top:4px; font-size:11px; color:#64748b; }
-    .scrap-history-pill { display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:750; white-space:nowrap; }
+    .scrap-history-main { font-size:11px; font-weight:700; color:#172033; }
+    .scrap-history-sub { margin-top:4px; font-size:10px; font-weight:400; color:#64748b; }
+    .scrap-history-date { display:block; text-align:center; white-space:nowrap; }
+    .scrap-history-date-main { display:block; font-size:11px; font-weight:700; line-height:1.35; color:inherit; }
+    .scrap-history-date-time { display:block; margin-top:4px; font-size:10px; font-weight:400; line-height:1.35; color:#94a3b8; }
+    html[data-theme="dark"] .scrap-history-date-time { color:var(--text-soft); }
+    .scrap-history-pill { display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:600; white-space:nowrap; }
     .scrap-history-pill.yes { background:#eaf6ed; color:#277047; }
     .scrap-history-pill.no { background:#fff1f2; color:#b24355; }
     .scrap-history-pill.pending { background:#f1f5f9; color:#64748b; }
@@ -48,12 +52,12 @@
     .scrap-history-detail-row td { background:#fbfdfb; padding:16px 20px 18px !important; }
     .scrap-history-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     .scrap-history-detail-box { padding:13px 15px; background:#fff; border:1px solid #e5eaf0; border-radius:10px; min-width:0; }
-    .scrap-history-detail-label { display:block; color:#94a3b8; font-size:10px; font-weight:800; text-transform:uppercase; margin-bottom:7px; }
-    .scrap-history-detail-content { color:#334155; font-size:12px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
-    .scrap-history-detail-meta { font-size:11px; color:#64748b; margin-top:7px; }
+    .scrap-history-detail-label { display:block; color:#94a3b8; font-size:10px; font-weight:700; text-transform:uppercase; margin-bottom:7px; }
+    .scrap-history-detail-content { color:#334155; font-size:11px; font-weight:400; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .scrap-history-detail-meta { font-size:10px; font-weight:400; color:#64748b; margin-top:7px; }
     .scrap-history-reset { margin-top:14px; display:flex; gap:9px; flex-wrap:wrap; align-items:flex-start; }
-    .scrap-history-reset input { height:38px; box-sizing:border-box; padding:0 12px; border:1px solid #dbe2ea; border-radius:9px; background:#fff; min-width:240px; flex:1; font-size:12px; font-weight:400; font-family:inherit; }
-    .scrap-history-reset button { border:0; border-radius:9px; background:#5f9278; color:#fff; padding:0 14px; height:38px; font-size:11px; font-weight:750; cursor:pointer; }
+    .scrap-history-reset input { height:38px; box-sizing:border-box; padding:0 12px; border:1px solid #dbe2ea; border-radius:9px; background:#fff; min-width:240px; flex:1; font-size:11px; font-weight:400; font-family:inherit; }
+    .scrap-history-reset button { border:0; border-radius:9px; background:#5f9278; color:#fff; padding:0 14px; height:38px; font-size:11px; font-weight:600; cursor:pointer; }
     .scrap-history-reset button:hover { background:#4c8167; }
     .scrap-history-empty { text-align:center; color:#94a3b8 !important; padding:30px 14px !important; }
     .scrap-history-pagination { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:18px; }
@@ -180,7 +184,14 @@
                         <td>
                             <div class="scrap-history-expand">
                                 <button type="button" class="scrap-history-chevron" aria-label="Lihat detail {{ $cycle->user?->name ?? 'scrap limit' }}" aria-expanded="false" aria-controls="scrap-detail-{{ $cycle->id }}"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
-                                <span>{{ $cycle->reached_at?->format('d/m/Y') ?? '-' }}</span>
+                                @if($cycle->reached_at)
+                                    <time class="scrap-history-date" datetime="{{ $cycle->reached_at->toIso8601String() }}">
+                                        <span class="scrap-history-date-main">{{ $cycle->reached_at->format('d-m-Y') }}</span>
+                                        <span class="scrap-history-date-time">{{ $cycle->reached_at->format('H:i') }}</span>
+                                    </time>
+                                @else
+                                    <span>—</span>
+                                @endif
                             </div>
                         </td>
                         <td>
@@ -191,7 +202,7 @@
                             <div class="scrap-history-main">{{ $cycle->product?->masterModel?->model ?? '-' }}</div>
                             <div class="scrap-history-sub">{{ $cycle->product?->name ?? '-' }}</div>
                         </td>
-                        <td style="text-align:center;font-weight:750;white-space:nowrap">{{ $cycle->reached_qty ?? 0 }} / {{ $cycle->limit_qty }}</td>
+                        <td style="text-align:center;font-weight:600;white-space:nowrap">{{ $cycle->reached_qty ?? 0 }} / {{ $cycle->limit_qty }}</td>
                         <td style="text-align:center">
                             <span class="scrap-history-pill {{ $cycle->decision === 'yes' ? 'yes' : ($cycle->decision === 'no' ? 'no' : 'pending') }}">
                                 {{ $cycle->decision === 'yes' ? 'Order' : ($cycle->decision === 'no' ? 'Tidak' : 'Belum dipilih') }}

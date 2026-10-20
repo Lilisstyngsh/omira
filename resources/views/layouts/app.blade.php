@@ -9,7 +9,9 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <script>document.documentElement.dataset.theme = 'light';</script>
+    <script>
+        document.documentElement.dataset.theme = 'light';
+    </script>
 
     <style>
         :root {
@@ -35,7 +37,7 @@
 
             --shadow-sm: 0 2px 8px rgba(31, 20, 70, .05);
             --shadow: 0 10px 35px rgba(58, 35, 120, .08);
-            --shadow-purple: 0 10px 30px rgba(95,146,120,.20);
+            --shadow-purple: 0 10px 30px rgba(95, 146, 120, .20);
 
             --radius: 16px;
         }
@@ -169,7 +171,7 @@
                     #5F9278);
 
             box-shadow:
-                0 8px 22px rgba(55,107,82,.22);
+                0 8px 22px rgba(55, 107, 82, .22);
 
             font-size: 17px;
             font-weight: 800;
@@ -499,10 +501,11 @@
 
         /* Equal vertical spacing for standalone cards in OMD and User views.
            Existing grid/flex layouts retain their own gap settings. */
-        :where(.content) > :where(.card, .page-card, .repair-card, .history-card, .fy-card, .monitor-card, .dashboard-panel, .order-table-card, .account-table-card, .account-form-card, .profile-card, .form-card) + :where(.card, .page-card, .repair-card, .history-card, .fy-card, .monitor-card, .dashboard-panel, .order-table-card, .account-table-card, .account-form-card, .profile-card, .form-card) {
+        :where(.content)> :where(.card, .page-card, .repair-card, .history-card, .fy-card, .monitor-card, .dashboard-panel, .order-table-card, .account-table-card, .account-form-card, .profile-card, .form-card)+ :where(.card, .page-card, .repair-card, .history-card, .fy-card, .monitor-card, .dashboard-panel, .order-table-card, .account-table-card, .account-form-card, .profile-card, .form-card) {
             margin-top: 18px;
         }
-        :where(.content) > :where(.page-head, .page-header) + :where(.card, .page-card, .repair-card, .history-card, .fy-card, .monitor-card, .dashboard-panel, .order-table-card, .account-table-card, .account-form-card, .profile-card, .form-card) {
+
+        :where(.content)> :where(.page-head, .page-header)+ :where(.card, .page-card, .repair-card, .history-card, .fy-card, .monitor-card, .dashboard-panel, .order-table-card, .account-table-card, .account-form-card, .profile-card, .form-card) {
             margin-top: 18px;
         }
 
@@ -686,7 +689,7 @@
                     #376B52);
 
             box-shadow:
-                0 8px 20px rgba(95,146,120,.20);
+                0 8px 20px rgba(95, 146, 120, .20);
         }
 
         .btn-primary:hover {
@@ -711,7 +714,7 @@
         .btn-success {
             color: #ffffff;
             background: linear-gradient(135deg, #7FA58C, #376B52);
-            box-shadow: 0 8px 20px rgba(95,146,120,.18);
+            box-shadow: 0 8px 20px rgba(95, 146, 120, .18);
         }
 
         .btn-success:hover {
@@ -780,7 +783,7 @@
             border-color: #7FA58C;
 
             box-shadow:
-                0 0 0 4px rgba(95,146,120,.12);
+                0 0 0 4px rgba(95, 146, 120, .12);
         }
 
         /* =========================================================
@@ -1555,12 +1558,12 @@
             --purple-soft: #1A2820;
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, .18);
             --shadow: 0 12px 34px rgba(0, 0, 0, .24);
-            --shadow-purple: 0 10px 30px rgba(95,146,120,.18);
+            --shadow-purple: 0 10px 30px rgba(95, 146, 120, .18);
         }
 
         html[data-theme="dark"] body {
             background:
-                radial-gradient(circle at 85% 5%, rgba(95,146,120,.12), transparent 25%),
+                radial-gradient(circle at 85% 5%, rgba(95, 146, 120, .12), transparent 25%),
                 var(--background);
             color: var(--text);
         }
@@ -1699,8 +1702,7 @@
             line-height: 1.5;
         }
 
-        body :is(
-            .page-head h2,
+        body :is(.page-head h2,
             .repair-head h2,
             .monitor-head h2,
             .fy-header h2,
@@ -1709,15 +1711,13 @@
             .dashboard-welcome h2,
             .profile-head h2,
             .recap-head h2,
-            .plant-dashboard-header h4
-        ) {
+            .plant-dashboard-header h4) {
             font-size: var(--font-page-title) !important;
             font-weight: 800 !important;
             line-height: 1.25 !important;
         }
 
-        body :is(
-            .card-title,
+        body :is(.card-title,
             .repair-card-title,
             .dashboard-panel-title,
             .account-form-header h3,
@@ -1725,8 +1725,7 @@
             .fy-card-head h3,
             .modal-header h4,
             .sl-modal-title,
-            .fy-modal-head h3
-        ) {
+            .fy-modal-head h3) {
             font-size: var(--font-section-title) !important;
             font-weight: 800 !important;
             line-height: 1.3 !important;
@@ -1798,8 +1797,7 @@
                 linear-gradient(180deg, #15231B 0%, #18281F 48%, #142119 100%);
         }
 
-        html[data-theme="dark"] :is(
-            .page-card,
+        html[data-theme="dark"] :is(.page-card,
             .card,
             .create-wrap,
             .dashboard-kpi,
@@ -1852,15 +1850,13 @@
             .recap-filter,
             .recap-line-menu,
             .login-container,
-            .login-form-panel
-        ) {
+            .login-form-panel) {
             background: var(--surface) !important;
             border-color: var(--border) !important;
             color: var(--text) !important;
         }
 
-        html[data-theme="dark"] :is(
-            .history-date-input input,
+        html[data-theme="dark"] :is(.history-date-input input,
             .history-date-picker input,
             .history-per-page select,
             .history-per-page-label select,
@@ -1886,30 +1882,26 @@
             .qty-input,
             .ng-input,
             .keterangan-input,
-            .mismatch-field
-        ) {
+            .mismatch-field) {
             background: var(--input-bg) !important;
             color: var(--text) !important;
             border-color: var(--input-border) !important;
         }
 
-        html[data-theme="dark"] :is(
-            .history-filter-btn-reset,
+        html[data-theme="dark"] :is(.history-filter-btn-reset,
             .calendar-nav,
             .calendar-reset,
             .history-pagination-btn,
             .recap-btn-secondary,
             .dialog-cancel,
             .btn-reset,
-            .fy-btn.cancel
-        ) {
+            .fy-btn.cancel) {
             background: var(--surface-soft) !important;
             border-color: var(--border) !important;
             color: var(--text-soft) !important;
         }
 
-        html[data-theme="dark"] :is(
-            .page-head h2,
+        html[data-theme="dark"] :is(.page-head h2,
             .page-head h3,
             .repair-head h2,
             .monitor-head h2,
@@ -1939,13 +1931,11 @@
             .profile-info-value,
             .account-user-name,
             .info-item strong,
-            .timeline-item strong
-        ) {
+            .timeline-item strong) {
             color: var(--text) !important;
         }
 
-        html[data-theme="dark"] :is(
-            .page-head p,
+        html[data-theme="dark"] :is(.page-head p,
             .fy-header p,
             .dashboard-welcome p,
             .profile-head p,
@@ -1954,13 +1944,11 @@
             .helper-text,
             .history-info,
             .order-date,
-            .repair-info-description
-        ) {
+            .repair-info-description) {
             color: var(--text-soft) !important;
         }
 
-        html[data-theme="dark"] :is(
-            .orders-table th,
+        html[data-theme="dark"] :is(.orders-table th,
             .order-table th,
             .repair-table th,
             .repair-detail-table th,
@@ -1970,15 +1958,13 @@
             .recent-table th,
             .account-table th,
             .fy-table th,
-            .recap-table th
-        ) {
+            .recap-table th) {
             background: var(--table-head-bg) !important;
             color: #cbd5e1 !important;
             border-color: var(--border) !important;
         }
 
-        html[data-theme="dark"] :is(
-            .orders-table td,
+        html[data-theme="dark"] :is(.orders-table td,
             .order-table td,
             .repair-table td,
             .repair-detail-table td,
@@ -1988,8 +1974,7 @@
             .recent-table td,
             .account-table td,
             .fy-table td,
-            .recap-table td
-        ) {
+            .recap-table td) {
             color: #dbe1ea !important;
             border-color: var(--border-soft) !important;
         }
@@ -2021,7 +2006,7 @@
 
         html[data-theme="dark"] .login-visual {
             background:
-                radial-gradient(circle at 15% 15%, rgba(95,146,120,.20), transparent 29%),
+                radial-gradient(circle at 15% 15%, rgba(95, 146, 120, .20), transparent 29%),
                 radial-gradient(circle at 88% 82%, rgba(95, 146, 120, .10), transparent 30%),
                 linear-gradient(145deg, #181a24 0%, #11141d 52%, #18231D 100%) !important;
         }
@@ -2049,8 +2034,7 @@
 
     <style>
         /* Additional per-page dark compatibility after full menu audit */
-        html[data-theme="dark"] :is(
-            .machine-screen,
+        html[data-theme="dark"] :is(.machine-screen,
             .status-panel,
             .stat-box,
             .ng-edit-box,
@@ -2061,8 +2045,7 @@
             .repair-dialog,
             .repair-dialog textarea,
             .top-info-item,
-            .form-notice
-        ) {
+            .form-notice) {
             background: var(--surface-soft) !important;
             border-color: var(--border) !important;
             color: var(--text) !important;
@@ -2109,8 +2092,7 @@
             color: var(--text) !important;
         }
 
-        body :is(
-            .orders-table,
+        body :is(.orders-table,
             .order-table,
             .repair-table,
             .repair-detail-table,
@@ -2120,14 +2102,12 @@
             .recent-table,
             .account-table,
             .fy-table,
-            .recap-table
-        ) th {
+            .recap-table) th {
             font-size: var(--font-table-head) !important;
             font-weight: 700 !important;
         }
 
-        body :is(
-            .orders-table,
+        body :is(.orders-table,
             .order-table,
             .repair-table,
             .repair-detail-table,
@@ -2137,8 +2117,7 @@
             .recent-table,
             .account-table,
             .fy-table,
-            .recap-table
-        ) td {
+            .recap-table) td {
             font-size: var(--font-table-body) !important;
             font-weight: 400;
         }
@@ -2201,10 +2180,10 @@
             color: var(--text);
             background-color: var(--page-bg);
             background-image:
-                radial-gradient(circle at 88% 4%, rgba(95,146,120,.10), transparent 27%),
-                radial-gradient(circle at 8% 92%, rgba(231,241,233,.72), transparent 30%),
-                linear-gradient(135deg, rgba(255,255,255,.96), rgba(242,247,242,.88)),
-                radial-gradient(circle, rgba(55,107,82,.035) 1px, transparent 1px);
+                radial-gradient(circle at 88% 4%, rgba(95, 146, 120, .10), transparent 27%),
+                radial-gradient(circle at 8% 92%, rgba(231, 241, 233, .72), transparent 30%),
+                linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(242, 247, 242, .88)),
+                radial-gradient(circle, rgba(55, 107, 82, .035) 1px, transparent 1px);
             background-size: auto, auto, auto, 22px 22px;
             background-attachment: fixed;
         }
@@ -2213,17 +2192,27 @@
             background: linear-gradient(180deg, #EEF6F0 0%, #E7F1E9 48%, #F2F7F2 100%) !important;
             color: #41554A !important;
             border-right: 1px solid #D7E5DA;
-            box-shadow: 8px 0 30px rgba(55,107,82,.06) !important;
-            scrollbar-color: rgba(55,107,82,.22) transparent !important;
+            box-shadow: 8px 0 30px rgba(55, 107, 82, .06) !important;
+            scrollbar-color: rgba(55, 107, 82, .22) transparent !important;
         }
-        .sidebar::-webkit-scrollbar-thumb { background: rgba(55,107,82,.18) !important; }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(55, 107, 82, .18) !important;
+        }
 
         .brand {
             display: block !important;
             padding: 8px 10px 24px !important;
         }
-        .brand-logo { display: none !important; }
-        .brand-text { display: block !important; }
+
+        .brand-logo {
+            display: none !important;
+        }
+
+        .brand-text {
+            display: block !important;
+        }
+
         .brand-title {
             color: #2F5E48 !important;
             font-size: 24px !important;
@@ -2231,6 +2220,7 @@
             font-weight: 850 !important;
             letter-spacing: -.45px !important;
         }
+
         .brand-subtitle {
             max-width: 205px;
             margin-top: 7px !important;
@@ -2239,47 +2229,66 @@
             line-height: 1.45 !important;
             font-weight: 550 !important;
         }
-        .nav-section { color: #8A9A91 !important; }
+
+        .nav-section {
+            color: #8A9A91 !important;
+        }
+
         .nav a {
             color: #52645A !important;
             background: transparent !important;
             box-shadow: none !important;
         }
+
         .nav a:hover {
             color: #315F49 !important;
-            background: rgba(255,255,255,.58) !important;
+            background: rgba(255, 255, 255, .58) !important;
             transform: none !important;
         }
+
         .nav a.active {
             color: #315F49 !important;
             background: #FFFFFF !important;
-            box-shadow: 0 5px 16px rgba(55,107,82,.09) !important;
+            box-shadow: 0 5px 16px rgba(55, 107, 82, .09) !important;
         }
-        .nav-icon { color: currentColor !important; }
+
+        .nav-icon {
+            color: currentColor !important;
+        }
+
         .sidebar-user {
-            background: rgba(255,255,255,.55) !important;
-            border-color: rgba(95,146,120,.16) !important;
+            background: rgba(255, 255, 255, .55) !important;
+            border-color: rgba(95, 146, 120, .16) !important;
             backdrop-filter: blur(8px);
         }
-        .sidebar-user-name { color: #2C4136 !important; }
-        .sidebar-user-role { color: #7B8A82 !important; }
+
+        .sidebar-user-name {
+            color: #2C4136 !important;
+        }
+
+        .sidebar-user-role {
+            color: #7B8A82 !important;
+        }
+
         .sidebar-avatar {
             background: linear-gradient(135deg, #7FAA90, #4F8368) !important;
-            box-shadow: 0 5px 15px rgba(55,107,82,.16) !important;
+            box-shadow: 0 5px 15px rgba(55, 107, 82, .16) !important;
         }
+
         .logout-btn {
             color: #5F7067 !important;
             border-color: #D7E5DA !important;
-            background: rgba(255,255,255,.65) !important;
+            background: rgba(255, 255, 255, .65) !important;
         }
+
         .logout-btn:hover {
             color: #B44E4E !important;
-            border-color: rgba(217,108,108,.30) !important;
+            border-color: rgba(217, 108, 108, .30) !important;
             background: #FFF5F5 !important;
         }
 
         .topbar {
-            background: rgba(255,255,255,.88) !important;
+            background: rgba(255, 255, 255, .88) !important;
             border-bottom-color: #E1EAE3 !important;
             backdrop-filter: blur(14px);
         }
@@ -2293,8 +2302,9 @@
             background: #5F9278 !important;
             border-color: #5F9278 !important;
             color: #FFFFFF !important;
-            box-shadow: 0 6px 16px rgba(95,146,120,.17) !important;
+            box-shadow: 0 6px 16px rgba(95, 146, 120, .17) !important;
         }
+
         .btn-primary:hover,
         button.btn-primary:hover,
         .dialog-confirm:hover,
@@ -2305,13 +2315,22 @@
             border-color: #376B52 !important;
         }
 
-        input:focus, select:focus, textarea:focus {
+        input:focus,
+        select:focus,
+        textarea:focus {
             border-color: #6D9D82 !important;
-            box-shadow: 0 0 0 3px rgba(95,146,120,.12) !important;
+            box-shadow: 0 0 0 3px rgba(95, 146, 120, .12) !important;
             outline: none;
         }
-        table th { background-color: var(--table-head-bg); color: #405148; }
-        tbody tr:hover td { background-color: var(--table-hover-bg); }
+
+        table th {
+            background-color: var(--table-head-bg);
+            color: #405148;
+        }
+
+        tbody tr:hover td {
+            background-color: var(--table-hover-bg);
+        }
 
         .theme-toggle {
             border: 0 !important;
@@ -2319,7 +2338,11 @@
             box-shadow: none !important;
             color: #5E6F66 !important;
         }
-        .theme-toggle:hover { color: #376B52 !important; transform: scale(1.08) !important; }
+
+        .theme-toggle:hover {
+            color: #376B52 !important;
+            transform: scale(1.08) !important;
+        }
 
         html[data-theme="dark"] {
             color-scheme: dark;
@@ -2343,44 +2366,84 @@
             --input-border: #34483C;
             --table-head-bg: #202E26;
             --table-hover-bg: #223129;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,.20);
-            --shadow: 0 12px 34px rgba(0,0,0,.28);
-            --shadow-purple: 0 10px 26px rgba(0,0,0,.24);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, .20);
+            --shadow: 0 12px 34px rgba(0, 0, 0, .28);
+            --shadow-purple: 0 10px 26px rgba(0, 0, 0, .24);
         }
+
         html[data-theme="dark"] body {
             background-color: #101813 !important;
             background-image:
-                radial-gradient(circle at 88% 4%, rgba(125,168,141,.10), transparent 27%),
+                radial-gradient(circle at 88% 4%, rgba(125, 168, 141, .10), transparent 27%),
                 linear-gradient(135deg, #101813, #121C16),
-                radial-gradient(circle, rgba(180,210,190,.025) 1px, transparent 1px) !important;
+                radial-gradient(circle, rgba(180, 210, 190, .025) 1px, transparent 1px) !important;
             background-size: auto, auto, 22px 22px !important;
         }
+
         html[data-theme="dark"] .sidebar {
             background: linear-gradient(180deg, #15231B 0%, #18281F 52%, #142119 100%) !important;
             color: #D8E6DC !important;
             border-right-color: #293B31 !important;
         }
-        html[data-theme="dark"] .brand-title { color: #E4EFE7 !important; }
+
+        html[data-theme="dark"] .brand-title {
+            color: #E4EFE7 !important;
+        }
+
         html[data-theme="dark"] .brand-subtitle,
-        html[data-theme="dark"] .nav-section { color: #8FA298 !important; }
-        html[data-theme="dark"] .nav a { color: #B5C4BB !important; }
-        html[data-theme="dark"] .nav a:hover { background: rgba(255,255,255,.055) !important; color: #E2EEE6 !important; }
+        html[data-theme="dark"] .nav-section {
+            color: #8FA298 !important;
+        }
+
+        html[data-theme="dark"] .nav a {
+            color: #B5C4BB !important;
+        }
+
+        html[data-theme="dark"] .nav a:hover {
+            background: rgba(255, 255, 255, .055) !important;
+            color: #E2EEE6 !important;
+        }
+
         html[data-theme="dark"] .nav a.active {
             color: #DDF0E3 !important;
             background: #22352A !important;
-            box-shadow: 0 5px 16px rgba(0,0,0,.18) !important;
+            box-shadow: 0 5px 16px rgba(0, 0, 0, .18) !important;
         }
-        html[data-theme="dark"] .sidebar-user { background: rgba(255,255,255,.035) !important; border-color: #31473A !important; }
-        html[data-theme="dark"] .sidebar-user-name { color: #E5EEE8 !important; }
-        html[data-theme="dark"] .sidebar-user-role { color: #91A49A !important; }
-        html[data-theme="dark"] .logout-btn { background: rgba(255,255,255,.03) !important; border-color: #31473A !important; color: #B5C4BB !important; }
-        html[data-theme="dark"] .topbar { background: rgba(17,26,21,.90) !important; border-bottom-color: #293B31 !important; }
-        html[data-theme="dark"] .theme-toggle { color: #E2C56B !important; }
-        html[data-theme="dark"] :is(.card,.repair-card,.repair-info-card,.monitor-card,.chart-card,.fy-card,.history-card,.account-form-card,.account-table-card,.action-card,.area-card,.form-card,.line-card,.line-table-card,.master-card,.model-card,.ng-card,.order-table-card,.page-card,.plant-card,.profile-card,.settings-card,.sl-card,.validation-card,.workflow-card,.recap-card,.recap-filter,.modal-box,.sl-modal,.fy-modal,.account-edit-modal,.validation-modal,.dashboard-kpi,.dashboard-panel) {
+
+        html[data-theme="dark"] .sidebar-user {
+            background: rgba(255, 255, 255, .035) !important;
+            border-color: #31473A !important;
+        }
+
+        html[data-theme="dark"] .sidebar-user-name {
+            color: #E5EEE8 !important;
+        }
+
+        html[data-theme="dark"] .sidebar-user-role {
+            color: #91A49A !important;
+        }
+
+        html[data-theme="dark"] .logout-btn {
+            background: rgba(255, 255, 255, .03) !important;
+            border-color: #31473A !important;
+            color: #B5C4BB !important;
+        }
+
+        html[data-theme="dark"] .topbar {
+            background: rgba(17, 26, 21, .90) !important;
+            border-bottom-color: #293B31 !important;
+        }
+
+        html[data-theme="dark"] .theme-toggle {
+            color: #E2C56B !important;
+        }
+
+        html[data-theme="dark"] :is(.card, .repair-card, .repair-info-card, .monitor-card, .chart-card, .fy-card, .history-card, .account-form-card, .account-table-card, .action-card, .area-card, .form-card, .line-card, .line-table-card, .master-card, .model-card, .ng-card, .order-table-card, .page-card, .plant-card, .profile-card, .settings-card, .sl-card, .validation-card, .workflow-card, .recap-card, .recap-filter, .modal-box, .sl-modal, .fy-modal, .account-edit-modal, .validation-modal, .dashboard-kpi, .dashboard-panel) {
             background: var(--surface) !important;
             border-color: var(--border) !important;
-            box-shadow: 0 12px 34px rgba(0,0,0,.20) !important;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, .20) !important;
         }
+
         html[data-theme="dark"] input,
         html[data-theme="dark"] select,
         html[data-theme="dark"] textarea {
@@ -2388,9 +2451,21 @@
             color: var(--text) !important;
             border-color: var(--input-border) !important;
         }
-        html[data-theme="dark"] table th { background: var(--table-head-bg) !important; color: #D4E1D8 !important; border-color: var(--border) !important; }
-        html[data-theme="dark"] table td { color: #D7E2DA !important; border-color: var(--border-soft) !important; }
-        html[data-theme="dark"] tbody tr:hover td { background: var(--table-hover-bg) !important; }
+
+        html[data-theme="dark"] table th {
+            background: var(--table-head-bg) !important;
+            color: #D4E1D8 !important;
+            border-color: var(--border) !important;
+        }
+
+        html[data-theme="dark"] table td {
+            color: #D7E2DA !important;
+            border-color: var(--border-soft) !important;
+        }
+
+        html[data-theme="dark"] tbody tr:hover td {
+            background: var(--table-hover-bg) !important;
+        }
 
         /* OMIRA Sidebar — clean white / thin outline / soft-green selection.
            Scoped to sidebar; preserves menu DOM, routes and permissions. */
@@ -2398,12 +2473,22 @@
             background: #FFFFFF !important;
             color: #111827 !important;
             border-right: 1px solid #E8ECE9 !important;
-            box-shadow: 3px 0 18px rgba(17,24,39,.025) !important;
+            box-shadow: 3px 0 18px rgba(17, 24, 39, .025) !important;
             scrollbar-color: #DDE5DF transparent !important;
         }
-        html:not([data-theme="dark"]) .sidebar .brand-title { color: #172A20 !important; }
-        html:not([data-theme="dark"]) .sidebar .brand-subtitle { color: #343F38 !important; }
-        html:not([data-theme="dark"]) .sidebar .nav-section { color: #5C665F !important; }
+
+        html:not([data-theme="dark"]) .sidebar .brand-title {
+            color: #172A20 !important;
+        }
+
+        html:not([data-theme="dark"]) .sidebar .brand-subtitle {
+            color: #343F38 !important;
+        }
+
+        html:not([data-theme="dark"]) .sidebar .nav-section {
+            color: #5C665F !important;
+        }
+
         .sidebar .nav a,
         .sidebar .nav-dropdown-toggle {
             min-height: 40px;
@@ -2411,11 +2496,39 @@
             font-weight: 500;
             transition: background-color .16s ease, color .16s ease;
         }
-        .sidebar .nav-icon { width: 20px; height: 20px; flex: 0 0 20px; opacity: 1; }
-        .sidebar .sidebar-outline-icon { display: block; width: 18px; height: 18px; flex-shrink: 0; }
-        .sidebar .nav-sub-icon { width: 18px; flex: 0 0 18px; display: flex; align-items: center; justify-content: center; }
-        .sidebar .nav-sub-icon .sidebar-outline-icon { width: 16px; height: 16px; }
-        .sidebar .nav-arrow .sidebar-outline-icon { width: 16px; height: 16px; }
+
+        .sidebar .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            opacity: 1;
+        }
+
+        .sidebar .sidebar-outline-icon {
+            display: block;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .sidebar .nav-sub-icon {
+            width: 18px;
+            flex: 0 0 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar .nav-sub-icon .sidebar-outline-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .sidebar .nav-arrow .sidebar-outline-icon {
+            width: 16px;
+            height: 16px;
+        }
+
         html:not([data-theme="dark"]) .sidebar .nav a,
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-toggle,
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-menu a {
@@ -2423,6 +2536,7 @@
             background: transparent !important;
             box-shadow: none !important;
         }
+
         html:not([data-theme="dark"]) .sidebar .nav a:hover,
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-toggle:hover,
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-menu a:hover {
@@ -2430,6 +2544,7 @@
             background: #F3F7F4 !important;
             transform: none !important;
         }
+
         html:not([data-theme="dark"]) .sidebar .nav a.active,
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-toggle.active,
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-menu a.active {
@@ -2438,25 +2553,51 @@
             font-weight: 700 !important;
             box-shadow: none !important;
         }
+
         html:not([data-theme="dark"]) .sidebar .nav-dropdown-menu {
             border-left: 1px solid #E4EBE6 !important;
         }
+
         html:not([data-theme="dark"]) .sidebar .sidebar-user {
             background: #FFFFFF !important;
             border: 1px solid #E7ECE8 !important;
             backdrop-filter: none;
-            box-shadow: 0 2px 9px rgba(17,24,39,.025) !important;
+            box-shadow: 0 2px 9px rgba(17, 24, 39, .025) !important;
         }
-        html:not([data-theme="dark"]) .sidebar .sidebar-user-name { color: #111827 !important; }
-        html:not([data-theme="dark"]) .sidebar .sidebar-user-role { color: #4B5563 !important; }
+
+        html:not([data-theme="dark"]) .sidebar .sidebar-user-name {
+            color: #111827 !important;
+        }
+
+        html:not([data-theme="dark"]) .sidebar .sidebar-user-role {
+            color: #4B5563 !important;
+        }
+
         /* Maintain existing dark theme, with understated green active state. */
-        html[data-theme="dark"] .sidebar .nav-dropdown-menu a { color: #D3E0D6 !important; }
-        html[data-theme="dark"] .sidebar .nav-dropdown-toggle { color: #D3E0D6 !important; }
-        html[data-theme="dark"] .sidebar .nav-dropdown-menu { border-left-color: #35493C !important; }
+        html[data-theme="dark"] .sidebar .nav-dropdown-menu a {
+            color: #D3E0D6 !important;
+        }
+
+        html[data-theme="dark"] .sidebar .nav-dropdown-toggle {
+            color: #D3E0D6 !important;
+        }
+
+        html[data-theme="dark"] .sidebar .nav-dropdown-menu {
+            border-left-color: #35493C !important;
+        }
+
         html[data-theme="dark"] .sidebar .nav-dropdown-toggle:hover,
-        html[data-theme="dark"] .sidebar .nav-dropdown-menu a:hover { background: #21352A !important; color: #F1F8F3 !important; }
+        html[data-theme="dark"] .sidebar .nav-dropdown-menu a:hover {
+            background: #21352A !important;
+            color: #F1F8F3 !important;
+        }
+
         html[data-theme="dark"] .sidebar .nav-dropdown-toggle.active,
-        html[data-theme="dark"] .sidebar .nav-dropdown-menu a.active { background: #294736 !important; color: #E5F5EA !important; font-weight: 700 !important; }
+        html[data-theme="dark"] .sidebar .nav-dropdown-menu a.active {
+            background: #294736 !important;
+            color: #E5F5EA !important;
+            font-weight: 700 !important;
+        }
 
 
         /* =========================================================
@@ -2584,6 +2725,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+
             .sidebar,
             .sidebar-backdrop {
                 transition: none !important;
@@ -2602,233 +2744,294 @@
 
     @if (View::hasSection('guest'))
 
-        <main class="guest-page">
-            @yield('guest')
-        </main>
+    <main class="guest-page">
+        @yield('guest')
+    </main>
     @else
-        {{-- =========================================================
+    {{-- =========================================================
              APPLICATION
         ========================================================== --}}
 
-        <div class="app">
+    <div class="app">
 
-            {{-- =====================================================
+        {{-- =====================================================
                  SIDEBAR
             ====================================================== --}}
 
-            <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+        <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
 
-            <aside class="sidebar" id="appSidebar">
+        <aside class="sidebar" id="appSidebar">
 
-                {{-- BRAND --}}
-                <div class="brand">
+            {{-- BRAND --}}
+            <div class="brand">
 
-                    <div class="brand-text">
+                <div class="brand-text">
 
-                        <div class="brand-title">
-                            OMIRA
-                        </div>
+                    <div class="brand-title">
+                        OMIRA
+                    </div>
 
-                        <div class="brand-subtitle">
-                            OMD Integrated Repair Application
-                        </div>
-
+                    <div class="brand-subtitle">
+                        OMD Integrated Repair Application
                     </div>
 
                 </div>
 
-
-                {{-- MAIN MENU --}}
-                <div class="nav-section">
-                    Main Menu
-                </div>
-
-                <nav class="nav">
-
-                    {{-- Dashboard --}}
-                    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-
-                        <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9"/><path d="M9 21v-7h6v7"/></svg></span>
-
-                        <span>
-                            Dashboard
-                        </span>
-
-                    </a>
+            </div>
 
 
-                    {{-- USER --}}
-                    @if (auth()->user()->role === 'user')
-                        <a href="{{ route('user.orders.index') }}"
-                            class="{{ request()->routeIs('user.orders.index', 'user.orders.create', 'user.orders.show') ? 'active' : '' }}">
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
-                            <span>Order Repair</span>
-                            <span id="userOrderNotification" class="nav-notification hidden">0</span>
-                        </a>
+            {{-- MAIN MENU --}}
+            <div class="nav-section">
+                Main Menu
+            </div>
 
+            <nav class="nav">
+
+                {{-- Dashboard --}}
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+
+                    <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m3 10 9-7 9 7" />
+                            <path d="M5 9v12h14V9" />
+                            <path d="M9 21v-7h6v7" />
+                        </svg></span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                {{-- USER --}}
+                @if (auth()->user()->role === 'user')
+                <a href="{{ route('user.orders.index') }}"
+                    class="{{ request()->routeIs('user.orders.index', 'user.orders.create', 'user.orders.show') ? 'active' : '' }}">
+                    <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m3 7 9-4 9 4-9 4-9-4Z" />
+                            <path d="M3 7v10l9 4 9-4V7" />
+                            <path d="M12 11v10" />
+                        </svg></span>
+                    <span>Order Repair</span>
+                    <span id="userOrderNotification" class="nav-notification hidden">0</span>
+                </a>
+
+                @php
+                $userHistoryActive = request()->routeIs('user.orders.history*')
+                || request()->routeIs('user.additional-box.*');
+                @endphp
+
+                <div class="nav-dropdown {{ $userHistoryActive ? 'open' : '' }}">
+                    <button type="button" class="nav-dropdown-toggle {{ $userHistoryActive ? 'active' : '' }}"
+                        aria-expanded="{{ $userHistoryActive ? 'true' : 'false' }}"
+                        aria-controls="user-history-menu"
+                        onclick="this.parentElement.classList.toggle('open'); this.setAttribute('aria-expanded', this.parentElement.classList.contains('open') ? 'true' : 'false')">
+                        <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 12a9 9 0 1 0 3-6.7" />
+                                <path d="M3 3v6h6" />
+                                <path d="M12 7v5l3 2" />
+                            </svg></span>
+                        <span class="nav-dropdown-title">History</span>
+                        <span class="nav-arrow"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg></span>
+                    </button>
+
+                    <div class="nav-dropdown-menu" id="user-history-menu">
                         <a href="{{ route('user.orders.history') }}"
-                            class="{{ (request()->routeIs('user.orders.history') || request()->routeIs('user.orders.history.show')) ? 'active' : '' }}">
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 7v5l3 2"/></svg></span>
-                            <span>History Repair</span>
+                            class="{{ request()->routeIs('user.orders.history*') ? 'active' : '' }}">
+                            <span>Repair Order</span>
                         </a>
-
                         <a href="{{ route('user.additional-box.index') }}"
                             class="{{ request()->routeIs('user.additional-box.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6"/><path d="M9 9h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span>
-                            <span>Additional Box</span>
+                            <span>Scrap</span>
                         </a>
-
-
-                        
-                    @else
-                        {{-- OMD --}}
-
-                        <a href="{{ route('omd.orders.index') }}"
-                            class="{{ (request()->routeIs('omd.orders.index') || request()->routeIs('omd.orders.show')) ? 'active' : '' }}">
-
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
-
-                            <span>
-                                Order Repair
-                            </span>
-
-                            <span id="omdOrderNotification" class="nav-notification hidden">
-                                0
-                            </span>
-
-                        </a>
-
-                        <a href="{{ route('omd.orders.history') }}"
-                            class="{{ (request()->routeIs('omd.orders.history') || request()->routeIs('omd.orders.history.show')) ? 'active' : '' }}">
-
-                            <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 7v5l3 2"/></svg></span>
-
-                            <span>
-                                History Repair
-                            </span>
-
-                        </a>
-
-                        
-                    @endif
-
-                </nav>
-
-
-                {{-- =================================================
-                     MANAGEMENT
-                ================================================== --}}
-
-                @if (auth()->user()->role !== 'user')
-
-                    <div class="nav-section">
-                        Management
                     </div>
+                </div>
 
-                    <nav class="nav">
-                        {{-- Data Master hanya Leader --}}
-                        @if (auth()->user()->role === 'omd')
-                            @php
-                                $dataMasterActive = request()->routeIs('omd.master.*')
-                                    || request()->routeIs('omd.scrap-limits.*')
-                                    || request()->routeIs('omd.scrap-cycles.*')
-                                    || request()->routeIs('omd.targets.*');
-                            @endphp
 
-                            <div class="nav-dropdown {{ $dataMasterActive ? 'open' : '' }}">
-                                <div class="nav-dropdown-toggle {{ $dataMasterActive ? 'active' : '' }}"
-                                    onclick="this.parentElement.classList.toggle('open')">
-                                    <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg></span>
-                                    <span class="nav-dropdown-title">Data Master</span>
-                                    <span class="nav-arrow"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
-                                </div>
 
-                                <div class="nav-dropdown-menu">
-                                    <a href="{{ route('omd.master.line') }}"
-                                        class="{{ request()->routeIs('omd.master.line') ? 'active' : '' }}">
-                                        <span>Plant & Line</span>
-                                    </a>
+                @else
+                {{-- OMD --}}
 
-                                    <a href="{{ route('omd.master.model-product') }}"
-                                        class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
-                                        <span>Model &amp; Produk</span>
-                                    </a>
+                <a href="{{ route('omd.orders.index') }}"
+                    class="{{ (request()->routeIs('omd.orders.index') || request()->routeIs('omd.orders.show')) ? 'active' : '' }}">
 
-                                    <a href="{{ route('omd.scrap-cycles.index') }}"
-                                        class="{{ request()->routeIs('omd.scrap-cycles.*') ? 'active' : '' }}">
-                                        <span>Riwayat Scrap</span>
-                                    </a>
+                    <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m3 7 9-4 9 4-9 4-9-4Z" />
+                            <path d="M3 7v10l9 4 9-4V7" />
+                            <path d="M12 11v10" />
+                        </svg></span>
 
-                                    <a href="{{ route('omd.master.form-numbers.index') }}"
-                                        class="{{ request()->routeIs('omd.master.form-numbers.*') ? 'active' : '' }}">
-                                        <span>Nomor Form</span>
-                                    </a>
+                    <span>
+                        Order Repair
+                    </span>
 
-                                    <a href="{{ route('omd.targets.index') }}"
-                                        class="{{ request()->routeIs('omd.targets.*') ? 'active' : '' }}">
-                                        <span>Fiscal Year</span>
-                                    </a>
-                                </div>
-                            </div>
-                        @endif
+                    <span id="omdOrderNotification" class="nav-notification hidden">
+                        0
+                    </span>
 
-                        {{-- Report Repair Order hanya untuk OMD --}}
-                        @if (auth()->user()->role === 'omd')
-                            <a href="{{ route('omd.recap') }}"
-                                class="{{ request()->routeIs('omd.recap*') ? 'active' : '' }}">
-                                <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 4 3 5-7"/></svg></span>
-                                <span>Report</span>
-                            </a>
-                        @endif
+                </a>
 
-                        {{-- Manajemen Akun hanya Leader --}}
-                        @if (auth()->user()->role === 'omd')
-                            <a href="{{ route('omd.users.index') }}"
-                                class="{{ request()->routeIs('omd.users.*') ? 'active' : '' }}">
+                @php
+                $omdHistoryActive = request()->routeIs('omd.orders.history*')
+                || request()->routeIs('omd.scrap-cycles.*');
+                @endphp
 
-                                <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 9-5"/><circle cx="17" cy="16" r="3"/><path d="M17 10v2m0 8v2m-6-6h2m8 0h2m-10.2-4.2 1.4 1.4m5.6 5.6 1.4 1.4m0-8.4-1.4 1.4m-5.6 5.6-1.4 1.4"/></svg></span>
+                <div class="nav-dropdown {{ $omdHistoryActive ? 'open' : '' }}">
+                    <button type="button" class="nav-dropdown-toggle {{ $omdHistoryActive ? 'active' : '' }}"
+                        aria-expanded="{{ $omdHistoryActive ? 'true' : 'false' }}"
+                        aria-controls="omd-history-menu"
+                        onclick="this.parentElement.classList.toggle('open'); this.setAttribute('aria-expanded', this.parentElement.classList.contains('open') ? 'true' : 'false')">
+                        <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 12a9 9 0 1 0 3-6.7" />
+                                <path d="M3 3v6h6" />
+                                <path d="M12 7v5l3 2" />
+                            </svg></span>
+                        <span class="nav-dropdown-title">History</span>
+                        <span class="nav-arrow"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg></span>
+                    </button>
 
-                                <span>
-                                    Manajemen Akun
-                                </span>
+                    <div class="nav-dropdown-menu" id="omd-history-menu">
+                        <a href="{{ route('omd.orders.history') }}"
+                            class="{{ request()->routeIs('omd.orders.history*') ? 'active' : '' }}">
+                            <span>Repair Order</span>
+                        </a>
+                        <a href="{{ route('omd.scrap-cycles.index') }}"
+                            class="{{ request()->routeIs('omd.scrap-cycles.*') ? 'active' : '' }}">
+                            <span>Scrap</span>
+                        </a>
+                    </div>
+                </div>
 
-                            </a>
-                        @endif
-
-                    </nav>
 
                 @endif
 
+            </nav>
 
-                {{-- =================================================
+
+            {{-- =================================================
+                     MANAGEMENT
+                ================================================== --}}
+
+            @if (auth()->user()->role !== 'user')
+
+            <div class="nav-section">
+                Management
+            </div>
+
+            <nav class="nav">
+                {{-- Data Master hanya Leader --}}
+                @if (auth()->user()->role === 'omd')
+                @php
+                $dataMasterActive = request()->routeIs('omd.master.*')
+                || request()->routeIs('omd.scrap-limits.*')
+                || request()->routeIs('omd.targets.*');
+                @endphp
+
+                <div class="nav-dropdown {{ $dataMasterActive ? 'open' : '' }}">
+                    <div class="nav-dropdown-toggle {{ $dataMasterActive ? 'active' : '' }}"
+                        onclick="this.parentElement.classList.toggle('open')">
+                        <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                                <path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5" />
+                                <path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3" />
+                            </svg></span>
+                        <span class="nav-dropdown-title">Data Master</span>
+                        <span class="nav-arrow"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg></span>
+                    </div>
+
+                    <div class="nav-dropdown-menu">
+                        <a href="{{ route('omd.master.line') }}"
+                            class="{{ request()->routeIs('omd.master.line') ? 'active' : '' }}">
+                            <span>Plant & Line</span>
+                        </a>
+
+                        <a href="{{ route('omd.master.model-product') }}"
+                            class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
+                            <span>Model &amp; Produk</span>
+                        </a>
+
+                        <a href="{{ route('omd.master.form-numbers.index') }}"
+                            class="{{ request()->routeIs('omd.master.form-numbers.*') ? 'active' : '' }}">
+                            <span>Nomor Form</span>
+                        </a>
+
+                        <a href="{{ route('omd.targets.index') }}"
+                            class="{{ request()->routeIs('omd.targets.*') ? 'active' : '' }}">
+                            <span>Fiscal Year</span>
+                        </a>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Report Repair Order hanya untuk OMD --}}
+                @if (auth()->user()->role === 'omd')
+                <a href="{{ route('omd.recap') }}"
+                    class="{{ request()->routeIs('omd.recap*') ? 'active' : '' }}">
+                    <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 3v18h18" />
+                            <path d="m7 14 4-4 4 3 5-7" />
+                        </svg></span>
+                    <span>Report</span>
+                </a>
+                @endif
+
+                {{-- Manajemen Akun hanya Leader --}}
+                @if (auth()->user()->role === 'omd')
+                <a href="{{ route('omd.users.index') }}"
+                    class="{{ request()->routeIs('omd.users.*') ? 'active' : '' }}">
+
+                    <span class="nav-icon"><svg class="sidebar-outline-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="9" cy="8" r="3" />
+                            <path d="M3 20v-2a6 6 0 0 1 9-5" />
+                            <circle cx="17" cy="16" r="3" />
+                            <path d="M17 10v2m0 8v2m-6-6h2m8 0h2m-10.2-4.2 1.4 1.4m5.6 5.6 1.4 1.4m0-8.4-1.4 1.4m-5.6 5.6-1.4 1.4" />
+                        </svg></span>
+
+                    <span>
+                        Manajemen Akun
+                    </span>
+
+                </a>
+                @endif
+
+            </nav>
+
+            @endif
+
+
+            {{-- =================================================
                      SIDEBAR BOTTOM
                 ================================================== --}}
 
-                <div class="sidebar-bottom">
+            <div class="sidebar-bottom">
 
-                    <div class="sidebar-user">
+                <div class="sidebar-user">
 
-                        <div class="sidebar-user-info">
+                    <div class="sidebar-user-info">
 
-                            <div class="sidebar-avatar">
-                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        <div class="sidebar-avatar">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+
+                        <div style="min-width:0;">
+
+                            <div class="sidebar-user-name">
+                                {{ auth()->user()->name }}
                             </div>
 
-                            <div style="min-width:0;">
+                            <div class="sidebar-user-role">
 
-                                <div class="sidebar-user-name">
-                                    {{ auth()->user()->name }}
-                                </div>
-
-                                <div class="sidebar-user-role">
-
-                                    @if (auth()->user()->role === 'user')
-                                        {{ auth()->user()->line?->name ?? '-' }}
-                                    @else
-                                        OMD
-                                    @endif
-
-                                </div>
+                                @if (auth()->user()->role === 'user')
+                                {{ auth()->user()->line?->name ?? '-' }}
+                                @else
+                                OMD
+                                @endif
 
                             </div>
 
@@ -2838,343 +3041,348 @@
 
                 </div>
 
-            </aside>
+            </div>
+
+        </aside>
 
 
-            {{-- =====================================================
+        {{-- =====================================================
                  MAIN
             ====================================================== --}}
 
-            <main class="main">
+        <main class="main">
 
-                {{-- TOPBAR --}}
-                <header class="topbar">
+            {{-- TOPBAR --}}
+            <header class="topbar">
 
-                    <button type="button" class="mobile-sidebar-toggle" id="mobileSidebarToggle" aria-label="Buka menu navigasi" aria-controls="appSidebar" aria-expanded="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                            <path d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
+                <button type="button" class="mobile-sidebar-toggle" id="mobileSidebarToggle" aria-label="Buka menu navigasi" aria-controls="appSidebar" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
 
-                    <div class="topbar-title">
-                        @yield('header', 'Dashboard')
-                    </div>
+                <div class="topbar-title">
+                    @yield('header', 'Dashboard')
+                </div>
 
 
-                    <div class="topbar-right">
+                <div class="topbar-right">
 
-                        <div class="profile-dropdown">
+                    <div class="profile-dropdown">
 
-                            <button type="button" class="profile profile-icon-only" id="profileToggle"
-                                aria-label="Buka menu profil" aria-haspopup="true">
-                                <div class="profile-avatar">
+                        <button type="button" class="profile profile-icon-only" id="profileToggle"
+                            aria-label="Buka menu profil" aria-haspopup="true">
+                            <div class="profile-avatar">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                        </button>
+
+
+                        <div class="profile-menu" id="profileMenu">
+
+                            {{-- PROFILE HEADER --}}
+                            <div class="profile-menu-header">
+
+                                <div class="profile-menu-avatar">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
-                            </button>
 
 
-                            <div class="profile-menu" id="profileMenu">
+                                <div class="profile-menu-user">
 
-                                {{-- PROFILE HEADER --}}
-                                <div class="profile-menu-header">
-
-                                    <div class="profile-menu-avatar">
-                                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                    <div class="profile-menu-name">
+                                        {{ auth()->user()->name }}
                                     </div>
 
-
-                                    <div class="profile-menu-user">
-
-                                        <div class="profile-menu-name">
-                                            {{ auth()->user()->name }}
-                                        </div>
-
-                                        <div class="profile-menu-email">
-                                            {{ auth()->user()->email }}
-                                        </div>
-
+                                    <div class="profile-menu-email">
+                                        {{ auth()->user()->email }}
                                     </div>
-
-
-                                    {{-- EDIT PROFILE --}}
-                                    <a href="{{ route('profile.index') }}" class="profile-menu-edit"
-                                        title="Edit Profil">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </a>
 
                                 </div>
 
 
-                                <div class="profile-menu-divider"></div>
-
-
-                                {{-- ACCOUNT SETTINGS --}}
-                                <a href="{{ route('profile.index') }}" class="profile-menu-settings">
-
-                                    <span class="profile-menu-icon">
-                                        <i class="fa-solid fa-gear"></i>
-                                    </span>
-
-                                    <span>
-                                        Settings
-                                    </span>
-
+                                {{-- EDIT PROFILE --}}
+                                <a href="{{ route('profile.index') }}" class="profile-menu-edit"
+                                    title="Edit Profil">
+                                    <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
-
-
-                                <div class="profile-menu-divider"></div>
-
-
-                                {{-- LOGOUT --}}
-                                <form method="POST" action="{{ route('logout') }}">
-
-                                    @csrf
-
-                                    <button type="submit">
-
-                                        <span class="profile-menu-icon">
-                                            <i class="fa-solid fa-right-from-bracket"></i>
-                                        </span>
-
-                                        <span>
-                                            Log out
-                                        </span>
-
-                                    </button>
-
-                                </form>
 
                             </div>
 
+
+                            <div class="profile-menu-divider"></div>
+
+
+                            {{-- ACCOUNT SETTINGS --}}
+                            <a href="{{ route('profile.index') }}" class="profile-menu-settings">
+
+                                <span class="profile-menu-icon">
+                                    <i class="fa-solid fa-gear"></i>
+                                </span>
+
+                                <span>
+                                    Settings
+                                </span>
+
+                            </a>
+
+
+                            <div class="profile-menu-divider"></div>
+
+
+                            {{-- LOGOUT --}}
+                            <form method="POST" action="{{ route('logout') }}">
+
+                                @csrf
+
+                                <button type="submit">
+
+                                    <span class="profile-menu-icon">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                    </span>
+
+                                    <span>
+                                        Log out
+                                    </span>
+
+                                </button>
+
+                            </form>
+
                         </div>
 
                     </div>
 
-                </header>
+                </div>
+
+            </header>
 
 
-                {{-- CONTENT --}}
-                <section class="content">
+            {{-- CONTENT --}}
+            <section class="content">
 
 
-                    {{-- ERROR --}}
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            {{ $errors->first() }}
-                        </div>
-                    @endif
+                {{-- ERROR --}}
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    {{ $errors->first() }}
+                </div>
+                @endif
 
 
-                    {{-- PAGE CONTENT --}}
-                    @yield('content')
+                {{-- PAGE CONTENT --}}
+                @yield('content')
 
-                </section>
+            </section>
 
-            </main>
+        </main>
 
-        </div>
+    </div>
 
     @endif
 
     @if (auth()->check() && auth()->user()->role === 'omd')
-        <script>
-            function updateOmdOrderNotification() {
+    <script>
+        function updateOmdOrderNotification() {
 
-                fetch(
-                        "{{ route('omd.orders.pendingCount') }}", {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
+            fetch(
+                    "{{ route('omd.orders.pendingCount') }}", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
-                    )
-                    .then(response => {
+                    }
+                )
+                .then(response => {
 
-                        if (!response.ok) {
-                            throw new Error(
-                                'Gagal mengambil notifikasi order.'
-                            );
-                        }
+                    if (!response.ok) {
+                        throw new Error(
+                            'Gagal mengambil notifikasi order.'
+                        );
+                    }
 
-                        return response.json();
-                    })
-                    .then(data => {
+                    return response.json();
+                })
+                .then(data => {
 
-                        const badge =
-                            document.getElementById(
-                                'omdOrderNotification'
-                            );
+                    const badge =
+                        document.getElementById(
+                            'omdOrderNotification'
+                        );
 
-                        if (!badge) {
-                            return;
-                        }
+                    if (!badge) {
+                        return;
+                    }
 
-                        const count =
-                            parseInt(data.count) || 0;
+                    const count =
+                        parseInt(data.count) || 0;
 
-                        if (count > 0) {
+                    if (count > 0) {
 
-                            badge.textContent =
-                                count > 99 ? '99+' : count;
+                        badge.textContent =
+                            count > 99 ? '99+' : count;
 
-                            badge.classList.remove('hidden');
+                        badge.classList.remove('hidden');
 
-                            badge.classList.add('pulse');
+                        badge.classList.add('pulse');
 
-                        } else {
+                    } else {
 
-                            badge.textContent = '0';
+                        badge.textContent = '0';
 
-                            badge.classList.add('hidden');
+                        badge.classList.add('hidden');
 
-                            badge.classList.remove('pulse');
-                        }
+                        badge.classList.remove('pulse');
+                    }
 
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-            }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
 
-            updateOmdOrderNotification();
+        updateOmdOrderNotification();
 
-            setInterval(
-                updateOmdOrderNotification,
-                5000
-            );
-        </script>
+        setInterval(
+            updateOmdOrderNotification,
+            5000
+        );
+    </script>
     @endif
 
 
     @if (auth()->check() && auth()->user()->role === 'user')
-        <script>
-            function updateUserOrderNotification() {
+    <script>
+        function updateUserOrderNotification() {
 
-                fetch(
-                        "{{ route('user.orders.pendingConfirmationCount') }}", {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
+            fetch(
+                    "{{ route('user.orders.pendingConfirmationCount') }}", {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
-                    )
-                    .then(response => {
+                    }
+                )
+                .then(response => {
 
-                        if (!response.ok) {
-                            throw new Error(
-                                'Gagal mengambil notifikasi order user.'
-                            );
-                        }
+                    if (!response.ok) {
+                        throw new Error(
+                            'Gagal mengambil notifikasi order user.'
+                        );
+                    }
 
-                        return response.json();
-                    })
-                    .then(data => {
+                    return response.json();
+                })
+                .then(data => {
 
-                        const badge =
-                            document.getElementById(
-                                'userOrderNotification'
-                            );
+                    const badge =
+                        document.getElementById(
+                            'userOrderNotification'
+                        );
 
-                        if (!badge) {
-                            return;
-                        }
+                    if (!badge) {
+                        return;
+                    }
 
-                        const count =
-                            parseInt(data.count) || 0;
+                    const count =
+                        parseInt(data.count) || 0;
 
-                        if (count > 0) {
+                    if (count > 0) {
 
-                            badge.textContent =
-                                count > 99 ? '99+' : count;
+                        badge.textContent =
+                            count > 99 ? '99+' : count;
 
-                            badge.classList.remove('hidden');
+                        badge.classList.remove('hidden');
 
-                            badge.classList.add('pulse');
+                        badge.classList.add('pulse');
 
-                        } else {
+                    } else {
 
-                            badge.textContent = '0';
+                        badge.textContent = '0';
 
-                            badge.classList.add('hidden');
+                        badge.classList.add('hidden');
 
-                            badge.classList.remove('pulse');
-                        }
+                        badge.classList.remove('pulse');
+                    }
 
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-            }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
 
-            updateUserOrderNotification();
+        updateUserOrderNotification();
 
-            setInterval(
-                updateUserOrderNotification,
-                5000
-            );
-        </script>
+        setInterval(
+            updateUserOrderNotification,
+            5000
+        );
+    </script>
     @endif
 
     @if (auth()->check() && in_array(auth()->user()->role, ['user', 'omd'], true))
-        {{-- Smart auto-refresh: polling hanya mengambil fingerprint, bukan isi order. --}}
-        <script>
-            (function () {
-                const versionUrl = @json(route('activity.version'));
-                const pollInterval = 10000;
-                let lastVersion = null;
-                let requestInFlight = false;
-                let hasUnsavedInput = @json($errors->any());
+    {{-- Smart auto-refresh: polling hanya mengambil fingerprint, bukan isi order. --}}
+    <script>
+        (function() {
+            const versionUrl = @json(route('activity.version'));
+            const pollInterval = 10000;
+            let lastVersion = null;
+            let requestInFlight = false;
+            let hasUnsavedInput = @json($errors -> any());
 
-                function isEditing() {
-                    if (hasUnsavedInput) return true;
-                    const focused = document.activeElement;
-                    if (focused && focused.matches('input, textarea, select, [contenteditable="true"]')) return true;
-                    return Array.from(document.querySelectorAll('dialog[open], [role="dialog"]:not([hidden])'))
-                        .some(dialog => dialog.getClientRects().length > 0);
-                }
+            function isEditing() {
+                if (hasUnsavedInput) return true;
+                const focused = document.activeElement;
+                if (focused && focused.matches('input, textarea, select, [contenteditable="true"]')) return true;
+                return Array.from(document.querySelectorAll('dialog[open], [role="dialog"]:not([hidden])'))
+                    .some(dialog => dialog.getClientRects().length > 0);
+            }
 
-                document.addEventListener('input', function (event) {
-                    if (event.target.closest('form, [contenteditable="true"]')) hasUnsavedInput = true;
-                }, true);
-                document.addEventListener('change', function (event) {
-                    if (event.target.closest('form')) hasUnsavedInput = true;
-                }, true);
-                document.addEventListener('submit', function () {
-                    hasUnsavedInput = true;
-                }, true);
+            document.addEventListener('input', function(event) {
+                if (event.target.closest('form, [contenteditable="true"]')) hasUnsavedInput = true;
+            }, true);
+            document.addEventListener('change', function(event) {
+                if (event.target.closest('form')) hasUnsavedInput = true;
+            }, true);
+            document.addEventListener('submit', function() {
+                hasUnsavedInput = true;
+            }, true);
 
-                async function checkForChanges() {
-                    if (document.visibilityState !== 'visible' || requestInFlight) return;
-                    requestInFlight = true;
-                    try {
-                        const response = await fetch(versionUrl, {
-                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                            cache: 'no-store',
-                            credentials: 'same-origin'
-                        });
-                        if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return;
-                        const payload = await response.json();
-                        if (typeof payload.version !== 'string') return;
-                        if (lastVersion !== null && payload.version !== lastVersion) {
-                            if (!isEditing()) window.location.reload();
-                            return; // perubahan tetap pending jika user sedang mengisi form
-                        }
-                        lastVersion = payload.version;
-                    } catch (error) {
-                        // Tidak memutus aktivitas user jika koneksi sementara bermasalah.
-                    } finally {
-                        requestInFlight = false;
+            async function checkForChanges() {
+                if (document.visibilityState !== 'visible' || requestInFlight) return;
+                requestInFlight = true;
+                try {
+                    const response = await fetch(versionUrl, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        cache: 'no-store',
+                        credentials: 'same-origin'
+                    });
+                    if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return;
+                    const payload = await response.json();
+                    if (typeof payload.version !== 'string') return;
+                    if (lastVersion !== null && payload.version !== lastVersion) {
+                        if (!isEditing()) window.location.reload();
+                        return; // perubahan tetap pending jika user sedang mengisi form
                     }
+                    lastVersion = payload.version;
+                } catch (error) {
+                    // Tidak memutus aktivitas user jika koneksi sementara bermasalah.
+                } finally {
+                    requestInFlight = false;
                 }
+            }
 
-                // Ambil baseline secepatnya, lalu cek maksimal sekali per 10 detik.
-                checkForChanges();
-                setInterval(checkForChanges, pollInterval);
-                document.addEventListener('visibilitychange', function () {
-                    if (document.visibilityState === 'visible') checkForChanges();
-                });
-            })();
-        </script>
+            // Ambil baseline secepatnya, lalu cek maksimal sekali per 10 detik.
+            checkForChanges();
+            setInterval(checkForChanges, pollInterval);
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') checkForChanges();
+            });
+        })();
+    </script>
     @endif
 
     {{-- =========================================================
@@ -3183,69 +3391,69 @@
 ========================================================= --}}
 
     @if (auth()->check())
-        <script>
-            document.addEventListener(
-                'DOMContentLoaded',
-                function() {
+    <script>
+        document.addEventListener(
+            'DOMContentLoaded',
+            function() {
 
-                    const profileToggle =
-                        document.getElementById(
-                            'profileToggle'
-                        );
-
-                    const profileMenu =
-                        document.getElementById(
-                            'profileMenu'
-                        );
-
-                    if (
-                        !profileToggle ||
-                        !profileMenu
-                    ) {
-                        return;
-                    }
-
-                    profileToggle.addEventListener(
-                        'click',
-                        function(event) {
-
-                            event.stopPropagation();
-
-                            profileMenu.classList.toggle(
-                                'open'
-                            );
-
-                        }
+                const profileToggle =
+                    document.getElementById(
+                        'profileToggle'
                     );
 
-                    profileMenu.addEventListener(
-                        'click',
-                        function(event) {
-
-                            event.stopPropagation();
-
-                        }
+                const profileMenu =
+                    document.getElementById(
+                        'profileMenu'
                     );
 
-                    document.addEventListener(
-                        'click',
-                        function() {
-
-                            profileMenu.classList.remove(
-                                'open'
-                            );
-
-                        }
-                    );
-
+                if (
+                    !profileToggle ||
+                    !profileMenu
+                ) {
+                    return;
                 }
-            );
-        </script>
+
+                profileToggle.addEventListener(
+                    'click',
+                    function(event) {
+
+                        event.stopPropagation();
+
+                        profileMenu.classList.toggle(
+                            'open'
+                        );
+
+                    }
+                );
+
+                profileMenu.addEventListener(
+                    'click',
+                    function(event) {
+
+                        event.stopPropagation();
+
+                    }
+                );
+
+                document.addEventListener(
+                    'click',
+                    function() {
+
+                        profileMenu.classList.remove(
+                            'open'
+                        );
+
+                    }
+                );
+
+            }
+        );
+    </script>
     @endif
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('appSidebar');
             const toggle = document.getElementById('mobileSidebarToggle');
             const backdrop = document.getElementById('sidebarBackdrop');
@@ -3270,24 +3478,24 @@
                 toggle.setAttribute('aria-label', 'Tutup menu navigasi');
             }
 
-            toggle.addEventListener('click', function () {
+            toggle.addEventListener('click', function() {
                 if (sidebar.classList.contains('is-open')) closeSidebar();
                 else openSidebar();
             });
 
             backdrop.addEventListener('click', closeSidebar);
 
-            sidebar.querySelectorAll('a').forEach(function (link) {
-                link.addEventListener('click', function () {
+            sidebar.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
                     if (mobileQuery.matches) closeSidebar();
                 });
             });
 
-            document.addEventListener('keydown', function (event) {
+            document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') closeSidebar();
             });
 
-            mobileQuery.addEventListener('change', function (event) {
+            mobileQuery.addEventListener('change', function(event) {
                 if (!event.matches) closeSidebar();
             });
         });
@@ -3296,9 +3504,11 @@
 
     {{-- Shared notifications for authenticated User / OMD; success comes from server flash only. --}}
     @if(auth()->check())
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>window.OMIRA_SUCCESS_MESSAGE = @json(session('success') ?: session('account_success'));</script>
-        <script src="{{ asset('js/omira-ui-shared.js') }}?v=20261020-success-art-b"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.OMIRA_SUCCESS_MESSAGE = @json(session('success') ? : session('account_success'));
+    </script>
+    <script src="{{ asset('js/omira-ui-shared.js') }}?v=20261020-success-art-b"></script>
     @endif
 </body>
 

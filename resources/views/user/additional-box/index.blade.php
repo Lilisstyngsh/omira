@@ -41,18 +41,32 @@
     .ab-search-clear { position:absolute; top:50%; right:7px; transform:translateY(-50%); width:24px; height:24px; border:0; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; }
     .ab-search-clear:hover { background:#f1f5f9; }
     .ab-table-wrap { overflow-x:auto; border:1px solid #dfe6ef; border-radius:12px; }
-    .ab-table { width:100%; min-width:590px; border-spacing:0; border-collapse:separate; table-layout:fixed; }
-    .ab-table th { padding:20px 14px; border-right:1px solid #dfe6ef; border-bottom:1px solid #dfe6ef; background:#f9fafb; color:#6b7280; font-size:11px; font-weight:800; text-align:center; text-transform:uppercase; }
-    .ab-table td { padding:20px 18px; border-right:1px solid #dfe6ef; border-bottom:1px solid #dfe6ef; color:#374151; font-size:12px; vertical-align:middle; }
-    .ab-table th:last-child,.ab-table td:last-child { border-right:0; }
+    .ab-table { width:100%; min-width:880px; border-spacing:0; border-collapse:separate; table-layout:fixed; font-size:11px; }
+    .ab-table th { padding:12px 14px; border-bottom:1px solid #e3e9f0; background:#f9fafb; color:#64748b; font-size:11px; font-weight:700; text-align:left; text-transform:uppercase; letter-spacing:.04em; }
+    .ab-table td { padding:13px 14px; border-bottom:1px solid #edf1f5; color:#334155; font-size:11px; font-weight:400; vertical-align:middle; }
+    .ab-table th:nth-child(2),.ab-table th:nth-child(4),.ab-table th:nth-child(5) { text-align:center; }
     .ab-table tbody tr:last-child td { border-bottom:0; }
     .ab-table tbody tr[data-href] { cursor:pointer; transition:background .15s ease; }
     .ab-table tbody tr[data-href]:hover,.ab-table tbody tr[data-href]:focus-visible { background:#F4F8F5; }
     .ab-table tbody tr[data-href]:focus-visible { outline:2px solid #5F9278; outline-offset:-2px; }
-    .ab-order-number { color:#172033; font-weight:750; text-decoration:none; white-space:nowrap; }
-    .ab-date { white-space:nowrap; }
-    .ab-model-products { line-height:1.6; overflow-wrap:anywhere; }
-    .ab-extra { color:#5F9278; font-size:11px; font-weight:750; white-space:nowrap; }
+    .ab-order-number { color:#172033; font-size:11px; font-weight:600; text-decoration:none; white-space:nowrap; }
+    .ab-date { text-align:center; white-space:nowrap; }
+    .ab-date-main { display:block; font-size:11px; font-weight:700; line-height:1.35; color:inherit; }
+    .ab-date-time { display:block; margin-top:4px; color:#94a3b8; font-size:10px; font-weight:400; line-height:1.35; }
+    .ab-model-products { line-height:1.4; overflow-wrap:anywhere; }
+    .ab-products-stack, .ab-values-stack, .ab-decisions-stack { display:grid; gap:9px; }
+    .ab-product-item, .ab-value-item, .ab-decision-item { min-height:44px; display:flex; flex-direction:column; justify-content:center; }
+    .ab-model-name { color:#172033; font-size:11px; font-weight:700; }
+    .ab-product-name { margin-top:3px; color:#64748b; font-size:10px; font-weight:400; }
+    .ab-value-item, .ab-decision-item { align-items:center; text-align:center; }
+    .ab-value-item { color:inherit; font-size:11px; font-weight:600; white-space:nowrap; }
+    .ab-muted { color:#94a3b8; }
+    .ab-decision-pill { display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:600; white-space:nowrap; }
+    .ab-decision-pill.yes { background:#eaf6ed; color:#277047; }
+    .ab-decision-pill.no { background:#fff1f2; color:#b24355; }
+    html[data-theme="dark"] .ab-model-name { color:var(--text); }
+    html[data-theme="dark"] .ab-product-name, html[data-theme="dark"] .ab-date-time { color:var(--text-soft); }
+    .ab-extra { color:#5F9278; font-size:10px; font-weight:400; white-space:nowrap; }
     .ab-empty { padding:46px 16px!important; text-align:center; color:#94a3b8!important; }
     .ab-pagination { margin-top:20px; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
     .ab-page-link { min-width:34px; height:34px; padding:0 10px; box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; border:1px solid #dbe2ea; border-radius:8px; background:#fff; color:#64748b; font-size:11px; font-weight:700; text-decoration:none; }
@@ -113,28 +127,69 @@
 
     <div class="ab-table-wrap">
         <table class="ab-table">
-            <colgroup><col style="width:29%"><col style="width:24%"><col style="width:47%"></colgroup>
-            <thead><tr><th scope="col">No Order</th><th scope="col">Tanggal</th><th scope="col">Model – Produk</th></tr></thead>
+            <colgroup><col style="width:20%"><col style="width:17%"><col style="width:29%"><col style="width:16%"><col style="width:18%"></colgroup>
+            <thead><tr><th scope="col">No Order</th><th scope="col">Tanggal</th><th scope="col">Model – Produk</th><th scope="col">Scrap / Limit</th><th scope="col">Keputusan</th></tr></thead>
             <tbody>
                 @forelse($requests as $document)
                     @php
-                        // Permintaan lama belum memiliki snapshot keputusan.
-                        $products = $document->decisions->isNotEmpty() ? $document->decisions : $document->items;
-                        $names = $products->map(fn ($item) => trim($item->model_name . ' – ' . $item->product_name))->unique()->values();
+                        // Snapshot keputusan tersedia untuk data baru; data lama fallback ke items.
+                        $hasSnapshots = $document->decisions->isNotEmpty();
+                        $products = $hasSnapshots ? $document->decisions : $document->items;
+                        $visibleProducts = $products->take(2);
                     @endphp
                     <tr data-href="{{ route('user.additional-box.show', $document) }}" role="link" tabindex="0"
                         aria-label="Lihat detail {{ $document->document_number }}"
                         onclick="if (!event.target.closest('a,button,input')) window.location.assign(this.dataset.href)"
                         onkeydown="if (event.target === this && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); window.location.assign(this.dataset.href); }">
                         <td><a class="ab-order-number" href="{{ route('user.additional-box.show', $document) }}">{{ $document->document_number }}</a></td>
-                        <td class="ab-date">{{ $document->created_at->format('d-m-Y H:i') }}</td>
+                        <td class="ab-date">
+                            <time datetime="{{ $document->created_at->toIso8601String() }}">
+                                <span class="ab-date-main">{{ $document->created_at->format('d-m-Y') }}</span>
+                                <span class="ab-date-time">{{ $document->created_at->format('H:i') }}</span>
+                            </time>
+                        </td>
                         <td class="ab-model-products">
-                            {{ $names->take(2)->implode(', ') }}
-                            @if($names->count() > 2)<span class="ab-extra"> +{{ $names->count() - 2 }} lainnya</span>@endif
+                            <div class="ab-products-stack">
+                                @foreach($visibleProducts as $product)
+                                    <div class="ab-product-item">
+                                        <div class="ab-model-name">{{ $product->model_name ?: '—' }}</div>
+                                        <div class="ab-product-name">{{ $product->product_name ?: '—' }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if($products->count() > 2)<span class="ab-extra">+{{ $products->count() - 2 }} lainnya</span>@endif
+                        </td>
+                        <td>
+                            <div class="ab-values-stack">
+                                @foreach($visibleProducts as $product)
+                                    <div class="ab-value-item">
+                                        @if($hasSnapshots && $product->scrap_qty !== null && $product->limit_qty !== null)
+                                            {{ $product->scrap_qty }} / {{ $product->limit_qty }}
+                                        @else
+                                            <span class="ab-muted">—</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </td>
+                        <td>
+                            <div class="ab-decisions-stack">
+                                @foreach($visibleProducts as $product)
+                                    <div class="ab-decision-item">
+                                        @if($hasSnapshots && $product->decision === 'yes')
+                                            <span class="ab-decision-pill yes">Order</span>
+                                        @elseif($hasSnapshots && $product->decision === 'no')
+                                            <span class="ab-decision-pill no">Tidak</span>
+                                        @else
+                                            <span class="ab-muted">—</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="3" class="ab-empty">{{ $hasFilters ? 'Tidak ada data yang sesuai filter.' : 'Belum ada riwayat Additional Box.' }}</td></tr>
+                    <tr><td colspan="5" class="ab-empty">{{ $hasFilters ? 'Tidak ada data yang sesuai filter.' : 'Belum ada riwayat Additional Box.' }}</td></tr>
                 @endforelse
             </tbody>
         </table>
