@@ -102,67 +102,184 @@
             page-break-inside: avoid;
         }
 
+        .annual-report {
+            width: 100%;
+        }
+
         .annual {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            font-size: 10pt;
+            font-size: 8pt;
+            margin: 0 0 4px;
         }
 
         .annual th,
         .annual td {
-            border: .6px solid #777;
-            padding: 9px 4px;
+            border: .6px solid #9BAAA0;
+            padding: 5px 3px;
             text-align: center;
+            vertical-align: middle;
+        }
+
+        .annual thead th {
+            background: #E5EEE6;
+            color: #173C32;
+            font-weight: bold;
         }
 
         .annual .metric {
-            width: 85px;
+            width: 78px;
             font-weight: bold;
             text-align: left;
+            background: #F1F6F0;
         }
 
         .annual-title {
             text-align: center;
             font-weight: bold;
-            font-size: 13px;
-            margin: 0 0 8px;
+            color: #173C32;
+            font-size: 14px;
+            margin: 0 0 4px;
         }
 
         .annual-period {
             text-align: center;
+            font-size: 8px;
+            color: #667A72;
+            margin-bottom: 3px;
+        }
+
+        .annual-chart-wrap {
+            width: 100%;
+            margin: 1px 0 2px;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .annual-chart {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .abnormality-title {
+            margin: 1px 0 3px;
             font-size: 9px;
-            margin-bottom: 9px;
+            font-weight: bold;
+            color: #173C32;
+        }
+
+        .abnormality {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 7.5px;
+        }
+
+        .abnormality th,
+        .abnormality td {
+            border: .55px solid #64748B;
+            padding: 3px 5px;
+            vertical-align: middle;
+        }
+
+        .abnormality thead th {
+            background: #E5EEE6;
+            color: #173C32;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .abnormality td.number,
+        .abnormality td.month {
+            text-align: center;
+        }
+
+        .abnormality td.reason {
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        .abnormality tr {
+            page-break-inside: avoid;
         }
     </style>
 </head>
 
 <body>
     @if ($isYearly)
-        <div class="annual-title">DATA REKAP REPAIR BOX - FY {{ $startDate->year }}</div>
-        <div class="annual-period">April {{ $startDate->year }} - Maret {{ $endDate->year }}</div>
-        <div class="annual-period">Line:
-            {{ $selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ') }}</div>
-        <table class="annual">
-            <thead>
-                <tr>
-                    <th class="metric">INDIKATOR</th>
-                    @foreach ($annualSummary as $month)
-                        <th>{{ strtoupper($month['label']) }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (['target' => 'TARGET', 'order' => 'ORDER', 'finish' => 'FINISH', 'scrap' => 'SCRAP'] as $key => $label)
+        <div class="annual-report">
+            <div class="annual-title">DATA REKAP REPAIR BOX FY {{ $startDate->year }}</div>
+            <div class="annual-period">Periode: April {{ $startDate->year }} - Maret {{ $endDate->year }}</div>
+            <div class="annual-period">Line: {{ $selectedLineNames->isEmpty() ? 'Semua Line' : $selectedLineNames->implode(', ') }}</div>
+
+            <table class="annual">
+                <thead>
                     <tr>
-                        <th class="metric">{{ $label }}</th>
+                        <th class="metric">INDIKATOR</th>
                         @foreach ($annualSummary as $month)
-                            <td>{{ $month[$key] === null ? '' : number_format($month[$key], 0, ',', '.') }}</td>
+                            <th>{{ strtoupper($month['label']) }}</th>
                         @endforeach
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (['target' => 'TARGET', 'order' => 'ORDER', 'finish' => 'FINISH', 'scrap' => 'SCRAP'] as $key => $label)
+                        <tr>
+                            <th class="metric">{{ $label }}</th>
+                            @foreach ($annualSummary as $month)
+                                <td>{{ $month[$key] === null ? '' : number_format($month[$key], 0, ',', '.') }}</td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="annual-chart-wrap">
+                <img
+                    class="annual-chart"
+                    src="data:image/svg+xml;base64,{{ base64_encode($annualChartSvg) }}"
+                    alt="Grafik Order Repair Box FY {{ $startDate->year }}"
+                >
+            </div>
+
+            <div class="abnormality-title">TABEL ABNORMALITY</div>
+            <table class="abnormality">
+                <colgroup>
+                    <col style="width: 18%">
+                    <col style="width: 15%">
+                    <col style="width: 15%">
+                    <col style="width: 15%">
+                    <col style="width: 37%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        <th>ORDER/NG</th>
+                        <th>TARGET FY</th>
+                        <th>SELISIH</th>
+                        <th>KETERANGAN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($annualAbnormalities as $abnormality)
+                        <tr>
+                            <td class="month">{{ $abnormality['label'] }}</td>
+                            <td class="number">{{ $abnormality['order'] === null ? '' : number_format($abnormality['order'], 0, ',', '.') }}</td>
+                            <td class="number">{{ number_format($abnormality['target'], 0, ',', '.') }}</td>
+                            <td class="number">{{ $abnormality['difference'] === null ? '' : number_format($abnormality['difference'], 0, ',', '.') }}</td>
+                            <td class="reason">{{ $abnormality['reason'] }}</td>
+                        </tr>
+                    @empty
+                        @for ($emptyRow = 0; $emptyRow < 3; $emptyRow++)
+                            <tr>
+                                <td>&nbsp;</td><td></td><td></td><td></td><td></td>
+                            </tr>
+                        @endfor
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     @else
         @foreach ($monthlyReports as $report)
             {{-- Layout mengikuti file DATA REKAP BULANAN.xlsx: B:AM, tanpa kolom total per produk. --}}

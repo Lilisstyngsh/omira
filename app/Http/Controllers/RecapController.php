@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\FiscalYearTarget;
 use App\Models\MonitoringAbnormality;
 use App\Models\RepairMonthlySnapshot;
-use App\Services\AnnualRecapPdfConverter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -150,19 +149,25 @@ class RecapController extends Controller
         $selectedLineIds = $this->resolveLineIds($request);
         $selectedLineNames = $this->selectedLineNames($selectedLineIds);
         $isYearly = $request->input('period_type', 'monthly') === 'yearly';
-        // PDF tahunan berasal dari workbook yang sama dengan Export Excel (termasuk Native Chart).
+        // PDF tahunan menggunakan DomPDF langsung, tanpa ketergantungan LibreOffice.
+        // Data dan aturan abnormality memakai sumber yang sama dengan workbook Excel.
         if ($isYearly) {
-            $workbook = $this->createAnnualRecapWorkbook($startDate->year, $selectedLineIds, $selectedLineNames);
-            try {
-                $pdfPath = app(AnnualRecapPdfConverter::class)->convert($workbook);
-            } catch (\RuntimeException $exception) {
-                abort(503, $exception->getMessage());
-            } finally {
-                $workbook->disconnectWorksheets();
-            }
-
+            $fiscalYear = $startDate->year;
+            $annualSummary = $this->annualSummary($fiscalYear, $selectedLineIds);
+            $abnormalityReasons = $this->annualAbnormalityReasons($fiscalYear, empty($selectedLineIds));
+            $annualAbnormalities = $this->annualAbnormalityRows($annualSummary, $fiscalYear, $abnormalityReasons);
+            $annualChartSvg = $this->buildAnnualChartSvg($annualSummary, $fiscalYear);
             $filename = sprintf('Rekap_Repair_Box_%s_sd_%s.pdf', $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
-            return response()->download($pdfPath, $filename)->deleteFileAfterSend(true);
+
+            return Pdf::loadView('omd.recap.pdf', compact(
+                'startDate',
+                'endDate',
+                'selectedLineNames',
+                'isYearly',
+                'annualSummary',
+                'annualAbnormalities',
+                'annualChartSvg'
+            ))->setPaper('a4', 'landscape')->download($filename);
         }
 
         $annualSummary = [];
@@ -911,6 +916,166 @@ class RecapController extends Controller
             ->all();
     }
 
+    /** Abnormality rows shared by the Excel workbook and the PDF rendering. */
+    private function annualAbnormalityRows(array $months, int $fiscalYear, array $reasonsByMonth): array
+    {
+        $rows = [];
+        foreach ($months as $index => $month) {
+            $date = Carbon::create($fiscalYear, 4, 1)->addMonths($index);
+            $key = $date->format('Y-m');
+            $order = $month['order'];
+            $target = (int) $month['target'];
+            $reason = trim((string) ($reasonsByMonth[$key] ?? ''));
+            $hasReason = $reason !== '';
+
+            if (($order !== null && $target > 0 && (int) $order > $target) || $hasReason) {
+                $orderValue = $order === null ? null : (int) $order;
+                $rows[] = [
+                    'label' => $date->locale('id')->translatedFormat('M Y'),
+                    'source' => Coordinate::stringFromColumnIndex($index + 2),
+                    'order' => $orderValue,
+                    'target' => $target,
+                    'difference' => $orderValue === null ? null : $orderValue - $target,
+                    'reason' => $reason,
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
+    /** Build a crisp vector chart for DomPDF, matching the Excel chart series and colors. */
+    private function buildAnnualChartSvg(array $months, int $fiscalYear): string
+    {
+        $left = 82;
+        $right = 1168;
+        $top = 48;
+        $bottom = 278;
+        $plotWidth = $right - $left;
+        $plotHeight = $bottom - $top;
+        $groupWidth = $plotWidth / max(1, count($months));
+
+        $values = [];
+        foreach ($months as $month) {
+            foreach (['target', 'order', 'finish', 'scrap'] as $key) {
+                if (isset($month[$key]) && is_numeric($month[$key])) {
+                    $values[] = (int) $month[$key];
+                }
+            }
+        }
+        $rawMax = max(1, (int) ceil((max($values ?: [0])) * 1.12));
+        $maxValue = $this->chartScaleMaximum($rawMax);
+        $svg = [
+            '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390" viewBox="0 0 1200 390">',
+            '<rect x="0" y="0" width="1200" height="390" fill="#ffffff"/>',
+            '<text x="600" y="25" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#173C32">Grafik Order Repair Box FY ' . $fiscalYear . '</text>',
+        ];
+
+        for ($tick = 0; $tick <= 4; $tick++) {
+            $value = (int) round($maxValue * $tick / 4);
+            $y = $bottom - ($plotHeight * $tick / 4);
+            $label = htmlspecialchars(number_format($value, 0, ',', '.'), ENT_QUOTES | ENT_XML1, 'UTF-8');
+            $svg[] = sprintf('<line x1="%s" y1="%.2f" x2="%s" y2="%.2f" stroke="#DDE5ED" stroke-width="1"/>', $left, $y, $right, $y);
+            $svg[] = sprintf('<text x="%s" y="%.2f" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748B">%s</text>', $left - 12, $y + 4, $label);
+        }
+        $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#94A3B8" stroke-width="1.2"/>', $left, $top, $left, $bottom);
+        $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#94A3B8" stroke-width="1.2"/>', $left, $bottom, $right, $bottom);
+        $svg[] = '<text x="22" y="164" transform="rotate(-90 22 164)" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="600" fill="#475569">Jumlah Box</text>';
+
+        $barSeries = [
+            ['key' => 'order', 'color' => '#F59E0B'],
+            ['key' => 'finish', 'color' => '#94A3B8'],
+            ['key' => 'scrap', 'color' => '#FACC15'],
+        ];
+        $targetPoints = [];
+        $barValueLabels = [];
+        $barLabelPositionsByMonth = [];
+        foreach ($months as $index => $month) {
+            $center = $left + ($groupWidth * ($index + 0.5));
+            $barWidth = min(15, max(8, $groupWidth * 0.16));
+            $barGap = max(2, $groupWidth * 0.045);
+            $totalBarsWidth = (3 * $barWidth) + (2 * $barGap);
+            $startX = $center - ($totalBarsWidth / 2);
+            $monthBarLabelPositions = [];
+
+            foreach ($barSeries as $seriesIndex => $series) {
+                $raw = $month[$series['key']] ?? null;
+                if ($raw === null || ! is_numeric($raw)) {
+                    continue;
+                }
+                $value = max(0, (int) $raw);
+                $barHeight = ($value / $maxValue) * $plotHeight;
+                $x = $startX + ($seriesIndex * ($barWidth + $barGap));
+                $y = $bottom - $barHeight;
+                // Excel chart labels use plain integer values; this keeps 4-digit labels readable.
+                $label = (string) $value;
+                $labelY = max($top + 11, $y - 4);
+                $svg[] = sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="1.5" fill="%s"/>', $x, $y, $barWidth, max(0.8, $barHeight), $series['color']);
+                $barValueLabels[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="7.5" fill="#334155">%s</text>', $x + ($barWidth / 2), $labelY, $label);
+                $monthBarLabelPositions[] = $labelY;
+            }
+
+            $target = max(0, (int) ($month['target'] ?? 0));
+            $targetY = $bottom - (($target / $maxValue) * $plotHeight);
+            $targetPoints[] = sprintf('%.2f,%.2f', $center, $targetY);
+            $barLabelPositionsByMonth[] = $monthBarLabelPositions;
+            $monthLabel = htmlspecialchars(strtoupper((string) ($month['label'] ?? '')), ENT_QUOTES | ENT_XML1, 'UTF-8');
+            $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" font-weight="600" fill="#475569">%s</text>', $center, $bottom + 21, $monthLabel);
+        }
+
+        if ($targetPoints !== []) {
+            $svg[] = '<polyline points="' . implode(' ', $targetPoints) . '" fill="none" stroke="#2563EB" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+            foreach ($months as $index => $month) {
+                $center = $left + ($groupWidth * ($index + 0.5));
+                $target = max(0, (int) ($month['target'] ?? 0));
+                $targetY = $bottom - (($target / $maxValue) * $plotHeight);
+                $label = (string) $target;
+                $targetLabelY = max($top + 12, $targetY - 9);
+                $nearBarLabel = false;
+                foreach ($barLabelPositionsByMonth[$index] ?? [] as $barLabelY) {
+                    if (abs($barLabelY - $targetLabelY) < 13) {
+                        $nearBarLabel = true;
+                        break;
+                    }
+                }
+                if ($nearBarLabel) {
+                    $targetLabelY = $targetY + 16 <= $bottom - 9 ? $targetY + 16 : $targetY - 18;
+                    // A subtle white label background keeps target values readable over bars.
+                    $svg[] = sprintf('<rect x="%.2f" y="%.2f" width="28" height="13" rx="2" fill="#FFFFFF" fill-opacity="0.92"/>', $center - 14, $targetLabelY - 10);
+                }
+                $svg[] = sprintf('<circle cx="%.2f" cy="%.2f" r="4.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5"/>', $center, $targetY);
+                $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#1D4ED8">%s</text>', $center, $targetLabelY, $label);
+            }
+        }
+
+        foreach ($barValueLabels as $barValueLabel) {
+            $svg[] = $barValueLabel;
+        }
+
+        $legendY = 330;
+        $legend = [
+            ['label' => 'NG', 'color' => '#F59E0B', 'type' => 'bar', 'x' => 385],
+            ['label' => 'OK', 'color' => '#94A3B8', 'type' => 'bar', 'x' => 485],
+            ['label' => 'Scrap', 'color' => '#FACC15', 'type' => 'bar', 'x' => 585],
+            ['label' => 'Target FY', 'color' => '#2563EB', 'type' => 'line', 'x' => 715],
+        ];
+        foreach ($legend as $item) {
+            if ($item['type'] === 'line') {
+                $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="3"/>', $item['x'], $legendY - 4, $item['x'] + 24, $legendY - 4, $item['color']);
+                $svg[] = sprintf('<circle cx="%s" cy="%s" r="4" fill="%s"/>', $item['x'] + 12, $legendY - 4, $item['color']);
+                $textX = $item['x'] + 32;
+            } else {
+                $svg[] = sprintf('<rect x="%s" y="%s" width="13" height="13" rx="1.5" fill="%s"/>', $item['x'], $legendY - 12, $item['color']);
+                $textX = $item['x'] + 20;
+            }
+            $svg[] = sprintf('<text x="%s" y="%s" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#334155">%s</text>', $textX, $legendY, $item['label']);
+        }
+        $svg[] = '<text x="625" y="369" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#334155">FY ' . $fiscalYear . '</text>';
+        $svg[] = '</svg>';
+
+        return implode('', $svg);
+    }
+
     /** Tabel abnormality menggunakan referensi langsung ke sel rekap agar selisih editable. */
     private function buildAnnualAbnormalityTable(Worksheet $sheet, array $months, int $fiscalYear, array $reasonsByMonth): void
     {
@@ -926,21 +1091,7 @@ class RecapController extends Controller
         $sheet->getStyle('A32:I32')->getFont()->setBold(true)->setSize(9);
         $sheet->getRowDimension(32)->setRowHeight(21);
 
-        $abnormalMonths = [];
-        foreach ($months as $index => $month) {
-            $date = Carbon::create($fiscalYear, 4, 1)->addMonths($index);
-            $key = $date->format('Y-m');
-            $order = $month['order'];
-            $target = (int) $month['target'];
-            $hasReason = isset($reasonsByMonth[$key]) && $reasonsByMonth[$key] !== '';
-            if (($order !== null && $target > 0 && (int) $order > $target) || $hasReason) {
-                $abnormalMonths[] = [
-                    'label' => $date->locale('id')->translatedFormat('M Y'),
-                    'source' => Coordinate::stringFromColumnIndex($index + 2),
-                    'reason' => $reasonsByMonth[$key] ?? '',
-                ];
-            }
-        }
+        $abnormalMonths = $this->annualAbnormalityRows($months, $fiscalYear, $reasonsByMonth);
 
         // Bila tidak ada abnormality, sisakan 3 baris kosong sesuai format referensi.
         $entries = $abnormalMonths ?: array_fill(0, 3, null);

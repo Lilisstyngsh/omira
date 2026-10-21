@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\RecapController;
-use App\Services\AnnualRecapPdfConverter;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
@@ -186,37 +185,6 @@ class RecapAnnualNativeChartTest extends TestCase
             }
         } finally {
             @unlink($path);
-            $book->disconnectWorksheets();
-        }
-    }
-
-    public function test_pdf_converter_preserves_the_excel_workbook_when_libreoffice_is_available(): void
-    {
-        $converter = new AnnualRecapPdfConverter();
-        if (! $converter->isAvailable()) {
-            $this->markTestSkipped('LibreOffice belum tersedia pada PHP CLI / server.');
-        }
-
-        $book = $this->buildBook($this->months(), ['2026-05' => 'Sortir PPIC Body']);
-        try {
-            $path = $converter->convert($book);
-            try {
-                self::assertFileExists($path);
-                $stream = fopen($path, 'rb');
-                self::assertNotFalse($stream);
-                try {
-                    self::assertSame('%PDF-', fread($stream, 5));
-                } finally {
-                    fclose($stream);
-                }
-                self::assertGreaterThan(1000, filesize($path));
-                // Konversi tidak boleh menghapus chart dari workbook asal.
-                self::assertCount(1, $book->getActiveSheet()->getChartCollection());
-                self::assertSame('TABEL ABNORMALITY', $book->getActiveSheet()->getCell('A31')->getValue());
-            } finally {
-                @unlink($path);
-            }
-        } finally {
             $book->disconnectWorksheets();
         }
     }
