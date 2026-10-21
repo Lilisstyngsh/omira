@@ -24,17 +24,17 @@ class OmdScrapCycleController extends Controller
         $cycles = UserScrapLimitCycle::query()
             ->whereNotNull('reached_at')
             ->with(['user', 'product.masterModel.line.plant', 'line', 'resetter'])
-            ->when(!empty($filters['start_date']), fn ($query) => $query->whereDate('reached_at', '>=', $filters['start_date']))
-            ->when(!empty($filters['end_date']), fn ($query) => $query->whereDate('reached_at', '<=', $filters['end_date']))
-            ->when(!empty($filters['line_id']), fn ($query) => $query->where('line_id', $filters['line_id']))
+            ->when(!empty($filters['start_date']), fn($query) => $query->whereDate('reached_at', '>=', $filters['start_date']))
+            ->when(!empty($filters['end_date']), fn($query) => $query->whereDate('reached_at', '<=', $filters['end_date']))
+            ->when(!empty($filters['line_id']), fn($query) => $query->where('line_id', $filters['line_id']))
             ->when($search !== '', function ($query) use ($search) {
                 $keyword = '%' . $search . '%';
                 $query->where(function ($matching) use ($keyword) {
-                    $matching->whereHas('user', fn ($user) => $user->where('name', 'like', $keyword))
-                        ->orWhereHas('line', fn ($line) => $line->where('name', 'like', $keyword))
-                        ->orWhereHas('product', fn ($product) => $product->where('name', 'like', $keyword))
-                        ->orWhereHas('product.masterModel', fn ($model) => $model->where('model', 'like', $keyword))
-                        ->orWhereHas('product.masterModel.line.plant', fn ($plant) => $plant->where('name', 'like', $keyword));
+                    $matching->whereHas('user', fn($user) => $user->where('name', 'like', $keyword))
+                        ->orWhereHas('line', fn($line) => $line->where('name', 'like', $keyword))
+                        ->orWhereHas('product', fn($product) => $product->where('name', 'like', $keyword))
+                        ->orWhereHas('product.masterModel', fn($model) => $model->where('model', 'like', $keyword))
+                        ->orWhereHas('product.masterModel.line.plant', fn($plant) => $plant->where('name', 'like', $keyword));
                 });
             })
             ->orderByDesc('reached_at')

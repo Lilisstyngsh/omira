@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\AdditionalBoxRequest;
@@ -19,7 +20,7 @@ class UserScrapLimitController extends Controller
             'decision' => ['required', 'in:yes,no'],
             'reason' => ['required_if:decision,no', 'nullable', 'string', 'max:1000'],
         ]);
-        // Compatibility for previously opened pages; Order now needs product quantities.
+
         if ($data['decision'] === 'yes') {
             return redirect()->route('dashboard')->with('success', 'Pilih Order pada dashboard, lalu Submit keputusan.');
         }
@@ -29,7 +30,7 @@ class UserScrapLimitController extends Controller
             $user = User::query()->lockForUpdate()->findOrFail($request->user()->id);
             $record = UserScrapLimitCycle::query()->lockForUpdate()->findOrFail($cycle->id);
             if ($record->reset_at && $record->decision === 'no') {
-                return AdditionalBoxRequest::whereHas('decisions', fn ($q) => $q->where('user_scrap_limit_cycle_id', $record->id))->first();
+                return AdditionalBoxRequest::whereHas('decisions', fn($q) => $q->where('user_scrap_limit_cycle_id', $record->id))->first();
             }
             abort_if($record->reset_at || !$record->reached_at, 422, 'Peringatan sudah diproses atau direset. Muat ulang dashboard.');
             $record->loadMissing('product.masterModel');

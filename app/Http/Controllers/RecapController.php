@@ -69,7 +69,7 @@ class RecapController extends Controller
     private function dashboardChartData(Carbon $endDate, array $lineIds): array
     {
         $dashboard = app(DashboardController::class);
-        
+
         $fiscalYear = $endDate->month >= 4 ? $endDate->year : $endDate->year - 1;
         $params = ['year' => $fiscalYear];
         $selectedLines = array_values(array_unique(array_map('intval', $lineIds)));
@@ -177,8 +177,8 @@ class RecapController extends Controller
                 'range_label' => $startDate->isSameMonth($endDate)
                     ? $startDate->locale('id')->translatedFormat('F Y')
                     : $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y'),
-                
-                    'pages' => $matrixRows->isEmpty()
+
+                'pages' => $matrixRows->isEmpty()
                     ? collect([collect()])
                     : $matrixRows->chunk(18)->map(fn(Collection $chunk) => $this->groupMatrixForPdf($chunk))->values(),
                 'grandDaily' => $this->sumDailyMatrix($matrixRows, $dates),
@@ -1151,28 +1151,46 @@ class RecapController extends Controller
             $barValues[] = new DataSeriesValues(
                 DataSeriesValues::DATASERIES_TYPE_NUMBER,
                 $source . '$B$' . $row . ':$M$' . $row,
-                '#,##0', 12, [], null, $color
+                '#,##0',
+                12,
+                [],
+                null,
+                $color
             );
         }
-        $bars = new DataSeries(DataSeries::TYPE_BARCHART, DataSeries::GROUPING_CLUSTERED,
-            [0, 1, 2], $barLabels, $barCategories, $barValues);
+        $bars = new DataSeries(
+            DataSeries::TYPE_BARCHART,
+            DataSeries::GROUPING_CLUSTERED,
+            [0, 1, 2],
+            $barLabels,
+            $barCategories,
+            $barValues
+        );
         $bars->setPlotDirection(DataSeries::DIRECTION_COL);
 
         $targetValues = new DataSeriesValues(
             DataSeriesValues::DATASERIES_TYPE_NUMBER,
             $source . '$B$5:$M$5',
-            '#,##0', 12, [], 'circle', '2563EB', 6
+            '#,##0',
+            12,
+            [],
+            'circle',
+            '2563EB',
+            6
         );
         $targetValues->setLineColorProperties('2563EB');
         $targetValues->setLineWidth(2.5);
         $targetValues->getMarkerFillColor()->setColorProperties('2563EB');
         $targetValues->getMarkerBorderColor()->setColorProperties('2563EB');
 
-        $line = new DataSeries(DataSeries::TYPE_LINECHART, DataSeries::GROUPING_STANDARD,
+        $line = new DataSeries(
+            DataSeries::TYPE_LINECHART,
+            DataSeries::GROUPING_STANDARD,
             [3],
             [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['Target FY'])],
             [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, 12)],
-            [$targetValues]);
+            [$targetValues]
+        );
 
         $layout = new Layout();
         $layout->setShowVal(true);
@@ -1181,7 +1199,10 @@ class RecapController extends Controller
             new Title('Grafik Order Repair Box FY ' . $fiscalYear),
             new Legend(Legend::POSITION_BOTTOM, null, false),
             new PlotArea($layout, [$bars, $line]),
-            true, DataSeries::EMPTY_AS_GAP, new Title('FY ' . $fiscalYear), new Title('Jumlah Box')
+            true,
+            DataSeries::EMPTY_AS_GAP,
+            new Title('FY ' . $fiscalYear),
+            new Title('Jumlah Box')
         );
         $gridlines = new GridLines();
         $gridlines->setLineColorProperties('DDE5ED');

@@ -13,9 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
 {
-    /**
-     * Menampilkan seluruh akun User dan OMD.
-     */
+
     public function index(Request $request)
     {
         $validated = $request->validate([
@@ -46,7 +44,9 @@ class UserManagementController extends Controller
                         });
                 });
             })
-            ->when($plantId, fn ($query) => $query->whereHas('line', fn ($lineQuery) =>
+            ->when($plantId, fn($query) => $query->whereHas(
+                'line',
+                fn($lineQuery) =>
                 $lineQuery->where('plant_id', $plantId)
             ))
             ->orderByRaw("CASE WHEN role = 'omd' THEN 0 ELSE 1 END")
@@ -63,9 +63,6 @@ class UserManagementController extends Controller
         return view('omd.users.index', compact('users', 'lines', 'search', 'plantId', 'perPage'));
     }
 
-    /**
-     * Form tambah akun.
-     */
     public function create()
     {
         $plants = $this->activePlants();
@@ -73,9 +70,6 @@ class UserManagementController extends Controller
         return view('omd.users.create', compact('plants'));
     }
 
-    /**
-     * Simpan akun baru.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -95,13 +89,13 @@ class UserManagementController extends Controller
                 Rule::in(['user', 'omd']),
             ],
             'plant_id' => [
-                Rule::requiredIf(fn () => $request->input('role') === 'user'),
+                Rule::requiredIf(fn() => $request->input('role') === 'user'),
                 'nullable',
                 'integer',
                 'exists:plants,id',
             ],
             'line_id' => [
-                Rule::requiredIf(fn () => $request->input('role') === 'user'),
+                Rule::requiredIf(fn() => $request->input('role') === 'user'),
                 'nullable',
                 'integer',
                 'exists:lines,id',
@@ -133,9 +127,6 @@ class UserManagementController extends Controller
             ->with('account_success', 'Akun berhasil ditambahkan dan dapat digunakan untuk login.');
     }
 
-    /**
-     * Form edit akun.
-     */
     public function edit(User $user)
     {
         $this->validateManagedAccount($user);
@@ -146,9 +137,7 @@ class UserManagementController extends Controller
         return view('omd.users.edit', compact('user', 'plants'));
     }
 
-    /**
-     * Update akun.
-     */
+
     public function update(Request $request, User $user)
     {
         $this->validateManagedAccount($user);
@@ -170,13 +159,13 @@ class UserManagementController extends Controller
                 Rule::in(['user', 'omd']),
             ],
             'plant_id' => [
-                Rule::requiredIf(fn () => $request->input('role') === 'user'),
+                Rule::requiredIf(fn() => $request->input('role') === 'user'),
                 'nullable',
                 'integer',
                 'exists:plants,id',
             ],
             'line_id' => [
-                Rule::requiredIf(fn () => $request->input('role') === 'user'),
+                Rule::requiredIf(fn() => $request->input('role') === 'user'),
                 'nullable',
                 'integer',
                 'exists:lines,id',
@@ -215,9 +204,7 @@ class UserManagementController extends Controller
             ->with('account_success', 'Akun berhasil diperbarui.');
     }
 
-    /**
-     * Reset password ke password default sistem.
-     */
+
     public function resetPassword(User $user)
     {
         $this->validateManagedAccount($user);
@@ -235,9 +222,7 @@ class UserManagementController extends Controller
             );
     }
 
-    /**
-     * Hapus akun.
-     */
+
     public function destroy(Request $request, User $user)
     {
         $this->validateManagedAccount($user);
@@ -258,9 +243,6 @@ class UserManagementController extends Controller
     }
 
 
-    /**
-     * Password default mengikuti nilai yang sama dengan DatabaseSeeder.
-     */
     private function defaultPasswordForRole(string $role): string
     {
         return $role === 'omd'
@@ -268,9 +250,6 @@ class UserManagementController extends Controller
             : DatabaseSeeder::DEFAULT_USER_PASSWORD;
     }
 
-    /**
-     * Resolve Line untuk User. OMD tidak terikat Plant/Line.
-     */
     private function resolveLineId(array $validated): ?int
     {
         if ($validated['role'] === 'omd') {
@@ -292,9 +271,6 @@ class UserManagementController extends Controller
         return $line->id;
     }
 
-    /**
-     * Plant dan Line aktif untuk form akun User.
-     */
     private function activePlants()
     {
         return Plant::where('is_active', true)
@@ -308,9 +284,7 @@ class UserManagementController extends Controller
             ->get();
     }
 
-    /**
-     * Batasi manajemen akun pada role aplikasi yang didukung.
-     */
+
     private function validateManagedAccount(User $user): void
     {
         abort_unless(

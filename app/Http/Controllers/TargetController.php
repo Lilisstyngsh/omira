@@ -116,11 +116,6 @@ class TargetController extends Controller
                 );
             }
 
-            /*
-             * Requirement terbaru: target yang tampil pada Histori Abnormality
-             * selalu mengikuti Target FY terbaru di tahun yang sama. Alasan,
-             * actual order, creator, dan waktu input abnormality tetap dipertahankan.
-             */
             DB::table('monitoring_abnormalities')
                 ->where('metric', MonitoringAbnormality::METRIC_TARGET_FY)
                 ->where('year', $year)

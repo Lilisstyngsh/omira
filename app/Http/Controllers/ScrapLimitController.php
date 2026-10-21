@@ -29,7 +29,7 @@ class ScrapLimitController extends Controller
 
         $models = MasterModel::query()
             ->where('is_active', true)
-            ->when($lineId, fn ($query) => $query->where('line_id', $lineId))
+            ->when($lineId, fn($query) => $query->where('line_id', $lineId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query
@@ -44,10 +44,10 @@ class ScrapLimitController extends Controller
             })
             ->with([
                 'line.plant',
-                'products' => fn ($query) => $query
+                'products' => fn($query) => $query
                     ->where('is_active', true)
                     ->orderBy('name'),
-                'products.scrapLimits' => fn ($query) => $query
+                'products.scrapLimits' => fn($query) => $query
                     ->with('creator')
                     ->orderByDesc('effective_from')
                     ->orderByDesc('id'),
@@ -97,12 +97,12 @@ class ScrapLimitController extends Controller
         ]);
 
         $model = MasterModel::query()
-            ->with(['products' => fn ($query) => $query->where('is_active', true)])
+            ->with(['products' => fn($query) => $query->where('is_active', true)])
             ->findOrFail($data['master_model_id']);
 
         $allowedProducts = $model->products->keyBy('id');
         $submittedLimits = collect($data['limits'])
-            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->filter(fn($value) => $value !== null && $value !== '')
             ->mapWithKeys(function ($value, $productId) use ($allowedProducts) {
                 $productId = (int) $productId;
 
@@ -140,7 +140,7 @@ class ScrapLimitController extends Controller
                         return $limit->effective_from->lte($effectiveFrom)
                             && ($limit->effective_to === null || $limit->effective_to->gte($effectiveFrom));
                     })
-                    ->sortByDesc(fn ($limit) => sprintf(
+                    ->sortByDesc(fn($limit) => sprintf(
                         '%s-%020d',
                         $limit->effective_from->format('Y-m-d H:i:s'),
                         $limit->id
@@ -166,7 +166,7 @@ class ScrapLimitController extends Controller
                 }
 
                 $next = $history
-                    ->filter(fn ($limit) => $limit->effective_from->gt($effectiveFrom))
+                    ->filter(fn($limit) => $limit->effective_from->gt($effectiveFrom))
                     ->sortBy('effective_from')
                     ->first();
 
@@ -210,7 +210,7 @@ class ScrapLimitController extends Controller
                 'line_id' => $request->input('return_line_id'),
                 'q' => trim((string) $request->input('return_q', '')) ?: null,
                 'per_page' => $request->input('return_per_page'),
-            ], fn ($value) => $value !== null && $value !== '');
+            ], fn($value) => $value !== null && $value !== '');
 
             return redirect()
                 ->to(route('omd.master.model-product', $catalogFilters) . '#model-' . $model->id)
@@ -221,7 +221,7 @@ class ScrapLimitController extends Controller
             ->route('omd.scrap-limits.index', array_filter([
                 'line_id' => $returnLine,
                 'q' => trim((string) $request->input('return_q', '')) ?: null,
-            ], fn ($value) => $value !== null && $value !== ''))
+            ], fn($value) => $value !== null && $value !== ''))
             ->with('success', $message);
     }
 }

@@ -49,13 +49,10 @@ class ProfileController extends Controller
             ],
         ]);
 
-        // Update nama
         $user->name = trim($validated['name']);
 
-        // Update email
         $user->email = strtolower(trim($validated['email']));
 
-        // Update password hanya jika diisi
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }

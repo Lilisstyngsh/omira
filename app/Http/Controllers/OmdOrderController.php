@@ -23,13 +23,23 @@ class OmdOrderController extends Controller
         ]);
 
         $query = RepairOrder::with([
-            'user', 'line', 'area', 'product', 'masterModel',
-            'ngType', 'result', 'confirmation', 'openFeedback.user',
+            'user',
+            'line',
+            'area',
+            'product',
+            'masterModel',
+            'ngType',
+            'result',
+            'confirmation',
+            'openFeedback.user',
         ])
             ->withSum('items as before_qty_sum', 'before_qty')
             ->withSum('items as after_qty_sum', 'after_qty')
             ->whereIn('status', [
-                'submitted', 'in_repair', 'completed', 'revision_requested',
+                'submitted',
+                'in_repair',
+                'completed',
+                'revision_requested',
             ]);
 
         if ($request->filled('start_date')) {
@@ -48,10 +58,10 @@ class OmdOrderController extends Controller
         if ($search !== '') {
             $query->where(function ($matching) use ($search) {
                 $matching->where('order_number', 'like', '%' . $search . '%')
-                    ->orWhereHas('user', fn ($userQuery) =>
-                        $userQuery->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('line', fn ($lineQuery) =>
-                        $lineQuery->where('name', 'like', '%' . $search . '%'));
+                    ->orWhereHas('user', fn($userQuery) =>
+                    $userQuery->where('name', 'like', '%' . $search . '%'))
+                    ->orWhereHas('line', fn($lineQuery) =>
+                    $lineQuery->where('name', 'like', '%' . $search . '%'));
             });
         }
 
@@ -658,7 +668,7 @@ class OmdOrderController extends Controller
 
                 $orderQty = (int) $order->items()->sum('after_qty');
                 $scrapQty = (int) $order->items()
-                    ->whereHas('ngType', fn ($query) => $query->where('code', 'S'))
+                    ->whereHas('ngType', fn($query) => $query->where('code', 'S'))
                     ->sum('after_qty');
                 $okQty = max($orderQty - $scrapQty, 0);
 

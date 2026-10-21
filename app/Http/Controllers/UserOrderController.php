@@ -22,13 +22,18 @@ class UserOrderController extends Controller
         ]);
 
         $query = RepairOrder::with([
-            'line', 'result', 'confirmation',
+            'line',
+            'result',
+            'confirmation',
         ])
             ->withSum('items as before_qty_sum', 'before_qty')
             ->withSum('items as after_qty_sum', 'after_qty')
             ->where('user_id', $request->user()->id)
             ->whereIn('status', [
-                'submitted', 'in_repair', 'completed', 'revision_requested',
+                'submitted',
+                'in_repair',
+                'completed',
+                'revision_requested',
             ]);
 
         if ($request->filled('start_date')) {
@@ -208,13 +213,6 @@ class UserOrderController extends Controller
 
         $ngTypesById = $ngTypes->keyBy('id');
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Validasi dan kumpulkan data Produk
-        |--------------------------------------------------------------------------
-        */
-
         $selectedProducts = [];
 
 
@@ -295,28 +293,6 @@ class UserOrderController extends Controller
             }
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Buat 4 Repair Order Item untuk setiap Produk yang dipilih
-        |--------------------------------------------------------------------------
-        |
-        | Contoh:
-        |
-        | Produk A
-        | P = 2
-        | H = 0
-        | C = 3
-        | S = 0
-        |
-        | Database:
-        | Produk A | P | 2
-        | Produk A | H | 0
-        | Produk A | C | 3
-        | Produk A | S | 0
-        |
-        */
-
         $preparedItems = [];
         $totalQuantity = 0;
 
@@ -329,11 +305,6 @@ class UserOrderController extends Controller
                 $selectedProduct['qty']['C'] +
                 $selectedProduct['qty']['S'];
 
-
-            /*
-             * Produk yang seluruh Qty NG-nya kosong
-             * tidak ikut dibuat ke dalam order.
-             */
             if ($productTotal <= 0) {
                 continue;
             }
@@ -369,13 +340,6 @@ class UserOrderController extends Controller
                 ])
                 ->withInput();
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Buat Token Order
-        |--------------------------------------------------------------------------
-        */
 
         DB::transaction(function () use (
             $data,
@@ -424,10 +388,6 @@ class UserOrderController extends Controller
 
                 'sequence' => $sequence,
 
-                /*
-                 * Field lama tetap diisi untuk kompatibilitas
-                 * dengan struktur RepairOrder existing.
-                 */
                 'master_model_id' => $firstItem['master_model_id'],
 
                 'product_id' => $firstItem['product_id'],
@@ -611,7 +571,9 @@ class UserOrderController extends Controller
             $query->where(function ($subQuery) use ($search) {
                 $subQuery
                     ->where('order_number', 'like', '%' . $search . '%')
-                    ->orWhereHas('line', fn ($lineQuery) =>
+                    ->orWhereHas(
+                        'line',
+                        fn($lineQuery) =>
                         $lineQuery->where('name', 'like', '%' . $search . '%')
                     );
             });
@@ -702,7 +664,8 @@ class UserOrderController extends Controller
             $key = ($item->master_model_id ?? $model) . ':' . ($item->product_id ?? $product);
             if (!isset($groups[$key])) {
                 $groups[$key] = [
-                    'model' => $model, 'product' => $product,
+                    'model' => $model,
+                    'product' => $product,
                     'mismatch_note' => trim((string) ($item->mismatch_note ?? '')),
                     'before' => ['P' => null, 'H' => null, 'C' => null, 'S' => null],
                     'after' => ['P' => null, 'H' => null, 'C' => null, 'S' => null],
@@ -717,7 +680,7 @@ class UserOrderController extends Controller
             $groups[$key]['after'][$ng] = ($groups[$key]['after'][$ng] ?? 0) + (int) ($item->after_qty ?? 0);
         }
         $entries = array_values($groups);
-        usort($entries, fn ($a, $b) => [$a['model'], $a['product']] <=> [$b['model'], $b['product']]);
+        usort($entries, fn($a, $b) => [$a['model'], $a['product']] <=> [$b['model'], $b['product']]);
         $handedBy = ($order->user?->name ?? '-') . ' - ' . ($order->line?->name ?? '-');
         $date = ($order->handed_over_at ?? $order->created_at)?->locale('id')->translatedFormat('l, d F Y') ?? '-';
         $logoPath = public_path('images/aisin-form-logo.jpg');
@@ -741,7 +704,13 @@ class UserOrderController extends Controller
         }
 
         return app(\App\Services\RepairOrderHistoryExcelService::class)->download(
-            $order, $entries, $filename, (bool) $isClosed, $userApproval, $omdApproval, $approvedAt
+            $order,
+            $entries,
+            $filename,
+            (bool) $isClosed,
+            $userApproval,
+            $omdApproval,
+            $approvedAt
         );
     }
 

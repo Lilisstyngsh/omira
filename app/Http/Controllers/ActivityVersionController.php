@@ -22,12 +22,12 @@ class ActivityVersionController extends Controller
 
         $orderState = $orders->selectRaw(
             'COUNT(*) as total, MAX(updated_at) as latest, '
-            . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as submitted_ids, '
-            . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as in_repair_ids, '
-            . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as completed_ids, '
-            . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as revision_ids, '
-            . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as confirmed_ids, '
-            . 'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as awaiting_confirmation',
+                . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as submitted_ids, '
+                . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as in_repair_ids, '
+                . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as completed_ids, '
+                . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as revision_ids, '
+                . 'SUM(CASE WHEN status = ? THEN id ELSE 0 END) as confirmed_ids, '
+                . 'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as awaiting_confirmation',
             ['submitted', 'in_repair', 'completed', 'revision_requested', 'confirmed', 'completed']
         )->first();
 

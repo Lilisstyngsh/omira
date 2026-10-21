@@ -201,7 +201,9 @@ class MasterDataController extends Controller
                 'exists:plants,id'
             ],
             'name' => [
-                'required', 'string', 'max:100',
+                'required',
+                'string',
+                'max:100',
                 $this->uniqueMasterName('line', null, (int) $request->input('plant_id')),
             ]
         ], ['name.required' => 'Nama Line wajib diisi.']);
@@ -234,7 +236,9 @@ class MasterDataController extends Controller
             ],
 
             'name' => [
-                'required', 'string', 'max:100',
+                'required',
+                'string',
+                'max:100',
                 $this->uniqueMasterName('line', (int) $line->id, (int) $request->input('plant_id')),
             ]
         ], ['name.required' => 'Nama Line wajib diisi.']);
@@ -327,23 +331,25 @@ class MasterDataController extends Controller
         $models = MasterModel::query()
             ->with([
                 'line.plant',
-                'products' => fn ($query) => $query->orderBy('name'),
-                'products.scrapLimits' => fn ($query) => $query
+                'products' => fn($query) => $query->orderBy('name'),
+                'products.scrapLimits' => fn($query) => $query
                     ->with('creator')
                     ->orderByDesc('effective_from')
                     ->orderByDesc('id'),
             ])
-            ->when($selectedPlantId, fn ($query) => $query->whereHas('line',
-                fn ($line) => $line->where('plant_id', $selectedPlantId)))
-            ->when($selectedLineId, fn ($query) => $query->where('line_id', $selectedLineId))
+            ->when($selectedPlantId, fn($query) => $query->whereHas(
+                'line',
+                fn($line) => $line->where('plant_id', $selectedPlantId)
+            ))
+            ->when($selectedLineId, fn($query) => $query->where('line_id', $selectedLineId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('model', 'like', '%' . $search . '%')
-                        ->orWhereHas('products', fn ($product) => $product
+                        ->orWhereHas('products', fn($product) => $product
                             ->where('name', 'like', '%' . $search . '%'))
-                        ->orWhereHas('line', fn ($line) => $line
+                        ->orWhereHas('line', fn($line) => $line
                             ->where('name', 'like', '%' . $search . '%')
-                            ->orWhereHas('plant', fn ($plant) => $plant
+                            ->orWhereHas('plant', fn($plant) => $plant
                                 ->where('name', 'like', '%' . $search . '%')));
                 });
             })
@@ -353,8 +359,13 @@ class MasterDataController extends Controller
             ->withQueryString();
 
         return view('omd.master.model-product', compact(
-            'models', 'plants', 'lines', 'selectedPlantId', 'selectedLineId',
-            'search', 'perPage'
+            'models',
+            'plants',
+            'lines',
+            'selectedPlantId',
+            'selectedLineId',
+            'search',
+            'perPage'
         ));
     }
 

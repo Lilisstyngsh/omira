@@ -21,10 +21,7 @@ class UserDashboardController extends Controller
         $orderActive = (clone $base)
             ->where('status', '!=', 'confirmed')
             ->count();
-
-        // Hanya hitung order yang sudah diverifikasi OMD dan sedang ditangani.
-        // Status submitted belum diverifikasi, sedangkan completed sudah masuk
-        // kartu Perlu Konfirmasi.
+            
         $processedOmd = (clone $base)
             ->whereIn('status', ['in_repair', 'revision_requested'])
             ->count();
@@ -71,12 +68,12 @@ class UserDashboardController extends Controller
 
         // Include legacy confirmed Scrap rows, not only orders confirmed after rollout.
         $scrapProductIds = RepairOrderItem::query()
-            ->whereHas('repairOrder', fn ($q) => $q->where('user_id', $userId)
+            ->whereHas('repairOrder', fn($q) => $q->where('user_id', $userId)
                 ->where('status', 'confirmed'))
-            ->whereHas('ngType', fn ($q) => $q->where('code', 'S'))
+            ->whereHas('ngType', fn($q) => $q->where('code', 'S'))
             ->where('after_qty', '>', 0)
             ->get(['product_id', 'after_product_id'])
-            ->map(fn ($item) => (int) ($item->after_product_id ?: $item->product_id))
+            ->map(fn($item) => (int) ($item->after_product_id ?: $item->product_id))
             ->filter()->unique();
         $limitService = app(UserScrapLimitService::class);
         foreach ($scrapProductIds as $productId) {
@@ -90,7 +87,7 @@ class UserDashboardController extends Controller
                 $cycle->used_qty = $limitService->quantity($user, $cycle->product_id, $cycle);
                 $cycle->remaining_qty = max(0, $cycle->limit_qty - $cycle->used_qty);
                 return $cycle;
-            })->filter(fn ($cycle) => $cycle->used_qty >= $cycle->limit_qty);
+            })->filter(fn($cycle) => $cycle->used_qty >= $cycle->limit_qty);
 
         $scrapLimitSummary = $scrapAlerts->map(function ($cycle) {
             return [
