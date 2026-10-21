@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('header')
-    Data Master Plant & Line
+    Plant & Line
 @endsection
 
 @section('content')

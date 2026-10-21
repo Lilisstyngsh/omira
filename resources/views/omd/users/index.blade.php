@@ -1,1539 +1,1895 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
-@section('header', 'Dashboard')
+@section('title', 'Manajemen Akun')
+@section('header', 'Manajemen Akun')
 
 @section('content')
+
+@php
+$accountPlants = $lines->pluck('plant')->filter()->unique('id')->sortBy('name')->values();
+$accountLinesByPlant = $lines->groupBy('plant_id')->map(fn ($items) => $items->map(fn ($line) => [
+'id' => $line->id,
+'name' => $line->name,
+])->values());
+$accountUsersPayload = $users->getCollection()->mapWithKeys(fn ($account) => [
+(string) $account->id => [
+'id' => $account->id,
+'name' => $account->name,
+'email' => $account->email,
+'role' => $account->role,
+'plant_id' => $account->line?->plant_id,
+'line_id' => $account->line_id,
+'update_url' => route('omd.users.update', $account),
+],
+]);
+@endphp
+
 <style>
-    /* Dashboard memakai background bawaan tema OMIRA. */
-    .user-dashboard {
+    /* =====================================================
+           PAGE HEADER
+        ===================================================== */
+
+    .account-page-head {
         display: flex;
-        flex-direction: column;
-        gap: 18px;
-        isolation: isolate;
-        margin: -14px;
-        padding: 14px;
-        border-radius: 24px;
-        background: transparent;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
     }
 
-    .dashboard-welcome {
+    .account-page-title {
+        margin: 0 0 6px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #172033;
+    }
+
+    .account-page-desc {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+           SUCCESS ALERT
+        ===================================================== */
+
+    .account-success-alert,
+    .account-error-alert {
+        margin-bottom: 22px;
+        padding: 18px 20px;
+        border-radius: 16px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .account-success-alert {
+        border: 1px solid #75e6bc;
+        background: #effdf6;
+        color: #059669;
+    }
+
+    .account-error-alert {
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+
+    /* =====================================================
+           PRIMARY BUTTON
+        ===================================================== */
+
+    .account-btn-primary {
+        border: none !important;
+        height: 38px;
+        padding: 0 16px;
+        border-radius: 9px;
+        background: #5F9278;
+        color: #fff;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 750;
+        box-shadow: 0 6px 15px rgba(95, 146, 120, .18);
+        transition: .2s ease;
+    }
+
+    .account-btn-primary:hover {
+        background: #47775c;
+        transform: translateY(-1px);
+        color: #fff;
+    }
+
+
+    /* =====================================================
+           TABLE CARD
+        ===================================================== */
+
+    .account-table-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 18px;
+        box-shadow: 0 10px 35px rgba(15, 23, 42, .06);
+        overflow: hidden;
+    }
+
+    .account-table-header {
+        padding: 20px 22px;
+        border-bottom: 1px solid #edf1f5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        background: linear-gradient(135deg,
+                #F4F8F5 0%,
+                #fff 75%);
+    }
+
+    .account-table-header h3 {
+        margin: 0 0 5px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #172033;
+    }
+
+    .account-table-header p {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .account-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 10px;
+        background: #EAF3EC;
+        color: #376d4d;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+           TABLE
+        ===================================================== */
+
+    .account-table-wrap {
+        overflow-x: auto;
+    }
+
+    .account-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 850px;
+    }
+
+    .account-table thead th {
+        padding: 14px 18px;
+        text-align: left;
+        background: #fafbfc;
+        border-bottom: 1px solid #e9eef4;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .account-table tbody td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f6;
+        color: #334155;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .account-table tbody tr {
+        transition: .2s ease;
+    }
+
+    .account-table tbody tr:hover {
+        background: #fafaff;
+    }
+
+    .account-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .account-number {
+        width: 65px;
+        color: #94a3b8 !important;
+        font-weight: 700;
+    }
+
+
+    /* =====================================================
+           USER
+        ===================================================== */
+
+    .account-user {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .account-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        background: #EAF3EC;
+        color: #376d4d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .account-user-name {
+        font-weight: 750;
+        color: #172033;
+        margin-bottom: 2px;
+    }
+
+    .account-user-label {
+        font-size: 10px;
+        color: #94a3b8;
+    }
+
+    .account-email {
+        color: #64748b;
+    }
+
+
+    /* =====================================================
+           BADGES
+        ===================================================== */
+
+    .account-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 750;
+    }
+
+    .account-badge-plant {
+        background: #F2F7F2;
+        color: #376d4d;
+    }
+
+    .account-badge-line {
+        background: #eff6ff;
+        color: #3478c5;
+    }
+
+
+    /* =====================================================
+           ACTION
+        ===================================================== */
+
+    .account-actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+
+    .account-action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 8px;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 750;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .account-action-edit {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .account-action-edit:hover {
+        background: #e2e8f0;
+    }
+
+    .account-action-reset {
+        background: #fff7e8;
+        color: #b77906;
+    }
+
+    .account-action-reset:hover {
+        background: #ffedc2;
+    }
+
+    .account-action-delete {
+        background: #fff0f1;
+        color: #d14d5b;
+    }
+
+    .account-action-delete:hover {
+        background: #ffe0e3;
+    }
+
+
+    /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+
+    .account-empty {
+        padding: 50px 20px !important;
+        text-align: center !important;
+        color: #94a3b8 !important;
+    }
+
+    .account-empty-icon {
+        width: 46px;
+        height: 46px;
+        margin: 0 auto 10px;
+        border-radius: 13px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .account-empty-title {
+        font-weight: 750;
+        color: #475569;
+        margin-bottom: 3px;
+    }
+
+    .account-empty-text {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+
+
+    .account-filter-bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
+        padding: 16px 18px;
+        border-bottom: 1px solid #edf1f5;
+        background: #fbfcfe;
     }
 
-    .dashboard-welcome h2 {
-        margin: 0 0 4px;
-        color: #172033;
-        font-size: 21px;
-        font-weight: 800;
+    .account-filter-left {
+        flex: 0 0 108px;
+        width: 108px;
     }
 
-    .dashboard-welcome p {
-        margin: 0;
-        color: #64748b;
-        font-size: 11px;
-    }
-
-    .dashboard-kpis {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
-        align-items: stretch;
-    }
-
-    .dashboard-kpi {
-        position: relative;
+    .account-filter-right {
+        margin-left: auto;
         display: flex;
         align-items: center;
-        gap: 20px;
+        justify-content: flex-end;
+        gap: 14px;
         min-width: 0;
-        min-height: 112px;
-        padding: 18px 19px;
+    }
+
+    .account-filter-line {
+        flex: 0 0 256px;
+        width: 256px;
+    }
+
+    .account-filter-search {
+        flex: 0 1 480px;
+        width: min(480px, 38vw);
+        min-width: 300px;
+    }
+
+    .account-filter-field>label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
         overflow: hidden;
-        background: var(--surface, #fff);
-        border: 1px solid var(--border, #DCE8DE);
-        border-radius: 17px;
-        box-shadow: 0 4px 16px rgba(31, 67, 44, .05);
-        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 
-    .dashboard-kpi:hover {
-        border-color: #cbded1;
-        box-shadow: 0 9px 24px rgba(34, 75, 53, .08);
-        transform: translateY(-1px);
+    .account-filter-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: .04em;
     }
 
-    .dashboard-kpi-head {
-        display: flex;
-        flex: 1 1 auto;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        gap: 7px;
-        min-width: 0;
-        order: 2;
+    .account-filter-field input,
+    .account-filter-field select {
+        width: 100%;
+        height: 38px;
+        box-sizing: border-box;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
+        background: #fff;
+        padding: 0 11px;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 650;
+        outline: none;
     }
 
-    .dashboard-kpi-label {
-        min-width: 0;
-        color: #64766b;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: .01em;
-        line-height: 1.35;
-        text-transform: none;
+    .account-filter-field input:focus,
+    .account-filter-field select:focus {
+        border-color: #7566ea;
+        box-shadow: 0 0 0 3px rgba(117, 102, 234, .10);
     }
 
-    .dashboard-kpi-icon {
-        width: 64px;
-        height: 64px;
-        flex: 0 0 64px;
+    .account-search-wrap {
+        position: relative;
+    }
+
+    .account-search-wrap .account-search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 11px;
+        pointer-events: none;
+    }
+
+    .account-search-wrap input {
+        padding-left: 31px;
+        padding-right: 34px;
+    }
+
+    .account-search-clear {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 27px;
+        height: 27px;
+        padding: 0;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: #94a3b8;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        order: 1;
-        border-radius: 50%;
-        background: #edf4e8;
-        color: #63805d;
-        font-size: 25px;
+        cursor: pointer;
     }
 
-    .dashboard-kpi.attention {
-        border-color: #e6dcae;
-        box-shadow: 0 6px 20px rgba(119, 105, 58, .07);
+    .account-search-clear:hover {
+        background: #f1f5f9;
+        color: #475569;
     }
 
-    .dashboard-kpi.attention .dashboard-kpi-icon {
-        background: #fbf4d9;
-        color: #96772b;
-    }
-
-    .dashboard-kpi-content {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        gap: 7px;
-        flex: 1 1 auto;
-        min-width: 0;
-        order: 2;
-    }
-
-    .dashboard-kpi-content .dashboard-kpi-head {
-        display: contents;
-    }
-
-    .dashboard-create-order.btn.btn-primary {
-        background: #347554;
-        border: 1px solid #347554;
-        color: #fff;
-        font-weight: 750;
-        box-shadow: 0 5px 14px rgba(38, 99, 68, .18);
-        min-height: 44px;
-        transition: background .18s ease, box-shadow .18s ease;
-    }
-
-    .dashboard-create-order.btn.btn-primary:hover,
-    .dashboard-create-order.btn.btn-primary:focus-visible {
-        background: #285E43;
-        border-color: #285E43;
-        color: #fff;
-        box-shadow: 0 7px 17px rgba(38, 99, 68, .24);
-    }
-
-    .dashboard-kpi-value {
-        margin-top: 0;
-        color: #172b20;
-        font-size: clamp(25px, 2vw, 30px);
-        font-weight: 800;
-        line-height: 1.05;
-        letter-spacing: -.035em;
-        overflow-wrap: anywhere;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .dashboard-panel {
-        overflow: hidden;
-        background: var(--surface, #fff);
-        border: 1px solid var(--border, #DCE8DE);
-        border-radius: 17px;
-        box-shadow: 0 4px 16px rgba(31, 67, 44, .05);
-    }
-
-    .dashboard-panel-head {
-        min-height: 60px;
+    .account-pagination {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 14px;
-        padding: 14px 18px;
-        border-bottom: 1px solid #edf1f5;
+        padding: 14px 18px 18px;
+        border-top: 1px solid #edf1f5;
+        background: #fff;
     }
 
-    .dashboard-panel-title {
-        margin: 0;
-        color: #172033;
-        font-size: 14px;
-        font-weight: 600;
+    .account-pagination-info {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 700;
     }
 
-    /* Header Perlu Tindakan memakai pola dropdown Scrap Limit dengan tema oranye. */
-    .dashboard-panel.action-panel.has-actions {
-        border-color: #eee1c7;
-        background: var(--surface, #fff);
+    .account-pagination-list {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .account-page-btn {
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid #dbe2ea;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .account-page-btn.active {
+        background: #5F9278;
+        border-color: #5F9278;
+        color: #fff;
+    }
+
+    .account-page-btn.disabled {
+        background: #f8fafc;
+        color: #cbd5e1;
+        pointer-events: none;
+    }
+
+
+    /* =====================================================
+           EDIT ACCOUNT MODAL
+        ===================================================== */
+    .account-edit-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(15, 23, 42, .42);
+        backdrop-filter: blur(2px);
+    }
+
+    .account-edit-overlay.is-open {
+        display: flex;
+    }
+
+    .account-edit-modal {
+        width: min(720px, 100%);
+        max-height: 90vh;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 18px;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
     }
 
-    .action-panel .action-panel-toggle {
-        width: 100%;
-        min-height: 0;
+    .account-edit-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 15px 18px;
-        border: 0;
-        border-bottom: 1px solid #F1EAD8;
-        background: #FFFCF2;
-        color: #263342;
-        text-align: left;
-        cursor: pointer;
+        padding: 18px 20px;
+        border-bottom: 1px solid #edf1f5;
     }
 
-    .action-panel .action-panel-toggle:focus-visible {
-        outline: 2px solid #d97706;
-        outline-offset: -2px;
-    }
-
-    .action-panel .action-panel-chevron {
-        flex: 0 0 auto;
-        color: #9a681e;
-        transition: transform .18s ease;
-    }
-
-    .action-panel .action-panel-toggle[aria-expanded="true"] .action-panel-chevron {
-        transform: rotate(180deg);
-    }
-
-    .action-panel .action-panel-content[hidden] {
-        display: none !important;
-    }
-
-    .action-panel .action-panel-content {
-        background: var(--surface, #fff);
-    }
-
-    .action-heading {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .action-heading-icon {
-        width: auto;
-        height: auto;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        color: #d97706;
-        font-size: 16px;
-    }
-
-    .action-subtitle {
-        margin: 4px 0 0;
-        font-size: 10px;
-        color: #88794F;
-    }
-
-    .action-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 26px;
-        height: 26px;
-        padding: 0 8px;
-        border: 1px solid #f3d6a3;
-        border-radius: 999px;
-        background: #fff0cf;
-        color: #9a5b12;
-        font-size: 12px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .action-list {
-        display: grid;
-        gap: 6px;
-        padding: 8px 10px;
-        background: #ffffff;
-    }
-
-    .action-order {
-        display: grid;
-        grid-template-columns: minmax(150px, 1fr) minmax(170px, 1.4fr) auto;
-        align-items: center;
-        gap: 10px;
-        padding: 7px 10px;
-        border: 1px solid #F1EAD8;
-        border-radius: 12px;
-        background: #FFFCF2;
-        text-decoration: none;
-        color: inherit;
-        cursor: pointer;
-        transition: background-color .18s ease, border-color .18s ease;
-    }
-
-    .action-order:hover,
-    .action-order:focus-visible {
-        background: #FFF8E5;
-        border-color: #E5D8B5;
-        outline-offset: 2px;
-    }
-
-    .action-order-number {
+    .account-edit-title {
+        margin: 0;
         color: #172033;
-        font-size: 11px;
-        font-weight: 500;
+        font-size: 17px;
+        font-weight: 800;
     }
 
-    .action-order-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px 10px;
-        margin-top: 4px;
-        color: #64748b;
-        font-size: 9.5px;
-    }
-
-    .action-order-message {
-        color: #475569;
-        font-size: 10.5px;
-        line-height: 1.45;
-    }
-
-    .action-order-message strong {
-        display: block;
-        margin-bottom: 2px;
-        color: #91652C;
-        font-size: 10.5px;
-    }
-
-    .action-order-message strong::before {
-        content: '';
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        margin-right: 7px;
-        border-radius: 50%;
-        background: #D5A44D;
-        vertical-align: 1px;
-    }
-
-    .action-check-order {
-        display: inline-flex;
-        align-items: center;
-        justify-content: flex-end;
-        min-height: 30px;
-        padding: 0;
+    .account-edit-close {
+        width: 34px;
+        height: 34px;
         border: 0;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-        color: #405B7D;
-        font-size: 12px;
-        font-weight: 600;
-        text-decoration: underline;
-        text-underline-offset: 3px;
-        white-space: nowrap;
-    }
-
-    .action-order:hover .action-check-order,
-    .action-order:focus-visible .action-check-order {
-        color: #2F4B6F;
-        text-decoration-thickness: 2px;
-    }
-
-    .dashboard-empty {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        min-height: 58px;
-        padding: 14px 18px;
+        border-radius: 9px;
+        background: #f1f5f9;
         color: #64748b;
-        font-size: 10.5px;
+        cursor: pointer;
     }
 
-    .dashboard-empty i {
-        color: #16a34a;
+    .account-edit-body {
+        padding: 20px;
+        overflow: auto;
     }
 
-    /* Tabel berdiri sebagai panel tersendiri di dalam card Order Terbaru. */
-    .recent-table-wrap {
-        margin: 16px;
-        overflow-x: auto;
-        border: 1px solid #dce5ef;
-        border-radius: 14px;
-        background: var(--surface, #fff);
+    .account-edit-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
     }
 
-    .recent-table {
-        width: 100%;
-        min-width: 660px;
-        border-collapse: separate;
-        border-spacing: 0;
+    .account-edit-field {
+        display: grid;
+        gap: 7px;
     }
 
-    .recent-table th {
-        padding: 12px 13px;
-        background: #fafbfc;
-        border-bottom: 1px solid #dce5ef;
-        color: #64748b;
+    .account-edit-field label {
         font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .025em;
-        text-align: center;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .recent-table td {
-        padding: 12px 13px;
-        border-bottom: 1px solid #e3eaf2;
+        font-weight: 750;
         color: #334155;
-        font-size: 11px;
-        font-weight: 400;
-        vertical-align: middle;
     }
 
-    /* Layout global memakai font isi 12px: kunci tabel ini maksimal 11px. */
-    body .recent-table.recent-table th,
-    body .recent-table.recent-table td {
-        font-size: 11px !important;
+    .account-edit-field input,
+    .account-edit-field select {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
+        background: #fff;
+        color: #172033;
+        outline: none;
     }
 
-    .recent-order-date {
-        display: block;
-        text-align: center;
-        white-space: nowrap;
+    .account-edit-field input:focus,
+    .account-edit-field select:focus {
+        border-color: #7566ea;
+        box-shadow: 0 0 0 3px rgba(117, 102, 234, .10);
     }
 
-    .recent-order-date-main {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        line-height: 1.35;
-    }
-
-    .recent-order-date-time {
-        display: block;
-        margin-top: 4px;
+    .account-edit-helper {
+        margin: 0;
         font-size: 10px;
-        font-weight: 400;
-        line-height: 1.35;
+        line-height: 1.45;
         color: #94a3b8;
     }
 
-    .recent-table .recent-order-qty {
-        font-size: 11px;
-        font-weight: 600;
-    }
-
-    body .recent-table.recent-table .order-number {
-        font-size: 11px;
-        font-weight: 600 !important;
-    }
-
-    .recent-table .order-model-product strong {
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .recent-table .order-model-product span {
-        font-size: 10px;
-        font-weight: 400;
-    }
-
-    .recent-table tbody tr {
-        cursor: pointer;
-        transition: background .16s ease;
-    }
-
-    .recent-table tbody tr:hover {
-        background: #f5f9f6;
-    }
-
-    .recent-table tbody tr:focus-visible {
-        outline: 2px solid #405B7D;
-        outline-offset: -2px;
-        background: #f5f9f6;
-    }
-
-    .recent-all-link {
-        display: inline-flex;
-        align-items: center;
-        min-height: 44px;
-        color: #405B7D;
-        font-size: 12px;
-        font-weight: 600;
-        text-decoration: underline;
-        text-underline-offset: 3px;
-        border: 0;
-        background: transparent;
-        padding: 0;
-    }
-
-    .recent-all-link:hover,
-    .recent-all-link:focus-visible {
-        color: #2c4463;
-    }
-
-    .recent-table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .order-number {
-        color: #172033;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .order-model-product {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-    }
-
-    .order-model-product strong {
-        color: #172033;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .order-model-product span {
-        color: #64748b;
-        font-size: 10px;
-        font-weight: 400;
-    }
-
-    .status-pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 29px;
-        padding: 5px 11px;
-        border: 1px solid transparent;
-        border-radius: 9px;
-        font-size: 10px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .status-pill.submitted {
-        color: #2563eb;
-        background: #eff6ff;
-        border-color: #dbeafe;
-    }
-
-    .status-pill.in-repair {
-        color: #9a651e;
-        background: #fff7e9;
-        border-color: #f6e4be;
-    }
-
-    .status-pill.completed {
-        color: #b56817;
-        background: #fff4e2;
-        border-color: #f5d8a9;
-    }
-
-    .status-pill.revision {
-        color: #be123c;
+    .account-edit-errors {
+        margin: 0 0 14px;
+        padding: 10px 12px;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
         background: #fff1f2;
-        border-color: #fecdd3;
+        color: #b42318;
+        font-size: 11px;
     }
 
-    .status-pill.confirmed {
-        color: #21804a;
-        background: #ecfdf3;
-        border-color: #bbf7d0;
+    .account-edit-errors ul {
+        margin: 0;
+        padding-left: 17px;
     }
 
-    @media (max-width: 760px) {
-        .recent-table-wrap {
-            margin: 12px;
+    .account-edit-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        padding: 14px 20px 18px;
+        border-top: 1px solid #edf1f5;
+    }
+
+    .account-edit-btn {
+        min-height: 40px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    .account-edit-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .account-edit-save {
+        background: #5F9278;
+        color: #fff;
+        box-shadow: 0 6px 15px rgba(95, 146, 120, .18);
+    }
+
+    .account-edit-save:hover {
+        background: #47775c;
+    }
+
+    body.account-modal-open {
+        overflow: hidden;
+    }
+
+    /* =====================================================
+           SWEETALERT
+           MENGIKUTI KONSEP DATA MASTER
+        ===================================================== */
+
+    .swal-account-popup {
+        width: 320px !important;
+        padding: 20px !important;
+        border-radius: 18px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .18) !important;
+    }
+
+    .swal-account-popup .swal2-icon {
+        width: 55px !important;
+        height: 55px !important;
+        margin: 0 auto 12px !important;
+    }
+
+    .swal-account-title {
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        color: #172033 !important;
+    }
+
+    .swal-account-text {
+        font-size: 12px !important;
+        color: #64748b !important;
+    }
+
+    .swal-account-popup .swal2-actions {
+        gap: 10px !important;
+        margin-top: 18px !important;
+    }
+
+
+    /* =====================================================
+           SWEETALERT CONFIRM BUTTON
+        ===================================================== */
+
+    .swal-account-confirm {
+        background: #dc5b68 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 9px !important;
+        height: 36px !important;
+        padding: 0 18px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+    }
+
+    .swal-account-confirm:hover {
+        background: #c94d5a !important;
+    }
+
+
+    /* =====================================================
+           SWEETALERT RESET BUTTON
+        ===================================================== */
+
+    .swal-account-reset {
+        background: #f59e0b !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 9px !important;
+        height: 36px !important;
+        padding: 0 18px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+    }
+
+    .swal-account-reset:hover {
+        background: #d98800 !important;
+    }
+
+
+    /* =====================================================
+           SWEETALERT CANCEL BUTTON
+        ===================================================== */
+
+    .swal-account-cancel {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+        border: none !important;
+        border-radius: 9px !important;
+        height: 36px !important;
+        padding: 0 18px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+    }
+
+    .swal-account-cancel:hover {
+        background: #e2e8f0 !important;
+    }
+
+
+    /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+    @media (max-width: 768px) {
+
+        .account-page-head {
+            flex-direction: column;
+            align-items: flex-start;
         }
-    }
 
-    @media (max-width: 1100px) {
-        .dashboard-kpis {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-    }
-
-    @media (max-width: 760px) {
-
-        .dashboard-welcome,
-        .dashboard-panel-head {
+        .account-table-header {
             align-items: flex-start;
             flex-direction: column;
         }
 
-        .dashboard-kpis {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+        .account-success-alert {
+            padding: 16px;
         }
 
-        .dashboard-kpi {
-            gap: 12px;
-            padding: 15px 13px;
-        }
-
-        .dashboard-kpi-icon {
-            width: 52px;
-            height: 52px;
-            flex-basis: 52px;
-            font-size: 21px;
-        }
-
-        .dashboard-kpi-label {
-            font-size: 11px;
-        }
-
-        .dashboard-kpi-value {
-            font-size: clamp(22px, 5vw, 27px);
-        }
-
-        .action-order {
-            grid-template-columns: 1fr auto;
-        }
-
-        .action-order-message {
-            grid-column: 1 / -1;
-            grid-row: 2;
-        }
-    }
-
-    @media (max-width: 520px) {
-        .dashboard-kpis {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .dashboard-kpi {
-            min-height: 104px;
-            gap: 12px;
-            padding: 14px;
-            border-radius: 14px;
-            align-items: center;
-        }
-
-        .dashboard-kpi-icon {
-            width: 52px;
-            height: 52px;
-            flex: 0 0 52px;
-            border-radius: 50%;
-            font-size: 20px;
-            align-self: center;
-        }
-
-        .dashboard-kpi-label {
-            font-size: 10px;
-        }
-
-        .dashboard-kpi-value {
-            margin-top: 11px;
-            font-size: 25px;
-        }
-
-        .action-order {
-            grid-template-columns: 1fr;
-        }
-
-        .action-order-message {
-            grid-column: auto;
-            grid-row: auto;
-        }
-    }
-
-    .scrap-limit-panel {
-        border: 1px solid #f1d4d6;
-        overflow: hidden;
-    }
-
-    .scrap-limit-panel .dashboard-panel-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .scrap-limit-toggle {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 15px 18px;
-        border: 0;
-        background: #fffafa;
-        color: #263342;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .scrap-limit-toggle-main {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .scrap-limit-toggle-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 auto;
-        color: #ad323a;
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        width: auto;
-        height: auto;
-        font-size: 16px;
-    }
-
-    .user-dashboard .scrap-limit-toggle,
-    .user-dashboard .action-panel-toggle {
-        font-family: inherit;
-    }
-
-    .user-dashboard .scrap-limit-toggle-title,
-    .user-dashboard .action-panel .dashboard-panel-title {
-        display: block;
-        margin: 0;
-        font-family: inherit;
-        font-size: 12px !important;
-        font-weight: 900 !important;
-        line-height: 1.5 !important;
-    }
-
-    .recent-orders-panel .dashboard-panel-title {
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1.5;
-    }
-
-    .scrap-limit-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 26px;
-        height: 26px;
-        padding: 0 8px;
-        border-radius: 999px;
-        background: #fff449;
-        color: #263342;
-        font-size: 12px;
-        font-weight: 800;
-    }
-
-    .scrap-limit-chevron {
-        transition: transform .18s ease;
-        color: #64748b;
-    }
-
-    .scrap-limit-toggle[aria-expanded="true"] .scrap-limit-chevron {
-        transform: rotate(180deg);
-    }
-
-    .scrap-limit-items {
-        padding: 12px;
-        border-top: 1px solid #f1d4d6;
-    }
-
-    #additional-box-form {
-        display: grid;
-        gap: 8px;
-    }
-
-    .scrap-limit-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 4px;
-    }
-
-    .scrap-limit-progress {
-        font-size: 11px;
-        color: #64748b;
-    }
-
-    .scrap-limit-footer .scrap-btn {
-        min-width: 110px;
-    }
-
-    .scrap-limit-actions .scrap-btn.is-selected {
-        box-shadow: 0 0 0 2px currentColor inset;
-    }
-
-    .scrap-limit-actions .scrap-btn-order.is-selected {
-        width: 35px;
-        height: 35px;
-        min-width: 35px;
-        padding: 0;
-        border-radius: 50%;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        background: #24563d;
-        color: #fff;
-        font-size: 15px;
-        box-shadow: 0 0 0 2px #b8dfc3;
-    }
-
-    .scrap-limit-actions .scrap-btn-order:focus-visible {
-        outline: 2px solid #24563d;
-        outline-offset: 3px;
-    }
-
-    .scrap-limit-alert:has([data-scrap-order].is-selected) {
-        border-color: #90c49f;
-        background: #f1faf2;
-    }
-
-    .scrap-limit-alert:has([data-scrap-no].is-selected) {
-        border-color: #c3d2e5;
-        background: #f6f9fd;
-    }
-
-    .scrap-limit-actions .scrap-btn-no.is-selected {
-        background: #d6e1f1;
-        color: #1d3e6d;
-    }
-
-    .scrap-limit-product .scrap-limit-quantity {
-        display: block;
-        margin-top: 3px;
-    }
-
-    .scrap-limit-alert {
-        padding: 10px 12px !important;
-    }
-
-    @media(max-width:500px) {
-        .scrap-limit-footer {
+        .account-filter-bar {
+            flex-wrap: wrap;
             align-items: stretch;
         }
 
-        .scrap-limit-footer .scrap-btn {
-            min-width: 92px;
+        .account-filter-left {
+            flex: 0 0 108px;
+        }
+
+        .account-filter-right {
+            width: 100%;
+            margin-left: 0;
+            justify-content: stretch;
+        }
+
+        .account-filter-line,
+        .account-filter-search {
+            flex: 1 1 220px;
+            width: auto;
+            min-width: 0;
+        }
+
+        .account-edit-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .account-pagination {
+            align-items: flex-start;
+            flex-direction: column;
         }
     }
 
-    .scrap-limit-items[hidden] {
-        display: none !important;
+    /* Manajemen Akun — modal minimalis dan toolbar compact (tablet friendly). */
+    .account-filter-bar .account-filter-right {
+        gap: 10px;
+        margin-left: auto;
+        width: auto;
     }
 
-    .scrap-limit-alert {
-        border: 1px solid #eadba7;
-        background: #fffbeb;
-        border-radius: 12px;
-        padding: 15px;
+    .account-filter-bar .account-filter-line {
+        flex: 0 0 158px;
+        width: 158px;
+        min-width: 0;
     }
 
-    .scrap-limit-alert.is-reached {
-        border-color: #efb4b6;
-        background: #fff4f4;
+    .account-filter-bar .account-filter-search {
+        flex: 0 0 235px;
+        width: 235px;
+        min-width: 0;
     }
 
-    .scrap-limit-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
+    .account-filter-bar .account-filter-field input,
+    .account-filter-bar .account-filter-field select {
+        max-width: 100%;
+    }
+
+    .account-create-modal {
+        width: min(620px, calc(100vw - 24px));
+        max-height: min(90vh, 780px);
+        overflow-y: auto;
+        background: #fff;
+    }
+
+    .account-create-modal .account-edit-body {
+        padding: 20px 24px;
+    }
+
+    .account-create-modal .account-edit-grid {
+        gap: 16px;
+    }
+
+    .account-create-modal .account-edit-head {
+        background: #fff;
+    }
+
+    .account-create-modal .account-edit-actions {
+        background: #fff;
+    }
+
+    .account-create-modal .account-edit-field input:focus,
+    .account-create-modal .account-edit-field select:focus {
+        border-color: #76a88b;
+        outline: 2px solid #e5f2e9;
+        outline-offset: 0;
+    }
+
+    @media(max-width: 780px) {
+        .account-filter-bar .account-filter-right {
+            margin-left: auto;
+            justify-content: flex-end;
+            width: auto;
+            flex: 1 1 auto;
+        }
+
+        .account-filter-bar .account-filter-line {
+            flex: 0 1 145px;
+            width: 145px;
+        }
+
+        .account-filter-bar .account-filter-search {
+            flex: 0 1 195px;
+            width: 195px;
+        }
+
+        .account-create-modal .account-edit-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media(max-width: 560px) {
+        .account-filter-bar {
+            flex-wrap: wrap;
+        }
+
+        .account-filter-bar .account-filter-right {
+            width: 100%;
+            flex: 1 1 100%;
+        }
+
+        .account-filter-bar .account-filter-search {
+            flex: 1 1 auto;
+        }
+
+        .account-create-modal .account-edit-body {
+            padding: 16px;
+        }
+    }
+
+    /* Selaraskan tampilan dengan History Order, tanpa menyentuh logika akun. */
+    .account-page-shell {
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+    }
+
+    .account-page-head {
+        justify-content: space-between;
+        margin-bottom: 18px;
         gap: 12px;
     }
 
-    .scrap-limit-product {
+    .account-list-heading { margin:0; color:#243d2e; font-size:16px; font-weight:750; line-height:1.4; }
+    .account-btn-primary {
+        height: 36px;
+        gap: 8px;
+        padding: 0 14px;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .account-btn-primary:hover { transform: none; }
+
+    .account-table-card {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    .account-filter-bar {
+        padding: 0 0 17px;
+        border: none;
+        background: transparent;
+        gap: 12px;
+    }
+
+    .account-filter-bar .account-filter-left {
+        flex: 0 0 72px;
+        width: 72px;
+    }
+
+    .account-filter-bar .account-filter-right {
+        gap: 12px;
         min-width: 0;
-        font-size: 12px;
-        font-weight: 600;
-        color: #263342;
-        overflow-wrap: anywhere;
     }
 
-    .scrap-limit-quantity {
-        font-size: 12px;
+    .account-filter-bar .account-filter-line {
+        flex: 0 0 170px;
+        width: 170px;
+    }
+
+    .account-filter-bar .account-filter-search {
+        flex: 0 1 320px;
+        width: 320px;
+        min-width: 180px;
+    }
+
+    .account-filter-bar .account-filter-field input,
+    .account-filter-bar .account-filter-field select {
+        height: 34px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .account-filter-bar .account-filter-left select {
+        font-weight: 800;
+    }
+
+    .account-filter-bar .account-filter-field input::placeholder {
+        color: #a3adba;
         font-weight: 400;
-        color: #64748b;
+    }
+
+    .account-filter-bar .account-filter-field input:focus,
+    .account-filter-bar .account-filter-field select:focus {
+        border-color: #5f9278;
+        box-shadow: 0 0 0 3px rgba(95, 146, 120, .1);
+    }
+
+    .account-search-wrap .account-search-icon { font-size: 11px; }
+
+    .account-table-wrap {
+        border: 1px solid #dfe6ef;
+        border-radius: 12px;
+        overflow-x: auto;
+    }
+
+    .account-table {
+        min-width: 940px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .account-table thead th {
+        padding: 12px 14px;
+        background: #f9fafb;
+        color: #6b7280;
+        text-align: center;
+        font-size: 10px;
+        letter-spacing: .04em;
+        border-right: 1px solid #dfe6ef;
+        border-bottom: 1px solid #dfe6ef;
         white-space: nowrap;
     }
 
-    .scrap-limit-row .scrap-limit-actions {
-        justify-content: flex-end;
-        flex-wrap: wrap;
-    }
-
-    .scrap-limit-actions form {
-        margin: 0;
-    }
-
-    .scrap-limit-decision {
-        justify-self: end;
+    .account-table tbody td {
+        padding: 13px 14px;
+        color: #374151;
         font-size: 12px;
-        font-weight: 600;
-        color: #64748b;
-        white-space: nowrap;
+        border-right: 1px solid #dfe6ef;
+        border-bottom: 1px solid #dfe6ef;
     }
 
-    @media(max-width:680px) {
-        .scrap-limit-row {
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 10px;
-        }
+    .account-table th:last-child,
+    .account-table td:last-child { border-right: none; }
 
-        .scrap-limit-row .scrap-limit-product {
-            grid-column: 1 / -1;
-        }
+    .account-table tbody tr:last-child td { border-bottom: none; }
+    .account-table tbody tr:hover { background: #f8fafc; }
 
-        .scrap-limit-row .scrap-btn {
-            padding: 9px 12px;
-        }
+    .account-number {
+        text-align: center;
+        font-weight: 400;
     }
 
-    .scrap-limit-actions,
-    .scrap-modal-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 9px;
-        align-items: center;
+    .account-user-name { font-size: 12px; font-weight: 600; }
+    .account-email { font-size: 12px; }
+    .account-badge { min-height: 26px; font-size: 10px; font-weight: 600; }
+    .account-actions { justify-content: center; flex-wrap: nowrap; }
+
+    .account-pagination {
+        margin-top: 20px;
+        padding: 0;
+        border: none;
+        background: transparent;
     }
 
-    .scrap-btn {
-        border: 0;
-        border-radius: 9px;
-        padding: 10px 16px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-    }
+    .account-pagination-info { font-size: 10px; font-weight: 600; }
+    .account-page-btn { font-size: 10px; font-weight: 700; border-radius: 7px; }
+    .account-page-btn.active { background: #334155; border-color: #334155; }
+    .account-page-btn:not(.disabled):not(.active):hover { background: #f8fafc; border-color: #cbd5e1; }
 
-    .scrap-btn-order {
-        background: #347554;
-        color: #fff;
-    }
-
-    .scrap-btn-no {
-        background: #e5eaf0;
-        color: #324255;
-    }
-
-    #additional-box-submit:disabled,
-    .scrap-reason-dialog [data-scrap-reason-save]:disabled {
-        background: #e5e7eb !important;
-        color: #9ca3af !important;
-        box-shadow: none !important;
-        cursor: not-allowed !important;
-        opacity: 1;
-    }
-
-    .scrap-reason-modal[hidden] {
-        display: none !important;
-    }
-
-    .scrap-reason-modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, .55);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1100;
-        padding: 18px;
-    }
-
-    .scrap-reason-dialog {
-        width: min(100%, 440px);
-        background: #fff;
+    /* Modal tambah dan edit menggunakan tipografi, radius dan kontrol seragam. */
+    .account-edit-modal,
+    .account-create-modal {
+        width: min(620px, calc(100vw - 24px));
         border-radius: 16px;
-        padding: 22px;
-        box-shadow: 0 24px 60px rgba(15, 23, 42, .22);
+        box-shadow: 0 20px 60px rgba(15, 23, 42, .18);
     }
 
-    .scrap-reason-dialog h3 {
-        font-size: 16px;
-        font-weight: 600;
-        margin: 0;
-    }
+    .account-edit-head { padding: 16px 20px; }
+    .account-edit-title { font-size: 16px; }
+    .account-edit-body,
+    .account-create-modal .account-edit-body { padding: 18px 20px; }
+    .account-edit-grid,
+    .account-create-modal .account-edit-grid { gap: 14px; }
 
-    .scrap-reason-dialog p {
-        margin: 5px 0 15px;
-        color: #64748b;
+    .account-edit-field label { font-size: 11px; }
+    .account-edit-field input,
+    .account-edit-field select {
+        height: 38px;
+        border-radius: 8px;
         font-size: 12px;
-        font-weight: 400;
     }
 
-    .scrap-reason-dialog textarea {
-        width: 100%;
-        box-sizing: border-box;
-        min-height: 110px;
-        border: 1px solid #cbd5e1;
-        border-radius: 9px;
-        padding: 10px;
-        font: inherit;
-        font-size: 13px;
-        resize: vertical;
+    .account-edit-field input:focus,
+    .account-edit-field select:focus,
+    .account-create-modal .account-edit-field input:focus,
+    .account-create-modal .account-edit-field select:focus {
+        border-color: #5f9278;
+        box-shadow: 0 0 0 3px rgba(95, 146, 120, .1);
+        outline: none;
     }
 
-    .scrap-modal-actions {
-        justify-content: flex-end;
-        margin-top: 12px;
-    }
+    .account-edit-actions { padding: 14px 20px 16px; }
+    .account-edit-btn { min-height: 38px; border-radius: 8px; }
 
-    .scrap-save-error {
-        color: #b91c1c !important;
-        margin: 7px 0 0 !important;
-    }
-
-    /* Dark mode memakai surface solid dari tema utama. */
-    html[data-theme="dark"] body .user-dashboard :is(.dashboard-kpi, .dashboard-panel) {
-        background: var(--surface, #18231D) !important;
-        border-color: var(--border, #34453B) !important;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, .14) !important;
-    }
-
-    html[data-theme="dark"] .user-dashboard .dashboard-kpi.attention {
-        border-color: rgba(208, 177, 107, .46) !important;
-    }
-
-    html[data-theme="dark"] .user-dashboard :is(.dashboard-kpi-value, .dashboard-kpi-label, .dashboard-panel-title) {
-        color: var(--text) !important;
-    }
-
-    html[data-theme="dark"] .user-dashboard .recent-table-wrap {
-        background: var(--surface) !important;
-        border-color: var(--border) !important;
-    }
-
-    html[data-theme="dark"] .user-dashboard .action-panel .action-panel-content {
-        background: var(--surface);
-    }
-
-    html[data-theme="dark"] .user-dashboard .action-panel .action-panel-toggle {
-        background: #30382E;
-        border-color: rgba(144, 177, 151, .20);
-        color: var(--text);
-    }
-
-    html[data-theme="dark"] .user-dashboard .scrap-limit-panel .scrap-limit-toggle {
-        background: #392C2D;
-        border-color: rgba(205, 126, 126, .27);
-        color: var(--text);
-    }
-
-    @media (max-width: 680px) {
-        .user-dashboard {
-            margin: 0;
-            padding: 0;
+    @media (max-width: 768px) {
+        .account-page-shell { padding: 16px; }
+        .account-filter-bar { flex-wrap: wrap; }
+        .account-filter-bar .account-filter-right {
+            flex: 1 1 100%;
+            width: 100%;
+            justify-content: flex-start;
         }
+        .account-filter-bar .account-filter-line { flex: 0 1 170px; width: 170px; }
+        .account-filter-bar .account-filter-search {
+            flex: 1 1 210px;
+            width: auto;
+            min-width: 160px;
+        }
+        .account-pagination { align-items: flex-start; }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        .user-dashboard .dashboard-kpi {
-            transition: none;
-        }
-
-        .user-dashboard .dashboard-kpi:hover {
-            transform: none;
-        }
+    @media (max-width: 480px) {
+        .account-filter-bar .account-filter-right { flex-wrap: wrap; }
+        .account-filter-bar .account-filter-line,
+        .account-filter-bar .account-filter-search { flex: 1 1 100%; width: 100%; }
+        .account-edit-body,
+        .account-create-modal .account-edit-body { padding: 16px; }
+        .account-edit-actions { padding: 12px 16px 16px; }
     }
+
 </style>
 
-@php
-$currentHour = now('Asia/Jakarta')->hour;
-$greeting = match (true) {
-$currentHour >= 4 && $currentHour < 10=> 'Pagi',
-    $currentHour >= 10 && $currentHour < 15=> 'Siang',
-        $currentHour >= 15 && $currentHour < 18=> 'Sore',
-            default => 'Malam',
-            };
 
-            $statusMap = [
-            'submitted' => ['label' => 'Menunggu Verifikasi', 'class' => 'submitted', 'icon' => 'fa-clock'],
-            'in_repair' => ['label' => 'Sedang Repair', 'class' => 'in-repair', 'icon' => 'fa-screwdriver-wrench'],
-            'completed' => ['label' => 'Perlu Konfirmasi', 'class' => 'completed', 'icon' => 'fa-circle-check'],
-            'revision_requested' => ['label' => 'Dalam Koreksi', 'class' => 'revision', 'icon' => 'fa-triangle-exclamation'],
-            'confirmed' => ['label' => 'Selesai', 'class' => 'confirmed', 'icon' => 'fa-check-double'],
-            ];
-            @endphp
+{{-- =====================================================
+    PAGE HEADER
+===================================================== --}}
 
-            <div class="user-dashboard">
-                <div class="dashboard-welcome">
-                    <div>
-                        <h2>Selamat {{ strtolower($greeting) }}, Mr. {{ auth()->user()->name }}</h2>
-                    </div>
+<div class="account-page-shell">
+    <div class="account-page-head">
+        <h2 class="account-list-heading">Daftar Akun</h2>
+        <button type="button" class="account-btn-primary" id="openAccountCreate" aria-haspopup="dialog">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>Tambah Akun
+        </button>
+    </div>
 
-                    <a class="btn btn-primary dashboard-create-order" href="{{ route('user.orders.create') }}">
-                        <i class="fa-solid fa-plus"></i>
-                        Buat Order Repair
-                    </a>
-                </div>
+{{-- =====================================================
+    SUCCESS ALERT
+===================================================== --}}
 
-                @if($errors->any())<div role="alert" style="padding:12px;background:#fff1f2;color:#991b1b">{{ $errors->first() }}</div>@endif
-                @if($scrapAlerts->isNotEmpty())
-                <section class="dashboard-panel scrap-limit-panel">
-                    <button type="button" class="scrap-limit-toggle" id="scrap-limit-toggle" aria-expanded="false" aria-controls="scrap-limit-items">
-                        <span class="scrap-limit-toggle-main">
-                            <span class="scrap-limit-toggle-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
-                            <span>
-                                <span class="scrap-limit-toggle-title">Peringatan Scrap Limit Produk</span>
-                            </span>
-                        </span>
-                        <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-                            <span class="scrap-limit-count">{{ $scrapAlerts->count() }}</span>
-                            <i class="fa-solid fa-chevron-down scrap-limit-chevron" aria-hidden="true"></i>
-                        </span>
-                    </button>
-                    <div class="scrap-limit-items" id="scrap-limit-items" hidden>
-                        <form id="additional-box-form" method="POST" action="{{ route('user.additional-box.store') }}">
-                            @csrf
-                            <input type="hidden" name="submission_token" value="{{ old('submission_token', (string) \Illuminate\Support\Str::uuid()) }}">
-                            @foreach($scrapAlerts as $cycle)
-                            <div class="scrap-limit-alert is-reached" data-scrap-choice-row="{{ $cycle->id }}">
-                                <input type="hidden" name="decisions[{{ $cycle->id }}][cycle_id]" value="{{ $cycle->id }}">
-                                <input type="hidden" name="decisions[{{ $cycle->id }}][decision]" value="" data-scrap-decision="{{ $cycle->id }}">
-                                <input type="hidden" name="decisions[{{ $cycle->id }}][reason]" value="" data-scrap-saved-reason="{{ $cycle->id }}">
-                                <div class="scrap-limit-row">
-                                    <div class="scrap-limit-product">
-                                        {{ $cycle->product?->masterModel?->model }} — {{ $cycle->product?->name }}
-                                        <span class="scrap-limit-quantity">Scrap {{ $cycle->used_qty }} / {{ $cycle->limit_qty }}</span>
-                                    </div>
-                                    <div class="scrap-limit-actions">
-                                        <button type="button" class="scrap-btn scrap-btn-order" data-scrap-order="{{ $cycle->id }}" aria-pressed="false">Order</button>
-                                        <button type="button" class="scrap-btn scrap-btn-no" data-scrap-no="{{ $cycle->id }}" aria-pressed="false">Tidak</button>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                            <div class="scrap-limit-footer">
-                                <span class="scrap-limit-progress" id="scrap-limit-progress" aria-live="polite"></span>
-                                <button type="submit" id="additional-box-submit" class="scrap-btn scrap-btn-order" disabled>Submit</button>
-                            </div>
-                        </form>
-                        @foreach($scrapAlerts as $cycle)
-                        <div class="scrap-reason-modal" id="scrap-reason-{{ $cycle->id }}" data-decision-url="{{ route('user.scrap-limit.decision', $cycle) }}" hidden role="dialog" aria-modal="true" aria-labelledby="scrap-modal-title-{{ $cycle->id }}">
-                            <div class="scrap-reason-dialog">
-                                <h3 id="scrap-modal-title-{{ $cycle->id }}">Alasan Tidak Order</h3>
-                                <p>{{ $cycle->product?->name }}</p>
-                                <textarea maxlength="1000" rows="3" placeholder="Tulis alasan..." data-scrap-reason="{{ $cycle->id }}" required></textarea>
-                                <p class="scrap-save-error" data-scrap-save-error role="alert" hidden></p>
-                                <div class="scrap-modal-actions">
-                                    <button type="button" class="scrap-btn scrap-btn-no" data-scrap-modal-close>Batal</button>
-                                    <button type="button" class="scrap-btn scrap-btn-order" data-scrap-reason-save="{{ $cycle->id }}" disabled>Simpan</button>
-                                </div>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </section>
-                @endif
 
-                @if ($actionOrders->isNotEmpty())
-                <section class="dashboard-panel action-panel has-actions">
-                    <button type="button" class="action-panel-toggle" id="action-panel-toggle" aria-expanded="false" aria-controls="action-panel-content">
-                        <span class="action-heading">
-                            <span class="action-heading-icon" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
-                            <span class="dashboard-panel-title">Perlu Konfirmasi</span>
-                        </span>
-                        <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-                            <span class="action-count">{{ $needConfirmation }} Order</span>
-                            <i class="fa-solid fa-chevron-down action-panel-chevron" aria-hidden="true"></i>
-                        </span>
-                    </button>
-                    <div class="action-panel-content" id="action-panel-content" hidden>
-                        <div class="action-list">
-                            @foreach ($actionOrders as $order)
-                            @php
-                            $qty = $order->after_qty_sum !== null
-                            ? (int) $order->after_qty_sum
-                            : (int) ($order->quantity ?? 0);
-                            $isCorrection = (int) $order->feedbacks_count > 0;
-                            @endphp
+@if ($errors->has('account_error'))
+<div class="account-error-alert">
+    {{ $errors->first('account_error') }}
+</div>
+@endif
 
-                            <a href="{{ route('user.orders.show', $order) }}" class="action-order" aria-label="Cek Order {{ $order->order_number }}">
-                                <div>
-                                    <div class="action-order-number">{{ $order->order_number }}</div>
-                                    <div class="action-order-meta"><span>{{ $qty }} NG</span></div>
-                                </div>
 
-                                <div class="action-order-message">
-                                    <strong>{{ $isCorrection ? 'Hasil koreksi siap diperiksa' : 'Hasil repair siap diperiksa' }}</strong>
-                                </div>
+{{-- =====================================================
+    TABLE CARD
+===================================================== --}}
 
-                                <span class="action-check-order">Buka <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-                            </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </section>
-                @endif
+<div class="account-table-card">
 
-                <div class="dashboard-kpis">
-                    <div class="dashboard-kpi">
-                        <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
-                        <div class="dashboard-kpi-content">
-                            <div class="dashboard-kpi-label">Order Aktif</div>
-                            <div class="dashboard-kpi-value">{{ $orderActive }}</div>
-                        </div>
-                    </div>
+    <form method="GET" action="{{ route('omd.users.index') }}" class="account-filter-bar">
+        <div class="account-filter-field account-filter-left">
+            <label for="account_per_page">Tampilkan</label>
+            <select id="account_per_page" name="per_page" onchange="this.form.submit()" aria-label="Jumlah data per halaman">
+                @foreach ([10, 25, 50, 100] as $size)
+                <option value="{{ $size }}" @selected((int) request('per_page', 10)===$size)>
+                    {{ $size }}
+                </option>
+                @endforeach
+            </select>
+        </div>
 
-                    <div class="dashboard-kpi">
-                        <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
-                        <div class="dashboard-kpi-content">
-                            <div class="dashboard-kpi-label">Diproses OMD</div>
-                            <div class="dashboard-kpi-value">{{ $processedOmd }}</div>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-kpi {{ $needConfirmation > 0 ? 'attention' : '' }}">
-                        <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
-                        <div class="dashboard-kpi-content">
-                            <div class="dashboard-kpi-label">Perlu Konfirmasi</div>
-                            <div class="dashboard-kpi-value">{{ $needConfirmation }}</div>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-kpi">
-                        <span class="dashboard-kpi-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
-                        <div class="dashboard-kpi-content">
-                            <div class="dashboard-kpi-label">Selesai Bulan Ini</div>
-                            <div class="dashboard-kpi-value">{{ $completedThisMonth }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <section class="dashboard-panel recent-orders-panel">
-                    <div class="dashboard-panel-head">
-                        <div>
-                            <h3 class="dashboard-panel-title">Order Terbaru</h3>
-                        </div>
-
-                        <a class="recent-all-link" href="{{ route('user.orders.index') }}">
-                            Lihat Semua Order
-                        </a>
-                    </div>
-
-                    <div class="recent-table-wrap">
-                        <table class="recent-table">
-                            <thead>
-                                <tr>
-                                    <th>No Order</th>
-                                    <th>Tanggal</th>
-                                    <th>Model / Produk</th>
-                                    <th>Qty</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($recentOrders as $order)
-                                @php
-                                $firstItem = $order->items->first();
-                                $modelName = $firstItem?->masterModel?->model ?? $order->model ?? '-';
-                                $productName = $firstItem?->product?->name ?? $order->product?->name ?? '-';
-                                $productCount = $order->items->pluck('product_id')->filter()->unique()->count();
-                                $showAfterQty = in_array($order->status, ['completed', 'revision_requested', 'confirmed'], true);
-                                $qty = $showAfterQty
-                                ? ($order->after_qty_sum !== null
-                                ? (int) $order->after_qty_sum
-                                : (int) ($order->quantity ?? 0))
-                                : ($order->before_qty_sum !== null
-                                ? (int) $order->before_qty_sum
-                                : (int) ($order->quantity ?? 0));
-                                $status = $statusMap[$order->status] ?? [
-                                'label' => $order->status_label,
-                                'class' => 'submitted',
-                                'icon' => 'fa-circle',
-                                ];
-                                @endphp
-
-                                <tr onclick="window.location.href=this.dataset.href"
-                                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location.href=this.dataset.href; }"
-                                    data-href="{{ route('user.orders.show', $order) }}"
-                                    tabindex="0"
-                                    role="link"
-                                    aria-label="Lihat detail order {{ $order->order_number }}"
-                                    title="Lihat detail order">
-                                    <td class="order-number">{{ $order->order_number }}</td>
-                                    <td>
-                                        @if ($order->created_at)
-                                        <time class="recent-order-date" datetime="{{ $order->created_at->toIso8601String() }}">
-                                            <span class="recent-order-date-main">{{ $order->created_at->format('d-m-Y') }}</span>
-                                            <span class="recent-order-date-time">{{ $order->created_at->format('H:i') }}</span>
-                                        </time>
-                                        @else
-                                        —
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="order-model-product">
-                                            <strong>{{ $modelName }}</strong>
-                                            <span>
-                                                {{ $productName }}
-                                                @if ($productCount > 1)
-                                                +{{ $productCount - 1 }} produk
-                                                @endif
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="recent-order-qty">{{ $qty }} NG</td>
-                                    <td>
-                                        <span class="status-pill {{ $status['class'] }}">
-                                            {{ $status['label'] }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5">
-                                        <div class="dashboard-empty">
-                                            <i class="fa-solid fa-box-open"></i>
-                                            Belum ada Order Repair Box.
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+        <div class="account-filter-right">
+            <div class="account-filter-field account-filter-line">
+                <label for="account_plant">Filter Plant</label>
+                <select id="account_plant" name="plant_id" onchange="this.form.submit()" aria-label="Filter Plant">
+                    <option value="">Semua Plant</option>
+                    @foreach ($accountPlants as $plant)
+                    <option value="{{ $plant->id }}" @selected((string) request('plant_id') === (string) $plant->id)>
+                        {{ $plant->name }}
+                    </option>
+                    @endforeach
+                </select>
             </div>
 
-            <style>
-                /* Unified operational status chips; numeric and status cells centered. */
-                .recent-table th:nth-child(4),
-                .recent-table th:nth-child(5),
-                .recent-table td:nth-child(4),
-                .recent-table td:nth-child(5) {
-                    text-align: center !important;
-                }
+            <div class="account-filter-field account-filter-search">
+                <label for="account_search">Pencarian</label>
+                <div class="account-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass account-search-icon" aria-hidden="true"></i>
+                    <input id="account_search" type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari akun..." autocomplete="off" aria-label="Pencarian akun">
+                    @if (request('search'))
+                    <button type="button" class="account-search-clear" title="Hapus pencarian" aria-label="Hapus pencarian"
+                        onclick="this.closest('form').querySelector('[name=search]').value=''; this.closest('form').submit();">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </form>
 
-                .recent-table .status-pill {
-                    display: inline-flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    gap: 8px !important;
-                    border: 0 !important;
-                    border-radius: 999px !important;
-                    padding: 8px 13px !important;
-                    font-size: 10px !important;
-                    font-weight: 600 !important;
-                    white-space: nowrap;
-                }
+    <div class="account-table-wrap">
 
-                html[data-theme="dark"] .recent-order-date-time,
-                html[data-theme="dark"] .recent-table .order-model-product span {
-                    color: var(--text-soft);
-                }
+        <table class="account-table">
 
-                html[data-theme="dark"] .recent-table-wrap {
-                    background: var(--surface);
-                    border-color: var(--border);
-                }
+            <thead>
 
-                .recent-table .status-pill::before {
-                    content: "";
-                    display: inline-block;
-                    width: 7px;
-                    height: 7px;
-                    min-width: 7px;
-                    background: currentColor;
-                    border-radius: 50%;
-                }
-            </style>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    function setupChevron(buttonId, contentId) {
-                        const button = document.getElementById(buttonId);
-                        const content = document.getElementById(contentId);
-                        if (!button || !content) return;
-                        button.addEventListener('click', function() {
-                            const wasOpen = button.getAttribute('aria-expanded') === 'true';
-                            button.setAttribute('aria-expanded', String(!wasOpen));
-                            content.hidden = wasOpen;
-                        });
-                    }
-                    setupChevron('action-panel-toggle', 'action-panel-content');
-                    setupChevron('scrap-limit-toggle', 'scrap-limit-items');
+                <tr>
 
-                    const form = document.getElementById('additional-box-form');
-                    if (!form) return;
-                    const submit = document.getElementById('additional-box-submit');
-                    const progress = document.getElementById('scrap-limit-progress');
-                    let rows = Array.from(form.querySelectorAll('[data-scrap-choice-row]'));
-                    const notifyEdited = function(input) {
-                        input.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
-                    };
+                    <th style="width: 65px;">
+                        No
+                    </th>
 
-                    function updateButtons() {
-                        let selected = 0;
-                        let hasInvalidChoice = false;
-                        rows.forEach(function(row) {
-                            const decision = row.querySelector('[data-scrap-decision]').value;
-                            const reason = row.querySelector('[data-scrap-saved-reason]').value.trim();
-                            const isValid = decision === 'yes' || (decision === 'no' && reason.length > 0);
-                            // Only chosen products go to Laravel. An undecided product keeps its limit warning.
-                            row.querySelectorAll('input[type="hidden"]').forEach(function(input) {
-                                input.disabled = !isValid;
-                            });
-                            if (decision === 'no' && !reason) hasInvalidChoice = true;
-                            const orderButton = row.querySelector('[data-scrap-order]');
-                            orderButton.classList.toggle('is-selected', decision === 'yes');
-                            orderButton.setAttribute('aria-pressed', String(decision === 'yes'));
-                            orderButton.textContent = decision === 'yes' ? '✓' : 'Order';
-                            orderButton.setAttribute('aria-label', decision === 'yes' ? 'Batalkan pilihan Order' : 'Pilih Order');
-                            orderButton.title = decision === 'yes' ? 'Batalkan Order' : 'Order';
-                            row.querySelector('[data-scrap-no]').classList.toggle('is-selected', decision === 'no');
-                            row.querySelector('[data-scrap-no]').setAttribute('aria-pressed', String(decision === 'no'));
-                            if (isValid) selected++;
-                        });
-                        submit.disabled = selected === 0 || hasInvalidChoice;
-                        progress.textContent = selected ? selected + ' dipilih' : '';
-                    }
+                    <th>
+                        Nama
+                    </th>
 
-                    function choose(row, choice) {
-                        const input = row.querySelector('[data-scrap-decision]');
-                        input.value = choice;
-                        notifyEdited(input); // Also protects unsaved choices from the existing auto-refresh.
-                        updateButtons();
-                    }
+                    <th>
+                        Email
+                    </th>
 
-                    function closeModal(modal) {
-                        modal.hidden = true;
-                    }
+                    <th style="width: 110px;">
+                        Role
+                    </th>
 
-                    rows.forEach(function(row) {
-                        const id = row.dataset.scrapChoiceRow;
-                        const reasonInput = row.querySelector('[data-scrap-saved-reason]');
-                        const modal = document.getElementById('scrap-reason-' + id);
-                        const textarea = modal.querySelector('[data-scrap-reason]');
-                        const saveReason = modal.querySelector('[data-scrap-reason-save]');
-                        const saveError = modal.querySelector('[data-scrap-save-error]');
-                        let saving = false;
+                    <th style="width: 150px;">
+                        Plant
+                    </th>
 
-                        function updateReasonSave() {
-                            saveReason.disabled = saving || textarea.value.trim().length === 0;
-                        }
+                    <th style="width: 160px;">
+                        Line
+                    </th>
 
-                        function setSaveError(message) {
-                            saveError.textContent = message;
-                            saveError.hidden = !message;
-                        }
-                        row.querySelector('[data-scrap-order]').addEventListener('click', function() {
-                            const isAlreadyOrder = row.querySelector('[data-scrap-decision]').value === 'yes';
-                            choose(row, isAlreadyOrder ? '' : 'yes');
-                        });
-                        row.querySelector('[data-scrap-no]').addEventListener('click', function() {
-                            textarea.value = '';
-                            setSaveError('');
-                            updateReasonSave();
-                            modal.hidden = false;
-                            textarea.focus();
-                        });
-                        saveReason.addEventListener('click', async function() {
-                            const reason = textarea.value.trim();
-                            if (saving || !reason) return;
-                            saving = true;
-                            setSaveError('');
-                            updateReasonSave();
-                            const cancel = modal.querySelector('[data-scrap-modal-close]');
-                            cancel.disabled = true;
-                            try {
-                                const response = await fetch(modal.dataset.decisionUrl, {
-                                    method: 'POST',
-                                    credentials: 'same-origin',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Accept': 'application/json',
-                                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
-                                    },
-                                    body: JSON.stringify({
-                                        decision: 'no',
-                                        reason: reason
-                                    }),
-                                });
-                                const data = await response.json();
-                                if (!response.ok || data.success !== true) {
-                                    const validation = data.errors && Object.values(data.errors).flat()[0];
-                                    throw new Error(validation || data.message || 'Gagal menyimpan keputusan.');
-                                }
-                                // The server already recorded the No decision and reset this product's cycle.
-                                // Leave other checked Order products untouched until their own Submit.
-                                row.remove();
-                                modal.remove();
-                                rows = rows.filter(function(item) {
-                                    return item !== row;
-                                });
-                                const count = document.querySelector('.scrap-limit-count');
-                                if (count) count.textContent = String(rows.length);
-                                if (!rows.length) document.querySelector('.scrap-limit-panel').remove();
-                                else updateButtons();
-                            } catch (error) {
-                                setSaveError(error.message || 'Koneksi gagal. Coba lagi.');
-                                saving = false;
-                                cancel.disabled = false;
-                                updateReasonSave();
-                            }
-                        });
-                        textarea.addEventListener('input', function() {
-                            textarea.setCustomValidity('');
-                            setSaveError('');
-                            updateReasonSave();
-                        });
-                        modal.querySelector('[data-scrap-modal-close]').addEventListener('click', function() {
-                            if (!saving) closeModal(modal);
-                        });
-                        modal.addEventListener('click', function(event) {
-                            if (!saving && event.target === modal) closeModal(modal);
-                        });
-                    });
-                    document.addEventListener('keydown', function(event) {
-                        if (event.key === 'Escape') document.querySelectorAll('.scrap-reason-modal').forEach(function(modal) {
-                            if (modal.querySelector('[data-scrap-modal-close]')?.disabled !== true) closeModal(modal);
-                        });
-                    });
+                    <th style="width: 150px;">
+                        Aksi
+                    </th>
 
-                    // Restore the submitted choices when Laravel returns validation errors.
-                    const oldDecisions = @json(old('decisions', []));
-                    Object.values(oldDecisions).forEach(function(item) {
-                        const row = form.querySelector('[data-scrap-choice-row="' + Number(item.cycle_id) + '"]');
-                        if (!row || !['yes', 'no'].includes(item.decision)) return;
-                        row.querySelector('[data-scrap-saved-reason]').value = item.reason || '';
-                        row.querySelector('[data-scrap-decision]').value = item.decision;
-                    });
-                    updateButtons();
-                    if (Object.keys(oldDecisions).length && document.getElementById('scrap-limit-toggle')) {
-                        document.getElementById('scrap-limit-toggle').setAttribute('aria-expanded', 'true');
-                        document.getElementById('scrap-limit-items').hidden = false;
-                    }
-                    form.addEventListener('submit', function(event) {
-                        updateButtons();
-                        if (submit.disabled) {
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @forelse($users as $index => $user)
+                <tr>
+
+                    {{-- NO --}}
+                    <td class="account-number">
+                        {{ $users->firstItem() + $index }}
+                    </td>
+
+
+                    {{-- USER --}}
+                    <td>
+
+                        <div class="account-user">
+
+                            <div>
+
+                                <div class="account-user-name">
+                                    {{ $user->name }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    {{-- EMAIL --}}
+                    <td class="account-email">
+                        {{ $user->email }}
+                    </td>
+
+
+                    {{-- ROLE --}}
+                    <td>
+
+                        {{ $user->role === 'omd' ? 'OMD' : 'User' }}
+
+                    </td>
+
+
+                    {{-- PLANT --}}
+                    <td>
+
+                        @if ($user->role === 'omd')
+                        -
+                        @else
+                        <span class="account-badge account-badge-plant">
+                            {{ $user->line?->plant?->name ?? '-' }}
+                        </span>
+                        @endif
+
+                    </td>
+
+
+                    {{-- LINE --}}
+                    <td>
+
+                        @if ($user->role === 'omd')
+                        <span class="account-badge account-badge-line">OMD Workshop</span>
+                        @else
+                        <span class="account-badge account-badge-line">
+                            {{ $user->line?->name ?? '-' }}
+                        </span>
+                        @endif
+
+                    </td>
+
+
+                    {{-- AKSI --}}
+                    <td>
+
+                        <div class="account-actions">
+
+
+                            {{-- EDIT --}}
+                            <button type="button"
+                                class="account-action-btn account-action-edit action-icon-only js-edit-account"
+                                data-user-id="{{ $user->id }}" title="Edit akun" aria-label="Edit akun">
+                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                            </button>
+
+
+                            {{-- RESET PASSWORD --}}
+                            <form method="POST" action="{{ route('omd.users.reset-password', $user) }}"
+                                class="reset-password-form" data-name="{{ $user->name }}">
+
+                                @csrf
+
+                                <button type="submit" class="account-action-btn account-action-reset action-icon-only" title="Reset password ke default role" aria-label="Reset password ke default role">
+                                    <i class="fa-solid fa-key" aria-hidden="true"></i>
+                                </button>
+
+                            </form>
+
+
+                            {{-- HAPUS --}}
+                            <form method="POST" action="{{ route('omd.users.destroy', $user) }}"
+                                class="delete-user-form" data-name="{{ $user->name }}">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit" class="account-action-btn account-action-delete action-icon-only" title="Hapus akun" aria-label="Hapus akun">
+                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                @empty
+
+                <tr>
+
+                    <td colspan="7" class="account-empty">
+
+                        <div class="account-empty-icon">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                        </div>
+
+                        <div class="account-empty-title">
+                            Belum ada akun
+                        </div>
+
+                        <div class="account-empty-text">
+                            Tambahkan akun User atau OMD untuk mulai menggunakan sistem.
+                        </div>
+
+                    </td>
+
+                </tr>
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="account-pagination">
+        <div class="account-pagination-info">
+            Menampilkan {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} akun
+        </div>
+
+        <div class="account-pagination-list">
+            @if ($users->onFirstPage())
+            <span class="account-page-btn disabled">Previous</span>
+            @else
+            <a class="account-page-btn" href="{{ $users->previousPageUrl() }}">Previous</a>
+            @endif
+
+            @for ($page = max(1, $users->currentPage() - 1); $page <= min($users->lastPage(), $users->currentPage() + 1); $page++)
+                <a class="account-page-btn {{ $users->currentPage() === $page ? 'active' : '' }}"
+                    href="{{ $users->url($page) }}">{{ $page }}</a>
+                @endfor
+
+                @if ($users->hasMorePages())
+                <a class="account-page-btn" href="{{ $users->nextPageUrl() }}">Next</a>
+                @else
+                <span class="account-page-btn disabled">Next</span>
+                @endif
+        </div>
+    </div>
+
+</div>
+</div>
+
+{{-- Tambah akun: modal menggunakan endpoint store dan validasi Laravel yang sama. --}}
+<div class="account-edit-overlay" id="accountCreateModal" aria-hidden="true">
+    <div class="account-edit-modal account-create-modal" role="dialog" aria-modal="true" aria-labelledby="accountCreateTitle">
+        <div class="account-edit-head">
+            <h3 class="account-edit-title" id="accountCreateTitle">Tambah Akun</h3>
+            <button type="button" class="account-edit-close js-close-create" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form action="{{ route('omd.users.store') }}" method="POST" id="accountCreateForm">
+            @csrf
+            <div class="account-edit-body">
+                @if ($errors->any() && !old('edit_user_id'))
+                <div class="account-edit-errors" role="alert">
+                    @foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach
+                </div>
+                @endif
+                <div class="account-edit-grid">
+                    <div class="account-edit-field"><label for="create_name">Nama</label><input type="text" id="create_name" name="name" maxlength="100" value="{{ old('name') }}" required autocomplete="name"></div>
+                    <div class="account-edit-field"><label for="create_email">Email</label><input type="email" id="create_email" name="email" maxlength="255" value="{{ old('email') }}" required autocomplete="email"></div>
+                    <div class="account-edit-field"><label for="create_role">Role</label><select id="create_role" name="role" required>
+                            <option value="user" @selected(old('role','user')==='user' )>User</option>
+                            <option value="omd" @selected(old('role')==='omd' )>OMD</option>
+                        </select></div>
+                    <div class="account-edit-field" id="createPlantField"><label for="create_plant">Plant</label><select id="create_plant" name="plant_id">
+                            <option value="">Pilih Plant</option>@foreach ($accountPlants as $plant)<option value="{{ $plant->id }}" @selected((string)old('plant_id')===(string)$plant->id)>{{ $plant->name }}</option>@endforeach
+                        </select></div>
+                    <div class="account-edit-field" id="createLineField"><label for="create_line">Line</label><select id="create_line" name="line_id">
+                            <option value="">Pilih Line</option>
+                        </select></div>
+                    <div class="account-edit-field"><label for="create_password">Password</label><input type="password" name="password" id="create_password" minlength="4" autocomplete="new-password" placeholder="Opsional (default sesuai role)"></div>
+                    <div class="account-edit-field"><label for="create_password_confirm">Konfirmasi Password</label><input type="password" name="password_confirmation" id="create_password_confirm" minlength="4" autocomplete="new-password" placeholder="Ulangi password"></div>
+                </div>
+            </div>
+            <div class="account-edit-actions"><button type="button" class="account-edit-btn account-edit-cancel js-close-create">Batal</button><button type="submit" class="account-edit-btn account-edit-save">Simpan</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="account-edit-overlay" id="accountEditModal" aria-hidden="true">
+    <div class="account-edit-modal" role="dialog" aria-modal="true" aria-labelledby="accountEditTitle">
+        <div class="account-edit-head">
+            <h3 class="account-edit-title" id="accountEditTitle">Edit Akun</h3>
+            <button type="button" class="account-edit-close js-close-account-modal" title="Tutup" aria-label="Tutup">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <form method="POST" id="accountEditForm">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="edit_user_id" id="edit_user_id" value="{{ old('edit_user_id') }}">
+
+            <div class="account-edit-body">
+                @if ($errors->any() && old('edit_user_id'))
+                <div class="account-edit-errors">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                <div class="account-edit-grid">
+                    <div class="account-edit-field">
+                        <label for="edit_name">Nama</label>
+                        <input id="edit_name" name="name" type="text" maxlength="100" required>
+                    </div>
+                    <div class="account-edit-field">
+                        <label for="edit_email">Email</label>
+                        <input id="edit_email" name="email" type="email" maxlength="255" required>
+                    </div>
+                    <div class="account-edit-field">
+                        <label for="edit_role">Role</label>
+                        <select id="edit_role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="omd">OMD</option>
+                        </select>
+                    </div>
+                    <div class="account-edit-field" id="editPlantField">
+                        <label for="edit_plant_id">Plant</label>
+                        <select id="edit_plant_id" name="plant_id">
+                            <option value="">Pilih Plant</option>
+                            @foreach ($accountPlants as $plant)
+                            <option value="{{ $plant->id }}">{{ $plant->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="account-edit-field" id="editLineField">
+                        <label for="edit_line_id">Line</label>
+                        <select id="edit_line_id" name="line_id">
+                            <option value="">Pilih Line</option>
+                        </select>
+                    </div>
+                    <div class="account-edit-field">
+                        <label for="edit_password">Password Baru</label>
+                        <input id="edit_password" name="password" type="password" minlength="4" autocomplete="new-password" placeholder="Kosongkan jika tidak diubah">
+                        
+                    </div>
+                    <div class="account-edit-field">
+                        <label for="edit_password_confirmation">Konfirmasi Password</label>
+                        <input id="edit_password_confirmation" name="password_confirmation" type="password" minlength="4" autocomplete="new-password">
+                    </div>
+                </div>
+            </div>
+
+            <div class="account-edit-actions">
+                <button type="button" class="account-edit-btn account-edit-cancel js-close-account-modal">Batal</button>
+                <button type="submit" class="account-edit-btn account-edit-save">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- =====================================================
+    SWEETALERT2
+===================================================== --}}
+
+@php
+$accountPageState = [
+    'users' => $accountUsersPayload,
+    'linesByPlant' => $accountLinesByPlant,
+    'oldLine' => (string) old('line_id', ''),
+    'oldEdit' => old('edit_user_id') ? [
+        'id' => (string) old('edit_user_id'),
+        'values' => [
+            'name' => old('name'),
+            'email' => old('email'),
+            'role' => old('role'),
+            'plant_id' => old('plant_id'),
+            'line_id' => old('line_id'),
+        ],
+    ] : null,
+    'openCreate' => $errors->any() && !old('edit_user_id'),
+];
+@endphp
+<div id="accountPageData" hidden
+    data-config="{{ json_encode($accountPageState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) }}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+    document.addEventListener(
+        'DOMContentLoaded',
+        function() {
+
+            const accountPageState = JSON.parse(document.getElementById('accountPageData').dataset.config);
+            const accountUsers = accountPageState.users;
+            const linesByPlant = accountPageState.linesByPlant;
+            const editModal = document.getElementById('accountEditModal');
+            const editForm = document.getElementById('accountEditForm');
+            const editUserId = document.getElementById('edit_user_id');
+            const editName = document.getElementById('edit_name');
+            const editEmail = document.getElementById('edit_email');
+            const editRole = document.getElementById('edit_role');
+            const editPlant = document.getElementById('edit_plant_id');
+            const editLine = document.getElementById('edit_line_id');
+            const editPlantField = document.getElementById('editPlantField');
+            const editLineField = document.getElementById('editLineField');
+
+            function syncAccountLines(selectedLineId = '') {
+                const plantId = String(editPlant.value || '');
+                const options = linesByPlant[plantId] || [];
+                editLine.innerHTML = '<option value="">Pilih Line</option>' + options.map(line =>
+                    `<option value="${line.id}">${line.name}</option>`
+                ).join('');
+                if (selectedLineId) editLine.value = String(selectedLineId);
+            }
+
+            function syncAccountRole() {
+                const isUser = editRole.value === 'user';
+                editPlantField.style.display = isUser ? '' : 'none';
+                editLineField.style.display = isUser ? '' : 'none';
+                editPlant.required = isUser;
+                editLine.required = isUser;
+                editPlant.disabled = !isUser;
+                editLine.disabled = !isUser;
+            }
+
+            function openAccountEdit(userId, oldValues = null) {
+                const user = accountUsers[String(userId)];
+                if (!user || !editModal || !editForm) return;
+
+                editForm.action = user.update_url;
+                editUserId.value = user.id;
+                editName.value = oldValues?.name ?? user.name ?? '';
+                editEmail.value = oldValues?.email ?? user.email ?? '';
+                editRole.value = oldValues?.role ?? user.role ?? 'user';
+                editPlant.value = String(oldValues?.plant_id ?? user.plant_id ?? '');
+                syncAccountRole();
+                syncAccountLines(oldValues?.line_id ?? user.line_id ?? '');
+                document.getElementById('edit_password').value = '';
+                document.getElementById('edit_password_confirmation').value = '';
+
+                editModal.classList.add('is-open');
+                editModal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('account-modal-open');
+                setTimeout(() => editName.focus(), 30);
+            }
+
+            function closeAccountEdit() {
+                editModal?.classList.remove('is-open');
+                editModal?.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('account-modal-open');
+            }
+
+            document.querySelectorAll('.js-edit-account').forEach(button => {
+                button.addEventListener('click', () => openAccountEdit(button.dataset.userId));
+            });
+            document.querySelectorAll('.js-close-account-modal').forEach(button => {
+                button.addEventListener('click', closeAccountEdit);
+            });
+            editModal?.addEventListener('click', event => {
+                if (event.target === editModal) closeAccountEdit();
+            });
+            editRole?.addEventListener('change', () => {
+                syncAccountRole();
+                if (editRole.value === 'user') syncAccountLines();
+            });
+            editPlant?.addEventListener('change', () => syncAccountLines());
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && editModal?.classList.contains('is-open')) closeAccountEdit();
+            });
+
+            if (accountPageState.oldEdit?.id) {
+                openAccountEdit(accountPageState.oldEdit.id, accountPageState.oldEdit.values);
+            }
+
+            /* =================================================
+               DELETE USER
+            ================================================= */
+
+            document
+                .querySelectorAll('.delete-user-form')
+                .forEach(function(form) {
+
+                    form.addEventListener(
+                        'submit',
+                        function(event) {
+
                             event.preventDefault();
-                            return;
+
+                            var userName =
+                                form.dataset.name;
+
+
+                            Swal.fire({
+
+                                icon: 'warning',
+
+                                title: 'Hapus Akun?',
+
+                                html: 'Akun <b>' +
+                                    userName +
+                                    '</b> akan dihapus dan data tidak dapat dikembalikan.',
+
+                                showCancelButton: true,
+
+                                confirmButtonText: 'Ya, Hapus',
+
+                                cancelButtonText: 'Batal',
+
+                                reverseButtons: true,
+
+                                buttonsStyling: false,
+
+                                customClass: {
+
+                                    popup: 'swal-account-popup',
+
+                                    title: 'swal-account-title',
+
+                                    htmlContainer: 'swal-account-text',
+
+                                    confirmButton: 'swal-account-confirm',
+
+                                    cancelButton: 'swal-account-cancel'
+
+                                }
+
+                            }).then(
+                                function(result) {
+
+                                    if (
+                                        result.isConfirmed
+                                    ) {
+
+                                        form.submit();
+
+                                    }
+
+                                }
+                            );
+
                         }
-                        submit.disabled = true;
-                        submit.textContent = 'Menyimpan...';
-                    });
-                    window.addEventListener('pageshow', updateButtons);
+                    );
+
                 });
-            </script>
-            @endsection
+
+
+            /* =================================================
+               RESET PASSWORD
+            ================================================= */
+
+            document
+                .querySelectorAll('.reset-password-form')
+                .forEach(function(form) {
+
+                    form.addEventListener(
+                        'submit',
+                        function(event) {
+
+                            event.preventDefault();
+
+                            var userName =
+                                form.dataset.name;
+
+
+                            Swal.fire({
+
+                                icon: 'warning',
+
+                                title: 'Reset Password?',
+
+                                html: 'Password akun <b>' +
+                                    userName +
+                                    '</b> akan direset ke <b>password default sesuai role</b>.',
+
+                                showCancelButton: true,
+
+                                confirmButtonText: 'Ya, Reset',
+
+                                cancelButtonText: 'Batal',
+
+                                reverseButtons: true,
+
+                                buttonsStyling: false,
+
+                                customClass: {
+
+                                    popup: 'swal-account-popup',
+
+                                    title: 'swal-account-title',
+
+                                    htmlContainer: 'swal-account-text',
+
+                                    confirmButton: 'swal-account-reset',
+
+                                    cancelButton: 'swal-account-cancel'
+
+                                }
+
+                            }).then(
+                                function(result) {
+
+                                    if (
+                                        result.isConfirmed
+                                    ) {
+
+                                        form.submit();
+
+                                    }
+
+                                }
+                            );
+
+                        }
+                    );
+
+                });
+
+        }
+    );
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('accountCreateModal');
+        const open = document.getElementById('openAccountCreate');
+        const form = document.getElementById('accountCreateForm');
+        const role = document.getElementById('create_role');
+        const plant = document.getElementById('create_plant');
+        const line = document.getElementById('create_line');
+        const plantField = document.getElementById('createPlantField');
+        const lineField = document.getElementById('createLineField');
+        const accountPageState = JSON.parse(document.getElementById('accountPageData').dataset.config);
+        const linesByPlant = accountPageState.linesByPlant;
+        const originalLine = accountPageState.oldLine;
+        let previousFocus = null;
+
+        function syncLines(selected = '') {
+            const lines = linesByPlant[String(plant.value || '')] || [];
+            line.replaceChildren(new Option('Pilih Line', ''));
+            lines.forEach(item => line.add(new Option(item.name, String(item.id))));
+            if (selected) line.value = String(selected);
+        }
+
+        function syncRole() {
+            const user = role.value === 'user';
+            plantField.hidden = !user;
+            lineField.hidden = !user;
+            plantField.style.display = user ? "" : "none";
+            lineField.style.display = user ? "" : "none";
+            plant.disabled = !user;
+            line.disabled = !user;
+            plant.required = user;
+            line.required = user;
+        }
+
+        function show() {
+            previousFocus = document.activeElement;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('account-modal-open');
+            document.getElementById('create_name').focus();
+        }
+
+        function hide() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            if (!document.getElementById('accountEditModal')?.classList.contains('is-open')) document.body.classList.remove('account-modal-open');
+            previousFocus?.focus?.();
+        }
+        open.addEventListener('click', show);
+        modal.querySelectorAll('.js-close-create').forEach(button => button.addEventListener('click', hide));
+        modal.addEventListener('click', e => {
+            if (e.target === modal) hide();
+        });
+        document.addEventListener('keydown', e => {
+            if (!modal.classList.contains('is-open')) return;
+            if (e.key === 'Escape') hide();
+            if (e.key === 'Tab') {
+                const fields = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled])')].filter(el => el.getClientRects().length);
+                if (!fields.length) return;
+                if (e.shiftKey && document.activeElement === fields[0]) {
+                    e.preventDefault();
+                    fields[fields.length - 1].focus();
+                } else if (!e.shiftKey && document.activeElement === fields[fields.length - 1]) {
+                    e.preventDefault();
+                    fields[0].focus();
+                }
+            }
+        });
+        plant.addEventListener('change', () => syncLines());
+        role.addEventListener('change', syncRole);
+        syncLines(originalLine);
+        syncRole();
+        if (accountPageState.openCreate) {
+            show();
+        }
+    });
+</script>
+@endsection

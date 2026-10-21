@@ -1022,10 +1022,7 @@
             <div class="recap-card">
                 <div class="recap-table-toolbar">
                     <div class="recap-actions">
-                        <a class="recap-btn recap-btn-pdf" href="{{ route('omd.recap.pdf', $exportParams) }}">
-                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
-                            PDF
-                        </a>
+                        
                         <button type="submit" form="omiraChartExport" class="recap-btn recap-btn-excel">
                             <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
                             Excel

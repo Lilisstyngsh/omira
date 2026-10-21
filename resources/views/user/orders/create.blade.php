@@ -698,7 +698,7 @@
             <div class="form-notice" id="formNotice">Masukkan minimal satu Quantity NG sebelum mengirim order.</div>
             <div class="actions">
                 <button type="button" class="btn-reset" id="resetButton">Kosongkan Form</button>
-                <button type="submit" class="btn-submit" id="submitButton" disabled>Kirim Order Repair</button>
+                <button type="submit" class="btn-submit" id="submitButton" disabled>Submit</button>
             </div>
         </form>
     </div>
