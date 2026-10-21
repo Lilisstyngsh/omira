@@ -223,7 +223,7 @@ html body .swal2-container .swal2-popup.omira-swal-success .swal2-html-container
     line-height: 1.55;
     overflow-wrap: anywhere;
 }
-/* Success popups are informational only: no OK / Continue button. */
+
 html body .swal2-container .swal2-popup.omira-swal-success .swal2-actions,
 html body .swal2-container .swal2-popup.omira-swal-success .swal2-icon { display: none !important; }
 @keyframes omira-success-popup-in {

@@ -18,12 +18,6 @@ use App\Http\Controllers\RecapController;
 use Illuminate\Support\Facades\Route;
 
 
-/*
-|--------------------------------------------------------------------------
-| Guest Routes
-|--------------------------------------------------------------------------
-*/
-
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', [AuthController::class, 'showLogin'])
@@ -34,30 +28,14 @@ Route::middleware('guest')->group(function () {
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| Logout
-|--------------------------------------------------------------------------
-*/
-
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes
-|--------------------------------------------------------------------------
-*/
-
 Route::middleware('auth')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Root
-    |--------------------------------------------------------------------------
-    */
+
 
     Route::get('/', fn() => redirect()->route('dashboard'));
 
@@ -66,21 +44,12 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:omd,user')
         ->name('activity.version');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Profile
-    |--------------------------------------------------------------------------
-*/
 
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Dashboard
-    |--------------------------------------------------------------------------
-    */
+    
 
     Route::get('/dashboard', function () {
 
@@ -92,22 +61,14 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | User Routes
-    |--------------------------------------------------------------------------
-    */
+    
 
     Route::middleware('role:user')
         ->prefix('user')
         ->name('user.')
         ->group(function () {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Order Repair - User
-            |--------------------------------------------------------------------------
-            */
+            
 
             Route::get('/orders', [UserOrderController::class, 'index'])
                 ->name('orders.index');
