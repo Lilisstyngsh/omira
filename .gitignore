@@ -28,3 +28,11 @@ Thumbs.db
 /storage/framework/views/
 /storage/framework/testing/
 /storage/logs/
+# Docker local environment and database exports
+.env.docker
+.env.docker.*
+!.env.docker.example
+/*.sql
+/*.dump
+/database/dumps/
+/docker-build-log.txt
