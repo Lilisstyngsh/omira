@@ -54,9 +54,7 @@ class DatabaseSeeder extends Seeder
             ]
 
         );
-
-        // Normalize existing Line names before firstOrCreate to preserve their IDs
-        // even when an operator runs db:seed before the rename migration.
+        
         foreach ([
             'Body' => ['AS Body' => 'Assy Body', 'INJ' => 'Injection', 'PT' => 'Painting'],
             'Electric' => ['AS Electric' => 'Assy Electric'],

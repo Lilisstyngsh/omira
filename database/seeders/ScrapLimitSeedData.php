@@ -6,11 +6,6 @@ final class ScrapLimitSeedData
 {
     /**
      * Source of truth:
-     * DATA QTY LIMIT BOX SCRAP (1)(1).xlsx
-     *
-     * Plant/Line follow OMIRA naming convention.
-     * Model/Product follow the Excel spelling exactly (outer whitespace trimmed).
-     *
      * @return array<int, array{0:string,1:string,2:string,3:string,4:int}>
      */
     public static function rows(): array
