@@ -109,7 +109,7 @@ html body .swal2-container .swal2-popup :is(.swal-plant-confirm,.swal-account-co
     cursor:pointer !important;
 }
 html body .swal2-container .swal2-popup :is(.swal-plant-confirm,.swal-account-confirm,.omira-swal-confirm):hover { background:#c94d5a !important; }
-/* Password reset remains amber, unlike destructive delete confirmation. */
+
 html body .swal2-container .swal2-popup .swal-account-reset {
     height:36px !important; padding:0 18px !important; border:0 !important;
     border-radius:9px !important; background:#f59e0b !important; color:#fff !important;
@@ -223,7 +223,7 @@ html body .swal2-container .swal2-popup.omira-swal-success .swal2-html-container
     line-height: 1.55;
     overflow-wrap: anywhere;
 }
-
+/* Success popups are informational only: no OK / Continue button. */
 html body .swal2-container .swal2-popup.omira-swal-success .swal2-actions,
 html body .swal2-container .swal2-popup.omira-swal-success .swal2-icon { display: none !important; }
 @keyframes omira-success-popup-in {
@@ -248,4 +248,63 @@ html body .swal2-container .swal2-popup.omira-swal-success .swal2-icon { display
     }
     .omira-success-check path { stroke-dashoffset: 0; }
     .omira-success-confetti { opacity: .65; transform: rotate(var(--rotation)); }
+}
+
+html:not([data-theme="dark"]) .topbar {
+    position: sticky;
+    isolation: isolate;
+    background: linear-gradient(108deg, #F1F6F0 0%, #EDF4EE 52%, #F3F8F3 100%) !important;
+    border-bottom: 1px solid #DDE8DF !important;
+    box-shadow: 0 2px 12px rgba(47, 82, 64, .035);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+html:not([data-theme="dark"]) .topbar::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(52%, 680px);
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 95% 285% at 100% 158%, transparent 0 43%, rgba(211, 232, 216, .52) 43.5% 54%, transparent 54.5%),
+        radial-gradient(ellipse 105% 310% at 100% 162%, transparent 0 55%, rgba(190, 220, 198, .32) 55.5% 66%, transparent 66.5%),
+        radial-gradient(ellipse 115% 340% at 100% 168%, transparent 0 68%, rgba(226, 240, 228, .62) 68.5% 78%, transparent 78.5%);
+    opacity: .95;
+}
+html:not([data-theme="dark"]) .topbar::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 8px;
+    right: 24px;
+    width: 112px;
+    height: 54px;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(111, 160, 125, .19) 1.5px, transparent 1.9px);
+    background-size: 13px 13px;
+    background-position: center;
+    opacity: .56;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 28%, #000 82%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 28%, #000 82%, transparent 100%);
+}
+html:not([data-theme="dark"]) .topbar > * {
+    position: relative;
+    z-index: 1;
+}
+html:not([data-theme="dark"]) .topbar-title {
+    color: #244637;
+}
+@media (max-width: 600px) {
+    html:not([data-theme="dark"]) .topbar::before {
+        width: 68%;
+        opacity: .7;
+    }
+    html:not([data-theme="dark"]) .topbar::after {
+        right: 12px;
+        width: 76px;
+        opacity: .4;
+    }
 }
