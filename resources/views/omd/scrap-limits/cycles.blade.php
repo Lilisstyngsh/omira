@@ -24,10 +24,16 @@
     .scrap-history-search input::placeholder { color:#94a3b8; font-weight:400; }
     .scrap-history-search input:focus { border-color:#5f9278; box-shadow:0 0 0 3px rgba(95,146,120,.12); }
     .scrap-history-search > i { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:12px; color:#94a3b8; pointer-events:none; }
+    .scrap-history-toolbar-actions { display:flex; align-items:center; justify-content:flex-end; gap:9px; min-width:0; }
+    .scrap-history-export-actions { display:flex; align-items:center; gap:7px; flex-shrink:0; }
+    .scrap-history-export-btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:36px; padding:0 12px; border:1px solid transparent; border-radius:9px; background:#fff; color:#24382c; font-family:inherit; font-size:11px; font-weight:800; text-decoration:none; white-space:nowrap; }
+    .scrap-history-export-btn.pdf { color:#b42318; background:#fff1f2; border-color:#fecdd3; }
+    .scrap-history-export-btn.excel { color:#166534; background:#ecfdf3; border-color:#bbf7d0; }
+    .scrap-history-export-btn:hover { filter:brightness(.97); text-decoration:none; }
     .scrap-history-clear-search { position:absolute; top:50%; right:6px; transform:translateY(-50%); border:0; border-radius:7px; width:25px; height:25px; background:transparent; color:#94a3b8; cursor:pointer; }
     .scrap-history-clear-search:hover { background:#f1f5f9; }
     .scrap-history-table-wrap { overflow-x:auto; border:1px solid #e3e9f0; border-radius:12px; }
-    .scrap-history-table { width:100%; min-width:790px; border-spacing:0; border-collapse:separate; font-size:12px; }
+    .scrap-history-table { width:100%; min-width:920px; border-spacing:0; border-collapse:separate; font-size:12px; }
     .scrap-history-table thead th { background:#f9fafb; border-bottom:1px solid #e3e9f0; padding:12px 14px; text-align:left; text-transform:uppercase; letter-spacing:.04em; color:#4b5563; font-size:11px; font-weight:800; }
     .scrap-history-table tbody td { padding:13px 14px; border-bottom:1px solid #edf1f5; vertical-align:middle; color:#111827; font-size:11px; }
     .scrap-history-table tbody tr:last-child td { border-bottom:0; }
@@ -39,7 +45,10 @@
     .scrap-history-chevron i { transition:transform .15s; }
     .scrap-history-row.is-open .scrap-history-chevron i { transform:rotate(180deg); }
     .scrap-history-main { font-size:11px; font-weight:750; color:#111827; }
-    .scrap-history-sub { margin-top:4px; font-size:10px; color:#4b5563; }
+    .scrap-history-sub { margin-top:4px; font-size:12px; font-weight:400; color:#4b5563; line-height:1.35; }
+    .scrap-history-date { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .scrap-history-date-main { font-size:11px; font-weight:750; line-height:1.3; color:#111827; white-space:nowrap; }
+    .scrap-history-date-time { font-size:11px; font-weight:400; line-height:1.3; color:#64748b; }
     .scrap-history-pill { display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:750; white-space:nowrap; }
     .scrap-history-pill.yes { background:#eaf6ed; color:#277047; }
     .scrap-history-pill.no { background:#fff1f2; color:#b24355; }
@@ -58,7 +67,8 @@
     .scrap-history-detail-meta { font-size:11px; color:#111827; margin-top:7px; }
     .scrap-history-reset { margin-top:14px; display:flex; gap:9px; flex-wrap:wrap; align-items:flex-start; }
     .scrap-history-reset input { height:38px; box-sizing:border-box; padding:0 12px; border:1px solid #dbe2ea; border-radius:9px; background:#fff; min-width:240px; flex:1; font-size:12px; font-weight:400; font-family:inherit; }
-    .scrap-history-reset button { border:0; border-radius:9px; background:#5f9278; color:#fff; padding:0 14px; height:38px; font-size:11px; font-weight:750; cursor:pointer; }
+    .scrap-history-reset button { display:none; border:0; border-radius:9px; background:#5f9278; color:#fff; padding:0 14px; height:38px; font-size:11px; font-weight:750; cursor:pointer; }
+    .scrap-history-reset button.is-visible { display:inline-flex; align-items:center; justify-content:center; }
     .scrap-history-reset button:hover { background:#4c8167; }
     .scrap-history-empty { text-align:center; color:#94a3b8 !important; padding:30px 14px !important; }
     .scrap-history-pagination { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:18px; }
@@ -72,7 +82,10 @@
         .scrap-history-card { padding:14px; }
         .scrap-history-field, .scrap-history-field.line { width:calc(50% - 6px); }
         .scrap-history-toolbar { align-items:stretch; }
+        .scrap-history-toolbar-actions { width:100%; flex-wrap:wrap; }
         .scrap-history-search { width:100%; }
+        .scrap-history-export-actions { width:100%; }
+        .scrap-history-export-btn { flex:1; }
         .scrap-history-detail-grid { grid-template-columns:1fr; }
         .scrap-history-pagination { flex-direction:column; align-items:flex-start; }
     }
@@ -158,12 +171,18 @@
                     <option value="{{ $size }}" @selected((int)request('per_page',10) === $size)>{{ $size }}</option>
                 @endforeach
             </select>
-            <div class="scrap-history-search">
-                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                <input type="search" name="search" value="{{ request('search') }}" placeholder="Cari User, Model, Produk, Line..." aria-label="Cari riwayat scrap limit" autocomplete="off">
-                @if(request('search'))
-                    <button type="button" class="scrap-history-clear-search" aria-label="Hapus pencarian" onclick="this.form.querySelector('input[name=search]').value='';this.form.submit()"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-                @endif
+            <div class="scrap-history-toolbar-actions">
+                <div class="scrap-history-search">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <input type="search" name="search" value="{{ request('search') }}" placeholder="Cari User, Model, Produk, Line..." aria-label="Cari riwayat scrap limit" autocomplete="off">
+                    @if(request('search'))
+                        <button type="button" class="scrap-history-clear-search" aria-label="Hapus pencarian" onclick="this.form.querySelector('input[name=search]').value='';this.form.submit()"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                    @endif
+                </div>
+                <div class="scrap-history-export-actions" aria-label="Export riwayat scrap">
+                    <a class="scrap-history-export-btn pdf" href="{{ route('omd.scrap-cycles.export', array_merge(request()->except('page'), ['format' => 'pdf'])) }}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF</a>
+                    <a class="scrap-history-export-btn excel" href="{{ route('omd.scrap-cycles.export', array_merge(request()->except('page'), ['format' => 'excel'])) }}"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel</a>
+                </div>
             </div>
         </div>
     </form>
@@ -172,11 +191,12 @@
         <table class="scrap-history-table">
             <thead>
                 <tr>
-                    <th style="width:21%">Tanggal</th>
-                    <th style="width:22%">Line / User</th>
-                    <th>Model – Produk</th>
-                    <th style="width:14%;text-align:center">Scrap / Limit</th>
-                    <th style="width:14%;text-align:center">Keputusan</th>
+                    <th style="width:18%">Tanggal</th>
+                    <th style="width:16%">No Order</th>
+                    <th style="width:18%">Line / User</th>
+                    <th style="width:22%">Model – Produk</th>
+                    <th style="width:13%;text-align:center">Scrap / Limit</th>
+                    <th style="width:13%;text-align:center">Keputusan</th>
                 </tr>
             </thead>
             <tbody>
@@ -194,9 +214,13 @@
                         <td>
                             <div class="scrap-history-expand">
                                 <button type="button" class="scrap-history-chevron" aria-label="Lihat detail {{ $cycle->user?->name ?? 'scrap limit' }}" aria-expanded="false" aria-controls="scrap-detail-{{ $cycle->id }}"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
-                                <span>{{ $cycle->reached_at?->format('d/m/Y') ?? '-' }}</span>
+                                <div class="scrap-history-date">
+                                    <div class="scrap-history-date-main">{{ $cycle->reached_at?->format('d/m/Y') ?? '-' }}</div>
+                                    <div class="scrap-history-date-time">{{ $cycle->reached_at?->format('H:i') ?? '—' }}</div>
+                                </div>
                             </div>
                         </td>
+                        <td><span>{{ $orderNumbers[$cycle->id] ?? '—' }}</span></td>
                         <td>
                             <div class="scrap-history-main">{{ $cycle->line?->name ?? '-' }}</div>
                             <div class="scrap-history-sub">{{ $cycle->user?->name ?? '-' }}</div>
@@ -211,7 +235,7 @@
                         </td>
                     </tr>
                     <tr class="scrap-history-detail-row" id="scrap-detail-{{ $cycle->id }}" hidden>
-                        <td colspan="5">
+                        <td colspan="6">
                             @if($isManualOmdReset)
                                 <div class="scrap-history-detail-grid single">
                                     <div class="scrap-history-detail-box reset">
@@ -262,13 +286,13 @@
                                 <form class="scrap-history-reset" method="POST" action="{{ route('omd.scrap-cycles.reset', $cycle) }}">
                                     @csrf
                                     <input name="reason" type="text" required minlength="5" maxlength="1000" placeholder="Alasan reset (wajib)" aria-label="Alasan reset manual">
-                                    <button type="submit">Reset Manual</button>
+                                    <button type="submit">Reset</button>
                                 </form>
                             @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="scrap-history-empty">Tidak ada riwayat Scrap Limit.</td></tr>
+                    <tr><td colspan="6" class="scrap-history-empty">Tidak ada riwayat Scrap Limit.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -331,6 +355,22 @@
                     toggleDetails();
                 }
             });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.scrap-history-reset').forEach(function (form) {
+            const reasonInput = form.querySelector('input[name="reason"]');
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (!reasonInput || !submitButton) return;
+
+            const updateButtonVisibility = function () {
+                submitButton.classList.toggle('is-visible', reasonInput.value.trim().length > 0);
+            };
+            reasonInput.addEventListener('input', updateButtonVisibility);
+            updateButtonVisibility();
         });
     });
 </script>

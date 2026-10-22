@@ -6,9 +6,7 @@
 @section('content')
 @php
     $activeAt = now();
-    $defaultAddLineId = $selectedLineId ?: $lines->first(
-        fn ($line) => !$selectedPlantId || (int) $line->plant_id === (int) $selectedPlantId
-    )?->id;
+    $defaultAddLineId = $selectedLineId ?: $lines->first()?->id;
     $catalogRoute = route('omd.master.model-product');
 @endphp
 <style>
@@ -35,7 +33,7 @@
     .mp-btn-icon{height:30px;min-width:30px;padding:0 7px;background:#fff;border:1px solid #dce4df;color:#617568}
     .mp-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 1px}
     .mp-summary-text{color:#334155;font-size:12px;font-weight:700}
-    .mp-summary-right{display:flex;align-items:center;gap:8px}
+    .mp-summary-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
     .mp-summary-right .mp-select{height:36px;width:82px;padding:0 10px;font-weight:700}
     .mp-table-scroll{width:100%;overflow-x:auto}
     .mp-table{border-collapse:collapse;width:100%;min-width:710px;table-layout:fixed}
@@ -138,9 +136,6 @@
 <div class="mp-page" id="mpCatalog">
     <div class="mp-top">
         <h2>Daftar Model Box</h2>
-        <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
-            <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
-        </button>
     </div>
 
     @if($errors->any()) <div class="mp-alert error" role="alert">{{ $errors->first() }}</div> @endif
@@ -148,30 +143,20 @@
     <form method="GET" action="{{ $catalogRoute }}" id="mpFilters" class="mp-card mp-filters">
         <div class="mp-filter-controls">
             <div class="mp-field">
-                <label class="mp-label" for="mpPlant">PLANT</label>
-                <select class="mp-select" id="mpPlant" name="plant_id">
-                    <option value="">Semua Plant</option>
-                    @foreach($plants as $plant)
-                        <option value="{{ $plant->id }}" @selected((string)$selectedPlantId === (string)$plant->id)>{{ $plant->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mp-field">
                 <label class="mp-label" for="mpLine">LINE</label>
                 <select class="mp-select" id="mpLine" name="line_id">
                     <option value="">Semua Line</option>
                     @foreach($lines as $line)
-                        <option value="{{ $line->id }}" data-plant="{{ $line->plant_id }}"
+                        <option value="{{ $line->id }}"
                             @selected((string)$selectedLineId === (string)$line->id)>{{ $line->name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="mp-filter-actions">
-                <button class="mp-btn mp-btn-primary" type="submit" title="Terapkan filter"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button>
-                @if($selectedPlantId || $selectedLineId)
-                    <a class="mp-btn mp-btn-outline" href="{{ route('omd.master.model-product', ['q' => $search, 'per_page' => $perPage]) }}" title="Reset Plant dan Line"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</a>
-                @endif
-            </div>
+            @if($selectedLineId)
+                <div class="mp-filter-actions">
+                    <a class="mp-btn mp-btn-outline" href="{{ route('omd.master.model-product', ['q' => $search, 'per_page' => $perPage]) }}" title="Reset filter Line"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</a>
+                </div>
+            @endif
             <div class="mp-field mp-filter-search">
                 <label class="mp-label" for="mpSearch">PENCARIAN</label>
                 <input class="mp-input" id="mpSearch" type="search" name="q" maxlength="150"
@@ -182,14 +167,17 @@
     </form>
 
     <div class="mp-summary">
+        <span class="mp-summary-text"><strong>{{ number_format($models->total()) }}</strong> Model</span>
         <div class="mp-summary-right">
             <select class="mp-select" id="mpPerPage" aria-label="Jumlah model per halaman">
                 @foreach([10,25,50,100] as $count)
                     <option value="{{ $count }}" @selected($perPage === $count)>{{ $count }}</option>
                 @endforeach
             </select>
+            <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
+            </button>
         </div>
-        <span class="mp-summary-text"><strong>{{ number_format($models->total()) }}</strong> Model</span>
     </div>
 
     <div class="mp-card">
@@ -281,7 +269,6 @@
                                         @csrf
                                         <input type="hidden" name="master_model_id" value="{{ $model->id }}">
                                         <input type="hidden" name="return_to" value="model-product">
-                                        <input type="hidden" name="return_plant" value="{{ $selectedPlantId }}">
                                         <input type="hidden" name="return_line_id" value="{{ $selectedLineId }}">
                                         <input type="hidden" name="return_q" value="{{ $search }}">
                                         <input type="hidden" name="return_per_page" value="{{ $perPage }}">
@@ -402,7 +389,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const root = document.getElementById('mpCatalog');
     const search = document.getElementById('mpSearch');
     const filters = document.getElementById('mpFilters');
-    const plant = document.getElementById('mpPlant');
     const line = document.getElementById('mpLine');
     const perPage = document.getElementById('mpPerPage');
     const modalMap = document.querySelectorAll('.mp-overlay');
@@ -426,14 +412,6 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.setAttribute('aria-hidden', 'true');
         if (!document.querySelector('.mp-overlay.is-open')) document.body.classList.remove('mp-modal-active');
         if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
-    }
-    function updateLineOptions() {
-        for (const option of line.options) {
-            if (!option.value) continue;
-            option.hidden = !!plant.value && option.dataset.plant !== plant.value;
-            option.disabled = option.hidden;
-        }
-        if (line.selectedOptions[0] && line.selectedOptions[0].disabled) line.value = '';
     }
     function cancelEditor() {
         if (!activeEditor) return;
@@ -464,15 +442,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
-    updateLineOptions();
-    // Plant dan Line baru diterapkan setelah tombol Filter ditekan.
-    plant.addEventListener('change', updateLineOptions);
     filters.addEventListener('submit', () => clearTimeout(searchTimer));
+    line.addEventListener('change', () => navigateCatalog({line_id: line.value}));
     function navigateCatalog(overrides) {
         // Pencarian dan jumlah data memakai filter yang sudah diterapkan, bukan pilihan draft.
         const url = new URL(filters.action, window.location.href);
         const current = new URLSearchParams(window.location.search);
-        for (const key of ['plant_id', 'line_id', 'q', 'per_page']) {
+        for (const key of ['line_id', 'q', 'per_page']) {
             const value = current.get(key);
             if (value) url.searchParams.set(key, value);
         }

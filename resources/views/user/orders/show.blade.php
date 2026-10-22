@@ -96,6 +96,16 @@
             color: #0f172a;
         }
 
+        /* Samakan tipografi semua judul kartu pada detail OMD dan user. */
+        body .repair-card .repair-card-title,
+        body .repair-info-card .repair-info-title {
+            font-family: inherit !important;
+            font-size: 14px !important;
+            font-weight: 650 !important;
+            line-height: 1.4 !important;
+            color: #0f172a !important;
+        }
+
         .repair-card-desc {
             margin: 0 0 18px;
             font-size: 11px;
@@ -651,7 +661,7 @@
 
         .timeline-item span {
             display: block;
-            font-size: 9px;
+            font-size: 10px;
             line-height: 1.5;
             color: #64748b;
         }

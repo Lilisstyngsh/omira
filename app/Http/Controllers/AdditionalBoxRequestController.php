@@ -6,7 +6,6 @@ use App\Models\AdditionalBoxRequest;
 use App\Models\User;
 use App\Models\UserScrapLimitCycle;
 use App\Services\AdditionalBoxExportService;
-use App\Services\ScrapHistoryExportService;
 use App\Services\UserScrapLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -137,127 +136,6 @@ class AdditionalBoxRequestController extends Controller
         })->filter(fn ($event) => $event->record !== null)->values());
 
         return view('user.additional-box.index', compact('requests'));
-    }
-
-    public function exportHistory(Request $request, string $format, ScrapHistoryExportService $exportService)
-    {
-        abort_unless(in_array($format, ['pdf', 'excel'], true), 404);
-
-        $filters = $request->validate([
-            'start_date' => ['nullable', 'date_format:Y-m-d'],
-            'end_date' => ['nullable', 'date_format:Y-m-d'],
-            'search' => ['nullable', 'string', 'max:150'],
-        ]);
-        if (!empty($filters['start_date']) && !empty($filters['end_date']) && $filters['end_date'] < $filters['start_date']) {
-            throw ValidationException::withMessages([
-                'end_date' => 'Sampai Tanggal tidak boleh sebelum Dari Tanggal.',
-            ]);
-        }
-
-        $userId = (int) $request->user()->id;
-        $search = trim((string) ($filters['search'] ?? ''));
-        $requestQuery = AdditionalBoxRequest::query()->where('user_id', $userId);
-        if (!empty($filters['start_date'])) {
-            $requestQuery->whereDate('created_at', '>=', $filters['start_date']);
-        }
-        if (!empty($filters['end_date'])) {
-            $requestQuery->whereDate('created_at', '<=', $filters['end_date']);
-        }
-        if ($search !== '') {
-            $like = '%' . addcslashes($search, '%_\\') . '%';
-            $numberParts = [];
-            $yearParts = [];
-            $isFullNumber = preg_match('/^AB-(\d{4})-(\d+)$/i', $search, $numberParts) === 1;
-            $isYearPrefix = !$isFullNumber && preg_match('/^AB-(\d{4})$/i', $search, $yearParts) === 1;
-            $requestQuery->where(function ($query) use ($like, $isFullNumber, $isYearPrefix, $numberParts, $yearParts) {
-                $query->whereHas('decisions', function ($items) use ($like) {
-                    $items->where('model_name', 'like', $like)->orWhere('product_name', 'like', $like);
-                })->orWhereHas('items', function ($items) use ($like) {
-                    $items->where('model_name', 'like', $like)->orWhere('product_name', 'like', $like);
-                });
-                if ($isFullNumber) {
-                    $query->orWhere(function ($number) use ($numberParts) {
-                        $number->where('id', (int) $numberParts[2])->whereYear('created_at', (int) $numberParts[1]);
-                    });
-                } elseif ($isYearPrefix) {
-                    $query->orWhereYear('created_at', (int) $yearParts[1]);
-                }
-            });
-        }
-        $documents = $requestQuery->with(['decisions', 'items'])->orderByDesc('created_at')->orderByDesc('id')->get();
-
-        $resetQuery = UserScrapLimitCycle::query()
-            ->where('user_id', $userId)
-            ->whereNotNull('reset_at')
-            ->whereNotNull('reset_by')
-            ->whereColumn('reset_by', '!=', 'user_id')
-            ->whereHas('resetter', fn ($query) => $query->where('role', 'omd'));
-        if (!empty($filters['start_date'])) {
-            $resetQuery->whereDate('reset_at', '>=', $filters['start_date']);
-        }
-        if (!empty($filters['end_date'])) {
-            $resetQuery->whereDate('reset_at', '<=', $filters['end_date']);
-        }
-        if ($search !== '') {
-            $like = '%' . addcslashes($search, '%_\\') . '%';
-            $resetQuery->where(function ($query) use ($like) {
-                $query->where('reset_reason', 'like', $like)
-                    ->orWhereHas('product', fn ($product) => $product->where('name', 'like', $like))
-                    ->orWhereHas('product.masterModel', fn ($model) => $model->where('model', 'like', $like));
-            });
-        }
-        $manualResets = $resetQuery->with(['product.masterModel', 'resetter'])->orderByDesc('reset_at')->get();
-
-        $rows = [];
-        foreach ($documents as $document) {
-            if ($document->decisions->isNotEmpty()) {
-                foreach ($document->decisions as $decision) {
-                    $rows[] = [
-                        '_sort_at' => $document->created_at?->timestamp ?? 0,
-                        'order_number' => $document->document_number,
-                        'date' => $document->created_at?->format('d-m-Y H:i') ?? '—',
-                        'model_product' => trim((string) $decision->model_name . ' – ' . (string) $decision->product_name, ' –'),
-                        'scrap_limit' => (string) ($decision->scrap_qty ?? '—') . ' / ' . (string) ($decision->limit_qty ?? '—'),
-                        'decision' => $decision->decision === 'yes' ? 'Order' : 'Tidak',
-                        'reason' => $decision->decision === 'no' ? (string) ($decision->reason ?? '') : '',
-                    ];
-                }
-            } else {
-                foreach ($document->items as $item) {
-                    $rows[] = [
-                        '_sort_at' => $document->created_at?->timestamp ?? 0,
-                        'order_number' => $document->document_number,
-                        'date' => $document->created_at?->format('d-m-Y H:i') ?? '—',
-                        'model_product' => trim((string) $item->model_name . ' – ' . (string) $item->product_name, ' –'),
-                        'scrap_limit' => '—',
-                        'decision' => 'Order',
-                        'reason' => '',
-                    ];
-                }
-            }
-        }
-        foreach ($manualResets as $cycle) {
-            $rows[] = [
-                '_sort_at' => $cycle->reset_at?->timestamp ?? 0,
-                'order_number' => '—',
-                'date' => $cycle->reset_at?->format('d-m-Y H:i') ?? '—',
-                'model_product' => trim((string) ($cycle->product?->masterModel?->model ?? '') . ' – ' . (string) ($cycle->product?->name ?? ''), ' –'),
-                'scrap_limit' => (string) ($cycle->reached_qty ?? 0) . ' / ' . (string) $cycle->limit_qty,
-                'decision' => 'Reset oleh OMD',
-                'reason' => (string) ($cycle->reset_reason ?? ''),
-            ];
-        }
-        usort($rows, static fn ($left, $right) => ($right['_sort_at'] <=> $left['_sort_at']));
-        $rows = array_map(static function (array $row): array {
-            unset($row['_sort_at']);
-            return $row;
-        }, $rows);
-
-        $title = 'History Scrap';
-        $filename = 'history-scrap-' . now()->format('Ymd-His');
-        return $format === 'pdf'
-            ? $exportService->pdf($title, $filename, $rows)
-            : $exportService->excel($title, $filename, $rows);
     }
 
     public function store(Request $request, UserScrapLimitService $service)

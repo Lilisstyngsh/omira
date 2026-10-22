@@ -556,14 +556,7 @@
             position: relative;
             min-width: 0;
         }
-
-        /*
-         * Grid dan garis Target FY harus memakai area data yang SAMA dengan
-         * tinggi batang (area chart dikurangi 27px untuk label bulan).
-         * Sebelumnya target memakai persentase terhadap tinggi chart penuh,
-         * sehingga garis bisa tampak lebih tinggi dari batang walaupun nilai
-         * batang sebenarnya sudah melewati target.
-         */
+        
         .chart-data-layer {
             position: absolute;
             inset: 0 0 27px;
@@ -585,11 +578,6 @@
             border-bottom: 1px solid #cbd5e1;
         }
 
-        /*
-         * Target FY dibuat sebagai overlay TERPISAH di atas batang.
-         * Dengan begitu garis tetap terlihat di depan ketika batang Order / OK / Scrap
-         * sudah melewati target, seperti grafik kombinasi bar + target line.
-         */
         .target-overlay {
             position: absolute;
             inset: 0 0 27px;
@@ -1381,7 +1369,7 @@ body .modern-abnormality-table.modern-abnormality-table th {
     padding: 12px 14px;
     border: 0;
     border-bottom: 1px solid var(--border, #e3e9f0);
-    color: #64748b;
+    color: #000000;
     font-size: 11px !important;
     font-weight: 700;
     text-transform: uppercase;
@@ -1402,7 +1390,7 @@ body .modern-abnormality-table.modern-abnormality-table td {
 .modern-abnormality-table tbody tr:hover { background: var(--table-hover-bg, #f8faf9); }
 .modern-abnormality-table td strong { font-size: 11px; font-weight: 700; }
 .modern-abnormality-table .abnormality-qty { font-weight: 600 !important; }
-body .modern-abnormality-table.modern-abnormality-table td.reason-cell { max-width: 420px; font-size: 10px !important; line-height: 1.5; }
+body .modern-abnormality-table.modern-abnormality-table td.reason-cell { max-width: 420px; font-size: 11px !important; line-height: 1.5; }
 .modern-abnormality-table .abnormality-diff {
     display: inline-flex;
     padding: 5px 10px;

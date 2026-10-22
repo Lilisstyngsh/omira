@@ -954,6 +954,8 @@ class OmdOrderController extends Controller
             'user',
             'line.plant',
             'area',
+            'masterModel',
+            'product',
             'items.masterModel',
             'items.product',
             'items.ngType',

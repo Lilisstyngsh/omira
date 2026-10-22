@@ -19,9 +19,23 @@ class OmdScrapCycleController extends Controller
             ->paginate((int) ($filters['per_page'] ?? 10))
             ->withQueryString();
 
+        $cycleIds = $cycles->getCollection()->pluck('id')->all();
+        $orderNumbers = empty($cycleIds)
+            ? []
+            : AdditionalBoxRequestDecision::query()
+                ->with('request')
+                ->whereIn('user_scrap_limit_cycle_id', $cycleIds)
+                ->orderByDesc('id')
+                ->get()
+                ->unique('user_scrap_limit_cycle_id')
+                ->mapWithKeys(fn (AdditionalBoxRequestDecision $snapshot) => [
+                    (int) $snapshot->user_scrap_limit_cycle_id => $snapshot->request?->document_number,
+                ])
+                ->all();
+
         $lines = Line::query()->with('plant')->orderBy('name')->get();
 
-        return view('omd.scrap-limits.cycles', compact('cycles', 'lines'));
+        return view('omd.scrap-limits.cycles', compact('cycles', 'lines', 'orderNumbers'));
     }
 
     public function export(Request $request, string $format, ScrapHistoryExportService $exportService)
@@ -36,7 +50,9 @@ class OmdScrapCycleController extends Controller
             : AdditionalBoxRequestDecision::query()
                 ->with('request')
                 ->whereIn('user_scrap_limit_cycle_id', $cycleIds)
+                ->orderByDesc('id')
                 ->get()
+                ->unique('user_scrap_limit_cycle_id')
                 ->keyBy('user_scrap_limit_cycle_id');
 
         $rows = $cycles->map(function (UserScrapLimitCycle $cycle) use ($decisionSnapshots): array {
@@ -46,21 +62,23 @@ class OmdScrapCycleController extends Controller
                 && $cycle->resetter?->role === 'omd';
             $snapshot = $decisionSnapshots->get($cycle->id);
 
-            $decision = match ($cycle->decision) {
-                'yes' => 'Order',
-                'no' => 'Tidak',
-                default => $manualReset ? 'Reset oleh OMD' : 'Belum dipilih',
-            };
-            $reason = $cycle->decision === 'no'
-                ? (string) ($cycle->decision_reason ?? '')
-                : (($manualReset && !$cycle->decision) ? (string) ($cycle->reset_reason ?? '') : '');
-            $model = trim((string) ($cycle->product?->masterModel?->model ?? ''));
-            $product = trim((string) ($cycle->product?->name ?? ''));
+            $decision = $manualReset
+                ? 'Reset oleh OMD'
+                : match ($cycle->decision) {
+                    'yes' => 'Order',
+                    'no' => 'Tidak',
+                    default => 'Belum dipilih',
+                };
+            $reason = $manualReset
+                ? (string) ($cycle->reset_reason ?? '')
+                : ($cycle->decision === 'no' ? (string) ($cycle->decision_reason ?? '') : '');
 
             return [
-                'order_number' => (string) ($snapshot?->request?->document_number ?? '—'),
                 'date' => $cycle->reached_at?->format('d-m-Y H:i') ?? '—',
-                'model_product' => trim($model . ' – ' . $product, ' –'),
+                'order_number' => (string) ($snapshot?->request?->document_number ?? '—'),
+                'line' => (string) ($cycle->line?->name ?? '—'),
+                'model' => (string) ($cycle->product?->masterModel?->model ?? '—'),
+                'product' => (string) ($cycle->product?->name ?? '—'),
                 'scrap_limit' => (string) ($cycle->reached_qty ?? 0) . ' / ' . (string) $cycle->limit_qty,
                 'decision' => $decision,
                 'reason' => $reason,

@@ -1534,6 +1534,17 @@
 
         </div>
 
+        @if ($order->status === 'submitted')
+            <div class="repair-verify-action" style="display:flex;justify-content:flex-end;margin:12px 0 0;">
+                <form method="POST" action="{{ route('omd.orders.verify', $order) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-verify" title="Verifikasi order dan mulai proses repair">
+                        Verifikasi Order
+                    </button>
+                </form>
+            </div>
+        @endif
+
         @if ($canEditResult)
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -1694,33 +1705,5 @@
         </div>
     @endif
 
-
-    {{-- =====================================================
-         VERIFIKASI ORDER
-    ===================================================== --}}
-
-    @if ($order->status === 'submitted')
-        <div class="repair-card">
-
-            <div class="action-card">
-
-                <div class="action-card-info">
-
-                </div>
-
-                <form method="POST" action="{{ route('omd.orders.verify', $order) }}">
-
-                    @csrf
-
-                    <button type="submit" class="btn btn-verify" title="Verifikasi order dan mulai proses repair">
-                        Verifikasi Order
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-    @endif
 
 @endsection

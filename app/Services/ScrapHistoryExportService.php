@@ -7,114 +7,113 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ScrapHistoryExportService
 {
-    /** @param array<int, array{order_number:string,date:string,model_product:string,scrap_limit:string,decision:string,reason:string}> $rows */
+    /** @param array<int, array{date:string,order_number:string,line:string,model:string,product:string,scrap_limit:string,decision:string,reason:string}> $rows */
     public function pdf(string $title, string $filename, array $rows)
     {
         return Pdf::loadView('shared.scrap-history-export-pdf', [
             'title' => $title,
             'rows' => $rows,
             'generatedAt' => now(),
-        ])->setPaper('a4', 'landscape')->download($filename . '.pdf');
+        ])->setPaper('a4', 'portrait')->download($filename . '.pdf');
     }
 
-    /** @param array<int, array{order_number:string,date:string,model_product:string,scrap_limit:string,decision:string,reason:string}> $rows */
+    /** @param array<int, array{date:string,order_number:string,line:string,model:string,product:string,scrap_limit:string,decision:string,reason:string}> $rows */
     public function excel(string $title, string $filename, array $rows)
     {
         $book = new Spreadsheet();
-        $book->getDefaultStyle()->getFont()->setName('Arial')->setSize(10)->getColor()->setARGB('FF111827');
+        $book->getDefaultStyle()->getFont()->setName('Arial')->setSize(10)->getColor()->setARGB('FF000000');
 
         $sheet = $book->getActiveSheet();
         $sheet->setTitle('History Scrap');
         $sheet->setShowGridlines(false);
         $sheet->getPageSetup()
             ->setPaperSize(PageSetup::PAPERSIZE_A4)
-            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
             ->setFitToPage(true)
             ->setFitToWidth(1)
             ->setFitToHeight(0);
-        $sheet->getPageMargins()->setTop(0.35)->setBottom(0.35)->setLeft(0.35)->setRight(0.35);
-        $sheet->getColumnDimension('A')->setWidth(21);
-        $sheet->getColumnDimension('B')->setWidth(20);
-        $sheet->getColumnDimension('C')->setWidth(38);
-        $sheet->getColumnDimension('D')->setWidth(17);
-        $sheet->getColumnDimension('E')->setWidth(58);
+        $sheet->getPageMargins()->setTop(0.45)->setBottom(0.45)->setLeft(0.35)->setRight(0.35);
 
-        $sheet->mergeCells('A1:E1');
+        foreach ([
+            'A' => 14, // Tanggal
+            'B' => 17, // No Order
+            'C' => 15, // Line
+            'D' => 16, // Model
+            'E' => 19, // Produk
+            'F' => 14, // Scrap / Limit
+            'G' => 16, // Keputusan
+            'H' => 30, // Alasan
+        ] as $column => $width) {
+            $sheet->getColumnDimension($column)->setWidth($width);
+        }
+
+        $sheet->mergeCells('A1:H1');
         $sheet->setCellValueExplicit('A1', $title, DataType::TYPE_STRING);
-        $sheet->getRowDimension(1)->setRowHeight(28);
-        $sheet->getStyle('A1:E1')->getFont()->setBold(true)->setSize(16)->getColor()->setARGB('FF263E30');
-        $sheet->getStyle('A1:E1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true)->setSize(14)->getColor()->setARGB('FF000000');
+        $sheet->getStyle('A1:H1')->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
 
-        $sheet->mergeCells('A2:E2');
+        $sheet->mergeCells('A2:H2');
         $sheet->setCellValueExplicit('A2', 'Diekspor: ' . now()->format('d-m-Y H:i'), DataType::TYPE_STRING);
-        $sheet->getStyle('A2:E2')->getFont()->setSize(9)->getColor()->setARGB('FF64748B');
-        $sheet->getStyle('A2:E2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('A2:H2')->getFont()->setSize(9)->getColor()->setARGB('FF000000');
+        $sheet->getStyle('A2:H2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-        $headers = ['No Order', 'Tanggal', 'Model – Produk', 'Scrap / Limit', 'Keputusan dan Alasan'];
+        $headers = ['Tanggal', 'No Order', 'Line', 'Model', 'Produk', 'Scrap / Limit', 'Keputusan', 'Alasan'];
         foreach ($headers as $index => $header) {
             $column = chr(65 + $index);
             $sheet->setCellValueExplicit($column . '4', $header, DataType::TYPE_STRING);
         }
-        $sheet->getRowDimension(4)->setRowHeight(24);
-        $sheet->getStyle('A4:E4')->getFont()->setBold(true)->getColor()->setARGB('FF64748B');
-        $sheet->getStyle('A4:E4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF9FAFB');
-        $sheet->getStyle('A4:E4')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $sheet->getStyle('A4:H4')->getFont()->setBold(true)->getColor()->setARGB('FF000000');
+        $sheet->getStyle('A4:H4')->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setWrapText(true);
 
         $rowNumber = 5;
         foreach ($rows as $row) {
-            $combinedDecision = trim((string) ($row['decision'] ?? ''));
-            $reason = trim((string) ($row['reason'] ?? ''));
-            if ($reason !== '') {
-                $combinedDecision .= "\nAlasan: " . $reason;
-            }
-
             $values = [
-                (string) ($row['order_number'] ?? '—'),
                 (string) ($row['date'] ?? '—'),
-                (string) ($row['model_product'] ?? '—'),
+                (string) ($row['order_number'] ?? '—'),
+                (string) ($row['line'] ?? '—'),
+                (string) ($row['model'] ?? '—'),
+                (string) ($row['product'] ?? '—'),
                 (string) ($row['scrap_limit'] ?? '—'),
-                $combinedDecision !== '' ? $combinedDecision : '—',
+                (string) ($row['decision'] ?? '—'),
+                (string) ($row['reason'] ?? '—'),
             ];
             foreach ($values as $index => $value) {
                 $column = chr(65 + $index);
-                $sheet->setCellValueExplicit($column . $rowNumber, $value, DataType::TYPE_STRING);
-            }
-
-            $lineCount = max(1, (int) ceil(mb_strwidth($values[2]) / 32), (int) ceil(mb_strwidth($values[4]) / 55));
-            $sheet->getRowDimension($rowNumber)->setRowHeight(max(23, min(90, $lineCount * 14)));
-            if (($rowNumber % 2) === 0) {
-                $sheet->getStyle('A' . $rowNumber . ':E' . $rowNumber)->getFill()
-                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF8FAFC');
+                $sheet->setCellValueExplicit($column . $rowNumber, $value !== '' ? $value : '—', DataType::TYPE_STRING);
             }
             $rowNumber++;
         }
 
         if ($rows === []) {
-            $sheet->mergeCells('A5:E5');
+            $sheet->mergeCells('A5:H5');
             $sheet->setCellValueExplicit('A5', 'Tidak ada data untuk filter yang dipilih.', DataType::TYPE_STRING);
-            $sheet->getRowDimension(5)->setRowHeight(24);
             $rowNumber = 6;
         }
 
         $lastRow = max(5, $rowNumber - 1);
-        $sheet->getStyle('A4:E' . $lastRow)->getBorders()->getAllBorders()
-            ->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FFE5EAF0');
+        $sheet->getStyle('A4:H' . $lastRow)->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN)->getColor()->setARGB('FF000000');
+        $sheet->getStyle('A5:H' . $lastRow)->getAlignment()
+            ->setVertical(Alignment::VERTICAL_TOP)
+            ->setWrapText(true);
+        $sheet->getStyle('A5:A' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F5:G' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         if ($rows !== []) {
-            $sheet->getStyle('A5:E' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
-            $sheet->getStyle('A5:B' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('D5:D' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->setAutoFilter('A4:E' . $lastRow);
-        } else {
-            $sheet->getStyle('A5:E5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+            $sheet->setAutoFilter('A4:H' . $lastRow);
         }
         $sheet->freezePane('A5');
 
+        // Row heights are intentionally not set: use Excel's default/auto row sizing.
         $writer = new Xlsx($book);
         return response()->streamDownload(
             static fn () => $writer->save('php://output'),

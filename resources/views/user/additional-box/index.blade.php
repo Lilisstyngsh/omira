@@ -265,43 +265,6 @@
             min-width: 0;
         }
 
-        .ab-export-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .ab-export-btn {
-            height: 36px;
-            padding: 0 13px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            border: 1px solid transparent;
-            border-radius: 9px;
-            font-family: inherit;
-            font-size: 11px;
-            font-weight: 800;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-
-        .ab-export-btn.pdf {
-            color: #b42318;
-            background: #fff1f2;
-            border-color: #fecdd3;
-        }
-
-        .ab-export-btn.excel {
-            color: #166534;
-            background: #ecfdf3;
-            border-color: #bbf7d0;
-        }
-
-        .ab-export-btn:hover { filter: brightness(.97); }
-
         .ab-search>i {
             position: absolute;
             left: 12px;
@@ -475,7 +438,7 @@
         .ab-product-name {
             margin-top: 3px;
             color: #475569;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 500;
             line-height: 1.45;
         }
@@ -671,13 +634,6 @@
                 max-width: none;
             }
 
-            .ab-export-actions {
-                width: 100%;
-            }
-
-            .ab-export-btn {
-                flex: 1;
-            }
         }
         .ab-history-modal[hidden] {
             display: none !important;
@@ -1016,14 +972,6 @@
                                 onclick="this.form.querySelector('input[name=search]').value=''; this.form.submit();"><i
                                     class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                         @endif
-                    </div>
-                    <div class="ab-export-actions">
-                        <a class="ab-export-btn pdf" href="{{ route('user.additional-box.history-export', array_merge(request()->except('page'), ['format' => 'pdf'])) }}">
-                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF
-                        </a>
-                        <a class="ab-export-btn excel" href="{{ route('user.additional-box.history-export', array_merge(request()->except('page'), ['format' => 'excel'])) }}">
-                            <i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel
-                        </a>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,8 @@
     .repair-index { background:#fff;border:1px solid #e8edf4;border-radius:18px;padding:22px;box-shadow:0 10px 35px rgba(15,23,42,.06) }
     .repair-index .ri-heading { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px }
     .repair-index .ri-heading h2 { margin:0;font-size:18px;font-weight:800;color:#172033 }
+    .repair-index.omd-repair-index .ri-heading h2,
+    .repair-index.omd-repair-index .history-filter-field>label { color:#000000; }
     .repair-index .ri-create { display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:0 15px;background:#5f9278;color:#fff;border-radius:10px;text-decoration:none;font-size:11px;font-weight:800 }
     .repair-index .ri-create:hover { background:#4c8167;color:#fff }
     .repair-index .history-filter-box { margin-bottom:18px;padding:16px 18px;background:#f8fafc;border:1px solid #e7ebf0;border-radius:14px }

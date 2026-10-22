@@ -692,14 +692,13 @@
         }
 
         .recap-total-qty {
-            display: inline-flex;
-            min-width: 54px;
-            justify-content: center;
-            padding: 7px 10px;
-            border-radius: 9px;
-            color: #07834f;
-            background: #eaf8f1;
-            font-weight: 800;
+            display: inline;
+            min-width: 0;
+            padding: 0;
+            border-radius: 0;
+            color: #000000;
+            background: transparent;
+            font-weight: 700;
         }
 
         @media (max-width: 700px) {

@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @page { margin: 14mm 12mm 13mm; }
-        body { font-family: DejaVu Sans, sans-serif; color: #111827; font-size: 9px; }
-        .report-head { margin-bottom: 16px; }
-        .report-title { margin: 0 0 5px; text-align: center; color: #263e30; font-size: 16px; font-weight: bold; }
-        .report-meta { text-align: right; color: #64748b; font-size: 8px; }
+        @page { margin: 12mm 10mm; }
+        body { font-family: DejaVu Sans, sans-serif; color: #000; font-size: 7px; }
+        .report-head { margin-bottom: 9px; color: #000; }
+        .report-title { margin: 0 0 4px; text-align: center; color: #000; font-size: 13px; font-weight: bold; }
+        .report-meta { text-align: right; color: #000; font-size: 7px; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th, td { border: 1px solid #e5eaf0; padding: 7px 8px; vertical-align: top; overflow-wrap: break-word; }
-        th { background: #f9fafb; color: #64748b; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: left; }
-        td { background: #fff; color: #111827; font-size: 8.5px; line-height: 1.45; }
-        tbody tr:nth-child(even) td { background: #f8fafc; }
+        th, td { border: 1px solid #000; padding: 4px 3px; vertical-align: top; overflow-wrap: break-word; word-wrap: break-word; color: #000; }
+        th { background: transparent; font-size: 7px; font-weight: bold; text-align: left; }
+        td { background: transparent; font-size: 7px; line-height: 1.25; }
         .center { text-align: center; }
-        .decision { font-weight: bold; color: #263e30; }
-        .reason { margin-top: 4px; white-space: pre-wrap; overflow-wrap: break-word; }
-        .empty { text-align: center; color: #64748b; padding: 16px; }
-        .col-order { width: 17%; }
-        .col-date { width: 16%; }
-        .col-product { width: 27%; }
-        .col-qty { width: 13%; }
-        .col-decision { width: 27%; }
+        .empty { text-align: center; padding: 8px; }
+        .col-date { width: 12%; }
+        .col-order { width: 13%; }
+        .col-line { width: 10%; }
+        .col-model { width: 12%; }
+        .col-product { width: 14%; }
+        .col-scrap { width: 11%; }
+        .col-decision { width: 12%; }
+        .col-reason { width: 16%; }
     </style>
 </head>
 <body>
@@ -31,33 +31,35 @@
     </div>
     <table>
         <colgroup>
-            <col class="col-order"><col class="col-date"><col class="col-product"><col class="col-qty"><col class="col-decision">
+            <col class="col-date"><col class="col-order"><col class="col-line"><col class="col-model">
+            <col class="col-product"><col class="col-scrap"><col class="col-decision"><col class="col-reason">
         </colgroup>
         <thead>
             <tr>
-                <th>No Order</th>
                 <th>Tanggal</th>
-                <th>Model – Produk</th>
+                <th>No Order</th>
+                <th>Line</th>
+                <th>Model</th>
+                <th>Produk</th>
                 <th class="center">Scrap / Limit</th>
-                <th>Keputusan dan Alasan</th>
+                <th>Keputusan</th>
+                <th>Alasan</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr>
-                    <td>{{ $row['order_number'] ?: '—' }}</td>
                     <td class="center">{{ $row['date'] ?: '—' }}</td>
-                    <td>{{ $row['model_product'] ?: '—' }}</td>
+                    <td>{{ $row['order_number'] ?: '—' }}</td>
+                    <td>{{ $row['line'] ?: '—' }}</td>
+                    <td>{{ $row['model'] ?: '—' }}</td>
+                    <td>{{ $row['product'] ?: '—' }}</td>
                     <td class="center">{{ $row['scrap_limit'] ?: '—' }}</td>
-                    <td>
-                        <div class="decision">{{ $row['decision'] ?: '—' }}</div>
-                        @if (trim((string) ($row['reason'] ?? '')) !== '')
-                            <div class="reason">Alasan: {{ $row['reason'] }}</div>
-                        @endif
-                    </td>
+                    <td>{{ $row['decision'] ?: '—' }}</td>
+                    <td>{{ $row['reason'] ?: '—' }}</td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="empty">Tidak ada data untuk filter yang dipilih.</td></tr>
+                <tr><td colspan="8" class="empty">Tidak ada data untuk filter yang dipilih.</td></tr>
             @endforelse
         </tbody>
     </table>

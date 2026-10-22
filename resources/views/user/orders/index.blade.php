@@ -4,6 +4,9 @@
 @section('header', 'Order Repair Box')
 
 @section('content')
+    <style>
+        .repair-index .ri-date small { font-size: 11px !important; }
+    </style>
     @php
         $indexRoute = 'user.orders.index';
         $showLineFilter = false;

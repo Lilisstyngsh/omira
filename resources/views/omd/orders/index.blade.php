@@ -9,7 +9,7 @@
         $showLineFilter = true;
     @endphp
 
-    <div class="repair-index">
+    <div class="repair-index omd-repair-index">
         <div class="ri-heading">
             <h2>Daftar Order Repair</h2>
         </div>

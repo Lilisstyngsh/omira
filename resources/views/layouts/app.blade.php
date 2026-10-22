@@ -2711,6 +2711,30 @@
             font-weight: 700 !important;
         }
     </style>
+
+    <style id="omira-black-table-headers-and-date-labels">
+        /* Use pure black for table column headers in the light theme across OMD and user pages.
+           Keep dark-theme headers light for readability. */
+        html:not([data-theme="dark"]) body .content :is(th, [role="columnheader"]) {
+            color: #000000 !important;
+        }
+
+        /* Date-range labels only; preserve all other filter labels and layouts. */
+        html:not([data-theme="dark"]) body .content :is(
+            .repair-index .history-filter-field > label[for="start_date"],
+            .repair-index .history-filter-field > label[for="end_date"],
+            .history-filter-field > label[for="start_date"],
+            .history-filter-field > label[for="end_date"],
+            .history-filter-field > label:has(+ .history-date-input),
+            .recap-custom-date > label,
+            .scrap-history-field > label[for="scrap_start_date"],
+            .scrap-history-field > label[for="scrap_end_date"],
+            .ab-date-field > label[for="ab_start_date"],
+            .ab-date-field > label[for="ab_end_date"]
+        ) {
+            color: #000000 !important;
+        }
+    </style>
 </head>
 
 <body>

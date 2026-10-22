@@ -66,19 +66,30 @@
     body .orders-table.orders-table td { font-size:11px !important; }
 
     .orders-table th:nth-child(1),
-    .orders-table th:nth-child(6),
-    .orders-table th:nth-child(7) { text-align:center; }
+    .orders-table th:nth-child(5),
+    .orders-table th:nth-child(6) { text-align:center; }
 
-    .orders-table td:nth-child(6),
-    .orders-table td:nth-child(7) { text-align:center; }
+    .orders-table td:nth-child(1),
+    .orders-table td:nth-child(5),
+    .orders-table td:nth-child(6) { text-align:center; }
 
     .orders-table .order-number { font-weight:600 !important; }
     .order-type-label { font-size:11px; font-weight:400; color:#64748b; }
-    .order-line-label { font-size:11px; font-weight:600; color:#172033; }
+    .order-line-user-stack,
+    .order-model-product-stack { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0; }
+    .order-model-product-pair { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+    .order-model-label,
+    .order-line-label { display:block; font-size:11px; font-weight:700; line-height:1.35; color:#172033; }
+    .order-user,
+    .order-product-label { display:block; font-size:12px; font-weight:400; line-height:1.4; color:#64748b; white-space:normal; overflow-wrap:anywhere; }
+    .order-extra-pairs { display:block; margin-top:2px; font-size:11px; font-weight:600; line-height:1.3; color:#64748b; }
     .order-qty-value { font-size:11px; font-weight:600; }
     html[data-theme="dark"] .order-user,
+    html[data-theme="dark"] .order-product-label,
     html[data-theme="dark"] .order-type-label { color:var(--text-soft); }
-    html[data-theme="dark"] .order-line-label { color:var(--text); }
+    html[data-theme="dark"] .order-line-label,
+    html[data-theme="dark"] .order-model-label { color:var(--text); }
+    html[data-theme="dark"] .order-extra-pairs { color:var(--text-soft); }
 
     .orders-table tbody tr {
         cursor: pointer;
@@ -99,7 +110,7 @@
 
     .order-history-date { display:block; text-align:center; white-space:nowrap; }
     .order-history-date-main { display:block; font-size:11px; font-weight:700; line-height:1.35; color:inherit; }
-    .order-history-date-time { display:block; margin-top:4px; font-size:10px; font-weight:400; line-height:1.35; color:#94a3b8; }
+    .order-history-date-time { display:block; margin-top:4px; font-size:12px; font-weight:400; line-height:1.4; color:#94a3b8; }
     html[data-theme="dark"] .order-history-date-time { color:var(--text-soft); }
 
     .order-number {
@@ -109,10 +120,11 @@
     }
 
     .order-user {
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 400;
         color: #64748b;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .order-line-badge {
@@ -1475,6 +1487,7 @@
         background: #5f947a !important;
         color: #fff !important;
         border: 1px solid #5f947a !important;
+        font-size: 12px !important;
         box-shadow: none !important
     }
 
@@ -1724,7 +1737,7 @@
                 <button type="submit" class="history-filter-btn history-filter-btn-primary">
                     <i class="fa-solid fa-filter"></i>
 
-                    Terapkan Filter
+                    Filter
                 </button>
 
 
@@ -1855,35 +1868,12 @@
             <thead>
 
                 <tr>
-
-                    <th>
-                        Tanggal
-                    </th>
-
-                    <th>
-                        No Order
-                    </th>
-
-                    <th>
-                        User
-                    </th>
-
-                    <th>
-                        Jenis Order
-                    </th>
-
-                    <th>
-                        Line
-                    </th>
-
-                    <th>
-                        Qty
-                    </th>
-
-                    <th>
-                        Status
-                    </th>
-
+                    <th>Tanggal</th>
+                    <th>No Order</th>
+                    <th>Line / User</th>
+                    <th>Model / Produk</th>
+                    <th>Qty</th>
+                    <th>Status</th>
                 </tr>
 
             </thead>
@@ -1909,16 +1899,55 @@
                         {{ $order->order_number }}
                     </td>
 
-                    <td class="order-user">
-                        {{ $order->user?->name ?? '-' }}
+                    <td>
+                        <div class="order-line-user-stack">
+                            <span class="order-line-label">{{ $order->line?->name ?? ($order->area?->name ?? '-') }}</span>
+                            <span class="order-user">{{ $order->user?->name ?? '-' }}</span>
+                        </div>
                     </td>
 
                     <td>
-                        <span class="order-type-label">Repair Box</span>
-                    </td>
+                        @php
+                            $modelProductPairs = $order->items
+                                ->map(function ($item) use ($order) {
+                                    return [
+                                        'model' => $item->masterModel?->model ?? $order->masterModel?->model ?? $order->model ?? '-',
+                                        'product' => $item->product?->name ?? $order->product?->name ?? '-',
+                                    ];
+                                })
+                                ->unique(fn ($pair) => $pair['model'] . '|' . $pair['product'])
+                                ->values();
 
-                    <td>
-                        <span class="order-line-label">{{ $order->line?->name ?? ($order->area?->name ?? '-') }}</span>
+                            if ($modelProductPairs->isEmpty()) {
+                                $fallbackModel = $order->masterModel?->model ?? $order->model;
+                                $fallbackProduct = $order->product?->name;
+
+                                if ($fallbackModel || $fallbackProduct) {
+                                    $modelProductPairs = collect([[
+                                        'model' => $fallbackModel ?? '-',
+                                        'product' => $fallbackProduct ?? '-',
+                                    ]]);
+                                }
+                            }
+                        @endphp
+
+                        @if ($modelProductPairs->isNotEmpty())
+                            @php
+                                $visiblePair = $modelProductPairs->first();
+                                $extraPairCount = max(0, $modelProductPairs->count() - 1);
+                            @endphp
+                            <div class="order-model-product-stack">
+                                <div class="order-model-product-pair">
+                                    <span class="order-model-label">{{ $visiblePair['model'] }}</span>
+                                    <span class="order-product-label">{{ $visiblePair['product'] }}</span>
+                                </div>
+                                @if ($extraPairCount > 0)
+                                    <span class="order-extra-pairs" title="{{ $extraPairCount }} model/produk lainnya">+{{ $extraPairCount }}</span>
+                                @endif
+                            </div>
+                        @else
+                            —
+                        @endif
                     </td>
 
                     <td>
@@ -1937,7 +1966,7 @@
 
                 <tr>
 
-                    <td colspan="7" class="order-empty">
+                    <td colspan="6" class="order-empty">
 
                         <div class="order-empty-text">
                             Belum ada history Order Repair Box.

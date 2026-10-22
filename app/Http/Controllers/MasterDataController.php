@@ -314,18 +314,15 @@ class MasterDataController extends Controller
     public function modelProduct(Request $request)
     {
         $filters = $request->validate([
-            'plant_id' => ['nullable', 'integer', 'exists:plants,id'],
             'line_id' => ['nullable', 'integer', 'exists:lines,id'],
             'q' => ['nullable', 'string', 'max:150'],
             'per_page' => ['nullable', 'in:10,25,50,100'],
         ]);
 
-        $selectedPlantId = $filters['plant_id'] ?? null;
         $selectedLineId = $filters['line_id'] ?? null;
         $search = trim($filters['q'] ?? '');
         $perPage = (int) ($filters['per_page'] ?? 10);
 
-        $plants = Plant::query()->orderBy('name')->get();
         $lines = Line::query()->with('plant')->orderBy('name')->get();
 
         $models = MasterModel::query()
@@ -337,10 +334,6 @@ class MasterDataController extends Controller
                     ->orderByDesc('effective_from')
                     ->orderByDesc('id'),
             ])
-            ->when($selectedPlantId, fn($query) => $query->whereHas(
-                'line',
-                fn($line) => $line->where('plant_id', $selectedPlantId)
-            ))
             ->when($selectedLineId, fn($query) => $query->where('line_id', $selectedLineId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
@@ -360,9 +353,7 @@ class MasterDataController extends Controller
 
         return view('omd.master.model-product', compact(
             'models',
-            'plants',
             'lines',
-            'selectedPlantId',
             'selectedLineId',
             'search',
             'perPage'

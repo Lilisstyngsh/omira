@@ -98,7 +98,7 @@
 
     .history-date-input input::placeholder {
         color: #a3adba;
-        font-weight: 500;
+        font-weight: 400;
     }
 
     .history-date-input input:hover {
@@ -483,23 +483,35 @@
     }
 
     .orders-table th:nth-child(1),
-    .orders-table th:nth-child(5),
-    .orders-table th:nth-child(6) { text-align: center; }
+    .orders-table th:nth-child(4),
+    .orders-table th:nth-child(5) { text-align: center; }
 
-    .orders-table td:nth-child(5),
-    .orders-table td:nth-child(6) { text-align: center; }
+    .orders-table td:nth-child(1),
+    .orders-table td:nth-child(4),
+    .orders-table td:nth-child(5) { text-align: center; }
 
     .order-history-date { display:block; text-align:center; white-space:nowrap; }
     .order-history-date-main { display:block; font-size:11px; font-weight:700; line-height:1.35; }
-    .order-history-date-time { display:block; margin-top:4px; color:#94a3b8; font-size:10px; font-weight:400; line-height:1.35; }
+    .order-history-date-time { display:block; margin-top:4px; color:#94a3b8; font-size:12px; font-weight:400; line-height:1.4; }
     html[data-theme="dark"] .order-history-date-time { color:var(--text-soft); }
 
     .orders-table .order-number { font-weight:600 !important; }
     .order-type-label { font-size:10px; font-weight:400; color:#64748b; }
-    .order-line-label { font-size:11px; font-weight:700; color:#172033; }
+    .order-line-user-stack,
+    .order-model-product-stack { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0; }
+    .order-model-product-pair { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+    .order-line-label,
+    .order-model-label { display:block; font-size:11px; font-weight:700; line-height:1.35; color:#172033; }
+    .order-user,
+    .order-product-label { display:block; font-size:12px; font-weight:400; line-height:1.4; color:#64748b; white-space:normal; overflow-wrap:anywhere; }
+    .order-extra-pairs { display:block; margin-top:2px; font-size:11px; font-weight:600; line-height:1.3; color:#64748b; }
     .order-qty-value { font-size:11px; font-weight:600; }
-    html[data-theme="dark"] .order-type-label { color:var(--text-soft); }
-    html[data-theme="dark"] .order-line-label { color:var(--text); }
+    html[data-theme="dark"] .order-type-label,
+    html[data-theme="dark"] .order-user,
+    html[data-theme="dark"] .order-product-label { color:var(--text-soft); }
+    html[data-theme="dark"] .order-line-label,
+    html[data-theme="dark"] .order-model-label { color:var(--text); }
+    html[data-theme="dark"] .order-extra-pairs { color:var(--text-soft); }
 
     .orders-table tbody tr {
         cursor: pointer;
@@ -797,6 +809,11 @@
         margin-left: auto
     }
 
+    .history-toolbar-query .history-line-filter-inline {
+        margin-left: 0;
+        flex-shrink: 0;
+    }
+
     @media(max-width:700px) {
         .history-toolbar-query {
             width: 100%;
@@ -842,7 +859,7 @@ $orders->appends(request()->query());
 $currentPage = $orders->currentPage();
 $lastPage = $orders->lastPage();
 
-$hasFilter = request('search') || request('start_date') || request('end_date') || request('line_id');
+$hasFilter = request('search') || request('start_date') || request('end_date');
 @endphp
 
 
@@ -894,7 +911,7 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
                     </button>
 
                     @if (request('start_date') || request('end_date'))
-                    <a href="{{ route('user.orders.history', array_filter(['search' => request('search'), 'per_page' => request('per_page'), 'line_id' => request('line_id')])) }}"
+                    <a href="{{ route('user.orders.history', array_filter(['search' => request('search'), 'per_page' => request('per_page')])) }}"
                         class="history-filter-btn history-filter-btn-reset">
                         <i class="fa-solid fa-rotate-left"></i>
                         Reset
@@ -940,7 +957,7 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
                     <i class="fa-solid fa-magnifying-glass"></i>
 
                     <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Cari No Order, User, atau Line..." autocomplete="off">
+                        placeholder="Cari No Order, Model, atau Produk..." autocomplete="off">
 
                     @if (request('search'))
                     <button type="button" class="history-search-clear" title="Hapus pencarian"
@@ -970,8 +987,7 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
                 <tr>
                     <th>Tanggal</th>
                     <th>No Order</th>
-                    <th>Jenis Order</th>
-                    <th>Line</th>
+                    <th>Model / Produk</th>
                     <th>Qty</th>
                     <th>Status</th>
                 </tr>
@@ -996,9 +1012,49 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
 
                     <td class="order-number">{{ $order->order_number }}</td>
 
-                    <td><span class="order-type-label">Repair Box</span></td>
+                    <td>
+                        @php
+                            $modelProductPairs = $order->items
+                                ->map(function ($item) use ($order) {
+                                    return [
+                                        'model' => $item->masterModel?->model ?? $order->masterModel?->model ?? $order->model ?? '-',
+                                        'product' => $item->product?->name ?? $order->product?->name ?? '-',
+                                    ];
+                                })
+                                ->unique(fn ($pair) => $pair['model'] . '|' . $pair['product'])
+                                ->values();
 
-                    <td><span class="order-line-label">{{ $order->line?->name ?? '-' }}</span></td>
+                            if ($modelProductPairs->isEmpty()) {
+                                $fallbackModel = $order->masterModel?->model ?? $order->model;
+                                $fallbackProduct = $order->product?->name;
+
+                                if ($fallbackModel || $fallbackProduct) {
+                                    $modelProductPairs = collect([[
+                                        'model' => $fallbackModel ?? '-',
+                                        'product' => $fallbackProduct ?? '-',
+                                    ]]);
+                                }
+                            }
+                        @endphp
+
+                        @if ($modelProductPairs->isNotEmpty())
+                            @php
+                                $visiblePair = $modelProductPairs->first();
+                                $extraPairCount = max(0, $modelProductPairs->count() - 1);
+                            @endphp
+                            <div class="order-model-product-stack">
+                                <div class="order-model-product-pair">
+                                    <span class="order-model-label">{{ $visiblePair['model'] }}</span>
+                                    <span class="order-product-label">{{ $visiblePair['product'] }}</span>
+                                </div>
+                                @if ($extraPairCount > 0)
+                                    <span class="order-extra-pairs" title="{{ $extraPairCount }} model/produk lainnya">+{{ $extraPairCount }}</span>
+                                @endif
+                            </div>
+                        @else
+                            —
+                        @endif
+                    </td>
 
                     <td><span class="order-qty-value">{{ in_array($order->status, ['completed', 'confirmed'], true) ? (int) ($order->after_qty_sum ?? 0) : (int) ($order->before_qty_sum ?? $order->quantity) }}</span></td>
 
@@ -1009,7 +1065,7 @@ $hasFilter = request('search') || request('start_date') || request('end_date') |
                 </tr>
                 @empty
                 <tr style="cursor:default;">
-                    <td colspan="6" class="order-empty">
+                    <td colspan="5" class="order-empty">
                         <div class="order-empty-text">
                             {{ $hasFilter ? 'Tidak ada order yang sesuai dengan filter.' : 'Belum ada history Order Repair Box.' }}
                         </div>

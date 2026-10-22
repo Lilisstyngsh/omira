@@ -22,7 +22,12 @@ class UserOrderController extends Controller
         ]);
 
         $query = RepairOrder::with([
+            'user',
             'line',
+            'masterModel',
+            'product',
+            'items.masterModel',
+            'items.product',
             'result',
             'confirmation',
         ])
@@ -548,17 +553,19 @@ class UserOrderController extends Controller
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
             'search' => ['nullable', 'string', 'max:100'],
-            'line_id' => ['nullable', 'integer', 'exists:lines,id'],
         ]);
 
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $search = trim((string) $request->input('search', ''));
-        $lineId = $request->filled('line_id') ? (int) $request->input('line_id') : null;
         $perPage = (int) $request->input('per_page', 10);
 
         $query = RepairOrder::with([
             'line',
+            'masterModel',
+            'product',
+            'items.masterModel',
+            'items.product',
             'result',
             'confirmation',
         ])
@@ -568,19 +575,24 @@ class UserOrderController extends Controller
             ->where('status', 'confirmed');
 
         if ($search !== '') {
-            $query->where(function ($subQuery) use ($search) {
+            $like = '%' . $search . '%';
+            $query->where(function ($subQuery) use ($like) {
                 $subQuery
-                    ->where('order_number', 'like', '%' . $search . '%')
-                    ->orWhereHas(
-                        'line',
-                        fn($lineQuery) =>
-                        $lineQuery->where('name', 'like', '%' . $search . '%')
+                    ->where('order_number', 'like', $like)
+                    ->orWhere('model', 'like', $like)
+                    ->orWhereHas('masterModel', fn ($modelQuery) =>
+                        $modelQuery->where('model', 'like', $like)
+                    )
+                    ->orWhereHas('product', fn ($productQuery) =>
+                        $productQuery->where('name', 'like', $like)
+                    )
+                    ->orWhereHas('items.masterModel', fn ($modelQuery) =>
+                        $modelQuery->where('model', 'like', $like)
+                    )
+                    ->orWhereHas('items.product', fn ($productQuery) =>
+                        $productQuery->where('name', 'like', $like)
                     );
             });
-        }
-
-        if ($lineId) {
-            $query->where('line_id', $lineId);
         }
 
         if ($startDate) {
@@ -596,24 +608,10 @@ class UserOrderController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        $historyLineIds = RepairOrder::query()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'confirmed')
-            ->whereNotNull('line_id')
-            ->distinct()
-            ->pluck('line_id');
-
-        $lines = Line::query()
-            ->whereIn('id', $historyLineIds)
-            ->orderBy('name')
-            ->get();
-
         return view('user.orders.history', compact(
             'orders',
             'startDate',
-            'endDate',
-            'lines',
-            'lineId'
+            'endDate'
         ));
     }
 
