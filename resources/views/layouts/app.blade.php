@@ -2837,7 +2837,7 @@
                             <div class="nav-dropdown-menu">
                                 <a href="{{ route('omd.orders.history') }}"
                                     class="{{ request()->routeIs('omd.orders.history', 'omd.orders.history.show') ? 'active' : '' }}">
-                                    <span>Repair Order</span>
+                                    <span>Order Repair</span>
                                 </a>
                                 <a href="{{ route('omd.scrap-cycles.index') }}"
                                     class="{{ request()->routeIs('omd.scrap-cycles.*') ? 'active' : '' }}">

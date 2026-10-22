@@ -4,7 +4,7 @@
     $activityTitle = match ($order->status) {
         'submitted' => 'Verifikasi Order Repair Box',
         'in_repair' => 'Input Hasil Repair OMD',
-        'completed' => 'Hasil Repair OMD — Menunggu Konfirmasi User',
+        'completed' => 'Hasil Repair',
         'revision_requested' => 'Koreksi Hasil Repair OMD',
         'confirmed' => 'Hasil Repair & Serah Terima',
         default => 'Detail Order Repair Box',
@@ -1329,7 +1329,7 @@
                             <th rowspan="{{ $showAfter ? 3 : 2 }}">No</th>
                             <th rowspan="{{ $showAfter ? 3 : 2 }}">Model</th>
                             <th rowspan="{{ $showAfter ? 3 : 2 }}">Produk</th>
-                            <th colspan="{{ $showAfter ? 8 : 4 }}">Qty NG</th>
+                            <th colspan="{{ $showAfter ? 8 : 4 }}">Jenis NG & QTY</th>
                             @if ($showProductNote)
                                 <th rowspan="{{ $showAfter ? 3 : 2 }}" class="keterangan-head">Catatan</th>
                             @endif
