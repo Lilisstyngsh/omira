@@ -2953,7 +2953,7 @@
 
                         <a href="{{ route('omd.master.model-product') }}"
                             class="{{ request()->routeIs('omd.master.model-product') ? 'active' : '' }}">
-                            <span>Model &amp; Produk</span>
+                            <span>Model Box</span>
                         </a>
 
                         <a href="{{ route('omd.master.form-numbers.index') }}"

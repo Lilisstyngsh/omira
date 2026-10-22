@@ -256,6 +256,52 @@
             max-width: 100%;
         }
 
+        .ab-toolbar-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ab-export-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .ab-export-btn {
+            height: 36px;
+            padding: 0 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .ab-export-btn.pdf {
+            color: #b42318;
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+        .ab-export-btn.excel {
+            color: #166534;
+            background: #ecfdf3;
+            border-color: #bbf7d0;
+        }
+
+        .ab-export-btn:hover { filter: brightness(.97); }
+
         .ab-search>i {
             position: absolute;
             left: 12px;
@@ -428,9 +474,10 @@
 
         .ab-product-name {
             margin-top: 3px;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 400;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.45;
         }
 
         .ab-value-item,
@@ -469,6 +516,43 @@
         .ab-decision-pill.no {
             background: #fff1f2;
             color: #b24355;
+        }
+
+        .ab-decision-pill.reset {
+            background: #eaf2ff;
+            color: #245ba8;
+        }
+
+        .ab-table tbody tr[data-href]:hover .ab-decision-pill.yes,
+        .ab-table tbody tr[data-href]:focus-visible .ab-decision-pill.yes {
+            background: #dff0e4;
+        }
+
+        .ab-table tbody tr[data-href]:hover .ab-decision-pill.reset,
+        .ab-table tbody tr[data-href]:focus-visible .ab-decision-pill.reset {
+            background: #dbeafe;
+        }
+
+        .ab-table tbody tr[data-href]:hover .ab-decision-pill.no,
+        .ab-table tbody tr[data-href]:focus-visible .ab-decision-pill.no {
+            background: #ffe4e6;
+        }
+
+        .ab-reset-meta,
+        .ab-reset-reason {
+            align-self: stretch;
+            max-width: 100%;
+            color: #475569;
+            font-size: 9px;
+            font-weight: 400;
+            line-height: 1.4;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .ab-reset-reason {
+            margin-top: 3px;
         }
 
         html[data-theme="dark"] .ab-model-name {
@@ -547,6 +631,10 @@
                 gap: 10px;
             }
 
+            .ab-toolbar-actions {
+                flex-wrap: wrap;
+            }
+
             .ab-search {
                 width: min(320px, 70%);
             }
@@ -573,10 +661,306 @@
                 width: 72px;
             }
 
+            .ab-toolbar-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
             .ab-search {
                 width: 100%;
+                max-width: none;
+            }
+
+            .ab-export-actions {
+                width: 100%;
+            }
+
+            .ab-export-btn {
+                flex: 1;
             }
         }
+        .ab-history-modal[hidden] {
+            display: none !important;
+        }
+
+        .ab-history-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .ab-history-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .48);
+            -webkit-backdrop-filter: blur(3px);
+            backdrop-filter: blur(3px);
+        }
+
+        .ab-history-modal-dialog {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            width: min(1160px, calc(100vw - 40px));
+            max-height: calc(100vh - 40px);
+            max-height: calc(100dvh - 40px);
+            background: #fff;
+            border: 1px solid #e8edf4;
+            border-radius: 18px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+            overflow: hidden;
+        }
+
+        .ab-history-modal-dialog.is-reset-detail {
+            width: min(900px, calc(100vw - 40px));
+        }
+
+        .ab-history-modal-dialog.is-reset-detail .ab-history-modal-body {
+            padding: 16px;
+        }
+
+        .ab-history-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8edf4;
+            background: linear-gradient(135deg, #F4F8F5 0%, #fff 75%);
+            flex: 0 0 auto;
+        }
+
+        .ab-history-modal-title {
+            margin: 0;
+            color: #172033;
+            font-size: 16px;
+            line-height: 1.35;
+            font-weight: 750;
+        }
+
+        .ab-history-modal-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 36px;
+            width: 36px;
+            height: 36px;
+            border: 1px solid #dbe2ea;
+            border-radius: 9px;
+            background: #fff;
+            color: #64748b;
+            cursor: pointer;
+            transition: background .15s ease, border-color .15s ease, color .15s ease;
+        }
+
+        .ab-history-modal-close:hover,
+        .ab-history-modal-close:focus-visible {
+            background: #F4F8F5;
+            border-color: #b8d0c0;
+            color: #245f42;
+            outline: none;
+        }
+
+        .ab-history-modal-body {
+            min-height: 0;
+            padding: 18px;
+            overflow: auto;
+            display: grid;
+            align-content: start;
+            gap: 14px;
+            color: #334155;
+        }
+
+        .ab-history-modal-content {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .ab-modal-card {
+            min-width: 0;
+            background: #fff;
+            border: 1px solid #e8edf4;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .ab-modal-card-header {
+            padding: 13px 16px;
+            border-bottom: 1px solid #edf1f5;
+            background: linear-gradient(135deg, #F4F8F5 0%, #fff 75%);
+        }
+
+        .ab-modal-card-header h3 {
+            margin: 0;
+            color: #172033;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .ab-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ab-modal-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .ab-modal-table {
+            width: 100%;
+            min-width: 820px;
+            border-spacing: 0;
+            border-collapse: separate;
+            table-layout: fixed;
+            font-size: 11px;
+        }
+
+        .ab-modal-table-reset {
+            min-width: 0;
+        }
+
+        .ab-history-modal-dialog.is-reset-detail .ab-modal-table-wrap {
+            overflow-x: visible;
+        }
+
+        .ab-modal-table th {
+            padding: 12px 13px;
+            border-bottom: 1px solid #e3e9f0;
+            background: #f9fafb;
+            color: #111111;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: .035em;
+        }
+
+        .ab-modal-table td {
+            padding: 12px 13px;
+            border-bottom: 1px solid #edf1f5;
+            color: #111111;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.5;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+
+        .ab-modal-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .ab-modal-table th:not(:last-child),
+        .ab-modal-table td:not(:last-child) {
+            border-right: 1px solid #edf1f5;
+        }
+
+        .ab-modal-table .ab-modal-model {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .ab-modal-table .ab-modal-reason {
+            white-space: pre-wrap;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        .ab-modal-table .ab-modal-center {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .ab-modal-preview {
+            padding: 12px;
+        }
+
+        .ab-modal-preview-frame {
+            display: block;
+            width: 100%;
+            height: 58vh;
+            min-height: 300px;
+            border: 1px solid #dfe6ef;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .ab-modal-preview-fallback {
+            margin: 9px 2px 0;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .ab-modal-preview-fallback a {
+            color: #347554;
+            font-weight: 700;
+        }
+
+        .ab-modal-loading,
+        .ab-modal-error {
+            padding: 34px 16px;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .ab-modal-error a {
+            display: inline-flex;
+            margin-top: 10px;
+            color: #347554;
+            font-weight: 700;
+        }
+
+        @media (max-width: 640px) {
+            .ab-history-modal {
+                padding: 8px;
+            }
+
+            .ab-history-modal-dialog {
+                width: calc(100vw - 16px);
+                max-height: calc(100vh - 16px);
+                max-height: calc(100dvh - 16px);
+                border-radius: 14px;
+            }
+
+            .ab-history-modal-dialog.is-reset-detail {
+                width: calc(100vw - 16px);
+            }
+
+            .ab-history-modal-dialog.is-reset-detail .ab-modal-table-wrap {
+                overflow-x: auto;
+            }
+
+            .ab-history-modal-dialog.is-reset-detail .ab-modal-table-reset {
+                min-width: 680px;
+            }
+
+            .ab-history-modal-header {
+                padding: 13px 14px;
+            }
+
+            .ab-history-modal-body {
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .ab-modal-preview-frame {
+                height: 48vh;
+                min-height: 260px;
+            }
+        }
+
     </style>
 
     @php
@@ -621,22 +1005,32 @@
                         <option value="{{ $size }}" @selected((int) request('per_page', 10) === $size)>{{ $size }}</option>
                     @endforeach
                 </select>
-                <div class="ab-search">
-                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                    <input type="search" name="search" value="{{ request('search') }}"
-                        placeholder="Cari No Order atau Produk..." autocomplete="off"
-                        aria-label="Cari No Order, Model, atau Produk">
-                    @if (request()->filled('search'))
-                        <button type="button" class="ab-search-clear" aria-label="Hapus pencarian"
-                            onclick="this.form.querySelector('input[name=search]').value=''; this.form.submit();"><i
-                                class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-                    @endif
+                <div class="ab-toolbar-actions">
+                    <div class="ab-search">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <input type="search" name="search" value="{{ request('search') }}"
+                            placeholder="Cari No Order atau Produk..." autocomplete="off"
+                            aria-label="Cari No Order, Model, atau Produk">
+                        @if (request()->filled('search'))
+                            <button type="button" class="ab-search-clear" aria-label="Hapus pencarian"
+                                onclick="this.form.querySelector('input[name=search]').value=''; this.form.submit();"><i
+                                    class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                        @endif
+                    </div>
+                    <div class="ab-export-actions">
+                        <a class="ab-export-btn pdf" href="{{ route('user.additional-box.history-export', array_merge(request()->except('page'), ['format' => 'pdf'])) }}">
+                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF
+                        </a>
+                        <a class="ab-export-btn excel" href="{{ route('user.additional-box.history-export', array_merge(request()->except('page'), ['format' => 'excel'])) }}">
+                            <i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>
 
         <div class="ab-table-wrap">
-            <table class="ab-table">
+            <table class="ab-table" id="abHistoryTable">
                 <colgroup>
                     <col style="width:20%">
                     <col style="width:17%">
@@ -654,17 +1048,51 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($requests as $document)
-                        @php
-                            // Snapshot keputusan tersedia untuk data baru; data lama fallback ke items.
-                            $hasSnapshots = $document->decisions->isNotEmpty();
-                            $products = $hasSnapshots ? $document->decisions : $document->items;
-                            $visibleProducts = $products->take(2);
-                        @endphp
-                        <tr data-href="{{ route('user.additional-box.show', $document) }}" role="link" tabindex="0"
-                            aria-label="Lihat detail {{ $document->document_number }}"
-                            onclick="if (!event.target.closest('a,button,input')) window.location.assign(this.dataset.href)"
-                            onkeydown="if (event.target === this && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); window.location.assign(this.dataset.href); }">
+                    @forelse($requests as $historyItem)
+                        @if ($historyItem->type === 'reset')
+                            @php $cycle = $historyItem->record; @endphp
+                            <tr class="ab-manual-reset-row"
+                                data-href="{{ route('user.additional-box.reset-show', $cycle) }}"
+                                role="link" tabindex="0" aria-haspopup="dialog"
+                                aria-label="Lihat detail reset oleh OMD tanggal {{ $cycle->reset_at->format('d-m-Y H:i') }}">
+                                <td><span class="ab-muted">—</span></td>
+                                <td class="ab-date">
+                                    <time datetime="{{ $cycle->reset_at->toIso8601String() }}">
+                                        <span class="ab-date-main">{{ $cycle->reset_at->format('d-m-Y') }}</span>
+                                        <span class="ab-date-time">{{ $cycle->reset_at->format('H:i') }}</span>
+                                    </time>
+                                </td>
+                                <td class="ab-model-products">
+                                    <div class="ab-products-stack">
+                                        <div class="ab-product-item">
+                                            <div class="ab-model-name">{{ $cycle->product?->masterModel?->model ?: '—' }}</div>
+                                            <div class="ab-product-name">{{ $cycle->product?->name ?: '—' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="ab-values-stack">
+                                        <div class="ab-value-item">{{ $cycle->reached_qty ?? 0 }} / {{ $cycle->limit_qty }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="ab-decisions-stack">
+                                        <div class="ab-decision-item">
+                                            <span class="ab-decision-pill reset">Reset oleh OMD</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @else
+                            @php
+                                $document = $historyItem->record;
+                                // Snapshot keputusan tersedia untuk data baru; data lama fallback ke items.
+                                $hasSnapshots = $document->decisions->isNotEmpty();
+                                $products = $hasSnapshots ? $document->decisions : $document->items;
+                                $visibleProducts = $products->take(2);
+                            @endphp
+                            <tr data-href="{{ route('user.additional-box.show', $document) }}" role="link" tabindex="0"
+                                aria-haspopup="dialog" aria-label="Lihat detail {{ $document->document_number }}">
                             <td><a class="ab-order-number"
                                     href="{{ route('user.additional-box.show', $document) }}">{{ $document->document_number }}</a>
                             </td>
@@ -716,6 +1144,7 @@
                                 </div>
                             </td>
                         </tr>
+                        @endif
                     @empty
                         <tr>
                             <td colspan="5" class="ab-empty">
@@ -747,6 +1176,150 @@
             </nav>
         @endif
     </div>
+
+    <div class="ab-history-modal" id="abHistoryModal" hidden aria-hidden="true">
+        <div class="ab-history-modal-backdrop" data-ab-modal-close></div>
+        <section class="ab-history-modal-dialog" role="dialog" aria-modal="true"
+            aria-labelledby="abHistoryModalTitle" tabindex="-1">
+            <header class="ab-history-modal-header">
+                <h2 class="ab-history-modal-title" id="abHistoryModalTitle">Detail History Scrap</h2>
+                <button type="button" class="ab-history-modal-close" data-ab-modal-close
+                    aria-label="Tutup detail">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </header>
+            <div class="ab-history-modal-body" id="abHistoryModalBody" aria-live="polite">
+                <div class="ab-modal-loading">Memuat detail...</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            const table = document.getElementById('abHistoryTable');
+            const modal = document.getElementById('abHistoryModal');
+            const dialog = modal?.querySelector('.ab-history-modal-dialog');
+            const modalTitle = document.getElementById('abHistoryModalTitle');
+            const modalBody = document.getElementById('abHistoryModalBody');
+            const closeButton = modal?.querySelector('.ab-history-modal-close');
+            if (!table || !modal || !dialog || !modalTitle || !modalBody || !closeButton) return;
+
+            let lastTrigger = null;
+            let priorBodyOverflow = '';
+            let requestVersion = 0;
+
+            function closeModal() {
+                requestVersion++;
+                modal.hidden = true;
+                modal.setAttribute('aria-hidden', 'true');
+                dialog.classList.remove('is-reset-detail');
+                modalBody.replaceChildren();
+                document.body.style.overflow = priorBodyOverflow;
+                if (lastTrigger && typeof lastTrigger.focus === 'function') lastTrigger.focus();
+            }
+
+            async function openModal(url, trigger) {
+                lastTrigger = trigger || document.activeElement;
+                priorBodyOverflow = document.body.style.overflow;
+                const currentRequest = ++requestVersion;
+                const target = new URL(url, window.location.href);
+                target.searchParams.set('modal', '1');
+
+                modal.hidden = false;
+                modal.setAttribute('aria-hidden', 'false');
+                dialog.classList.remove('is-reset-detail');
+                document.body.style.overflow = 'hidden';
+                modalTitle.textContent = 'Detail History Scrap';
+                modalBody.innerHTML = '<div class="ab-modal-loading">Memuat detail...</div>';
+                closeButton.focus();
+
+                try {
+                    const response = await fetch(target.toString(), {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'text/html'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Detail tidak tersedia.');
+
+                    const html = await response.text();
+                    if (currentRequest !== requestVersion) return;
+
+                    const template = document.createElement('template');
+                    template.innerHTML = html;
+                    const content = template.content.querySelector('[data-modal-title]');
+                    if (!content) throw new Error('Respons detail tidak valid.');
+
+                    modalTitle.textContent = content.dataset.modalTitle || 'Detail History Scrap';
+                    dialog.classList.toggle('is-reset-detail', content.dataset.modalTitle === 'Detail Reset Scrap');
+                    modalBody.replaceChildren(content);
+                } catch (error) {
+                    if (currentRequest !== requestVersion) return;
+                    modalBody.replaceChildren();
+                    const message = document.createElement('div');
+                    message.className = 'ab-modal-error';
+                    message.textContent = 'Detail tidak dapat dimuat.';
+                    const fallback = document.createElement('a');
+                    fallback.href = url;
+                    fallback.textContent = 'Buka halaman detail';
+                    message.appendChild(document.createElement('br'));
+                    message.appendChild(fallback);
+                    modalBody.appendChild(message);
+                }
+            }
+
+            table.addEventListener('click', function(event) {
+                const row = event.target.closest('tr[data-href]');
+                if (!row || !table.contains(row)) return;
+                if (event.target.closest('button,input,select,textarea,[data-no-modal]')) return;
+
+                const link = event.target.closest('a');
+                if (link) event.preventDefault();
+                openModal(row.dataset.href, row);
+            });
+
+            table.addEventListener('keydown', function(event) {
+                const row = event.target.closest('tr[data-href]');
+                if (!row || !table.contains(row) || event.target !== row) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openModal(row.dataset.href, row);
+                }
+            });
+
+            modal.addEventListener('click', function(event) {
+                if (event.target.closest('[data-ab-modal-close]')) closeModal();
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (modal.hidden) return;
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeModal();
+                }
+                if (event.key === 'Tab') {
+                    const focusable = modal.querySelectorAll('a[href], button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])');
+                    if (!focusable.length) {
+                        event.preventDefault();
+                        dialog.focus();
+                        return;
+                    }
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    if (event.shiftKey && document.activeElement === first) {
+                        event.preventDefault();
+                        last.focus();
+                    } else if (!event.shiftKey && document.activeElement === last) {
+                        event.preventDefault();
+                        first.focus();
+                    }
+                }
+            });
+        })();
+    </script>
 
     <script>
         (function() {

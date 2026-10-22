@@ -10,21 +10,42 @@
 
         .ab-detail-top {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            justify-content: flex-end;
+            align-items: center;
             gap: 14px;
             flex-wrap: wrap;
         }
 
-        .ab-back {
+        .ab-back-button {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 7px;
-            text-decoration: none;
+            min-height: 42px;
+            padding: 0 15px;
+            border: 1px solid #2563eb;
+            border-radius: 9px;
+            background: #2563eb;
+            color: #fff !important;
+            text-decoration: none !important;
             font-size: 12px;
-            font-weight: 650;
-            color: #438866;
-            margin-bottom: 9px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: background .15s ease, border-color .15s ease;
+        }
+
+        .ab-back-button:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .ab-detail-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         .ab-detail-title {
@@ -50,27 +71,41 @@
         .ab-download {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 7px;
-            background: #347554;
-            color: white !important;
-            padding: 10px 14px;
+            min-height: 42px;
+            padding: 8px 14px;
+            border: 1px solid #dce5de;
             border-radius: 9px;
-            font-size: 11px;
+            background: #fff;
+            color: #245f42 !important;
+            font-size: 12px;
             font-weight: 700;
-            text-decoration: none;
-            transition: background .15s ease;
+            text-decoration: none !important;
+            white-space: nowrap;
+            transition: background .15s ease, border-color .15s ease;
         }
 
-        .ab-download:hover {
-            background: #24563d;
+        .ab-download.pdf {
+            background: #fff1f1;
+            border-color: #f2cccc;
+            color: #ad454d !important;
+        }
+
+        .ab-download.pdf:hover {
+            background: #ffe7e7;
+            border-color: #e9b5b9;
         }
 
         .ab-download.excel {
-            background: #215f77;
+            background: #edf8f0;
+            border-color: #cbe9d1;
+            color: #247447 !important;
         }
 
         .ab-download.excel:hover {
-            background: #16495e;
+            background: #e1f3e5;
+            border-color: #a8d9b4;
         }
 
         .ab-no-export {
@@ -145,7 +180,7 @@
             border-collapse: separate;
             overflow: hidden;
             width: 100%;
-            min-width: 620px;
+            min-width: 920px;
             table-layout: fixed;
         }
 
@@ -280,68 +315,68 @@
     @endphp
     <div class="ab-detail">
         <div class="ab-detail-top">
-            <div>
-                <a href="{{ route('user.additional-box.index') }}" class="ab-back"><i class="fa-solid fa-arrow-left"
-                        aria-hidden="true"></i> Additional Box</a>
-                <h1 class="ab-detail-title">{{ $document->document_number }}</h1>
-                <div class="ab-detail-date">{{ $document->created_at->format('d/m/Y · H:i') }}</div>
-            </div>
-            <div class="ab-downloads">
+            <div class="ab-detail-actions">
                 @if ($canExport)
-                    <a href="{{ route('user.additional-box.export', [$document, 'pdf']) }}" class="ab-download"><i
-                            class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF</a>
-                    <a href="{{ route('user.additional-box.export', [$document, 'excel']) }}" class="ab-download excel"><i
-                            class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel</a>
+                    <a href="{{ route('user.additional-box.export', [$document, 'pdf']) }}" class="ab-download pdf">
+                        <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF
+                    </a>
+                    <a href="{{ route('user.additional-box.export', [$document, 'excel']) }}" class="ab-download excel">
+                        <i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel
+                    </a>
                 @else
-                    <span class="ab-no-export"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Tidak ada produk
-                        Order untuk diekspor</span>
+                    <span class="ab-no-export"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Tidak ada produk untuk diekspor</span>
                 @endif
+                <a href="{{ route('user.additional-box.index') }}" class="ab-back-button">
+                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali
+                </a>
             </div>
         </div>
         <section class="ab-card">
             <div class="ab-card-header">
-                <h2>Detail Keputusan Produk</h2>
+                <h2>Rincian Order</h2>
             </div>
             <div class="ab-table-wrap">
                 <table class="ab-table">
                     <colgroup>
-                        <col style="width:43%">
-                        <col style="width:20%">
+                        <col style="width:15%">
+                        <col style="width:14%">
+                        <col style="width:24%">
+                        <col style="width:13%">
+                        <col style="width:13%">
                         <col style="width:21%">
-                        <col style="width:16%">
                     </colgroup>
                     <thead>
                         <tr>
+                            <th scope="col">No Order</th>
+                            <th scope="col">Tanggal</th>
                             <th scope="col">Model – Produk</th>
                             <th scope="col">Scrap / Limit</th>
                             <th scope="col">Keputusan</th>
-                            <th scope="col">Qty</th>
+                            <th scope="col">Alasan</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($rows as $item)
                             @php $isOrder = !isset($item->decision) || $item->decision === 'yes'; @endphp
                             <tr>
+                                <td>{{ $document->document_number }}</td>
+                                <td>{{ $document->created_at->format('d-m-Y H:i') }}</td>
                                 <td>
                                     <div class="ab-name">{{ $item->model_name }} – {{ $item->product_name }}</div>
-                                    @if (!$isOrder && $item->reason)
-                                        <div class="ab-note"><strong>Alasan:</strong> {{ $item->reason }}</div>
-                                    @endif
                                 </td>
-                                <td>{{ isset($item->scrap_qty) ? $item->scrap_qty . ' / ' . $item->limit_qty : '—' }}</td>
-                                <td><span
-                                        class="ab-status {{ $isOrder ? 'yes' : 'no' }}">{{ $isOrder ? 'Order' : 'Tidak' }}</span>
+                                <td style="text-align:center;white-space:nowrap">
+                                    {{ isset($item->scrap_qty) ? $item->scrap_qty . ' / ' . $item->limit_qty : '—' }}
                                 </td>
                                 <td>
-                                    @if ($isOrder)
-                                    <span class="ab-quantity">{{ $item->quantity }}</span>@else<span
-                                            class="ab-muted">—</span>
-                                    @endif
+                                    <span class="ab-status {{ $isOrder ? 'yes' : 'no' }}">
+                                        {{ $isOrder ? 'Order' : 'Tidak' }}
+                                    </span>
                                 </td>
+                                <td><div class="ab-note">{{ $item->reason ?: '—' }}</div></td>
                             </tr>
-                        @empty<tr>
-                                <td colspan="4" class="ab-muted" style="text-align:center;padding:28px">Tidak ada produk.
-                                </td>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="ab-muted" style="text-align:center;padding:28px">Tidak ada data.</td>
                             </tr>
                         @endforelse
                     </tbody>

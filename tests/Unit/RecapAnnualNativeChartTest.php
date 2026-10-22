@@ -92,7 +92,7 @@ class RecapAnnualNativeChartTest extends TestCase
             foreach ([6, 7, 8, 5] as $row) {
                 self::assertStringContainsString(sprintf("'Rekap Tahunan'!\$B\$%d:\$M\$%d", $row, $row), $xml);
             }
-            foreach (['F59E0B', '94A3B8', 'FACC15', '2563EB'] as $color) {
+            foreach (['578EF5', '76C457', 'D39A53', 'D75B62'] as $color) {
                 self::assertStringContainsString($color, $xml);
             }
             foreach (['NG', 'OK', 'Scrap', 'Target FY'] as $label) {

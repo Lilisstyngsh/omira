@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <h2>Data Master Model & Produk {{ $scopeLabel }}</h2>
+    <h2>Data Master Model Box {{ $scopeLabel }}</h2>
     <div class="subtitle">OMD Order - Workshop Digital System</div>
 
     <table>

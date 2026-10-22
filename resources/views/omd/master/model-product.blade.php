@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Model & Produk')
-@section('header', 'Model & Produk')
+@section('title', 'Model Box')
+@section('header', 'Model Box')
 
 @section('content')
 @php
@@ -137,7 +137,7 @@
 
 <div class="mp-page" id="mpCatalog">
     <div class="mp-top">
-        <h2>Daftar Model Box &amp; Produk</h2>
+        <h2>Daftar Model Box</h2>
         <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
             <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
         </button>

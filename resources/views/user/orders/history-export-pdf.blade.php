@@ -285,16 +285,17 @@
                     <tr>
                         <td class="logo-side" rowspan="2">
                             @if ($logoData)
-                            <img class="logo" src="{{ $logoData }}">
+                                <img class="logo" src="{{ $logoData }}">
                             @else
-                            <b>AISIN</b>
+                                <b>AISIN</b>
                             @endif
                         </td>
                         <td class="title" rowspan="2">FORM ORDER REPAIR BOX NG</td>
                         <td class="document-side" style="font-size:11px;font-weight:bold;height:24px">PSD - OMD</td>
                     </tr>
                     <tr>
-                        <td class="document-side" style="font-size:8px;font-weight:bold;height:25px">{{ $order->order_number }}</td>
+                        <td class="document-side" style="font-size:8px;font-weight:bold;height:25px">
+                            {{ $order->order_number }}</td>
                     </tr>
                 </table>
                 <div class="form-frame">
@@ -302,20 +303,25 @@
                         {{ $date }}
                     </div>
                     @php
-                    $categories = ['P', 'H', 'C', 'S'];
-                    $grandBefore = array_fill_keys($categories, 0);
-                    $grandAfter = array_fill_keys($categories, 0);
-                    $byModel = collect($entries)->groupBy('model');
-                    $notes = collect($entries)->map(function ($entry) {
-                    $note = trim((string) ($entry['mismatch_note'] ?? ''));
-                    if ($note === '') {
-                    return null;
-                    }
-                    $model = trim((string) ($entry['model'] ?? ''));
-                    $product = trim((string) ($entry['product'] ?? ''));
-                    $label = trim($model . ($product !== '' ? ' - ' . $product : ''), ' -');
-                    return ($label !== '' ? $label . ': ' : '') . $note;
-                    })->filter()->unique()->values()->implode("\n");
+                        $categories = ['P', 'H', 'C', 'S'];
+                        $grandBefore = array_fill_keys($categories, 0);
+                        $grandAfter = array_fill_keys($categories, 0);
+                        $byModel = collect($entries)->groupBy('model');
+                        $notes = collect($entries)
+                            ->map(function ($entry) {
+                                $note = trim((string) ($entry['mismatch_note'] ?? ''));
+                                if ($note === '') {
+                                    return null;
+                                }
+                                $model = trim((string) ($entry['model'] ?? ''));
+                                $product = trim((string) ($entry['product'] ?? ''));
+                                $label = trim($model . ($product !== '' ? ' - ' . $product : ''), ' -');
+                                return ($label !== '' ? $label . ': ' : '') . $note;
+                            })
+                            ->filter()
+                            ->unique()
+                            ->values()
+                            ->implode("\n");
                     @endphp
                     <table class="grid">
                         <colgroup>
@@ -349,68 +355,68 @@
                             </tr>
                             <tr>
                                 @foreach ($categories as $ng)
-                                <th>{{ $ng }}</th>
-                                @endforeach @foreach ($categories as $ng)
-                                <th>{{ $ng }}</th>
-                                @endforeach
+                                    <th>{{ $ng }}</th>
+                                    @endforeach @foreach ($categories as $ng)
+                                        <th>{{ $ng }}</th>
+                                    @endforeach
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($byModel as $model => $modelEntries)
-                            @php @endphp
-                            @foreach ($modelEntries as $entryIndex => $entry)
-                            <tr>
-                                @if ($entryIndex === 0)
-                                <td class="model" rowspan="{{ count($modelEntries) }}">
-                                    {{ $entry['model'] }}
-                                </td>
-                                @endif
-                                <td class="product">
-                                    {{ $entry['product'] }}
-                                </td>
-                                @foreach ($categories as $ng)
-                                @php
-                                $n = (int) ($entry['before'][$ng] ?? 0);
-                                $grandBefore[$ng] += $n;
-                                @endphp
-                                <td class="num">{{ $n ?: '' }}</td>
+                                @php @endphp
+                                @foreach ($modelEntries as $entryIndex => $entry)
+                                    <tr>
+                                        @if ($entryIndex === 0)
+                                            <td class="model" rowspan="{{ count($modelEntries) }}">
+                                                {{ $entry['model'] }}
+                                            </td>
+                                        @endif
+                                        <td class="product">
+                                            {{ $entry['product'] }}
+                                        </td>
+                                        @foreach ($categories as $ng)
+                                            @php
+                                                $n = (int) ($entry['before'][$ng] ?? 0);
+                                                $grandBefore[$ng] += $n;
+                                            @endphp
+                                            <td class="num">{{ $n ?: '' }}</td>
+                                        @endforeach
+                                        <td class="sep"></td>
+                                        @if ($entryIndex === 0)
+                                            <td class="model" rowspan="{{ count($modelEntries) }}">
+                                                {{ $entry['model'] }}
+                                            </td>
+                                        @endif
+                                        <td class="product">
+                                            {{ $entry['product'] }}
+                                        </td>
+                                        @foreach ($categories as $ng)
+                                            @php
+                                                $n = (int) ($entry['after'][$ng] ?? 0);
+                                                $grandAfter[$ng] += $n;
+                                            @endphp
+                                            <td class="num">{{ $n ?: '' }}</td>
+                                        @endforeach
+                                    </tr>
                                 @endforeach
-                                <td class="sep"></td>
-                                @if ($entryIndex === 0)
-                                <td class="model" rowspan="{{ count($modelEntries) }}">
-                                    {{ $entry['model'] }}
-                                </td>
-                                @endif
-                                <td class="product">
-                                    {{ $entry['product'] }}
-                                </td>
-                                @foreach ($categories as $ng)
-                                @php
-                                $n = (int) ($entry['after'][$ng] ?? 0);
-                                $grandAfter[$ng] += $n;
-                                @endphp
-                                <td class="num">{{ $n ?: '' }}</td>
-                                @endforeach
-                            </tr>
-                            @endforeach
 
                             @empty
-                            <tr>
-                                <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
-                                <td class="sep"></td>
-                                <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
+                                    <td class="sep"></td>
+                                    <td colspan="6" style="text-align:center">Tidak ada item Repair Order.</td>
+                                </tr>
                             @endforelse
                             <tr class="summary">
                                 <td colspan="2">SUB TOTAL</td>
                                 @foreach ($categories as $ng)
-                                <td class="num">{{ $grandBefore[$ng] ?: '' }}</td>
+                                    <td class="num">{{ $grandBefore[$ng] ?: '' }}</td>
                                 @endforeach
                                 <td class="sep">
                                 </td>
                                 <td colspan="2">SUB TOTAL</td>
                                 @foreach ($categories as $ng)
-                                <td class="num">{{ $grandAfter[$ng] ?: '' }}</td>
+                                    <td class="num">{{ $grandAfter[$ng] ?: '' }}</td>
                                 @endforeach
                             </tr>
                             <tr class="summary grand">
@@ -481,12 +487,14 @@
                                 <tr>
                                     <td class="blank">
                                         @if ($isClosed)
-                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
+                                            <b>DIKONFIRMASI
+                                                ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                     <td class="blank">
                                         @if ($isClosed && $omdApproval)
-                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
+                                            <b>DIKONFIRMASI
+                                                ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                 </tr>
@@ -510,12 +518,14 @@
                                 <tr>
                                     <td class="blank">
                                         @if ($isClosed && $omdApproval)
-                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
+                                            <b>DIKONFIRMASI
+                                                ELEKTRONIK</b><br>{{ $omdApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                     <td class="blank">
                                         @if ($isClosed)
-                                        <b>DIKONFIRMASI ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
+                                            <b>DIKONFIRMASI
+                                                ELEKTRONIK</b><br>{{ $userApproval }}<br>{{ $approvedAt }}
                                         @endif
                                     </td>
                                 </tr>

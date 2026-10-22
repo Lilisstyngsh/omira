@@ -968,7 +968,7 @@ class RecapController extends Controller
         $svg = [
             '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390" viewBox="0 0 1200 390">',
             '<rect x="0" y="0" width="1200" height="390" fill="#ffffff"/>',
-            '<text x="600" y="25" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#173C32">Grafik Order Repair Box FY ' . $fiscalYear . '</text>',
+            '<text x="600" y="25" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#000000">Grafik Order Repair Box FY ' . $fiscalYear . '</text>',
         ];
 
         for ($tick = 0; $tick <= 4; $tick++) {
@@ -976,16 +976,16 @@ class RecapController extends Controller
             $y = $bottom - ($plotHeight * $tick / 4);
             $label = htmlspecialchars(number_format($value, 0, ',', '.'), ENT_QUOTES | ENT_XML1, 'UTF-8');
             $svg[] = sprintf('<line x1="%s" y1="%.2f" x2="%s" y2="%.2f" stroke="#DDE5ED" stroke-width="1"/>', $left, $y, $right, $y);
-            $svg[] = sprintf('<text x="%s" y="%.2f" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748B">%s</text>', $left - 12, $y + 4, $label);
+            $svg[] = sprintf('<text x="%s" y="%.2f" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#000000">%s</text>', $left - 12, $y + 4, $label);
         }
-        $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#94A3B8" stroke-width="1.2"/>', $left, $top, $left, $bottom);
-        $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#94A3B8" stroke-width="1.2"/>', $left, $bottom, $right, $bottom);
-        $svg[] = '<text x="22" y="164" transform="rotate(-90 22 164)" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="600" fill="#475569">Jumlah Box</text>';
+        $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#000000" stroke-width="1.2"/>', $left, $top, $left, $bottom);
+        $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#000000" stroke-width="1.2"/>', $left, $bottom, $right, $bottom);
+        $svg[] = '<text x="22" y="164" transform="rotate(-90 22 164)" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="600" fill="#000000">Jumlah Box</text>';
 
         $barSeries = [
-            ['key' => 'order', 'color' => '#F59E0B'],
-            ['key' => 'finish', 'color' => '#94A3B8'],
-            ['key' => 'scrap', 'color' => '#FACC15'],
+            ['key' => 'order', 'color' => '#578EF5'],
+            ['key' => 'finish', 'color' => '#76C457'],
+            ['key' => 'scrap', 'color' => '#D39A53'],
         ];
         $targetPoints = [];
         $barValueLabels = [];
@@ -1011,7 +1011,7 @@ class RecapController extends Controller
                 $label = (string) $value;
                 $labelY = max($top + 11, $y - 4);
                 $svg[] = sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="1.5" fill="%s"/>', $x, $y, $barWidth, max(0.8, $barHeight), $series['color']);
-                $barValueLabels[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="7.5" fill="#334155">%s</text>', $x + ($barWidth / 2), $labelY, $label);
+                $barValueLabels[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="7.5" fill="#000000">%s</text>', $x + ($barWidth / 2), $labelY, $label);
                 $monthBarLabelPositions[] = $labelY;
             }
 
@@ -1020,11 +1020,11 @@ class RecapController extends Controller
             $targetPoints[] = sprintf('%.2f,%.2f', $center, $targetY);
             $barLabelPositionsByMonth[] = $monthBarLabelPositions;
             $monthLabel = htmlspecialchars(strtoupper((string) ($month['label'] ?? '')), ENT_QUOTES | ENT_XML1, 'UTF-8');
-            $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" font-weight="600" fill="#475569">%s</text>', $center, $bottom + 21, $monthLabel);
+            $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" font-weight="600" fill="#000000">%s</text>', $center, $bottom + 21, $monthLabel);
         }
 
         if ($targetPoints !== []) {
-            $svg[] = '<polyline points="' . implode(' ', $targetPoints) . '" fill="none" stroke="#2563EB" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+            $svg[] = '<polyline points="' . implode(' ', $targetPoints) . '" fill="none" stroke="#D75B62" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
             foreach ($months as $index => $month) {
                 $center = $left + ($groupWidth * ($index + 0.5));
                 $target = max(0, (int) ($month['target'] ?? 0));
@@ -1043,8 +1043,8 @@ class RecapController extends Controller
                     // A subtle white label background keeps target values readable over bars.
                     $svg[] = sprintf('<rect x="%.2f" y="%.2f" width="28" height="13" rx="2" fill="#FFFFFF" fill-opacity="0.92"/>', $center - 14, $targetLabelY - 10);
                 }
-                $svg[] = sprintf('<circle cx="%.2f" cy="%.2f" r="4.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5"/>', $center, $targetY);
-                $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#1D4ED8">%s</text>', $center, $targetLabelY, $label);
+                $svg[] = sprintf('<circle cx="%.2f" cy="%.2f" r="4.5" fill="#D75B62" stroke="#FFFFFF" stroke-width="1.5"/>', $center, $targetY);
+                $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#000000">%s</text>', $center, $targetLabelY, $label);
             }
         }
 
@@ -1054,10 +1054,10 @@ class RecapController extends Controller
 
         $legendY = 330;
         $legend = [
-            ['label' => 'NG', 'color' => '#F59E0B', 'type' => 'bar', 'x' => 385],
-            ['label' => 'OK', 'color' => '#94A3B8', 'type' => 'bar', 'x' => 485],
-            ['label' => 'Scrap', 'color' => '#FACC15', 'type' => 'bar', 'x' => 585],
-            ['label' => 'Target FY', 'color' => '#2563EB', 'type' => 'line', 'x' => 715],
+            ['label' => 'NG', 'color' => '#578EF5', 'type' => 'bar', 'x' => 385],
+            ['label' => 'OK', 'color' => '#76C457', 'type' => 'bar', 'x' => 485],
+            ['label' => 'Scrap', 'color' => '#D39A53', 'type' => 'bar', 'x' => 585],
+            ['label' => 'Target FY', 'color' => '#D75B62', 'type' => 'line', 'x' => 715],
         ];
         foreach ($legend as $item) {
             if ($item['type'] === 'line') {
@@ -1068,9 +1068,9 @@ class RecapController extends Controller
                 $svg[] = sprintf('<rect x="%s" y="%s" width="13" height="13" rx="1.5" fill="%s"/>', $item['x'], $legendY - 12, $item['color']);
                 $textX = $item['x'] + 20;
             }
-            $svg[] = sprintf('<text x="%s" y="%s" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#334155">%s</text>', $textX, $legendY, $item['label']);
+            $svg[] = sprintf('<text x="%s" y="%s" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#000000">%s</text>', $textX, $legendY, $item['label']);
         }
-        $svg[] = '<text x="625" y="369" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#334155">FY ' . $fiscalYear . '</text>';
+        $svg[] = '<text x="625" y="369" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#000000">FY ' . $fiscalYear . '</text>';
         $svg[] = '</svg>';
 
         return implode('', $svg);
@@ -1296,7 +1296,7 @@ class RecapController extends Controller
         $barLabels = [];
         $barCategories = [];
         $barValues = [];
-        foreach ([6 => ['NG', 'F59E0B'], 7 => ['OK', '94A3B8'], 8 => ['Scrap', 'FACC15']] as $row => [$label, $color]) {
+        foreach ([6 => ['NG', '578EF5'], 7 => ['OK', '76C457'], 8 => ['Scrap', 'D39A53']] as $row => [$label, $color]) {
             $barLabels[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, [$label]);
             $barCategories[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, $categories, null, 12);
             $barValues[] = new DataSeriesValues(
@@ -1326,13 +1326,13 @@ class RecapController extends Controller
             12,
             [],
             'circle',
-            '2563EB',
+            'D75B62',
             6
         );
-        $targetValues->setLineColorProperties('2563EB');
+        $targetValues->setLineColorProperties('D75B62');
         $targetValues->setLineWidth(2.5);
-        $targetValues->getMarkerFillColor()->setColorProperties('2563EB');
-        $targetValues->getMarkerBorderColor()->setColorProperties('2563EB');
+        $targetValues->getMarkerFillColor()->setColorProperties('D75B62');
+        $targetValues->getMarkerBorderColor()->setColorProperties('D75B62');
 
         $line = new DataSeries(
             DataSeries::TYPE_LINECHART,

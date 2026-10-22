@@ -89,6 +89,8 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/additional-box', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'index'])->name('additional-box.index');
             Route::post('/additional-box', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'store'])->name('additional-box.store');
+            Route::get('/additional-box/history/export/{format}', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'exportHistory'])->where('format', 'pdf|excel')->name('additional-box.history-export');
+            Route::get('/additional-box/reset/{cycle}', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'showReset'])->name('additional-box.reset-show');
             Route::get('/additional-box/{document}', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'show'])->name('additional-box.show');
             Route::get('/additional-box/{document}/preview', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'preview'])->name('additional-box.preview');
             Route::get('/additional-box/{document}/export/{format}', [\App\Http\Controllers\AdditionalBoxRequestController::class, 'export'])->where('format', 'pdf|excel')->name('additional-box.export');
@@ -399,6 +401,8 @@ Route::middleware('auth')->group(function () {
             */
             Route::get('/scrap-limit-history', [OmdScrapCycleController::class, 'index'])
                 ->name('scrap-cycles.index');
+            Route::get('/scrap-limit-history/export/{format}', [OmdScrapCycleController::class, 'export'])
+                ->where('format', 'pdf|excel')->name('scrap-cycles.export');
             Route::post('/scrap-limit-history/{cycle}/reset', [OmdScrapCycleController::class, 'reset'])
                 ->name('scrap-cycles.reset');
 

@@ -36,10 +36,10 @@ class RecapAnnualPdfLayoutTest extends TestCase
         $this->assertStringContainsString('>FY 2027</text>', $svg);
         $this->assertStringContainsString('Jumlah Box', $svg);
         $this->assertStringContainsString('APR', $svg);
-        $this->assertStringContainsString('#F59E0B', $svg);
-        $this->assertStringContainsString('#94A3B8', $svg);
-        $this->assertStringContainsString('#FACC15', $svg);
-        $this->assertStringContainsString('#2563EB', $svg);
+        $this->assertStringContainsString('#578EF5', $svg);
+        $this->assertStringContainsString('#76C457', $svg);
+        $this->assertStringContainsString('#D39A53', $svg);
+        $this->assertStringContainsString('#D75B62', $svg);
         $this->assertStringContainsString('<polyline', $svg);
         $this->assertStringContainsString('<circle', $svg);
 
