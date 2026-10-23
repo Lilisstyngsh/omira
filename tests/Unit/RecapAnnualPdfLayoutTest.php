@@ -32,6 +32,7 @@ class RecapAnnualPdfLayoutTest extends TestCase
         $svg = $this->invoke($controller, 'buildAnnualChartSvg', $this->months(), 2027);
 
         $this->assertStringContainsString('<svg xmlns="http://www.w3.org/2000/svg"', $svg);
+        $this->assertStringContainsString('height="265" viewBox="0 0 1200 265"', $svg);
         $this->assertStringContainsString('Grafik Order Repair Box FY 2027', $svg);
         $this->assertStringContainsString('>FY 2027</text>', $svg);
         $this->assertStringContainsString('Jumlah Box', $svg);
@@ -45,6 +46,20 @@ class RecapAnnualPdfLayoutTest extends TestCase
 
         $document = new \DOMDocument();
         $this->assertTrue($document->loadXML($svg));
+    }
+
+    public function test_annual_pdf_template_contains_summary_chart_and_abnormality_table_together(): void
+    {
+        $templatePath = dirname(__DIR__, 2) . '/resources/views/omd/recap/pdf.blade.php';
+        $template = file_get_contents($templatePath);
+
+        $this->assertNotFalse($template);
+        $this->assertStringContainsString('class="annual"', $template);
+        $this->assertStringContainsString('class="annual-chart-wrap"', $template);
+        $this->assertStringContainsString('annualChartSvg', $template);
+        $this->assertStringContainsString('TABEL ABNORMALITY', $template);
+        $this->assertStringContainsString('$annualAbnormalities', $template);
+        $this->assertStringContainsString('margin: 7mm 10mm;', $template);
     }
 
     public function test_pdf_abnormality_rows_match_excel_threshold_and_reason_rules(): void

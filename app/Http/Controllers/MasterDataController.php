@@ -319,6 +319,8 @@ class MasterDataController extends Controller
             'per_page' => ['nullable', 'in:10,25,50,100'],
         ]);
 
+        // Model Box hanya difilter berdasarkan Line; abaikan parameter plant_id lama.
+        $selectedPlantId = null;
         $selectedLineId = $filters['line_id'] ?? null;
         $search = trim($filters['q'] ?? '');
         $perPage = (int) ($filters['per_page'] ?? 10);
@@ -354,6 +356,7 @@ class MasterDataController extends Controller
         return view('omd.master.model-product', compact(
             'models',
             'lines',
+            'selectedPlantId',
             'selectedLineId',
             'search',
             'perPage'

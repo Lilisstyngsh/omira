@@ -949,8 +949,8 @@ class RecapController extends Controller
     {
         $left = 82;
         $right = 1168;
-        $top = 48;
-        $bottom = 278;
+        $top = 35;
+        $bottom = 166;
         $plotWidth = $right - $left;
         $plotHeight = $bottom - $top;
         $groupWidth = $plotWidth / max(1, count($months));
@@ -966,8 +966,8 @@ class RecapController extends Controller
         $rawMax = max(1, (int) ceil((max($values ?: [0])) * 1.12));
         $maxValue = $this->chartScaleMaximum($rawMax);
         $svg = [
-            '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390" viewBox="0 0 1200 390">',
-            '<rect x="0" y="0" width="1200" height="390" fill="#ffffff"/>',
+            '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="265" viewBox="0 0 1200 265">',
+            '<rect x="0" y="0" width="1200" height="265" fill="#ffffff"/>',
             '<text x="600" y="25" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#000000">Grafik Order Repair Box FY ' . $fiscalYear . '</text>',
         ];
 
@@ -976,11 +976,11 @@ class RecapController extends Controller
             $y = $bottom - ($plotHeight * $tick / 4);
             $label = htmlspecialchars(number_format($value, 0, ',', '.'), ENT_QUOTES | ENT_XML1, 'UTF-8');
             $svg[] = sprintf('<line x1="%s" y1="%.2f" x2="%s" y2="%.2f" stroke="#DDE5ED" stroke-width="1"/>', $left, $y, $right, $y);
-            $svg[] = sprintf('<text x="%s" y="%.2f" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#000000">%s</text>', $left - 12, $y + 4, $label);
+            $svg[] = sprintf('<text x="%s" y="%.2f" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#000000">%s</text>', $left - 12, $y + 4, $label);
         }
         $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#000000" stroke-width="1.2"/>', $left, $top, $left, $bottom);
         $svg[] = sprintf('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#000000" stroke-width="1.2"/>', $left, $bottom, $right, $bottom);
-        $svg[] = '<text x="22" y="164" transform="rotate(-90 22 164)" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="600" fill="#000000">Jumlah Box</text>';
+        $svg[] = '<text x="22" y="101" transform="rotate(-90 22 101)" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" font-weight="600" fill="#000000">Jumlah Box</text>';
 
         $barSeries = [
             ['key' => 'order', 'color' => '#578EF5'],
@@ -1011,7 +1011,7 @@ class RecapController extends Controller
                 $label = (string) $value;
                 $labelY = max($top + 11, $y - 4);
                 $svg[] = sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="1.5" fill="%s"/>', $x, $y, $barWidth, max(0.8, $barHeight), $series['color']);
-                $barValueLabels[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="7.5" fill="#000000">%s</text>', $x + ($barWidth / 2), $labelY, $label);
+                $barValueLabels[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="10.5" fill="#000000">%s</text>', $x + ($barWidth / 2), $labelY, $label);
                 $monthBarLabelPositions[] = $labelY;
             }
 
@@ -1020,7 +1020,7 @@ class RecapController extends Controller
             $targetPoints[] = sprintf('%.2f,%.2f', $center, $targetY);
             $barLabelPositionsByMonth[] = $monthBarLabelPositions;
             $monthLabel = htmlspecialchars(strtoupper((string) ($month['label'] ?? '')), ENT_QUOTES | ENT_XML1, 'UTF-8');
-            $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" font-weight="600" fill="#000000">%s</text>', $center, $bottom + 21, $monthLabel);
+            $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="600" fill="#000000">%s</text>', $center, $bottom + 21, $monthLabel);
         }
 
         if ($targetPoints !== []) {
@@ -1044,7 +1044,7 @@ class RecapController extends Controller
                     $svg[] = sprintf('<rect x="%.2f" y="%.2f" width="28" height="13" rx="2" fill="#FFFFFF" fill-opacity="0.92"/>', $center - 14, $targetLabelY - 10);
                 }
                 $svg[] = sprintf('<circle cx="%.2f" cy="%.2f" r="4.5" fill="#D75B62" stroke="#FFFFFF" stroke-width="1.5"/>', $center, $targetY);
-                $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#000000">%s</text>', $center, $targetLabelY, $label);
+                $svg[] = sprintf('<text x="%.2f" y="%.2f" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" font-weight="600" fill="#000000">%s</text>', $center, $targetLabelY, $label);
             }
         }
 
@@ -1052,7 +1052,7 @@ class RecapController extends Controller
             $svg[] = $barValueLabel;
         }
 
-        $legendY = 330;
+        $legendY = 215;
         $legend = [
             ['label' => 'NG', 'color' => '#578EF5', 'type' => 'bar', 'x' => 385],
             ['label' => 'OK', 'color' => '#76C457', 'type' => 'bar', 'x' => 485],
@@ -1068,9 +1068,9 @@ class RecapController extends Controller
                 $svg[] = sprintf('<rect x="%s" y="%s" width="13" height="13" rx="1.5" fill="%s"/>', $item['x'], $legendY - 12, $item['color']);
                 $textX = $item['x'] + 20;
             }
-            $svg[] = sprintf('<text x="%s" y="%s" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#000000">%s</text>', $textX, $legendY, $item['label']);
+            $svg[] = sprintf('<text x="%s" y="%s" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#000000">%s</text>', $textX, $legendY, $item['label']);
         }
-        $svg[] = '<text x="625" y="369" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#000000">FY ' . $fiscalYear . '</text>';
+        $svg[] = '<text x="625" y="251" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#000000">FY ' . $fiscalYear . '</text>';
         $svg[] = '</svg>';
 
         return implode('', $svg);

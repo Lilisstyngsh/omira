@@ -32,9 +32,9 @@
     .mp-btn-muted{background:#f4f6f5;color:#56665e}
     .mp-btn-icon{height:30px;min-width:30px;padding:0 7px;background:#fff;border:1px solid #dce4df;color:#617568}
     .mp-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 1px}
-    .mp-summary-text{color:#334155;font-size:12px;font-weight:700}
-    .mp-summary-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .mp-summary-right{display:flex;align-items:center;gap:8px}
     .mp-summary-right .mp-select{height:36px;width:82px;padding:0 10px;font-weight:700}
+    .mp-summary>.mp-btn{margin-left:auto}
     .mp-table-scroll{width:100%;overflow-x:auto}
     .mp-table{border-collapse:collapse;width:100%;min-width:710px;table-layout:fixed}
     .mp-table th{background:#f9fafb;text-align:center;font-size:11px;letter-spacing:.035em;font-weight:800;color:#667085;padding:13px 14px;border-bottom:1px solid #dfe6ef}
@@ -147,14 +147,13 @@
                 <select class="mp-select" id="mpLine" name="line_id">
                     <option value="">Semua Line</option>
                     @foreach($lines as $line)
-                        <option value="{{ $line->id }}"
-                            @selected((string)$selectedLineId === (string)$line->id)>{{ $line->name }}</option>
+                        <option value="{{ $line->id }}" @selected((string)$selectedLineId === (string)$line->id)>{{ $line->name }}</option>
                     @endforeach
                 </select>
             </div>
             @if($selectedLineId)
                 <div class="mp-filter-actions">
-                    <a class="mp-btn mp-btn-outline" href="{{ route('omd.master.model-product', ['q' => $search, 'per_page' => $perPage]) }}" title="Reset filter Line"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</a>
+                    <a class="mp-btn mp-btn-outline" href="{{ route('omd.master.model-product', ['q' => $search, 'per_page' => $perPage]) }}" title="Tampilkan semua Line"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</a>
                 </div>
             @endif
             <div class="mp-field mp-filter-search">
@@ -167,17 +166,16 @@
     </form>
 
     <div class="mp-summary">
-        <span class="mp-summary-text"><strong>{{ number_format($models->total()) }}</strong> Model</span>
         <div class="mp-summary-right">
-            <select class="mp-select" id="mpPerPage" aria-label="Jumlah model per halaman">
+            <select class="mp-select" id="mpPerPage" aria-label="Jumlah data yang ditampilkan">
                 @foreach([10,25,50,100] as $count)
                     <option value="{{ $count }}" @selected($perPage === $count)>{{ $count }}</option>
                 @endforeach
             </select>
-            <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
-                <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
-            </button>
         </div>
+        <button type="button" class="mp-btn mp-btn-primary" data-open-modal="mp-add-model">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah Model
+        </button>
     </div>
 
     <div class="mp-card">
@@ -269,6 +267,7 @@
                                         @csrf
                                         <input type="hidden" name="master_model_id" value="{{ $model->id }}">
                                         <input type="hidden" name="return_to" value="model-product">
+                                        <input type="hidden" name="return_plant" value="">
                                         <input type="hidden" name="return_line_id" value="{{ $selectedLineId }}">
                                         <input type="hidden" name="return_q" value="{{ $search }}">
                                         <input type="hidden" name="return_per_page" value="{{ $perPage }}">
@@ -442,8 +441,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
+    // Filter Line diterapkan langsung saat pilihan berubah; plant tidak lagi menjadi filter.
+    line.addEventListener('change', () => navigateCatalog({line_id: line.value, q: search.value.trim()}));
     filters.addEventListener('submit', () => clearTimeout(searchTimer));
-    line.addEventListener('change', () => navigateCatalog({line_id: line.value}));
     function navigateCatalog(overrides) {
         // Pencarian dan jumlah data memakai filter yang sudah diterapkan, bukan pilihan draft.
         const url = new URL(filters.action, window.location.href);
@@ -452,6 +452,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const value = current.get(key);
             if (value) url.searchParams.set(key, value);
         }
+        url.searchParams.delete('plant_id');
         for (const [key, value] of Object.entries(overrides)) {
             if (value === '' || value === null) url.searchParams.delete(key);
             else url.searchParams.set(key, value);
